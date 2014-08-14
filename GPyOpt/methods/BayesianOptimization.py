@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 import scipy
 import random
 
+from ..util.general import samples_multimensional_uniform 
+
 
 class BayesianOptimization:
 	'''

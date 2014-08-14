@@ -3,7 +3,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 import methods
 import util
-import examples
+import computer_models
 import plotting
 
 

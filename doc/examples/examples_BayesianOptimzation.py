@@ -1,39 +1,35 @@
 '''
-Example of use of the classes
+Examples of use of the class BayesianOptimization
+	- forrester (1d)
+	- branin (2d))
+	- gSobol (arbitrary dimension)
 
-- experiments.py: simulates data from experiments using different classes of functions
-		- branin (2d)
-		- forrester (1d)
-		- gSobol (arbitrary dimension)
-
-'''
+''' 
 import numpy as np
 from scipy.optimize import minimize
+import GPyOpt
 
-run experiments.py
-run BayesianOptimization.py
+#
+# Example 1: Optimization of the forrester function
+#
 
-## Example branin function
-branin_exp = branin(sd=10)
-x = np.array([1.3, 0.7])
-branin_exp.f(x)
-branin_exp.plot()
-res = minimize(branin_exp.f, x0=np.array([1,1]), method='nelder-mead',options={'xtol': 1e-8, 'disp': True})
+# create the object function
+f_true = GPyOpt.fmodels.experiments1d.forrester()
+f_sim = GPyOpt.fmodels.experiments1d.forrester(sd= .5)
+f_true.plot()
+bounds = [(0,1)]
+H = 3
 
-# Example forrester fucntion
-forr_exp = forrester()
-x = np.array([2.2,4,4,4])
-forr_exp.f(x)
-forr_exp.plot()
+# starts the optimization with 3 data points 
+myBopt = GPyOpt.methods.BayesianOptimization.BayesianOptimization(bounds, acquisition_type='UCB', acquisition_par = 2)
+myBopt.start_optimization(f_sim.f,H=H)
+myBopt.model.plot()
+myBopt.plot_acquisition()
 
-# Example for the gSobol function
-a = np.array([1,.5,.1]) 
-x = np.array([[1,1,1],[2,3,4],[33,4,5],[43,2,2]])
-sobol_exp = gSobol(a=a)
-sobol_exp.f(x)
-sobol_exp.S_coef
-
-
+# cotinue optimization for 10 observations more
+myBopt.continue_optimization(H=10)
+myBopt.model.plot()
+myBopt.plot_acquisition()
 
 
 
