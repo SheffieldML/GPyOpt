@@ -7,6 +7,8 @@ from scipy.stats import norm
 import matplotlib.pyplot as plt
 import scipy
 import random
+from pylab import plot, xlabel, ylabel, title, grid
+import matplotlib.pyplot as plt
 
 # this will be replaced by a multidimensional lattice
 from ..util.general import samples_multimensional_uniform 
@@ -170,9 +172,32 @@ class BayesianOptimization:
 			X = np.arange(self.bounds[0][0], self.bounds[0][1], 0.001)
           		Y = self.acquisition_function(X)
 			Y_normalized = (-Y - min(-Y))/(max(-Y - min(-Y)))
-                	fig = plt.figure()
- 	               	plt.plot(X, Y_normalized, lw=2)
-                	plt.show()
+			m, s = self.model.predict(X.reshape(len(X),1))
+			## 
+			plt.subplot(2, 1, 1)
+			plt.plot(self.X, self.Y, 'p')
+			plt.plot(X, m, 'b-',lw=2)
+			plt.plot(X, m-2*s, 'b-', alpha = 0.5)
+			plt.plot(X, m+2*s, 'b-', alpha=0.5)		
+			plt.title('Model and observations')
+			plt.ylabel('Y values')
+			plt.xlabel('X')
+			grid(True)
+			##
+			plt.subplot(2, 1, 2)
+			plt.plot(X, Y_normalized, 'r-',lw=2)
+			plt.xlabel('time (s)')
+			plt.ylabel('Undamped')
+			plt.xlabel('X')
+			plt.ylabel('Acquisition value')
+			plt.title('Acquisition function')
+			grid(True)
+#		
+#		if self.input_dim ==2:
+
+#	def plot_convergence(self):
+#
+			
 
 	def update_model(self):
 		self.model = GPy.models.GPRegression(self.X,self.Y,self.kernel)

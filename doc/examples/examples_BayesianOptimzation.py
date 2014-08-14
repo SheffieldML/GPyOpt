@@ -16,7 +16,7 @@ import GPyOpt
 # create the object function
 f_true = GPyOpt.fmodels.experiments1d.forrester()
 f_sim = GPyOpt.fmodels.experiments1d.forrester(sd= .5)
-f_true.plot()
+#f_true.plot()
 bounds = [(0,1)]
 H = 3
 
