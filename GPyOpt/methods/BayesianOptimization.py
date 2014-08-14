@@ -8,22 +8,23 @@ import matplotlib.pyplot as plt
 import scipy
 import random
 
+# this will be replaced by a multidimensional lattice
 from ..util.general import samples_multimensional_uniform 
 
 
 class BayesianOptimization:
 	'''
-	Bayes Optimzation models in Python. Perform BO with EI, E.. etc
+	Standard Bayes Optimzation models in Python.
 	
 	Javier Gonzalez, August 2014
-	- bouds:  list of pairs of tuples defining the box constrains of the optimization
+	- bounds:  list of pairs of tuples defining the box constrains of the optimization
 	- kernel:  GPy kernel function. It is set to a RBF if it is not specified
  	- acquisition_type:
 		'EI' for expected improvement
        		'MPI' for maximum probability improvement
        		'UCB' for upper confidence band
  	- acquisition_par: parameter of the acquisition function.
- 	- grid_search: Option to do grid search on the acquisition function.
+ 	- grid_search (will be removed by and efficient optimization): Option to do grid search on the acquisition function.
  	- invertsign: By defaulf, minimization is done. Set invertsign to True to maximize
  	- Nrandom: Number of uniform evaluations of f before the optimization starts. If not
 	selected if fixed to 5 times the dimensionality of the problem
@@ -122,22 +123,38 @@ class BayesianOptimization:
 			m, s = self.model.predict(x)
 		return m, s, fmin
 
+	# need to update
 	def maximum_probability_improvement(self,x):   
 		m, s, fmin = self.get_moments(x) 
 		Z = -self.sign * (fmin - m + self.acquisition_par)/s
 		f_acqu =  s*Z*norm.cdf(Z) + s * norm.pdf(Z)
 		return f_acqu
 
+	# need to update
 	def upper_confidence_bound(self,x):	
 		m, s, fmin = self.get_moments(x)
 		f_acqu = m - self.sign* self.acquisition_par * s
 		return f_acqu
-
+	
+	# need to update	
  	def expected_improvement(self,x):
 		m, s, fmin = self.get_moments(x) 	
 		Z = -self.sign * (fmin - m + self.acquisition_par)/s			
 		f_acqu = norm.cdf(Z)		
 		return f_acqu
+
+# (TO HELP THE OPTIMIZER OF THE ACQUISITION FUNCTION)
+#	def d_ maximum_probability_improvement(self,x):
+#		m, s, fmin = self.get_moments(x)
+
+
+#	def d_upper_confidence_bound(self,x):
+#		m, s, fmin = self.get_moments(x)
+
+
+#	def upper_confidence_bound(self,x):
+#		m, s, fmin = self.get_moments(x)
+
 
 	def optimize_acquisition(self):
 		if self.grid_search:
