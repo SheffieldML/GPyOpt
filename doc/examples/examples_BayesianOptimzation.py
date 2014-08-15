@@ -18,7 +18,7 @@ f_true = GPyOpt.fmodels.experiments1d.forrester()
 f_sim = GPyOpt.fmodels.experiments1d.forrester(sd= .5)
 #f_true.plot()
 bounds = [(0,1)]
-H = 3
+H = 0
 
 # starts the optimization with 3 data points 
 myBopt = GPyOpt.methods.BayesianOptimization.BayesianOptimization(bounds, acquisition_type='UCB', acquisition_par = 2)
@@ -27,9 +27,13 @@ myBopt.model.plot()
 myBopt.plot_acquisition()
 
 # cotinue optimization for 10 observations more
-myBopt.continue_optimization(H=10)
+myBopt.continue_optimization(H=0)
 myBopt.model.plot()
 myBopt.plot_acquisition()
+myBopt.plot_convergence()
+
+
+
 
 
 

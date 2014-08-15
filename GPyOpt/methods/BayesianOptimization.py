@@ -11,7 +11,7 @@ from pylab import plot, xlabel, ylabel, title, grid
 import matplotlib.pyplot as plt
 
 # this will be replaced by a multidimensional lattice
-from ..util.general import samples_multimensional_uniform 
+from ..util.general import samples_multimensional_uniform, multigrid 
 
 
 class BayesianOptimization:
@@ -33,7 +33,7 @@ class BayesianOptimization:
 	
 	Javier Gonzalez -  August, 2014 
 	'''
-	def __init__(self, bounds=None, kernel=None, optimize_model=None, acquisition_type=None, acquisition_par=None, grid_search=None, invertsign=None, Nrandom = None):
+	def __init__(self, bounds=None, kernel=None, optimize_model=None, acquisition_type=None, acquisition_par=None, invertsign=None, Nrandom = None):
 
 		if bounds==None: 
 			print 'Box contrainst are needed. Please insert box constrains'	
@@ -59,24 +59,23 @@ class BayesianOptimization:
 		if invertsign == None: 
 			self.sign = 1		
 		else: 
-			self.sign = -1
-	
-		if grid_search == None:
-			self.grid_search =True
-		else:
-			self.grid_search = grid.search
+			self.sign = -1	
+		#if grid_search == None:
+		#	self.grid_search =True
+		#else:
+		#	self.grid_search = grid.search
 		if Nrandom ==None:
-			self.Nrandom = 5*self.input_dim
+			self.Nrandom = 3*self.input_dim
 		else: 
 			self.Nrandom = Nrandom  # number or samples of random exploration before starting the optimization
-
+		self.Ngrid = 5
 		
 	def start_optimization(self, f=None, H=None , X=None, Y=None, convergence_plot = True):
 		if f==None: print 'Function to optimize is requiered'
 		else: self.f = f
 		if H == None: H=0
 		if X==None or Y == None:
-			self.X = samples_multimensional_uniform(self.Nrandom,self.bounds)		 	
+			self.X = samples_multimensional_uniform(self.bounds,self.Nrandom)		 	
 			self.Y = f(self.X)
 		else:
 			self.X = X
@@ -117,13 +116,14 @@ class BayesianOptimization:
 		return acquisition_code[self.acquisition_type]	
 	
 	def get_moments(self,x):
+		x = np.array(x)
 		if len(x)==self.input_dim: 
 			x = x.reshape((1,self.input_dim))
  		else: 
 			x = x.reshape((len(x),self.input_dim)) 
-			fmin = min(self.model.predict(self.X)[0])
-			m, s = self.model.predict(x)
-		return m, s, fmin
+		fmin = min(self.model.predict(self.X)[0])
+		m, s = self.model.predict(x)
+		return (m, s, fmin)
 
 	# need to update
 	def maximum_probability_improvement(self,x):   
@@ -159,13 +159,12 @@ class BayesianOptimization:
 
 
 	def optimize_acquisition(self):
-		if self.grid_search:
-			grid = np.linspace(self.bounds[0][0], self.bounds[0][1], 100)
-			x = grid[np.argmin(self.acquisition_function(grid))]
-		else:
-			x0 = np.mean(np.array(self.bounds),axis=1)  # initial value for optimization
-			x,f,d = scipy.optimize.fmin_l_bfgs_b(self.acquisition_function, x0=x0, bounds=self.bounds, approx_grad=True )
-		return x	
+			# combine initial grid search with local optimzation
+			grid = multigrid(self.bounds,self.Ngrid)
+			pred_grid = self.acquisition_function(grid)
+			x0 =  grid[np.argmin(pred_grid)]
+			res = scipy.optimize.minimize(self.acquisition_function, x0=np.array(x0), method='SLSQP',bounds=self.bounds)
+			return res.x	
 			
 	def plot_acquisition(self):
 		if self.input_dim ==1:
@@ -173,7 +172,8 @@ class BayesianOptimization:
           		Y = self.acquisition_function(X)
 			Y_normalized = (-Y - min(-Y))/(max(-Y - min(-Y)))
 			m, s = self.model.predict(X.reshape(len(X),1))
-			## 
+			##
+			plt.figure() 
 			plt.subplot(2, 1, 1)
 			plt.plot(self.X, self.Y, 'p')
 			plt.plot(X, m, 'b-',lw=2)
@@ -186,8 +186,6 @@ class BayesianOptimization:
 			##
 			plt.subplot(2, 1, 2)
 			plt.plot(X, Y_normalized, 'r-',lw=2)
-			plt.xlabel('time (s)')
-			plt.ylabel('Undamped')
 			plt.xlabel('X')
 			plt.ylabel('Acquisition value')
 			plt.title('Acquisition function')
@@ -195,10 +193,19 @@ class BayesianOptimization:
 #		
 #		if self.input_dim ==2:
 
-#	def plot_convergence(self):
-#
-			
-
+	def plot_convergence(self):
+		n = self.X.shape[0]	
+		aux = (self.X[1:n,:]-self.X[0:n-1,:])**2		
+		distances = np.sqrt(aux.sum(axis=1))
+		plt.figure()
+		plt.plot(range(n-1), distances, 'pr-',lw=2)
+		plt.xlabel('Iteration')
+		plt.ylabel('d(x[n-]x[n-1])')
+		plt.title('Convergence plot')
+		grid(True)
+	
+	
+	
 	def update_model(self):
 		self.model = GPy.models.GPRegression(self.X,self.Y,self.kernel)
                 if self.optimize_model:
