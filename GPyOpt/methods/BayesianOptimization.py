@@ -60,14 +60,10 @@ class BayesianOptimization:
 			self.sign = 1		
 		else: 
 			self.sign = -1	
-		#if grid_search == None:
-		#	self.grid_search =True
-		#else:
-		#	self.grid_search = grid.search
 		if Nrandom ==None:
 			self.Nrandom = 3*self.input_dim
 		else: 
-			self.Nrandom = Nrandom  # number or samples of random exploration before starting the optimization
+			self.Nrandom = Nrandom  # number or samples of initial random exploration 
 		self.Ngrid = 5
 		
 	def start_optimization(self, f=None, H=None , X=None, Y=None, convergence_plot = True):
@@ -89,10 +85,6 @@ class BayesianOptimization:
               		k +=1
 			  
 		self.update_model()  # last update
-		
-     #		if convergence_plot == True:
-     #			make_convergence_plot()  ## add here plot of the distances d(X[i] - X[i-1])			
-     #
 		self.optimization_started = True
 		return self.suggested_sample
 	
@@ -190,8 +182,19 @@ class BayesianOptimization:
 			plt.ylabel('Acquisition value')
 			plt.title('Acquisition function')
 			grid(True)
-#		
-#		if self.input_dim ==2:
+		
+		if self.input_dim ==2:
+			X1 = np.linspace(self.bounds[0][0], self.bounds[0][1], 200)
+			X2 = np.linspace(self.bounds[1][0], self.bounds[1][1], 200)
+			X = multigrid(self.bounds,200) 
+			Z = self.acquisition_function(X)
+			Z = (-Z - min(-Z))/(max(-Z - min(-Z)))
+			Z = Z.reshape((200,200))
+
+			m, s = self.model.predict(X.reshape(len(X),1))	
+			plt.figure()
+			plt.subplot(1, 2, 1)			
+
 
 	def plot_convergence(self):
 		n = self.X.shape[0]	
