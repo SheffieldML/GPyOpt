@@ -11,7 +11,7 @@ from pylab import plot, xlabel, ylabel, title, grid
 import matplotlib.pyplot as plt
 
 # this will be replaced by a multidimensional lattice
-from ..util.general import samples_multimensional_uniform, multigrid 
+from ..util.general import samples_multimensional_uniform, multigrid, reshape 
 
 
 class BayesianOptimization:
@@ -108,11 +108,7 @@ class BayesianOptimization:
 		return acquisition_code[self.acquisition_type]	
 	
 	def get_moments(self,x):
-		x = np.array(x)
-		if len(x)==self.input_dim: 
-			x = x.reshape((1,self.input_dim))
- 		else: 
-			x = x.reshape((len(x),self.input_dim)) 
+		x = reshape(x,self.input_dim)
 		fmin = min(self.model.predict(self.X)[0])
 		m, s = self.model.predict(x)
 		return (m, s, fmin)
@@ -120,35 +116,51 @@ class BayesianOptimization:
 	# need to update
 	def maximum_probability_improvement(self,x):   
 		m, s, fmin = self.get_moments(x) 
-		Z = -self.sign * (fmin - m + self.acquisition_par)/s
-		f_acqu =  s*Z*norm.cdf(Z) + s * norm.pdf(Z)
-		return f_acqu
+		u = ((1+self.acquisition_par)*fmin-m)/s
+		Phi = 0.5 * erfc(-u / np.sqrt(2))
+		f_acqu =  self.sign*Phi
+		return -f_acqu # returns negative value for posterior minimization (but we plot f_acqu)
 
 	# need to update
 	def upper_confidence_bound(self,x):	
 		m, s, fmin = self.get_moments(x)
-		f_acqu = m - self.sign* self.acquisition_par * s
-		return f_acqu
+		f_acqu = self.sign*(-m - self.sign* self.acquisition_par * s)
+		return -f_acqu  # returns negative value for posterior minimization (but we plot f_acqu)
 	
 	# need to update	
  	def expected_improvement(self,x):
 		m, s, fmin = self.get_moments(x) 	
-		Z = -self.sign * (fmin - m + self.acquisition_par)/s			
-		f_acqu = norm.cdf(Z)		
-		return f_acqu
+		u = ((1+self.acquisition_par)*fmin-m)/s	
+		phi = np.exp(-0.5 * u**2) / np.sqrt(2*np.pi)
+		Phi = 0.5 * erfc(-u / np.sqrt(2))	
+		f_acqu = self.sign * (((1+self.acquisition_par)*fmin-m) * Phi + s * phi)
+		return -f_acqu  # returns negative value for posterior minimization (but we plot f_acqu)
 
-# (TO HELP THE OPTIMIZER OF THE ACQUISITION FUNCTION)
-#	def d_ maximum_probability_improvement(self,x):
-#		m, s, fmin = self.get_moments(x)
+	def d_ maximum_probability_improvement(self,x):
+		m, s, fmin = self.get_moments(x)
+		u = ((1+self.acquisition_par)*fmin-m)/s	
+		phi = np.exp(-0.5 * u**2) / np.sqrt(2*np.pi)
+		Phi = 0.5 * erfc(-u / np.sqrt(2))	
+		dmds = 
+		dsdx = 
+		df_acqu =  self.sign* ((Phi/s)* (dmdx + dsdx + z))
+		return -df_acqu 
+		
+	def d_upper_confidence_bound(self,x):
+		x = reashape(x,self.input_dim)
+		dm, ds = self.model.predictive_gradients(x)		
+		df_acqu = self.sign*(-dm - self.sign* self.acquisition_par * ds) 
+		return -df_acqu
 
-
-#	def d_upper_confidence_bound(self,x):
-#		m, s, fmin = self.get_moments(x)
-
-
-#	def upper_confidence_bound(self,x):
-#		m, s, fmin = self.get_moments(x)
-
+	def upper_confidence_bound(self,x):
+		m, s, fmin = self.get_moments(x)
+		u = ((1+self.acquisition_par)*fmin-m)/s	
+		phi = np.exp(-0.5 * u**2) / np.sqrt(2*np.pi)
+		Phi = 0.5 * erfc(-u / np.sqrt(2))	
+		dmds = 
+		dsdx = 
+		df_acqu =  self.sign* (-dmdx * Phi  + dsdx * phi))
+		return -df_acqu
 
 	def optimize_acquisition(self):
 			# combine initial grid search with local optimzation
@@ -161,8 +173,8 @@ class BayesianOptimization:
 	def plot_acquisition(self):
 		if self.input_dim ==1:
 			X = np.arange(self.bounds[0][0], self.bounds[0][1], 0.001)
-          		Y = self.acquisition_function(X)
-			Y_normalized = (-Y - min(-Y))/(max(-Y - min(-Y)))
+          		acqu = self.acquisition_function(X)
+			acqu_normalized = (acqu - min(acqu))/(max(acqu - min(acqu)))
 			m, s = self.model.predict(X.reshape(len(X),1))
 			##
 			plt.figure() 
@@ -177,7 +189,7 @@ class BayesianOptimization:
 			grid(True)
 			##
 			plt.subplot(2, 1, 2)
-			plt.plot(X, Y_normalized, 'r-',lw=2)
+			plt.plot(X,-acqu_normalized, 'r-',lw=2) # self.acquisition_function returns -acqu for posterior minimization
 			plt.xlabel('X')
 			plt.ylabel('Acquisition value')
 			plt.title('Acquisition function')
@@ -188,7 +200,7 @@ class BayesianOptimization:
 			X2 = np.linspace(self.bounds[1][0], self.bounds[1][1], 200)
 			X = multigrid(self.bounds,200) 
 			Z = self.acquisition_function(X)
-			Z = (-Z - min(-Z))/(max(-Z - min(-Z)))
+			Z = (Z - min(Z))/(max(Z - min(Z)))
 			Z = Z.reshape((200,200))
 
 			m, s = self.model.predict(X.reshape(len(X),1))	

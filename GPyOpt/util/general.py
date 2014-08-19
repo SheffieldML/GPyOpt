@@ -23,5 +23,11 @@ def multigrid(bounds,Ngrid):
 		Z[:,k] = grid.coorv[k].reshape((Ngrid+1)**num_dim)
 	return Z
 
-
+def reshape(x,input_dim):
+	x = np.array(x)
+	if len(x)==input_dim: 
+		x = x.reshape((1,input_dim))
+	else: 
+	x = x.reshape((len(x),input_dim)) 
+	return x
 
