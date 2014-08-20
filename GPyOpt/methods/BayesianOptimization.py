@@ -77,14 +77,22 @@ class BayesianOptimization:
 			self.X = X
 			self.Y = Y 
 		
+		self.update_model()
+		prediction = self.model.predict(self.X)
+		self.m_in_min = prediction[0]
+		self.s_in_min = prediction[1] 
+			 
  		k=1
 		while k<=H:
-			self.update_model()
+			# add new data point in the minumum)
                         self.X = np.vstack((self.X,self.suggested_sample))
                         self.Y = np.vstack((self.Y,self.f(np.array([self.suggested_sample]))))
-              		k +=1
+			pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))
+			self.m_in_min = np.vstack((self.m_in_min,pred_min[0]))
+			self.s_in_min = np.vstack((self.s_in_min,pred_min[1]))
+	      		self.update_model()
+			k +=1
 			  
-		self.update_model()  # last update
 		self.optimization_started = True
 		return self.suggested_sample
 	
@@ -92,11 +100,13 @@ class BayesianOptimization:
 		if self.optimization_started:
 			k=1
 			while k<=H:
-				self.update_model()
 				self.X = np.vstack((self.X,self.suggested_sample))
 				self.Y = np.vstack((self.Y,self.f(np.array([self.suggested_sample]))))
+				pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))
+				self.m_in_min = np.vstack((self.m_in_min,pred_min[0]))
+				self.s_in_min = np.vstack((self.s_in_min,pred_min[1]))
+				self.update_model()				
 				k +=1
-			self.update_model()  # last update
 			return self.suggested_sample
 
 		else: print 'Optimization not initiated: Use .start_optimization and provide a function to optimize'
@@ -113,7 +123,6 @@ class BayesianOptimization:
 		m, s = self.model.predict(x)
 		return (m, s, fmin)
 
-	# need to update
 	def maximum_probability_improvement(self,x):   
 		m, s, fmin = self.get_moments(x) 
 		u = ((1+self.acquisition_par)*fmin-m)/s
@@ -121,13 +130,11 @@ class BayesianOptimization:
 		f_acqu =  self.sign*Phi
 		return -f_acqu # returns negative value for posterior minimization (but we plot f_acqu)
 
-	# need to update
 	def upper_confidence_bound(self,x):	
 		m, s, fmin = self.get_moments(x)
 		f_acqu = self.sign*(-m - self.sign* self.acquisition_par * s)
 		return -f_acqu  # returns negative value for posterior minimization (but we plot f_acqu)
 	
-	# need to update	
  	def expected_improvement(self,x):
 		m, s, fmin = self.get_moments(x) 	
 		u = ((1+self.acquisition_par)*fmin-m)/s	
@@ -136,34 +143,32 @@ class BayesianOptimization:
 		f_acqu = self.sign * (((1+self.acquisition_par)*fmin-m) * Phi + s * phi)
 		return -f_acqu  # returns negative value for posterior minimization (but we plot f_acqu)
 
-	def d_ maximum_probability_improvement(self,x):
+	def d_maximum_probability_improvement(self,x):
 		m, s, fmin = self.get_moments(x)
 		u = ((1+self.acquisition_par)*fmin-m)/s	
 		phi = np.exp(-0.5 * u**2) / np.sqrt(2*np.pi)
 		Phi = 0.5 * erfc(-u / np.sqrt(2))	
-		dmds = 
-		dsdx = 
+		dmdx, dsdx = self.model.predictive_gradients(x)
 		df_acqu =  self.sign* ((Phi/s)* (dmdx + dsdx + z))
 		return -df_acqu 
 		
 	def d_upper_confidence_bound(self,x):
 		x = reashape(x,self.input_dim)
-		dm, ds = self.model.predictive_gradients(x)		
-		df_acqu = self.sign*(-dm - self.sign* self.acquisition_par * ds) 
+		dmdx, dsdx = self.model.predictive_gradients(x)		
+		df_acqu = self.sign*(-dmdx - self.sign* self.acquisition_par * dsdx) 
 		return -df_acqu
 
-	def upper_confidence_bound(self,x):
+	def d_expected_improvement(self,x):
 		m, s, fmin = self.get_moments(x)
 		u = ((1+self.acquisition_par)*fmin-m)/s	
 		phi = np.exp(-0.5 * u**2) / np.sqrt(2*np.pi)
 		Phi = 0.5 * erfc(-u / np.sqrt(2))	
-		dmds = 
-		dsdx = 
-		df_acqu =  self.sign* (-dmdx * Phi  + dsdx * phi))
+		dmdx, dsdx = self.model.predictive_gradients(x)
+		df_acqu =  self.sign* (-dmdx * Phi  + dsdx * phi)
 		return -df_acqu
 
 	def optimize_acquisition(self):
-			# combine initial grid search with local optimzation
+			# combines initial grid search with local optimzation starting on the minimum of the grid
 			grid = multigrid(self.bounds,self.Ngrid)
 			pred_grid = self.acquisition_function(grid)
 			x0 =  grid[np.argmin(pred_grid)]
@@ -174,51 +179,88 @@ class BayesianOptimization:
 		if self.input_dim ==1:
 			X = np.arange(self.bounds[0][0], self.bounds[0][1], 0.001)
           		acqu = self.acquisition_function(X)
-			acqu_normalized = (acqu - min(acqu))/(max(acqu - min(acqu)))
+			acqu_normalized = (-acqu - min(-acqu))/(max(-acqu - min(-acqu))) # normalize acq in (0,1)
 			m, s = self.model.predict(X.reshape(len(X),1))
-			##
 			plt.figure() 
 			plt.subplot(2, 1, 1)
-			plt.plot(self.X, self.Y, 'p')
-			plt.plot(X, m, 'b-',lw=2)
-			plt.plot(X, m-2*s, 'b-', alpha = 0.5)
-			plt.plot(X, m+2*s, 'b-', alpha=0.5)		
+			plt.plot(X, m, 'b-', label=u'Posterior mean',lw=2)
+			plt.fill(np.concatenate([X, X[::-1]]), \
+        			np.concatenate([m - 1.9600 * s,
+                       				(m + 1.9600 * s)[::-1]]), \
+        			alpha=.5, fc='b', ec='None', label='95% C. I.')	
+			plt.plot(X, m-1.96*s, 'b-', alpha = 0.5)
+			plt.plot(X, m+1.96*s, 'b-', alpha=0.5)		
+			plt.plot(self.X, self.Y, 'r.', markersize=10, label=u'Observations')
 			plt.title('Model and observations')
-			plt.ylabel('Y values')
+			plt.ylabel('Y')
 			plt.xlabel('X')
+			plt.legend(loc='upper left')
 			grid(True)
-			##
 			plt.subplot(2, 1, 2)
-			plt.plot(X,-acqu_normalized, 'r-',lw=2) # self.acquisition_function returns -acqu for posterior minimization
+			plt.plot(X,acqu_normalized, 'r-',lw=2) 
 			plt.xlabel('X')
 			plt.ylabel('Acquisition value')
 			plt.title('Acquisition function')
 			grid(True)
-		
+
+	# finish this 
 		if self.input_dim ==2:
 			X1 = np.linspace(self.bounds[0][0], self.bounds[0][1], 200)
 			X2 = np.linspace(self.bounds[1][0], self.bounds[1][1], 200)
-			X = multigrid(self.bounds,200) 
-			Z = self.acquisition_function(X)
-			Z = (Z - min(Z))/(max(Z - min(Z)))
-			Z = Z.reshape((200,200))
-
-			m, s = self.model.predict(X.reshape(len(X),1))	
+			x1, x2 = np.meshgrid(X1, X2)
+			X = np.hstack((x1.reshape(200*200,1),x2.reshape(200*200,1)))
+			# X = multigrid(self.bounds,200) 
+			acqu = self.acquisition_function(X)
+			acqu_normalized = (-acqu - min(-acqu))/(max(-acqu - min(-acqu)))
+			acqu_normalized = acqu_normalized.reshape((200,200))
+			m, s = self.model.predict(X)	
+			##
 			plt.figure()
-			plt.subplot(1, 2, 1)			
+			plt.subplot(1, 3, 1)			
+			plt.contourf(X1, X2, m.reshape(200,200),100)
+			plt.plot(self.X[:,0], self.X[:,1], 'r.', markersize=10, label=u'Observations')
+			plt.colorbar()
+			plt.xlabel('X1')
+			plt.ylabel('X2')			
+			plt.title('Posterior mean')
+			
+			plt.subplot(1, 3, 2)
+			plt.plot(self.X[:,0], self.X[:,1], 'r.', markersize=10, label=u'Observations')
+			plt.contourf(X1, X2, s.reshape(200,200),100)
+			plt.colorbar()
+			plt.xlabel('X1')
+			plt.ylabel('X2')
+			plt.title('Posterior variance')
+			
+			plt.subplot(1, 3, 3)
+			plt.contourf(X1, X2, acqu_normalized,100)
+			plt.colorbar()
+			plt.xlabel('X1')
+			plt.ylabel('X2')
+			plt.title('Acquisition function')
+
 
 
 	def plot_convergence(self):
 		n = self.X.shape[0]	
 		aux = (self.X[1:n,:]-self.X[0:n-1,:])**2		
 		distances = np.sqrt(aux.sum(axis=1))
+
+		## plot of distances between consecutive x's
 		plt.figure()
-		plt.plot(range(n-1), distances, 'pr-',lw=2)
+		plt.subplot(1, 2, 1)
+		plt.plot(range(n-1), distances, '-o')
 		plt.xlabel('Iteration')
-		plt.ylabel('d(x[n-]x[n-1])')
-		plt.title('Convergence plot')
+		plt.ylabel('d(x[n], x[n-1])')
+		plt.title('Distance between consecutive Xs')
 		grid(True)
-	
+		# plot of the extimated m(x) in the proposed sampling points
+		plt.subplot(1, 2, 2)		
+		plt.errorbar(range(self.X.shape[0]), self.m_in_min[:,0], yerr=self.s_in_min[:,0],fmt='-o',ecolor='b', capthick=2)
+		plt.title('Estimated f at the next  sampling points')
+		plt.xlabel('Iteration')
+		plt.ylabel('Estimated f')
+		grid(True)
 	
 	
 	def update_model(self):

@@ -28,6 +28,6 @@ def reshape(x,input_dim):
 	if len(x)==input_dim: 
 		x = x.reshape((1,input_dim))
 	else: 
-	x = x.reshape((len(x),input_dim)) 
+		x = x.reshape((len(x),input_dim)) 
 	return x
 
