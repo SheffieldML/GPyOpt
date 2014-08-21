@@ -11,10 +11,10 @@ f_true = GPyOpt.fmodels.experiments2d.branin()
 f_sim = GPyOpt.fmodels.experiments2d.branin(sd= .5)
 f_true.plot()
 bounds = f_true.bounds
-H = 50
+H = 1
 
 # starts the optimization with 3 data points 
-myBopt = GPyOpt.methods.BayesianOptimization(bounds, acquisition_type='MPI', acquisition_par = 0.01)
+myBopt = GPyOpt.methods.BayesianOptimizationUCB(bounds)
 myBopt.start_optimization(f_sim.f,H=H)
 myBopt.plot_acquisition()
 myBopt.plot_convergence()
