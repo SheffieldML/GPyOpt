@@ -31,12 +31,24 @@ class function2d:
                 X1, X2 = np.meshgrid(x1, x2)
                 X = np.hstack((X1.reshape(100*100,1),X2.reshape(100*100,1)))
                 Y = self.f(X)
-                fig = plt.figure()
+
+        	fig = plt.figure()
                 ax = fig.gca(projection='3d')
                 surf = ax.plot_surface(X1, X2, Y.reshape((100,100)), rstride=1, cstride=1, cmap=cm.coolwarm,linewidth=0, antialiased=False)
                 ax.zaxis.set_major_locator(LinearLocator(10))
                 ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
                	ax.set_title(self.name)	
+			
+		plt.figure()	
+		plt.contourf(X1, X2, Y.reshape((100,100)),100)
+		if (len(self.min)>1):	
+			plt.plot(np.array(self.min)[:,0], np.array(self.min)[:,1], 'w.', markersize=20, label=u'Observations')
+		else:
+			plt.plot(self.min[0][0], self.min[0][1], 'w.', markersize=20, label=u'Observations')
+		plt.colorbar()
+		plt.xlabel('X1')
+		plt.ylabel('X2')
+		plt.title(self.name)
 		plt.show()
 
 
@@ -59,7 +71,7 @@ class branin(function2d):
 		else: self.t = t	
 		if sd==None: self.sd = 0
 		else: self.sd=sd
-		self.min = ((-np.pi,12.275),(np.pi,2.275),(9.42478,2.475)) 
+		self.min = [(-np.pi,12.275),(np.pi,2.275),(9.42478,2.475)] 
 		self.fmin = 0.397887
 		self.name = 'Branin'
 	
@@ -85,7 +97,7 @@ class crossintray(function2d):
 		self.D = 2
 		if bounds == None: self.bounds = [(-10,10),(-10,10)]
 		else: self.bounds = bounds
-		self.min = ((1.3491,-1.3491),(1.3491,1.3491),(-1.3491,1.3491),(-1.3491,1.3491))
+		self.min = [(1.3491,-1.3491),(1.3491,1.3491),(-1.3491,1.3491),(-1.3491,-1.3491)]
 		self.fmin = -2.06261
 		if sd==None: self.sd = 0
 		else: self.sd=sd
@@ -112,7 +124,7 @@ class dropwave(function2d):
 		self.D = 2
 		if bounds == None: self.bounds = [(-5.12,5.12),(-5.12,5.12)]
 		else: self.bounds = bounds
-		self.min = ((0,0))
+		self.min = [(0,0)]
 		self.fmin = -1
 		if sd==None: self.sd = 0
 		else: self.sd=sd
@@ -140,7 +152,7 @@ class eggholder(function2d):
 		self.D = 2
 		if bounds == None: self.bounds = [(-512,512),(-512,512)]
 		else: self.bounds = bounds
-		self.min = ((512,404.2319))
+		self.min = [(512,404.2319)]
 		self.fmin = -959.6407
 		if sd==None: self.sd = 0
 		else: self.sd=sd
@@ -168,7 +180,7 @@ class goldstein(function2d):
 		self.D = 2
 		if bounds == None: self.bounds = [(-2,2),(-2,2)]
 		else: self.bounds = bounds
-		self.min = ((0,-1))
+		self.min = [(0,-1)]
 		self.fmin = 3
 		if sd==None: self.sd = 0
 		else: self.sd=sd
@@ -201,7 +213,7 @@ class beale(function2d):
 		self.D = 2
 		if bounds == None: self.bounds = [(-4.5,4.5),(-4.5,4.5)]
 		else: self.bounds = bounds
-		self.min = ((3,0.5))
+		self.min = [(3,0.5)]
 		self.fmin = 0
 		if sd==None: self.sd = 0
 		else: self.sd=sd
@@ -231,7 +243,7 @@ class sixhumpcamel(function2d):
 		self.d = 2
 		if bounds == None: self.bounds = [(-2,2),(-1,1)]
 		else: self.bounds = bounds
-		self.min = ((0.0898,-0.7126),(-0.0898,0.7126))
+		self.min = [(0.0898,-0.7126),(-0.0898,0.7126)]
 		self.fmin = -1.0316
 		if sd==None: self.sd = 0
 		else: self.sd=sd
@@ -262,7 +274,7 @@ class mccormick(function2d):
 		self.d = 2
 		if bounds == None: self.bounds = [(-1.5,4),(-3,4)]
 		else: self.bounds = bounds
-		self.min = ((-0.54719,-1.54719))
+		self.min = [(-0.54719,-1.54719)]
 		self.fmin = -1.9133
 		if sd==None: self.sd = 0
 		else: self.sd=sd
@@ -293,7 +305,7 @@ class levy2(function2d):
 		self.d = 2
 		if bounds == None: self.bounds = [(-10,10),(-10,10)]
 		else: self.bounds = bounds
-		self.min = ((1,1))
+		self.min = [(1,1)]
 		self.fmin = 0
 		if sd==None: self.sd = 0
 		else: self.sd=sd
@@ -326,7 +338,7 @@ class schaffer2(function2d):
 		self.d = 2
 		if bounds == None: self.bounds = [(-2,2),(-2,2)]
 		else: self.bounds = bounds
-		self.min = ((0,0))
+		self.min = [(0,0)]
 		self.fmin = 0
 		if sd==None: self.sd = 0
 		else: self.sd=sd

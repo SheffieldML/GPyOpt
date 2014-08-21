@@ -2,4 +2,4 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 
-from .BayesianOptimization import BayesianOptimization
+from .bayesian_optimization import BayesianOptimization
