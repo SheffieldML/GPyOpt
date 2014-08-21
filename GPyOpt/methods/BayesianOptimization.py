@@ -11,7 +11,7 @@ from pylab import plot, xlabel, ylabel, title, grid
 import matplotlib.pyplot as plt
 
 # this will be replaced by a multidimensional lattice
-from ..util.general import samples_multimensional_uniform, multigrid, reshape 
+from ..util.general import samples_multimensional_uniform, multigrid, reshape, ellipse 
 
 
 class BayesianOptimization:
@@ -66,7 +66,7 @@ class BayesianOptimization:
 			self.Nrandom = Nrandom  # number or samples of initial random exploration 
 		self.Ngrid = 5
 		
-	def start_optimization(self, f=None, H=None , X=None, Y=None, convergence_plot = True):
+	def start_optimization(self, f=None, H=None , X=None, Y=None):
 		if f==None: print 'Function to optimize is requiered'
 		else: self.f = f
 		if H == None: H=0
@@ -174,6 +174,16 @@ class BayesianOptimization:
 			x0 =  grid[np.argmin(pred_grid)]
 			res = scipy.optimize.minimize(self.acquisition_function, x0=np.array(x0), method='SLSQP',bounds=self.bounds)
 			return res.x	
+
+	
+	def update_model(self):
+		self.model = GPy.models.GPRegression(self.X,self.Y,self.kernel)
+                if self.optimize_model:
+                        self.model.constrain_positive('')
+                        self.model.optimize_restarts(num_restarts = 5)
+                        self.model.optimize()
+		self.suggested_sample = self.optimize_acquisition()
+
 			
 	def plot_acquisition(self):
 		if self.input_dim ==1:
@@ -203,38 +213,51 @@ class BayesianOptimization:
 			plt.title('Acquisition function')
 			grid(True)
 
-	# finish this 
 		if self.input_dim ==2:
 			X1 = np.linspace(self.bounds[0][0], self.bounds[0][1], 200)
 			X2 = np.linspace(self.bounds[1][0], self.bounds[1][1], 200)
 			x1, x2 = np.meshgrid(X1, X2)
 			X = np.hstack((x1.reshape(200*200,1),x2.reshape(200*200,1)))
-			# X = multigrid(self.bounds,200) 
 			acqu = self.acquisition_function(X)
 			acqu_normalized = (-acqu - min(-acqu))/(max(-acqu - min(-acqu)))
 			acqu_normalized = acqu_normalized.reshape((200,200))
 			m, s = self.model.predict(X)	
+			#
+			eX3, eY3 = ellipse(self.X,nstd=3)
+			eX2, eY2 = ellipse(self.X,nstd=2)
+			eX1, eY1 = ellipse(self.X,nstd=1)
+			pos = self.X.mean(axis=0)
+
 			##
 			plt.figure()
 			plt.subplot(1, 3, 1)			
 			plt.contourf(X1, X2, m.reshape(200,200),100)
 			plt.plot(self.X[:,0], self.X[:,1], 'r.', markersize=10, label=u'Observations')
 			plt.colorbar()
+			plt.plot(eX1,eY1,"k.-",ms=1,lw=3)
+			plt.plot(eX2,eY2,"k.-",ms=1,lw=3)
+			plt.plot(eX3,eY3,"k.-",ms=1,lw=3)		
 			plt.xlabel('X1')
 			plt.ylabel('X2')			
 			plt.title('Posterior mean')
-			
+			##
 			plt.subplot(1, 3, 2)
 			plt.plot(self.X[:,0], self.X[:,1], 'r.', markersize=10, label=u'Observations')
 			plt.contourf(X1, X2, s.reshape(200,200),100)
 			plt.colorbar()
+                        plt.plot(eX1,eY1,"k.-",ms=1,lw=3)
+                        plt.plot(eX2,eY2,"k.-",ms=1,lw=3)
+                        plt.plot(eX3,eY3,"k.-",ms=1,lw=3)
 			plt.xlabel('X1')
 			plt.ylabel('X2')
 			plt.title('Posterior variance')
-			
+			##
 			plt.subplot(1, 3, 3)
 			plt.contourf(X1, X2, acqu_normalized,100)
 			plt.colorbar()
+                        plt.plot(eX1,eY1,"k.-",ms=1,lw=3)
+                        plt.plot(eX2,eY2,"k.-",ms=1,lw=3)
+                        plt.plot(eX3,eY3,"k.-",ms=1,lw=3)
 			plt.xlabel('X1')
 			plt.ylabel('X2')
 			plt.title('Acquisition function')
@@ -248,28 +271,27 @@ class BayesianOptimization:
 
 		## plot of distances between consecutive x's
 		plt.figure()
-		plt.subplot(1, 2, 1)
-		plt.plot(range(n-1), distances, '-o')
+		plt.subplot(1, 3, 1)
+		plt.plot(range(n-1), distances, '-ro')
 		plt.xlabel('Iteration')
 		plt.ylabel('d(x[n], x[n-1])')
-		plt.title('Distance between consecutive Xs')
+		plt.title('Distance between consecutive x\'s')
 		grid(True)
-		# plot of the extimated m(x) in the proposed sampling points
-		plt.subplot(1, 2, 2)		
-		plt.errorbar(range(self.X.shape[0]), self.m_in_min[:,0], yerr=self.s_in_min[:,0],fmt='-o',ecolor='b', capthick=2)
-		plt.title('Estimated f at the next  sampling points')
+		# plot of the extimated m(x) at the proposed sampling points
+		plt.subplot(1, 3, 2)
+		plt.plot(range(self.X.shape[0]),self.m_in_min[:,0],'-o')
+                plt.title('GP mean at x[n+1]')
+                plt.xlabel('Iteration')
+                plt.ylabel('mean at x[n+1]')
+                grid(True)
+		# Plot of the proposed v(x) at the proposed sampling points
+		plt.subplot(1, 3, 3)
+		plt.errorbar(range(self.X.shape[0]),[0]*self.X.shape[0] , yerr=self.s_in_min[:,0],fmt='-o',ecolor='b', capthick=1)
+		plt.title('GP-model C.I. at x[n+1]')
 		plt.xlabel('Iteration')
-		plt.ylabel('Estimated f')
+		plt.ylabel('CI (centered at zero)')
 		grid(True)
-	
-	
-	def update_model(self):
-		self.model = GPy.models.GPRegression(self.X,self.Y,self.kernel)
-                if self.optimize_model:
-                        self.model.constrain_positive('')
-                        self.model.optimize_restarts(num_restarts = 5)
-                        self.model.optimize()
-		self.suggested_sample = self.optimize_acquisition()
+
 
 
 
