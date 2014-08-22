@@ -25,7 +25,9 @@ def multigrid(bounds,Ngrid):
 
 def reshape(x,input_dim):
 	x = np.array(x)
-	if len(x)==input_dim: 
+#	if len(x.shape)==input_dim: 
+	if x.shape[0] ==1:
+		#x.reshape(x.shape[0],input_dim)
 		x = x.reshape((1,input_dim))
 	else: 
 		x = x.reshape((len(x),input_dim)) 
@@ -48,4 +50,10 @@ def ellipse(points, nstd=2, Nb=100):
         Y= width * np.cos(grid)* np.sin(theta) + np.cos(theta) * height * np.sin(grid) + pos[1]
         return X,Y
 
+def get_moments(model,x):
+	input_dim = model.input_dim
+	x = reshape(x,input_dim)
+	fmin = min(model.predict(model.X)[0])
+	m, s = model.predict(x)
+	return (m, s, fmin)
 

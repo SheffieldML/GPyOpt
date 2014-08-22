@@ -21,7 +21,7 @@ bounds = [(0,1)]
 H = 3
 
 # starts the optimization with 3 data points 
-myBopt = GPyOpt.methods.BayesianOptimization.BayesianOptimization(bounds, acquisition_type='MPI', acquisition_par = 0.01)
+myBopt = GPyOpt.methods.BayesianOptimizationEI(bounds, acquisition_par = 0.01)
 myBopt.start_optimization(f_sim.f,H=H)
 myBopt.plot_acquisition()
 
