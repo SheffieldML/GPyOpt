@@ -83,12 +83,12 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function):
 		plt.ylabel('X2')
 		plt.title('Acquisition function')
 
-def plot_convergence(X,m_in_min,s_in_min):
+def plot_convergence(Xdata,m_in_min,s_in_min):
 	'''
 	Plots three plots to evaluate the convergence of the algorithm
 	'''
-	n = X.shape[0]	
-	aux = (X[1:n,:]-X[0:n-1,:])**2		
+	n = Xdata.shape[0]	
+	aux = (Xdata[1:n,:]-Xdata[0:n-1,:])**2		
 	distances = np.sqrt(aux.sum(axis=1))
 	## plot of distances between consecutive x's
 	plt.figure()
@@ -100,14 +100,14 @@ def plot_convergence(X,m_in_min,s_in_min):
 	grid(True)
 	# plot of the estimated m(x) at the proposed sampling points
 	plt.subplot(1, 3, 2)
-	plt.plot(range(X.shape[0]),m_in_min[:,0],'-o')
+	plt.plot(range(n),m_in_min[:,0],'-o')
 	plt.title('GP mean at x[n+1]')
 	plt.xlabel('Iteration')
 	plt.ylabel('mean at x[n+1]')
 	grid(True)
 	# Plot of the proposed v(x) at the proposed sampling points
 	plt.subplot(1, 3, 3)
-	plt.errorbar(range(X.shape[0]),[0]*X.shape[0] , yerr=s_in_min[:,0],fmt='-o',ecolor='b', capthick=1)
+	plt.errorbar(range(n),[0]*n , yerr=s_in_min[:,0],fmt='-o',ecolor='b', capthick=1)
 	plt.title('GP-model C.I. at x[n+1]')
 	plt.xlabel('Iteration')
 	plt.ylabel('CI (centered at zero)')

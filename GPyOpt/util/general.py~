@@ -1,6 +1,6 @@
 import numpy as np
 from scitools.BoxGrid import UniformBoxGrid
-
+from scipy.special import erfc
 
 
 ## generates a multidimensional grid uniformly distributes
@@ -47,5 +47,29 @@ def ellipse(points, nstd=2, Nb=100):
         X= width * np.cos(grid)* np.cos(theta) - np.sin(theta) * height * np.sin(grid) + pos[0]
         Y= width * np.cos(grid)* np.sin(theta) + np.cos(theta) * height * np.sin(grid) + pos[1]
         return X,Y
+
+def get_moments(model,x):
+	input_dim = model.input_dim
+	x = reshape(x,input_dim)
+	fmin = min(model.predict(model.X)[0])
+	m, s = model.predict(x)
+	return (m, s, fmin)
+
+def get_quantiles(acquisition_par, fmin, m, s)
+	u = ((1+acquisition_par)*fmin-m)/s	
+        phi = np.exp(-0.5 * u**2) / np.sqrt(2*np.pi)
+        Phi = 0.5 * erfc(-u / np.sqrt(2))
+	return (phi, Phi, u)
+
+
+
+
+
+
+
+
+
+
+
 
 

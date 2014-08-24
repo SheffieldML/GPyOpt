@@ -3,12 +3,12 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 import GPy
-from ..core.entropysearch import EntropyLoss # work in progress
-from ..core.es import ES  # work in progress
+from ..core.acquisition import AcquisitionUCB
+from ..core.bo import BO
 
-class EntropySearch(ES): #work in progress
+class BayesianOptimizationUCB(BO):
 	"""
-	Entropy seach method proposed by Henning and Schuler (2012)
+	Bayesian Optimization using the Upper Confidence Bound acquisition function.
 
 	This is a thin wrapper around the methods.BO class, with a set of sensible defaults
 
@@ -30,8 +30,8 @@ class EntropySearch(ES): #work in progress
 			self.kernel = GPy.kern.RBF(self.input_dim, variance=.1, lengthscale=.1)
 		else: 
 			self.kernel = kernel
-		acq = AcquisitionUBC(acquisition_par, invertsign)  ## change to Entropy Seach optimization
-		super(BayesianOptimizationEI ,self ).__init__(acq, bounds, optimize_model,Nrandom)
+		acq = AcquisitionUCB(acquisition_par, invertsign)
+		super(BayesianOptimizationUCB ,self ).__init__(acq, bounds, optimize_model,Nrandom)
         
 	def _init_model(self, X, Y):
 		'''
@@ -43,4 +43,4 @@ class EntropySearch(ES): #work in progress
 		..Note : X and Y can be None. In this case Nrandom*model_dimension data are uniformly generated to initialize the model.
 
 		'''
-		self.model = GPy.models.GPRegression(X,Y,kernel=self.kernel)   ### this part remains the same
+		self.model = GPy.models.GPRegression(X,Y,kernel=self.kernel)

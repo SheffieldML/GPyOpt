@@ -1,6 +1,6 @@
 import numpy as np
 from scitools.BoxGrid import UniformBoxGrid
-
+from scipy.special import erfc
 
 
 ## generates a multidimensional grid uniformly distributes
@@ -25,9 +25,7 @@ def multigrid(bounds,Ngrid):
 
 def reshape(x,input_dim):
 	x = np.array(x)
-#	if len(x.shape)==input_dim: 
-	if x.shape[0] ==1:
-		#x.reshape(x.shape[0],input_dim)
+	if len(x)==input_dim: 
 		x = x.reshape((1,input_dim))
 	else: 
 		x = x.reshape((len(x),input_dim)) 
@@ -56,4 +54,22 @@ def get_moments(model,x):
 	fmin = min(model.predict(model.X)[0])
 	m, s = model.predict(x)
 	return (m, s, fmin)
+
+def get_quantiles(acquisition_par, fmin, m, s):
+	u = ((1+acquisition_par)*fmin-m)/s	
+        phi = np.exp(-0.5 * u**2) / np.sqrt(2*np.pi)
+        Phi = 0.5 * erfc(-u / np.sqrt(2))
+	return (phi, Phi, u)
+
+
+
+
+
+
+
+
+
+
+
+
 

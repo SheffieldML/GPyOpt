@@ -5,8 +5,7 @@ Examples of use of the class BayesianOptimization
 	- gSobol (arbitrary dimension)
 
 ''' 
-import numpy as np
-from scipy.optimize import minimize
+import GPy
 import GPyOpt
 
 #
@@ -16,9 +15,9 @@ import GPyOpt
 # create the object function
 f_true = GPyOpt.fmodels.experiments1d.forrester()
 f_sim = GPyOpt.fmodels.experiments1d.forrester(sd= .5)
-f_true.plot()
+#f_true.plot()
 bounds = [(0,1)]
-H = 3
+H = 1
 
 # starts the optimization with 3 data points 
 myBopt = GPyOpt.methods.BayesianOptimizationEI(bounds, acquisition_par = 0.01)
@@ -26,9 +25,9 @@ myBopt.start_optimization(f_sim.f,H=H)
 myBopt.plot_acquisition()
 
 # cotinue optimization for 10 observations more
-myBopt.continue_optimization(H=10)
+myBopt.continue_optimization(H=1)
 myBopt.plot_acquisition()
-myBopt.plot_convergence()
+#myBopt.plot_convergence()
 
 
 
