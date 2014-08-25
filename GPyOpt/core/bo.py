@@ -57,6 +57,28 @@ class BO(object):
 		self.optimization_started = True
 		return self.continue_optimization(H)
 	
+	def change_to_sparseGP(self, num_inducing):
+		"""
+		Changes standard GP estimation to sparse GP estimation
+		"""
+		if self.sparse == True:
+			raise 'Sparse GP is already in use'
+		else:
+			self.num_inducing = num_inducing
+			self.sparse = True
+			self._init_model(self.X,self.Y)
+
+	def change_to_standardGP(self):
+		"""
+		Changes sparse GP estimation to standard GP estimation
+		"""
+		if self.sparse == False:
+			raise 'Sparse GP is already in use'
+		else:
+			self.num_inducing = num_inducing
+			self.sparse = False
+			self._init_model(self.X,self.Y)
+
 	def continue_optimization(self,H):
 		"""
 		Continues Bayesian Optimization for a number H of iterations. Requieres prior initialization with self.start_optimization
@@ -101,7 +123,7 @@ class BO(object):
 			#self.model.constrain_bounded('.*rbf_variance',1e-3,1e4)
 			#self.model.constrain_bounded('lengthscale',.1,200.)
 			#self.model.constrain_bounded('noise_variance',1e-3,1e4)
-			#self.model.optimize_restarts(num_restarts = 5)				
+			self.model.optimize_restarts(num_restarts = 10)				
 			self.model.optimize()
 		self.suggested_sample = self._optimize_acquisition()
 
@@ -112,7 +134,7 @@ class BO(object):
 			if self.input_dim = 2: as before but it separates the mean and variance of the model in two different plots
 
 		"""  
-		return plot_acquisition(self.bounds,self.input_dim,self.model,self.X,self.Y,self.acquisition_func.acquisition_function)
+		return plot_acquisition(self.bounds,self.input_dim,self.model,self.X,self.Y,self.acquisition_func.acquisition_function,self.suggested_sample)
 
 	def plot_convergence(self):
 		"""

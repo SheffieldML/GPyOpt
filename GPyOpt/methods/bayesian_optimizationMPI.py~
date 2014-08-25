@@ -27,7 +27,7 @@ class BayesianOptimizationMPI(BO):
 		if bounds==None: 
 			raise 'Box contrainst are needed. Please insert box constrains'	
 		if kernel is None: 
-			self.kernel = GPy.kern.RBF(self.input_dim, variance=.1, lengthscale=.1)
+			self.kernel = GPy.kern.RBF(self.input_dim, variance=.1, lengthscale=.1) + GPy.kern.Bias(self.input_dim)
 		else: 
 			self.kernel = kernel
 		acq = AcquisitionMPI(acquisition_par, invertsign)

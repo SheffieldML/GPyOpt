@@ -1,8 +1,3 @@
-# Copyright (c) 2014, Javier Gonzalez
-# Copyright (c) 2014, the GPy Authors (see GPy AUTHORS.txt)
-# Licensed under the BSD 3-clause license (see LICENSE.txt)
-
-
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter

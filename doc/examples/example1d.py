@@ -7,6 +7,9 @@ Examples of use of the class BayesianOptimization
 ''' 
 import GPy
 import GPyOpt
+from numpy.random import seed 
+
+seed(123)
 
 #
 # Example 1: Optimization of the forrester function
