@@ -68,6 +68,17 @@ class BO(object):
 			self.sparse = True
 			self._init_model(self.X,self.Y)
 
+	def change_to_standardGP(self):
+		"""
+		Changes sparse GP estimation to standard GP estimation
+		"""
+		if self.sparse == False:
+			raise 'Sparse GP is already in use'
+		else:
+			self.num_inducing = num_inducing
+			self.sparse = False
+			self._init_model(self.X,self.Y)
+
 	def continue_optimization(self,H):
 		"""
 		Continues Bayesian Optimization for a number H of iterations. Requieres prior initialization with self.start_optimization

@@ -20,8 +20,8 @@ class BO(object):
                 self.acquisition_func = acquisition_func
                 if optimize_model == None: self.optimize_model = True
 		else: self.optimize_model = optimize_model
-		self.Ngrid = 10
-		if Nrandom ==None: self.Nrandom = 3*self.input_dim # number or samples for initial random exploration
+		self.Ngrid = 100
+		if Nrandom ==None: self.Nrandom = 2*self.input_dim # number or samples for initial random exploration
 		else: self.Nrandom = Nrandom  
 	
  
@@ -123,7 +123,7 @@ class BO(object):
 			#self.model.constrain_bounded('.*rbf_variance',1e-3,1e4)
 			#self.model.constrain_bounded('lengthscale',.1,200.)
 			#self.model.constrain_bounded('noise_variance',1e-3,1e4)
-			self.model.optimize_restarts(num_restarts = 10)				
+			self.model.optimize_restarts(num_restarts = 10)			
 			self.model.optimize()
 		self.suggested_sample = self._optimize_acquisition()
 
