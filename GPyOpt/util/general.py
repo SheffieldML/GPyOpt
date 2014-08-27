@@ -61,9 +61,12 @@ def get_quantiles(acquisition_par, fmin, m, s):
         Phi = 0.5 * erfc(-u / np.sqrt(2))
 	return (phi, Phi, u)
 
-
-
-
+def ProjNullSpace(J,v):
+	if J.shape[1]>0:
+		p = v - np.dot(np.dot(J,J.T),v)
+	else:
+		p = v
+	return p
 
 
 

@@ -7,8 +7,10 @@ from scipy.stats import norm
 import matplotlib.pyplot as plt
 import scipy
 import random
+from numpy.linalg inport norm
 
 from ..util.general import samples_multimensional_uniform
+from ..core.acquisition import AcquisitionEI
 
 ##
 ## WORK IN PROGRESS
@@ -53,6 +55,12 @@ class EntropySearch:
                 else:
                         self.Nrandom = Nrandom  # 
 
+		self.Nb = 50
+		self.Ne = 10
+		self.T  = 200
+		self.MeanEsts = np.zeros(self.input_dim)
+		self.MAPEsts = np.zeros(self.input_dim)
+		self.BestGuesses = np.zeros(self.input_dim) 
 
 	def start_optimization(self, f=None, H=None , X=None, Y=None, convergence_plot = True):
 		## run optimzation loop for some given number of iterations
@@ -63,11 +71,36 @@ class EntropySearch:
 
 
 
-	def sample_belief_locations(self, ...)
-		## sample belief locations according to x~ p(f(x)< min f(model))
-		##
-		## retun zb, mb  (zbelief and the measure mb of those points proportional to p(f(x)< min f(model)) ) 
+	def _sample_belief_locations(self)
+		'''
+		sample belief locations according to x~ p(f(x)< min f(model))
+		retuns zb, mb  (zbelief and the measure mb of those points proportional to p(f(x)< min f(model)) ) 
+		'''
+		EI = AcquisitionEI(acquisition_par=0, self.invertsign) # refer to it as EI.acquisition_function(X)
+		d0 = norm(np.array(bounds)[:,1] - np.array(bounds)[:,0])/2  # size of the slize sampler
+		zb = np.zeros((self.Nb,self.input_dim))
+		mb = np.zeros((self.Nb,1))
+		numblock = round(self.Nb / 10)		
+
+		restarts = np.zeros((numblock,input_dim))
+		restarts[0:(min(numblock,BestGuesses.shape[0]+1),:] =   ???		##finish this
+		restarts[(min(numblock,BestGuesses.shape[0])+2):numblock,:] = ???	##finish this
+
+		xx = restarts[0,]
+		subsample = 20
+			
+		for i in range(subsample * self.Nb):            				 # sub-sample by factor of 10 to improve mixing
+			if np.mod(i,subsample*10) == 0 and i / (subsample*10) < numblock
+				xx = restarts[i/(subsample*10) + 1,:];    # chack if the index is right
+
+     			 xx = Slice_ShrinkRank_nolog(xx,EI.acquisition_function,EI.d_acquisition_function, d0)
+
+			if np.mod(i,subsample) == 0:
+				zb[i / subsample,:] = xx
+				emb = EI.acquisition_function(xx)
+				mb(i / subsample)  = np.log(emb)
 		
+		return (zb,mb) # later we need to obtain the moments of the GP at zb
 
 	def join_min(self,...)
 		## belief over the minimum of the sampled set
