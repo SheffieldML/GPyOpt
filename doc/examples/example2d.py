@@ -11,10 +11,10 @@ np.random.seed(1234)
 
 # create the object function
 f_true = GPyOpt.fmodels.experiments2d.powers()
-f_sim = GPyOpt.fmodels.experiments2d.powers(sd= 0.5)
+f_sim = GPyOpt.fmodels.experiments2d.powers(sd= 0.1)
 #f_true.plot()
 bounds = f_true.bounds
-H = 1
+H = 25
 
 # starts the optimization with 3 data points 
 myBopt = GPyOpt.methods.BayesianOptimizationEI(bounds,acquisition_par=0.01)
@@ -23,7 +23,7 @@ myBopt.plot_acquisition()
 myBopt.plot_convergence()
 
 # continue optimization for 10 observations more
-myBopt.continue_optimization(H=10)
+myBopt.continue_optimization(H=40)
 myBopt.plot_acquisition()
 #myBopt.plot_convergence()
 myBopt.suggested_sample

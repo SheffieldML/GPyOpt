@@ -6,7 +6,9 @@ import scipy
 import random
 
 from ..util.general import samples_multimensional_uniform, multigrid, reshape, ellipse 
+from ..core.optimization import grid_optimization
 from ..plotting.plots_bo import plot_acquisition, plot_convergence
+
 
 #from .acquisition import AcquisitionEI 
 
@@ -104,12 +106,11 @@ class BO(object):
 		Optimizes the acquisition function. It combines initial grid search with local optimzation starting on the minimum of the grid
 
 		"""
-                grid = multigrid(self.bounds,self.Ngrid)
-                pred_grid = self.acquisition_func.acquisition_function(grid)
-                x0 =  grid[np.argmin(pred_grid)]
-		
-                res = scipy.optimize.minimize(self.acquisition_func.acquisition_function, x0=np.array(x0), method='SLSQP',bounds=self.bounds)
-                return res.x
+		## add here the new idea to optimize the surrogate and the multiple initiallizations
+		#return multi_init_optimization(self.acquisition_function, self.bounds, self.Ninit)
+		#return density_sampling_optimization(self.acquisition_function, self.bounds, self.model)
+		return grid_optimization(self.acquisition_func.acquisition_function, self.bounds, self.Ngrid) 
+
 
 	def _update_model(self):
 		"""                
