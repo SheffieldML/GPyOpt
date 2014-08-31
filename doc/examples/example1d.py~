@@ -23,7 +23,7 @@ bounds = [(0,1)]
 H = 1
 
 # starts the optimization with 3 data points 
-myBopt = GPyOpt.methods.BayesianOptimizationEI(bounds, acquisition_par = 0.01, sparse=True,num_inducing = 10)
+myBopt = GPyOpt.methods.BayesianOptimizationEI(bounds, acquisition_par = 0.01)
 myBopt.start_optimization(f_sim.f,H=H)
 myBopt.plot_acquisition()
 
