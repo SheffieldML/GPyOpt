@@ -27,4 +27,12 @@ def ellipse(points, nstd=2, Nb=100):
 
 
 
+plt.figure()
+points = np.random.multivariate_normal(mean=(1,1), cov=[[10, 8],[8, 10]], size=100)
+plt.plot(points[:,0],points[:,1],'.')
+eX, eY = ellipse(points,nstd=3)
+plt.plot(eX,eY,"w.-",ms=1,lw=3)
+
+
+
 

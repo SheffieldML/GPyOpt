@@ -81,7 +81,7 @@ class AcquisitionUCB(AcquisitionBase):
 		Upper Confidence Band
 		"""		
 		m, s, fmin = get_moments(self.model, x) 	
-		f_acqu = self.sign*(-m - self.sign* self.acquisition_par * s)
+		f_acqu = self.sign*(-m) + self.sign* self.acquisition_par * s
 		return -f_acqu  # note: returns negative value for posterior minimization 
 
 	def d_acquisition_function(self,x):
@@ -90,10 +90,12 @@ class AcquisitionUCB(AcquisitionBase):
 		"""
 		m, s, fmin = get_moments(self.model, x)
 		dmdx, dsdx = self.model.predictive_gradients(x)
-		df_acqu = self.sign*(-dmdx - self.sign* self.acquisition_par * dsdx)
+		df_acqu = self.sign*(-dmdx) + self.sign* self.acquisition_par * dsdx
 		return -df_acqu
 
-
+######
+###### TODO, the derivatives are with respet to the variance not the standard deviation.
+######
 
 
 

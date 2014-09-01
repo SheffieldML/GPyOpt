@@ -55,7 +55,7 @@ class BO(object):
 		self._update_model()
 		prediction = self.model.predict(self.X)
 		self.m_in_min = prediction[0]
-		self.s_in_min = prediction[1] 
+		self.s_in_min = np.sqrt(prediction[1]) 
 		self.optimization_started = True
 		return self.continue_optimization(H)
 	
@@ -94,7 +94,7 @@ class BO(object):
 				self.Y = np.vstack((self.Y,self.f(np.array([self.suggested_sample]))))
 				pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))
 				self.m_in_min = np.vstack((self.m_in_min,pred_min[0]))
-				self.s_in_min = np.vstack((self.s_in_min,pred_min[1]))
+				self.s_in_min = np.vstack((self.s_in_min,np.sqrt(pred_min[1])))
 				self._update_model()				
 				k +=1
 			return self.suggested_sample

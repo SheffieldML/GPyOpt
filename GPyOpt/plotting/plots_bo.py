@@ -13,16 +13,16 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
 		X = np.arange(bounds[0][0], bounds[0][1], 0.001)
        		acqu = acquisition_function(X)
 		acqu_normalized = (-acqu - min(-acqu))/(max(-acqu - min(-acqu))) # normalize acq in (0,1)
-		m, s = model.predict(X.reshape(len(X),1))
+		m, v = model.predict(X.reshape(len(X),1))
 		plt.figure(figsize=(10,5)) 
 		plt.subplot(2, 1, 1)
 		plt.plot(X, m, 'b-', label=u'Posterior mean',lw=2)
 		plt.fill(np.concatenate([X, X[::-1]]), \
-       			np.concatenate([m - 1.9600 * s,
-              				(m + 1.9600 * s)[::-1]]), \
+       			np.concatenate([m - 1.9600 * np.sqrt(v),
+              				(m + 1.9600 * np.sqrt(v))[::-1]]), \
        			alpha=.5, fc='b', ec='None', label='95% C. I.')	
-		plt.plot(X, m-1.96*s, 'b-', alpha = 0.5)
-		plt.plot(X, m+1.96*s, 'b-', alpha=0.5)		
+		plt.plot(X, m-1.96*np.sqrt(v), 'b-', alpha = 0.5)
+		plt.plot(X, m+1.96*np.sqrt(v), 'b-', alpha=0.5)		
 		plt.plot(Xdata, Ydata, 'r.', markersize=10, label=u'Observations')
 		plt.title('Model and observations')
 		plt.ylabel('Y')
@@ -44,7 +44,7 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
 		acqu = acquisition_function(X)
 		acqu_normalized = (-acqu - min(-acqu))/(max(-acqu - min(-acqu)))
 		acqu_normalized = acqu_normalized.reshape((200,200))
-		m, s = model.predict(X)	
+		m, v = model.predict(X)	
 		#
 		eX3, eY3 = ellipse(Xdata,nstd=3)
 		eX2, eY2 = ellipse(Xdata,nstd=2)
@@ -66,14 +66,14 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
 		##
 		plt.subplot(1, 3, 2)
 		plt.plot(Xdata[:,0], Xdata[:,1], 'r.', markersize=10, label=u'Observations')
-		plt.contourf(X1, X2, s.reshape(200,200),100)
+		plt.contourf(X1, X2, np.sqrt(v.reshape(200,200)),100)
 		plt.colorbar()
 		plt.plot(eX1,eY1,"k.-",ms=1,lw=3,alpha = 0.9)
 		plt.plot(eX2,eY2,"k.-",ms=1,lw=3,alpha = 0.6)
 		plt.plot(eX3,eY3,"k.-",ms=1,lw=3,alpha = 0.3)
 		plt.xlabel('X1')
 		plt.ylabel('X2')
-		plt.title('Posterior variance')
+		plt.title('Posterior sd.')
 		plt.axis((bounds[0][0]-0.5,bounds[0][1]+0.5,bounds[1][0]-0.5,bounds[1][1]+0.5))
 		##
 		plt.subplot(1, 3, 3)
