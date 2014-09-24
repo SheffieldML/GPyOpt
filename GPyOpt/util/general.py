@@ -3,8 +3,17 @@ from scitools.BoxGrid import UniformBoxGrid
 from scipy.special import erfc
 
 
+## gets the best current guess from a vertor and 
+def best_gess(f,X):
+        n = X.shape[0]
+        xbest = np.zeros(n)
+        for i in range(n):
+                ff = f(X[0:(i+1)])
+                xbest[i] = ff[np.argmin(ff)]
+        return xbest
+
 ## generates a multidimensional grid uniformly distributes
-def samples_multimensional_uniform(bounds,num_data):
+def samples_multidimensional_uniform(bounds,num_data):
         dim = len(bounds)
         Z_rand = np.zeros(shape=(num_data,dim))
         for k in range(0,dim): Z_rand[:,k] = np.random.uniform(low=bounds[k][0],high=bounds[k][1],size=num_data)
