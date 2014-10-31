@@ -5,8 +5,8 @@ from scipy.optimize import minimize
 import scipy
 import random
 
-from ..util.general import samples_multimensional_uniform, multigrid, reshape, ellipse 
-from ..core.optimization import grid_optimization
+from ..util.general import samples_multidimensional_uniform, multigrid, reshape, ellipse 
+from ..core.optimization import grid_optimization, multi_init_optimization
 from ..plotting.plots_bo import plot_acquisition, plot_convergence
 
 
@@ -45,14 +45,15 @@ class BO(object):
 		else: self.f = f
 		if H == None: H=0
 		if X==None or Y == None:
-			self.X = samples_multimensional_uniform(self.bounds,self.Nrandom)
+			self.X = samples_multidimensional_uniform(self.bounds,self.Nrandom)
 			self.Y = f(self.X)
 		else:
 			self.X = X
 			self.Y = Y
 		if Ninit == None: 
 			self.Ninit = 10
-		else self.Ninit = Ninit
+		else: 
+			self.Ninit = Ninit
 		self._init_model(self.X,self.Y)
                 self.acquisition_func.model = self.model
 		self._update_model()
@@ -98,7 +99,12 @@ class BO(object):
 				pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))
 				self.m_in_min = np.vstack((self.m_in_min,pred_min[0]))
 				self.s_in_min = np.vstack((self.s_in_min,np.sqrt(pred_min[1])))
-				self._update_model()				
+				try:
+					self._update_model()				
+				except np.linalg.linalg.LinAlgError:
+					# Kernel become singular, DO something
+					print 'Optimization stopped. Two equal points selected.'
+					break
 				k +=1
 			return self.suggested_sample
 
@@ -109,10 +115,9 @@ class BO(object):
 		Optimizes the acquisition function. It combines initial grid search with local optimzation starting on the minimum of the grid
 
 		"""
-		## add here the new idea to optimize the surrogate and the multiple initiallizations
-		#return multi_init_optimization(self.acquisition_function, self.bounds, self.Ninit)
+		return multi_init_optimization(self.acquisition_func.acquisition_function,self.bounds, self.Ninit)
 		#return density_sampling_optimization(self.acquisition_function, self.bounds, self.model)
-		return grid_optimization(self.acquisition_func.acquisition_function, self.bounds, self.Ngrid) 
+		# return grid_optimization(self.acquisition_func.acquisition_function, self.bounds, self.Ngrid) 
 
 
 	def _update_model(self):
@@ -120,14 +125,16 @@ class BO(object):
 		Updates X and Y in the model and re-optimizes the parameters of the new model
 
 		"""                
-		self.model.X = GPy.core.parameterization.ObsAr(self.X)
-                self.model.Y = GPy.core.parameterization.ObsAr(self.Y)
+		self.model.set_X(self.X)
+                self.model.set_Y(self.Y)
+		self.model.update_model(True)
+
                 if self.optimize_model:
-			self.model.constrain_positive('')
+			self.model.constrain_positive()
 			#self.model.constrain_bounded('.*rbf_variance',1e-3,1e4)
 			#self.model.constrain_bounded('lengthscale',.1,200.)
 			#self.model.constrain_bounded('noise_variance',1e-3,1e4)
-			self.model.optimize_restarts(num_restarts = 10)			
+			self.model.optimize_restarts(num_restarts = 5)			
 			self.model.optimize()
 		self.suggested_sample = self._optimize_acquisition()
 

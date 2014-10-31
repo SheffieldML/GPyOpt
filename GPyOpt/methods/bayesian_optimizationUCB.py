@@ -24,7 +24,7 @@ class BayesianOptimizationUCB(BO):
 
     """
 	def __init__(self, bounds=None, kernel=None, optimize_model=None, acquisition_par=None, invertsign=None, Nrandom = None, sparse=False, num_inducing=None):
-		self.input_dim = len(bounds)
+		self.Nrandom = Nrandom
 		self.sparse = sparse
 		self.input_dim = len(bounds)
 		if bounds==None: 

@@ -24,6 +24,7 @@ class BayesianOptimizationEI(BO):
 
     """
 	def __init__(self, bounds=None, kernel=None, optimize_model=None, acquisition_par=None, invertsign=None, Nrandom = None, sparse=False, num_inducing=None):
+		self.Nrandom = Nrandom	
 		self.num_inducing = num_inducing
 		self.sparse = sparse
 		self.input_dim = len(bounds)

@@ -18,11 +18,15 @@ class BayesianOptimizationMPI(BO):
 	:param acquisition_par: parameter of the acquisition function. To avoid local minima 
 	:param invertsign: minimization is done unles invertsing is True
 	:param Nrandom: number of initial random evaluatios of f is X and Y are not provided  
+	:param sparse: if sparse is True, and sparse GP is used
 
     .. Note:: Multiple independent outputs are allowed using columns of Y
 
     """
-	def __init__(self, bounds=None, kernel=None, optimize_model=None, acquisition_par=None, invertsign=None, Nrandom = None):
+	def __init__(self, bounds=None, kernel=None, optimize_model=None, acquisition_par=None, invertsign=None, Nrandom = None, sparse=False, num_inducing=None):
+		self.Nrandom = Nrandom	
+		self.num_inducing = num_inducing
+		self.sparse = sparse
 		self.input_dim = len(bounds)
 		if bounds==None: 
 			raise 'Box contrainst are needed. Please insert box constrains'	
@@ -43,4 +47,10 @@ class BayesianOptimizationMPI(BO):
 		..Note : X and Y can be None. In this case Nrandom*model_dimension data are uniformly generated to initialize the model.
 
 		'''
-		self.model = GPy.models.GPRegression(X,Y,kernel=self.kernel)
+		if self.sparse == True:
+			if self.num_inducing ==None:
+				raise 'Sparse model, please insert the number of inducing points'
+			else:			
+				self.model = GPy.models.SparseGPRegression(X, Y, kernel=self.kernel, num_inducing=self.num_inducing)
+		else:		
+			self.model = GPy.models.GPRegression(X,Y,kernel=self.kernel)

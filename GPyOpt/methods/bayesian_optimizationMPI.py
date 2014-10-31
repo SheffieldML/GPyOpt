@@ -23,7 +23,8 @@ class BayesianOptimizationMPI(BO):
     .. Note:: Multiple independent outputs are allowed using columns of Y
 
     """
-	def __init__(self, bounds=None, kernel=None, optimize_model=None, acquisition_par=None, invertsign=None, Nrandom = None):
+	def __init__(self, bounds=None, kernel=None, optimize_model=None, acquisition_par=None, invertsign=None, Nrandom = None, sparse=False, num_inducing=10):
+		self.Nrandom = Nrandom	
 		self.num_inducing = num_inducing
 		self.sparse = sparse
 		self.input_dim = len(bounds)
