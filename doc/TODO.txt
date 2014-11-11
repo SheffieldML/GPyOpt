@@ -1,0 +1,42 @@
+# TODO list to improve GPyOpt   
+# 10/11/2014
+
+# 
+# Big additions
+#
+
+- Finish the implementation of ES
+- Add Multi-task optimization (contact Tudor for this)
+- Add Batch optimization (new ideas and well as the Azimi update). Potential for paralellizaion here
+- Add a commamd line interface (usefull for the optimization of physical experiments).
+
+
+#
+# Small addtions
+#
+
+- remove the dependencies from scitools
+- Clarify that H refers the horizont (number of samples to be taken)
+- Add an option to select the number of restats in the optimization of the parameters in the GP.
+- Add an option to select after how many interations the parameters of the GP
+shoulb be updated.
+- Plot the variances as a var plot instead of using confidence bands.
+- Implement a last-step pure exploration.
+- Implement stopping criteria (distance between the two last consecutive time points?)
+- in 1D cases, add vertical lines in the plots where the optimum is.
+- Flag to plot the true function if available.
+- Robust test. Sometimes it is instable (when two data points are very close). Need to save the results before that happens.
+- inlcude an option to change the model before start running the optimization.
+- normalize y
+
+
+
+
+
+
+
+
+
+
+
+
