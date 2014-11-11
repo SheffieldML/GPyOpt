@@ -129,6 +129,7 @@ class BO(object):
         """        
         self.model.set_XY(self.X,(self.Y-self.Y.mean())/self.Y.std())
         if (self.num_acquisitions%self.model_optimize_interval)==0:
+            self.model.optimization_runs = [] # clear previous optimization runs so they don't get used.
             self.model.optimize_restarts(num_restarts=self.model_optimize_restarts)            
         self.suggested_sample = self._optimize_acquisition()
         if np.any(np.isnan(self.suggested_sample)):
