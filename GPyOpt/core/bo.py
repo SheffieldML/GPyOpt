@@ -13,7 +13,7 @@ from ..plotting.plots_bo import plot_acquisition, plot_convergence
 #from .acquisition import AcquisitionEI 
 
 class BO(object):
-    def __init__(self, acquisition_func, bounds=None, model_optimize_interval=1, model_optimize_restarts=5, Nrandom=None):
+    def __init__(self, acquisition_func, bounds=None, model_optimize_interval=1, model_optimize_restarts=5, Nrandom=None, verbosity=1):
         if bounds==None: 
             print 'Box contrainst are needed. Please insert box constrains'    
         else:
@@ -24,6 +24,7 @@ class BO(object):
         self.Ngrid = 100
         if Nrandom ==None: self.Nrandom = 2*self.input_dim # number or samples for initial random exploration
         else: self.Nrandom = Nrandom  
+        self.verbosity=verbosity
     
  
     def _init_model(self, X, Y):
@@ -130,10 +131,8 @@ class BO(object):
         self.model.set_XY(self.X,(self.Y-self.Y.mean())/self.Y.std())
         if (self.num_acquisitions%self.model_optimize_interval)==0:
             self.model.optimization_runs = [] # clear previous optimization runs so they don't get used.
-            self.model.optimize_restarts(num_restarts=self.model_optimize_restarts)            
+            self.model.optimize_restarts(num_restarts=self.model_optimize_restarts, verbose=self.verbosity)            
         self.suggested_sample = self._optimize_acquisition()
-        if np.any(np.isnan(self.suggested_sample)):
-            debug
 
     def plot_acquisition(self):
         """        
