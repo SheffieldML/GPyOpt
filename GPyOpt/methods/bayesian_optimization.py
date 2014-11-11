@@ -12,23 +12,28 @@ class BayesianOptimization(BO):
 
 	This is a thin wrapper around the methods.BO class, with a set of sensible defaults
 
-	:param bounds: Tuple containing the box contrains of the function to optimize. Example: for [0,1]x[0,1] insert [(0,1),(0,1)]  
-	:param kernel: a GPy kernel, defaults to rbf
+	:param bounds: Tuple containing the box contrains of the function to optimize. Example: for [0,1]x[0,1] insert [(0,1),(0,1)].  
+	:param kernel: a GPy kernel, defaults to rbf + bias.
 	:param optimize_model: Unless specified otherwise the parameters of the model are updated after each iteration. 
+	:param model_optimize_interval: iterations after which the parameters of the model are optimized.	
+	:param model_optimize_restarts: number of initial points for the GP parameters optimization.
 	:param acquisition: acquisition function ('EI' 'MPI' or LCB). Default set to EI.
-	:param acquisition_par: parameter of the acquisition function. To avoid local minima 
-	:param invertsign: minimization is done unles invertsing is True
-	:param Nrandom: number of initial random evaluatios of f is X and Y are not provided  
-	:param sparse: if sparse is True, and sparse GP is used
+	:param acquisition_par: parameter of the acquisition function. To avoid local minima.
+	:param invertsign: minimization is done unles invertsing is True.
+	:param Nrandom: number of initial random evaluatios of f is X and Y are not provided.  
+	:param sparse: if sparse is True, and sparse GP is used.
+	:param normalize: normalization of the Y's. Default is False.
+	:param verbosity: whether to show (1) or not (0, default) the value of the log-likelihood of the model for the optimized parameters.
 
     .. Note:: Multiple independent outputs are allowed using columns of Y
 
     """
-	def __init__(self, bounds=None, kernel=None, optimize_model=None, acquisition=None, acquisition_par=None, invertsign=None, Nrandom = None, sparse=False, num_inducing=None):
+	def __init__(self, bounds=None, kernel=None, optimize_model=None, model_optimize_interval=1, model_optimize_restarts=3, acquisition=None, acquisition_par=None, invertsign=None, Nrandom = None, sparse=False, num_inducing=None, normalize=False, verbosity=0):
 		self.Nrandom = Nrandom	
 		self.num_inducing = num_inducing
 		self.sparse = sparse
 		self.input_dim = len(bounds)
+		self.normalize = normalize
 		if bounds==None: 
 			raise 'Box contrainst are needed. Please insert box constrains'	
 		if kernel is None: 
@@ -45,7 +50,7 @@ class BayesianOptimization(BO):
 		else:	
 			print 'The selected acquisition fucntion is not valid. Please try again with EI, MPI, or LCB'
 		if (acquisition=='EI' or acquisition=='MPI' or acquisition =='LCB'):
-			super(BayesianOptimization ,self).__init__(acq, bounds, optimize_model,Nrandom)
+			super(BayesianOptimization ,self).__init__(acquisition_func=acq, bounds=bounds, model_optimize_interval=model_optimize_interval, model_optimize_restarts=model_optimize_restarts, Nrandom=Nrandom, normalize=normalize, verbosity=verbosity)
 	
 
 	def _init_model(self, X, Y):

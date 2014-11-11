@@ -13,24 +13,27 @@ from ..plotting.plots_bo import plot_acquisition, plot_convergence
 #from .acquisition import AcquisitionEI 
 
 class BO(object):
-    def __init__(self, acquisition_func, bounds=None, model_optimize_interval=1, model_optimize_restarts=5, Nrandom=None, verbosity=1):
+    def __init__(self, acquisition_func, bounds=None, model_optimize_interval=None, model_optimize_restarts=None, Nrandom=None, normalize=None, verbosity=None):
+
         if bounds==None: 
             print 'Box contrainst are needed. Please insert box constrains'    
         else:
             self.bounds = bounds
             self.input_dim = len(self.bounds)        
         self.acquisition_func = acquisition_func
-        self.model_optimize_interval, self.model_optimize_restarts = model_optimize_interval, model_optimize_restarts
+	self.model_optimize_interval = model_optimize_interval
+	self.model_optimize_restarts = model_optimize_restarts
         self.Ngrid = 100
         if Nrandom ==None: self.Nrandom = 2*self.input_dim # number or samples for initial random exploration
         else: self.Nrandom = Nrandom  
+	self.normalize = normalize
         self.verbosity=verbosity
     
  
     def _init_model(self, X, Y):
         pass
         
-    def start_optimization(self, f, H, X=None, Y=None, Ninit=None):
+    def start_optimization(self, f, H, X=None, Y=None, Ninit=None, stop_criteria = 1e-6):
         """ 
         Starts Bayesian Optimization for a number H of iterations (after the initial exploration data)
 
@@ -38,11 +41,13 @@ class BO(object):
         :param X: input observations
         :param Y: output values
         :param H: exploration horizon, or number of iterations  
+	:param stop_criteria: minimum distance between two consecuve x's to keep running the model
 
         ..Note : X and Y can be None. In this case Nrandom*model_dimension data are uniformly generated to initialize the model.
     
         """
         self.num_acquisitions = 0
+        self.stop_criteria = stop_criteria
         if f==None: print 'Function to optimize is requiered'
         else: self.f = f
         if H == None: H=0
@@ -68,7 +73,9 @@ class BO(object):
     def change_to_sparseGP(self, num_inducing):
         """
         Changes standard GP estimation to sparse GP estimation
-        """
+	       
+	:param num__inducing: number of inducing points for sparse-GP modelling
+	 """
         if self.sparse == True:
             raise 'Sparse GP is already in use'
         else:
@@ -83,19 +90,22 @@ class BO(object):
         if self.sparse == False:
             raise 'Sparse GP is already in use'
         else:
-            self.num_inducing = num_inducing
             self.sparse = False
             self._init_model(self.X,self.Y)
 
     def continue_optimization(self,H):
         """
         Continues Bayesian Optimization for a number H of iterations. Requieres prior initialization with self.start_optimization
+
         :param H: new exploration horizon, or number of extra iterations  
 
         """
         if self.optimization_started:
-            k=1
-            while k<=H:
+            print '*****************************'
+            print '** Optimization in process...'
+            print '*****************************'
+            k=1		
+            while k<=H: # TODO add stopping condition 
                 self.X = np.vstack((self.X,self.suggested_sample))
                 self.Y = np.vstack((self.Y,self.f(np.array([self.suggested_sample]))))
                 self.num_acquisitions += 1
@@ -109,6 +119,7 @@ class BO(object):
                     print 'Optimization stopped. Two equal points selected.'
                     break
                 k +=1
+            print ' ** Optimzation completed. **'	
             return self.suggested_sample
 
         else: print 'Optimization not initiated: Use .start_optimization and provide a function to optimize'
@@ -119,7 +130,7 @@ class BO(object):
 
         """
         return multi_init_optimization(self.acquisition_func.acquisition_function,self.bounds, self.Ninit)
-        #return density_sampling_optimization(self.acquisition_function, self.bounds, self.model)
+        # return density_sampling_optimization(self.acquisition_function, self.bounds, self.model)
         # return grid_optimization(self.acquisition_func.acquisition_function, self.bounds, self.Ngrid) 
 
 
@@ -127,9 +138,13 @@ class BO(object):
         """        
         Updates X and Y in the model and re-optimizes the parameters of the new model
 
-        """        
-        self.model.set_XY(self.X,(self.Y-self.Y.mean())/self.Y.std())
-        if (self.num_acquisitions%self.model_optimize_interval)==0:
+        """  
+	if self.normalize:      
+        	self.model.set_XY(self.X,(self.Y-self.Y.mean())/self.Y.std())
+	else:
+		self.model.set_XY(self.X,self.Y)
+
+	if (self.num_acquisitions%self.model_optimize_interval)==0:
             self.model.optimization_runs = [] # clear previous optimization runs so they don't get used.
             self.model.optimize_restarts(num_restarts=self.model_optimize_restarts, verbose=self.verbosity)            
         self.suggested_sample = self._optimize_acquisition()
@@ -141,7 +156,7 @@ class BO(object):
             if self.input_dim = 2: as before but it separates the mean and variance of the model in two different plots
 
         """  
-        return plot_acquisition(self.bounds,self.input_dim,self.model,self.X,self.Y,self.acquisition_func.acquisition_function,self.suggested_sample)
+        return plot_acquisition(self.bounds,self.input_dim,self.model,self.model.X,self.model.Y,self.acquisition_func.acquisition_function,self.suggested_sample)
 
     def plot_convergence(self):
         """

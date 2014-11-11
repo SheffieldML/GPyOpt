@@ -16,18 +16,18 @@
 #
 
 - remove the dependencies from scitools
-- Clarify that H refers the horizont (number of samples to be taken)
-- Add an option to select the number of restats in the optimization of the parameters in the GP.
-- Add an option to select after how many interations the parameters of the GP
+- (DONE, included in the function help)Clarify that H refers the horizont (number of samples to be taken)
+-(DONE) Add an option to select the number of restats in the optimization of the parameters in the GP.
+-(DONE) Add an option to select after how many interations the parameters of the GP
 shoulb be updated.
 - Plot the variances as a var plot instead of using confidence bands.
 - Implement a last-step pure exploration.
 - Implement stopping criteria (distance between the two last consecutive time points?)
-- in 1D cases, add vertical lines in the plots where the optimum is.
+- (DONE) in 1D cases, add vertical lines in the plots where the optimum is.
 - Flag to plot the true function if available.
 - Robust test. Sometimes it is instable (when two data points are very close). Need to save the results before that happens.
 - inlcude an option to change the model before start running the optimization.
-- normalize y
+-(DONE) normalize y
 
 
 
