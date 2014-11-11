@@ -72,7 +72,7 @@ class AcquisitionMPI(AcquisitionBase):
 		return -df_acqu
 
 
-class AcquisitionUCB(AcquisitionBase):
+class AcquisitionLCB(AcquisitionBase):
 	"""
 	Class for Upper Confidence Band acquisition functions.
 	"""
