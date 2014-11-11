@@ -1,7 +1,0 @@
-"""
-Acquisition
-"""
-
-class AcquisitionBase(object):
-    def __init__(self, model):
-        """"""

@@ -28,6 +28,7 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
 		plt.ylabel('Y')
 		plt.xlabel('X')
 		plt.legend(loc='upper left')
+                plt.xlim(*bounds)
 		grid(True)
 		plt.subplot(2, 1, 2)
 		plt.plot(X,acqu_normalized, 'r-',lw=2) 
@@ -35,6 +36,7 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
 		plt.ylabel('Acquisition value')
 		plt.title('Acquisition function')
 		grid(True)
+                plt.xlim(*bounds)
 
 	if input_dim ==2:
 		X1 = np.linspace(bounds[0][0], bounds[0][1], 200)

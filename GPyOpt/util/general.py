@@ -62,7 +62,7 @@ def get_moments(model,x):
 	x = reshape(x,input_dim)
 	fmin = min(model.predict(model.X)[0])
 	m, v = model.predict(x)
-	return (m, np.sqrt(v), fmin)
+	return (m, np.sqrt(np.clip(v, 0, np.inf)), fmin)
 
 def get_quantiles(acquisition_par, fmin, m, s):
 	u = ((1+acquisition_par)*fmin-m)/s	

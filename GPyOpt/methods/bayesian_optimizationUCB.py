@@ -23,7 +23,7 @@ class BayesianOptimizationUCB(BO):
     .. Note:: Multiple independent outputs are allowed using columns of Y
 
     """
-	def __init__(self, bounds=None, kernel=None, optimize_model=None, acquisition_par=None, invertsign=None, Nrandom = None, sparse=False, num_inducing=None):
+	def __init__(self, bounds=None, kernel=None, model_optimize_interval=1, model_optimize_restarts=3, acquisition_par=None, invertsign=None, Nrandom = None, sparse=False, num_inducing=None):
 		self.Nrandom = Nrandom
 		self.sparse = sparse
 		self.input_dim = len(bounds)
@@ -34,7 +34,7 @@ class BayesianOptimizationUCB(BO):
 		else: 
 			self.kernel = kernel
 		acq = AcquisitionUCB(acquisition_par, invertsign)
-		super(BayesianOptimizationUCB ,self ).__init__(acq, bounds, optimize_model,Nrandom)
+		super(BayesianOptimizationUCB ,self ).__init__(acquisition_func=acq, bounds=bounds, model_optimize_interval=model_optimize_interval, model_optimize_restarts=model_optimize_restarts, Nrandom=Nrandom)
         
 	def _init_model(self, X, Y):
 		'''
