@@ -14,58 +14,49 @@ from ..plotting.plots_bo import plot_acquisition, plot_convergence
 
 class BO(object):
     def __init__(self, acquisition_func, bounds=None, model_optimize_interval=None, model_optimize_restarts=None, model_data_init=None, normalize=None, verbosity=None):
-
-        if bounds==None: 
-            print 'Box contrainst are needed. Please insert box constrains'    
-        else:
-            self.bounds = bounds
-            self.input_dim = len(self.bounds)        
+             
+       # if bounds==None: 
+       #     print 'Box contrainst are needed. Please insert box constrains'    
+       # else:
+       #     self.bounds = bounds
+        self.input_dim = len(self.bounds)        
         self.acquisition_func = acquisition_func
-	self.model_optimize_interval = model_optimize_interval
-	self.model_optimize_restarts = model_optimize_restarts
-        if model_data_init ==None: self.model_data_init = 2*self.input_dim # number or samples for initial random exploration
-        else: self.model_data_init = model_data_init  
-	self.normalize = normalize
+        self.model_optimize_interval = model_optimize_interval
+        self.model_optimize_restarts = model_optimize_restarts
+        if  model_data_init ==None: 
+            self.model_data_init = 2*self.input_dim # number or samples for initial random exploration
+        else: 
+            self.model_data_init = model_data_init  
+        self.normalize = normalize
         self.verbosity = verbosity
     
  
-    def _init_model(self, X, Y):
+    def _init_model(self):
         pass
         
-    def start_optimization(self, f, max_iter, X=None, Y=None, acqu_optimize_method='random', acqu_optimize_restarts=None, stop_criteria = 1e-6):
+    def start_optimization(self, max_iter, acqu_optimize_method='random', acqu_optimize_restarts=None, stop_criteria = 1e-6):
         """ 
         Starts Bayesian Optimization for a number H of iterations (after the initial exploration data)
 
-        :param: f the function to optimize
-        :param X: input observations
-        :param Y: output values
         :param max_iter: exploration horizon, or number of iterations  
-	:acqu_optimize_method: method to optimize the aquisition function 
-		'brute': uses a uniform lattice with 'acqu_optimize_restarts' points per dimension. A local CG gradient is run the best point.
-		'random': takes the best of 'acqu_optimize_restarts' local random optimizers.
-	:param acqu_optimize_restarts: numbers of random restarts in the optimization of the acquisition function, default=10.
-	:param stop_criteria: minimum distance between two consecuve x's to keep running the model
+	    :acqu_optimize_method: method to optimize the aquisition function 
+		    -'brute': uses a uniform lattice with 'acqu_optimize_restarts' points per dimension. A local CG gradient is run the best point.
+		    -'random': takes the best of 'acqu_optimize_restarts' local random optimizers.
+	    :param acqu_optimize_restarts: numbers of random restarts in the optimization of the acquisition function, default=10.
+	    :param stop_criteria: minimum distance between two consecuve x's to keep running the model
 
         ..Note : X and Y can be None. In this case Nrandom*model_dimension data are uniformly generated to initialize the model.
     
         """
         self.num_acquisitions = 0
         self.stop_criteria = stop_criteria
-        if f==None: print 'Function to optimize is requiered'
-        else: self.f = f
+
         if max_iter == None: max_iter=0
-        if X==None or Y == None:
-            self.X = samples_multidimensional_uniform(self.bounds, self.model_data_init)
-            self.Y = f(self.X)
-        else:
-            self.X = X
-            self.Y = Y
         if acqu_optimize_restarts == None: 
             self.acqu_optimize_restarts = 10
         else: 
             self.acqu_optimize_restarts = acqu_optimize_restarts
-        self._init_model(self.X, self.Y)
-	    
+
         self.acqu_optimize_method = acqu_optimize_method
         self.acquisition_func.model = self.model
        
@@ -80,8 +71,8 @@ class BO(object):
         """
         Changes standard GP estimation to sparse GP estimation
 	       
-	:param num__inducing: number of inducing points for sparse-GP modelling
-	 """
+	    :param num__inducing: number of inducing points for sparse-GP modelling
+	     """
         if self.sparse == True:
             raise 'Sparse GP is already in use'
         else:
@@ -107,11 +98,10 @@ class BO(object):
 
         """
         if self.optimization_started:
-            print '*****************************'
-            print '** Optimization in process...'
-            print '*****************************'
-            k=1		
-            while k<=max_iter: # TODO add stopping condition 
+            print '*Optimization started.'
+            k=0
+            distance_lastX = self.stop_criteria + 1
+            while k<max_iter and distance_lastX > self.stop_criteria:
                 self.X = np.vstack((self.X,self.suggested_sample))
                 self.Y = np.vstack((self.Y,self.f(np.array([self.suggested_sample]))))
                 self.num_acquisitions += 1
@@ -125,8 +115,16 @@ class BO(object):
                     print 'Optimization stopped. Two equal points selected.'
                     break
                 k +=1
-            print '*** Optimzation completed **'	
-            return self.suggested_sample
+                current = self.X.shape[0]
+                distance_lastX = np.sqrt(sum((self.X[current-1,:]-self.X[current-2,:])**2))		
+            print '*Optimization completed:'
+            if k==max_iter:
+                print '   -Maximum number of iterations reached.'
+            else:
+                print '   -Close samples collected below admisible tolerance.'
+            self.x_opt = self.X[np.argmin(self.Y),:]
+            self.fx_opt = min(self.Y) 
+            return self.x_opt 
 
         else: print 'Optimization not initiated: Use .start_optimization and provide a function to optimize'
         
@@ -147,12 +145,11 @@ class BO(object):
         Updates X and Y in the model and re-optimizes the parameters of the new model
 
         """  
-	if self.normalize:      
+        if self.normalize:      
         	self.model.set_XY(self.X,(self.Y-self.Y.mean())/self.Y.std())
-	else:
-		self.model.set_XY(self.X,self.Y)
-
-	if (self.num_acquisitions%self.model_optimize_interval)==0:
+        else:
+            self.model.set_XY(self.X,self.Y)
+        if (self.num_acquisitions%self.model_optimize_interval)==0:
             self.model.optimization_runs = [] # clear previous optimization runs so they don't get used.
             self.model.optimize_restarts(num_restarts=self.model_optimize_restarts, verbose=self.verbosity)            
         self.suggested_sample = self._optimize_acquisition()
