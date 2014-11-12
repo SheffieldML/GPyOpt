@@ -13,7 +13,7 @@ from ..plotting.plots_bo import plot_acquisition, plot_convergence
 #from .acquisition import AcquisitionEI 
 
 class BO(object):
-    def __init__(self, acquisition_func, bounds=None, model_optimize_interval=None, model_optimize_restarts=None, Nrandom=None, normalize=None, verbosity=None):
+    def __init__(self, acquisition_func, bounds=None, model_optimize_interval=None, model_optimize_restarts=None, model_data_init=None, normalize=None, verbosity=None):
 
         if bounds==None: 
             print 'Box contrainst are needed. Please insert box constrains'    
@@ -23,24 +23,27 @@ class BO(object):
         self.acquisition_func = acquisition_func
 	self.model_optimize_interval = model_optimize_interval
 	self.model_optimize_restarts = model_optimize_restarts
-        self.Ngrid = 100
-        if Nrandom ==None: self.Nrandom = 2*self.input_dim # number or samples for initial random exploration
-        else: self.Nrandom = Nrandom  
+        if model_data_init ==None: self.model_data_init = 2*self.input_dim # number or samples for initial random exploration
+        else: self.model_data_init = model_data_init  
 	self.normalize = normalize
-        self.verbosity=verbosity
+        self.verbosity = verbosity
     
  
     def _init_model(self, X, Y):
         pass
         
-    def start_optimization(self, f, H, X=None, Y=None, Ninit=None, stop_criteria = 1e-6):
+    def start_optimization(self, f, max_iter, X=None, Y=None, acqu_optimize_method='random', acqu_optimize_restarts=None, stop_criteria = 1e-6):
         """ 
         Starts Bayesian Optimization for a number H of iterations (after the initial exploration data)
 
         :param: f the function to optimize
         :param X: input observations
         :param Y: output values
-        :param H: exploration horizon, or number of iterations  
+        :param max_iter: exploration horizon, or number of iterations  
+	:acqu_optimize_method: method to optimize the aquisition function 
+		'brute': uses a uniform lattice with 'acqu_optimize_restarts' points per dimension. A local CG gradient is run the best point.
+		'random': takes the best of 'acqu_optimize_restarts' local random optimizers.
+	:param acqu_optimize_restarts: numbers of random restarts in the optimization of the acquisition function, default=10.
 	:param stop_criteria: minimum distance between two consecuve x's to keep running the model
 
         ..Note : X and Y can be None. In this case Nrandom*model_dimension data are uniformly generated to initialize the model.
@@ -50,25 +53,28 @@ class BO(object):
         self.stop_criteria = stop_criteria
         if f==None: print 'Function to optimize is requiered'
         else: self.f = f
-        if H == None: H=0
+        if max_iter == None: max_iter=0
         if X==None or Y == None:
-            self.X = samples_multidimensional_uniform(self.bounds, self.Nrandom)
+            self.X = samples_multidimensional_uniform(self.bounds, self.model_data_init)
             self.Y = f(self.X)
         else:
             self.X = X
             self.Y = Y
-        if Ninit == None: 
-            self.Ninit = 10
+        if acqu_optimize_restarts == None: 
+            self.acqu_optimize_restarts = 10
         else: 
-            self.Ninit = Ninit
+            self.acqu_optimize_restarts = acqu_optimize_restarts
         self._init_model(self.X, self.Y)
+	    
+        self.acqu_optimize_method = acqu_optimize_method
         self.acquisition_func.model = self.model
+       
         self._update_model()
         prediction = self.model.predict(self.X)
         self.m_in_min = prediction[0]
         self.s_in_min = np.sqrt(prediction[1]) 
         self.optimization_started = True
-        return self.continue_optimization(H)
+        return self.continue_optimization(max_iter)
     
     def change_to_sparseGP(self, num_inducing):
         """
@@ -93,7 +99,7 @@ class BO(object):
             self.sparse = False
             self._init_model(self.X,self.Y)
 
-    def continue_optimization(self,H):
+    def continue_optimization(self,max_iter):
         """
         Continues Bayesian Optimization for a number H of iterations. Requieres prior initialization with self.start_optimization
 
@@ -105,7 +111,7 @@ class BO(object):
             print '** Optimization in process...'
             print '*****************************'
             k=1		
-            while k<=H: # TODO add stopping condition 
+            while k<=max_iter: # TODO add stopping condition 
                 self.X = np.vstack((self.X,self.suggested_sample))
                 self.Y = np.vstack((self.Y,self.f(np.array([self.suggested_sample]))))
                 self.num_acquisitions += 1
@@ -119,7 +125,7 @@ class BO(object):
                     print 'Optimization stopped. Two equal points selected.'
                     break
                 k +=1
-            print ' ** Optimzation completed. **'	
+            print '*** Optimzation completed **'	
             return self.suggested_sample
 
         else: print 'Optimization not initiated: Use .start_optimization and provide a function to optimize'
@@ -129,10 +135,12 @@ class BO(object):
         Optimizes the acquisition function. It combines initial grid search with local optimzation starting on the minimum of the grid
 
         """
-        return multi_init_optimization(self.acquisition_func.acquisition_function,self.bounds, self.Ninit)
-        # return density_sampling_optimization(self.acquisition_function, self.bounds, self.model)
-        # return grid_optimization(self.acquisition_func.acquisition_function, self.bounds, self.Ngrid) 
-
+        if self.acqu_optimize_method=='brute':
+            res = grid_optimization(self.acquisition_func.acquisition_function, self.bounds, self.acqu_optimize_restarts)
+        if self.acqu_optimize_method=='random':
+            res = multi_init_optimization(self.acquisition_func.acquisition_function,self.bounds, self.acqu_optimize_restarts)
+        # TODO return density_sampling_optimization(self.acquisition_function, self.bounds, self.model)
+        return res
 
     def _update_model(self):
         """        
@@ -168,9 +176,9 @@ class BO(object):
         """
         return plot_convergence(self.X,self.m_in_min,self.s_in_min)
 
-
-
-
+	
+    	    	
+		
 
 
 

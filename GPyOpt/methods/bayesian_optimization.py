@@ -28,8 +28,8 @@ class BayesianOptimization(BO):
     .. Note:: Multiple independent outputs are allowed using columns of Y
 
     """
-	def __init__(self, bounds=None, kernel=None, optimize_model=None, model_optimize_interval=1, model_optimize_restarts=3, acquisition=None, acquisition_par=None, invertsign=None, Nrandom = None, sparse=False, num_inducing=None, normalize=False, verbosity=0):
-		self.Nrandom = Nrandom	
+	def __init__(self, bounds=None, kernel=None, optimize_model=None, model_optimize_interval=1, model_optimize_restarts=3, acquisition=None, acquisition_par=None, invertsign=None, model_data_init = None, sparse=False, num_inducing=None, normalize=False, verbosity=0):
+		self.model_data_init = model_data_init	
 		self.num_inducing = num_inducing
 		self.sparse = sparse
 		self.input_dim = len(bounds)
@@ -50,7 +50,7 @@ class BayesianOptimization(BO):
 		else:	
 			print 'The selected acquisition fucntion is not valid. Please try again with EI, MPI, or LCB'
 		if (acquisition=='EI' or acquisition=='MPI' or acquisition =='LCB'):
-			super(BayesianOptimization ,self).__init__(acquisition_func=acq, bounds=bounds, model_optimize_interval=model_optimize_interval, model_optimize_restarts=model_optimize_restarts, Nrandom=Nrandom, normalize=normalize, verbosity=verbosity)
+			super(BayesianOptimization ,self).__init__(acquisition_func=acq, bounds=bounds, model_optimize_interval=model_optimize_interval, model_optimize_restarts=model_optimize_restarts, model_data_init=model_data_init, normalize=normalize, verbosity=verbosity)
 	
 
 	def _init_model(self, X, Y):
