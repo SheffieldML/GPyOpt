@@ -3,12 +3,12 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 import GPy
-from ..core.acquisition import AcquisitionEI 
+from ..core.acquisition import multiAcquisitionEI 
 from ..core.bo import BO
 
-class BayesianOptimizationEI(BO):
+class multiBayesianOptimizationEI(BO):
 	"""
-	Bayesian Optimization using the Expected Improvement acquisition function.
+	Multi-taslk Bayesian Optimization using the Expected Improvement acquisition function.
 
 	This is a thin wrapper around the methods.BO class, with a set of sensible defaults
 
@@ -19,23 +19,30 @@ class BayesianOptimizationEI(BO):
 	:param invertsign: minimization is done unles invertsing is True
 	:param Nrandom: number of initial random evaluatios of f is X and Y are not provided  
 	:param sparse: if sparse is True, and sparse GP is used
+	
+	NEW
+	:param w: weights of the different tasks
+
 
     .. Note:: Multiple independent outputs are allowed using columns of Y
 
     """
-	def __init__(self, bounds=None, kernel=None, optimize_model=None, acquisition_par=None, invertsign=None, Nrandom = None, sparse=False, num_inducing=None):
+	def __init__(self, bounds=None, kernel=None, optimize_model=None, acquisition_par=None, invertsign=None, Nrandom = None, sparse=False, num_inducing=None, w = None):
 		self.Nrandom = Nrandom	
 		self.num_inducing = num_inducing
 		self.sparse = sparse
 		self.input_dim = len(bounds)
+		if w ==None: print 'Insert weights of the tasks for multiobjective optimization'
+		self.NT = len(w)		
 		if bounds==None: 
 			raise 'Box contrainst are needed. Please insert box constrains'	
 		if kernel is None: 
-			self.kernel = GPy.kern.RBF(self.input_dim, variance=.1, lengthscale=.1) + GPy.kern.Bias(self.input_dim)
+		##TODO INSERT HERE CORREGIONALIZATION KERNEL 
+			self.kernel = GPy.kern.RBF(self.input_dim, variance=.1, lengthscale=.1) 
 		else: 
 			self.kernel = kernel
-		acq = AcquisitionEI(acquisition_par, invertsign)
-		super(BayesianOptimizationEI ,self ).__init__(acq, bounds, optimize_model,Nrandom)
+		acq = multiAcquisitionEI(acquisition_par, invertsign)  # NEW MULTI
+		super(multiBayesianOptimizationEI ,self ).__init__(acq, bounds, optimize_model,Nrandom)
         
 	def _init_model(self, X, Y):
 		'''
@@ -51,9 +58,9 @@ class BayesianOptimizationEI(BO):
 			if self.num_inducing ==None:
 				raise 'Sparse model, please insert the number of inducing points'
 			else:			
-				self.model = GPy.models.SparseGPRegression(X, Y, kernel=self.kernel, num_inducing=self.num_inducing)
+				self.model = GPy.models.SparseGPCoregionalizedRegression(X, Y, kernel=self.kernel, num_inducing=self.num_inducing)
 		else:		
-			self.model = GPy.models.GPRegression(X,Y,kernel=self.kernel)
+			self.model = GPy.models.GPCoregionalizedRegression(X,Y,kernel=self.kernel)
 
 
 
