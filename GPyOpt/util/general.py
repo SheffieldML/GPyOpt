@@ -65,7 +65,7 @@ def get_moments(model,x):
 	return (m, np.sqrt(np.clip(v, 0, np.inf)), fmin)
 
 def get_quantiles(acquisition_par, fmin, m, s):
-	u = ((1+acquisition_par)*fmin-m)/s	
+	u = ((1+acquisition_par)*fmin-m)/s	# insert here case for s==0
         phi = np.exp(-0.5 * u**2) / np.sqrt(2*np.pi)
         Phi = 0.5 * erfc(-u / np.sqrt(2))
 	return (phi, Phi, u)
