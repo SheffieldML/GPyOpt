@@ -3,7 +3,7 @@ from pylab import plot, xlabel, ylabel, title, grid
 import matplotlib.pyplot as plt
 from pylab import savefig
 
-from ..util.general import ellipse
+from ..util.general import ellipse, best_value
 
 def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,suggested_sample, filename = None):
 	'''
@@ -96,7 +96,7 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
 
 
 
-def plot_convergence(Xdata,m_in_min,s_in_min):
+def plot_convergence(Xdata,best_Y,s_in_min):
 	'''
 	Plots three plots to evaluate the convergence of the algorithm
 	'''
@@ -113,16 +113,17 @@ def plot_convergence(Xdata,m_in_min,s_in_min):
 	grid(True)
 	# plot of the estimated m(x) at the proposed sampling points
 	plt.subplot(1, 3, 2)
-	plt.plot(range(n),m_in_min[:,0],'-o')
-	plt.title('GP mean at x[n+1]')
+	plt.plot(range(n),best_Y,'-o')
+	plt.title('Value of the best selected sample')
 	plt.xlabel('Iteration')
-	plt.ylabel('mean at x[n+1]')
+	plt.ylabel('Best y')
 	grid(True)
 	# Plot of the proposed v(x) at the proposed sampling points
 	plt.subplot(1, 3, 3)
-	plt.errorbar(range(n),[0]*n , yerr=s_in_min[:,0],fmt='-o',ecolor='b', capthick=1)
-	plt.title('GP-model C.I. at x[n+1]')
+	plt.errorbar(range(n),[0]*n , yerr=s_in_min[:,0],ecolor='b', capthick=1)
+	plt.title('Predicted sd. in the next sample')
 	plt.xlabel('Iteration')
+	plt.ylim(0,max(s_in_min[:,0])+np.sqrt(max(s_in_min[:,0])))
 	plt.ylabel('CI (centered at zero)')
 	grid(True)
 

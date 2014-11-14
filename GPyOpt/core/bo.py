@@ -5,7 +5,7 @@ from scipy.optimize import minimize
 import scipy
 import random
 
-from ..util.general import samples_multidimensional_uniform, multigrid, reshape, ellipse 
+from ..util.general import samples_multidimensional_uniform, multigrid, reshape, ellipse, best_value 
 from ..core.optimization import grid_optimization, multi_init_optimization
 from ..plotting.plots_bo import plot_acquisition, plot_convergence
 
@@ -48,6 +48,7 @@ class BO(object):
         ..Note : X and Y can be None. In this case Nrandom*model_dimension data are uniformly generated to initialize the model.
     
         """
+        print '*Optimization started.'
         self.num_acquisitions = 0
         self.stop_criteria = stop_criteria
 
@@ -62,6 +63,7 @@ class BO(object):
        
         self._update_model()
         prediction = self.model.predict(self.X)
+
         self.m_in_min = prediction[0]
         self.s_in_min = np.sqrt(prediction[1]) 
         self.optimization_started = True
@@ -98,7 +100,6 @@ class BO(object):
 
         """
         if self.optimization_started:
-            print '*Optimization started.'
             k=0
             distance_lastX = self.stop_criteria + 1
             while k<max_iter and distance_lastX > self.stop_criteria:
@@ -122,6 +123,8 @@ class BO(object):
                 print '   -Maximum number of iterations reached.'
             else:
                 print '   -Close samples collected below admisible tolerance.'
+            
+            self.Y_best = best_value(self.Y)
             self.x_opt = self.X[np.argmin(self.Y),:]
             self.fx_opt = min(self.Y) 
             return self.x_opt 
@@ -171,7 +174,7 @@ class BO(object):
             plot 3: Iterations vs. the variance of the current model in the selected sample.
 
         """
-        return plot_convergence(self.X,self.m_in_min,self.s_in_min)
+        return plot_convergence(self.X,self.Y_best,self.s_in_min)
 
 	
     	    	

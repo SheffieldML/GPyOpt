@@ -11,24 +11,25 @@
 - Add a commamd line interface (usefull for the optimization of physical experiments).
 
 
+
 #
 # Small addtions
 #
 
 - remove the dependencies from scitools
-- (DONE, included in the function help)Clarify that H refers the horizont (number of samples to be taken)
--(DONE) Add an option to select the number of restats in the optimization of the parameters in the GP.
--(DONE) Add an option to select after how many interations the parameters of the GP
-shoulb be updated.
+- (DONE, renamed as max_iter) Clarify that H refers the horizont (number of samples to be taken)
+- (DONE) Add an option to select the number of restats in the optimization of the parameters in the GP.
+- (DONE) Add an option to select after how many interations the parameters of the GP shoulb be updated.
 - Plot the variances as a var plot instead of using confidence bands.
-- Implement a last-step pure exploration.
-- Implement stopping criteria (distance between the two last consecutive time points?)
+- (DONE)Implement a last-step pure exploration.
+- (DONE)Implement stopping criteria (distance between the two last consecutive time points?)
 - (DONE) in 1D cases, add vertical lines in the plots where the optimum is.
 - Flag to plot the true function if available.
 - Robust test. Sometimes it is instable (when two data points are very close). Need to save the results before that happens.
 - inlcude an option to change the model before start running the optimization.
--(DONE) normalize y
-
+- (DONE) normalize y
+- (DONE) merge wrap functions for the three acquisitions 
+- (DONE) include option to optimize the acquisition function using brute force or ramdominitializations.
 
 
 

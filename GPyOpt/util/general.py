@@ -70,6 +70,20 @@ def get_quantiles(acquisition_par, fmin, m, s):
         Phi = 0.5 * erfc(-u / np.sqrt(2))
 	return (phi, Phi, u)
 
+def best_value(Y,sign=1):
+    '''
+	Returs a vector whose components i are the minimum (default) or maximum of Y[:i]
+    '''
+    n = Y.shape[0]
+    Y_best = np.ones(n)
+    for i in range(n):
+        if sign == 1:
+            Y_best[i]=Y[:(i+1)].min()
+        else:
+		    Y_best[i]=Y[:(i+1)].max()
+    return Y_best
+
+
 def ProjNullSpace(J,v):
 	if J.shape[1]>0:
 		p = v - np.dot(np.dot(J,J.T),v)
