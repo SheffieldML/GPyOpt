@@ -1,9 +1,9 @@
 GPyOpt
 ======
 
-Gaussian Process Optimization using GPy (http://sheffieldml.github.io/GPyOpt/). Performs standard global optimization with different acquisition functions. Among other functionalities it is possible to use GPyOpt to optimize physical experiments sequentially or in batches and to handle large data sets via GPy sparse Gaussian processes models. 
+Gaussian process optimization using GPy (http://sheffieldml.github.io/GPy/). Performs global optimization with different acquisition functions. Among other functionalities, it is possible to use GPyOpt to optimize physical experiments (sequentially or in batches) and to handle large data sets via sparse Gaussian process models. 
 
-* [GPy homepage](http://sheffieldml.github.io/GPyOpt/)
+* [GPyOpt homepage](http://sheffieldml.github.io/GPyOpt/)
 * [User mailing list]()
 * [Online documentation]()
 
@@ -41,7 +41,7 @@ If you'd like to install from source, or want to contribute to the project (e.g.
 
 Dependencies:
 ------------------------
-	- GPy
+  - GPy
   - numpy
   - scipy
   - matplotlib
