@@ -65,6 +65,7 @@ class BayesianOptimization(BO):
         else: 
             self.kernel = kernel
         self._init_model()
+        self.acqu_name = acquisition
 
         # Initilize aquisition function
         if acquisition==None or acquisition=='EI': 

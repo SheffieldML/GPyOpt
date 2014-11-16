@@ -1,24 +1,45 @@
 import numpy as np
-from ..util.general import multigrid, samples_multidimensional_uniform
+from ..util.general import multigrid, samples_multidimensional_uniform, reshape
 import scipy
+import GPyOpt
 
-def grid_optimization(acquisition_function, bounds, Ngrid):
-	grid = multigrid(bounds,Ngrid)
+def grid_optimization(acquisition_function, bounds, n_init):
+	grid = multigrid(bounds, n_init)
 	pred_grid = acquisition_function(grid)
 	x0 =  grid[np.argmin(pred_grid)]
 	res = scipy.optimize.minimize(acquisition_function, x0=np.array(x0),method='SLSQP',bounds=bounds)
 	return res.x
 
-def multi_init_optimization(acquisition_function, bounds, Ninit):
+def multi_init_optimization(acquisition_function, bounds, n_init):
 	# sample Ninit initial points 
-	mins = np.zeros((Ninit,len(bounds)))
-	fmins = np.zeros(Ninit)
-	samples = samples_multidimensional_uniform(bounds,Ninit)
-	for k in range(Ninit):
+	mins = np.zeros((n_init,len(bounds)))
+	fmins = np.zeros(n_init)
+	samples = samples_multidimensional_uniform(bounds,n_init)
+	for k in range(n_init):
 		res = scipy.optimize.minimize(acquisition_function, x0 = samples[k,:] ,method='SLSQP',bounds=bounds)
 		mins[k] = res.x
 		fmins[k] = res.fun
 	return mins[np.argmin(fmins)]
+
+def batch_optimization(self):
+	
+	if self.acqu_optimize_method=='brute':
+		X_batch = grid_optimization(self.acquisition_func.acquisition_function, self.bounds,self.acqu_optimize_restarts)
+	elif self.acqu_optimize_method=='random':
+		X_batch =  multi_init_optimization(self.acquisition_func.acquisition_function,self.bounds,self.acqu_optimize_restarts)
+	else:
+		print 'Wrong aquisition optimizer inserted.'
+	k=1 
+	while k<self.n_inbatch:
+		model_batch = self.model
+		X = np.vstack((self.X,X_batch))
+		Y = np.vstack((self.Y,model_batch.predict(reshape(X_batch,self.input_dim))[0]))
+		auxBO = GPyOpt.methods.BayesianOptimization(f=self.f, bounds=self.bounds,X=X,Y=Y,kernel=self.kernel, acquisition = self.acqu_name, normalize = self.normalize)
+		auxBO.start_optimization(max_iter = 0, acqu_optimize_restarts = 20)			
+		X_batch = np.vstack((X_batch,auxBO.suggested_sample))
+		k+=1
+	return X_batch
+
 
 #def density_sampling_optimization(acquisition_function, bounds, model,Ninit):
 #	    mins = np.zeros((Ninit,len(bounds)))
@@ -68,7 +89,7 @@ def genererte_line(model,bounds,z,sign):
 	X = model.X
 	C = max(model.predict(X)[0])
 	pos = X.mean(axis=0)
-	cov = np.cov(X, rowvar=False) 	
+	cov = np.cov(X, rowvar=False)	
 	x0 =  np.random.multivariate_normal(pos, cov,1)
 
 	while x0[0,0]<bounds[0][0] or x0[0,0]>bounds[0][1] or  x0[0,1]<bounds[1][0] or x0[0,1]>bounds[1][1]:
