@@ -5,8 +5,9 @@ from scipy.optimize import minimize
 import scipy
 import random
 
-from ..util.general import samples_multidimensional_uniform, multigrid, reshape, ellipse, best_value 
-from ..core.optimization import grid_optimization, multi_init_optimization
+from ..util.general import samples_multidimensional_uniform, multigrid, reshape, ellipse, best_value, reshape 
+#from ..core.optimization import grid_optimization, multi_init_optimization
+from ..core.optimization import batch_optimization
 from ..plotting.plots_bo import plot_acquisition, plot_convergence
 
 
@@ -34,36 +35,41 @@ class BO(object):
     def _init_model(self):
         pass
         
-    def start_optimization(self, max_iter, acqu_optimize_method='random', acqu_optimize_restarts=None, stop_criteria = 1e-6):
+    def start_optimization(self, max_iter, n_inbatch=1, acqu_optimize_method='random', batch_method='predmean', acqu_optimize_restarts=None, stop_criteria = 1e-6):
         """ 
         Starts Bayesian Optimization for a number H of iterations (after the initial exploration data)
 
         :param max_iter: exploration horizon, or number of iterations  
-	    :acqu_optimize_method: method to optimize the aquisition function 
-		    -'brute': uses a uniform lattice with 'acqu_optimize_restarts' points per dimension. A local CG gradient is run the best point.
-		    -'random': takes the best of 'acqu_optimize_restarts' local random optimizers.
-	    :param acqu_optimize_restarts: numbers of random restarts in the optimization of the acquisition function, default=10.
-	    :param stop_criteria: minimum distance between two consecuve x's to keep running the model
+	    :n_inbatch: number of samples to collect in each batch (one by default)
+        :acqu_optimize_method: method to optimize the aquisition function 
+	    :nb: number of samples to collect in each batch (one by default)
+	        -'brute': uses a uniform lattice with 'acqu_optimize_restarts' points per dimension. A local CG gradient is run the best point.
+	        -'random': takes the best of 'acqu_optimize_restarts' local random optimizers.
+	    :batch_method: method to collect samples in batches
+            -'predmean': uses the predicted mean in the selected sample to update the acquisition function.
+            -'adaptive': used a penalization of the aquisition fucntion to based on exclusion zones.
+        :param acqu_optimize_restarts: numbers of random restarts in the optimization of the acquisition function, default=10.
+    	:param stop_criteria: minimum distance between two consecuve x's to keep running the model
 
         ..Note : X and Y can be None. In this case Nrandom*model_dimension data are uniformly generated to initialize the model.
     
         """
-        print '*Optimization started.'
         self.num_acquisitions = 0
-        self.stop_criteria = stop_criteria
-
-        if max_iter == None: max_iter=0
+        self.n_inbatch=n_inbatch
+        self.stop_criteria = stop_criteria 
+        if max_iter == None: 
+            max_iter=0
+        
         if acqu_optimize_restarts == None: 
             self.acqu_optimize_restarts = 10
         else: 
             self.acqu_optimize_restarts = acqu_optimize_restarts
 
         self.acqu_optimize_method = acqu_optimize_method
+        self.batch_method = batch_method
         self.acquisition_func.model = self.model
-       
         self._update_model()
         prediction = self.model.predict(self.X)
-
         self.m_in_min = prediction[0]
         self.s_in_min = np.sqrt(prediction[1]) 
         self.optimization_started = True
@@ -104,7 +110,8 @@ class BO(object):
             distance_lastX = self.stop_criteria + 1
             while k<max_iter and distance_lastX > self.stop_criteria:
                 self.X = np.vstack((self.X,self.suggested_sample))
-                self.Y = np.vstack((self.Y,self.f(np.array([self.suggested_sample]))))
+                #self.Y = np.vstack((self.Y,self.f(np.array([self.suggested_sample]))))
+                self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
                 self.num_acquisitions += 1
                 pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))
                 self.m_in_min = np.vstack((self.m_in_min,pred_min[0]))
@@ -112,13 +119,13 @@ class BO(object):
                 try:
                     self._update_model()                
                 except np.linalg.linalg.LinAlgError:
-                    # Kernel become singular, DO something
                     print 'Optimization stopped. Two equal points selected.'
                     break
                 k +=1
                 current = self.X.shape[0]
                 distance_lastX = np.sqrt(sum((self.X[current-1,:]-self.X[current-2,:])**2))		
             print '*Optimization completed:'
+ 
             if k==max_iter:
                 print '   -Maximum number of iterations reached.'
             else:
@@ -136,12 +143,14 @@ class BO(object):
         Optimizes the acquisition function. It combines initial grid search with local optimzation starting on the minimum of the grid
 
         """
-        if self.acqu_optimize_method=='brute':
-            res = grid_optimization(self.acquisition_func.acquisition_function, self.bounds, self.acqu_optimize_restarts)
-        if self.acqu_optimize_method=='random':
-            res = multi_init_optimization(self.acquisition_func.acquisition_function,self.bounds, self.acqu_optimize_restarts)
+        return batch_optimization(self)
+
+        #if self.acqu_optimize_method=='brute':
+        #    res = grid_optimization(self.acquisition_func.acquisition_function, self.bounds, self.acqu_optimize_restarts)
+        #if self.acqu_optimize_method=='random':
+        #    res = multi_init_optimization(self.acquisition_func.acquisition_function,self.bounds, self.acqu_optimize_restarts)
         # TODO return density_sampling_optimization(self.acquisition_function, self.bounds, self.model)
-        return res
+        #return res
 
     def _update_model(self):
         """        
@@ -149,7 +158,7 @@ class BO(object):
 
         """  
         if self.normalize:      
-        	self.model.set_XY(self.X,(self.Y-self.Y.mean())/self.Y.std())
+            self.model.set_XY(self.X,(self.Y-self.Y.mean())/self.Y.std())
         else:
             self.model.set_XY(self.X,self.Y)
         if (self.num_acquisitions%self.model_optimize_interval)==0:

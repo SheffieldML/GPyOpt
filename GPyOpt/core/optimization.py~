@@ -13,17 +13,82 @@ def multi_init_optimization(acquisition_function, bounds, Ninit):
 	# sample Ninit initial points 
 	mins = np.zeros((Ninit,len(bounds)))
 	fmins = np.zeros(Ninit)
-	samples = samples_multimensional_uniform(bounds,Ninit)
+	samples = samples_multidimensional_uniform(bounds,Ninit)
 	for k in range(Ninit):
 		res = scipy.optimize.minimize(acquisition_function, x0 = samples[k,:] ,method='SLSQP',bounds=bounds)
 		mins[k] = res.x
 		fmins[k] = res.fun
 	return mins[np.argmin(fmins)]
 
+def density_sampling_optimization(acquisition_function, bounds, model,Ninit):
+	    mins = np.zeros((Ninit,len(bounds)))
+		fmins = np.zeros(Ninit)
+	    samples = ## sample here from the density
+        for k in range(Ninit):
+           res = scipy.optimize.minimize(acquisition_function, x0 = samples[k,:] ,method='SLSQP',bounds=bounds)
+           mins[k] = res.x
+           fmins[k] = res.fun
+    return mins[np.argmin(fmins)]
 
-#def density_sampling_optimization(acquisition_function, bounds, model, X):
+###
+### function for running the density sample function
+###
+
+def constant_line_lcb(model,z,x0,r,tau0,tau1,C,sign=-1):
+	return scipy.integrate.quad(lambda tau: line_unnorm_lcb(model,z,x0,r,tau,C,sign=-1), tau0, tau1)[0]
+
+def line_unnorm_lcb(model,z,x0,r,tau,C,sign=-1):
+	m, s = get_moments(model, x0+tau*r)
+	return -m + z * s + C
+			
+def line_norm_lcb(model,z,x0,r,tau0,tau1,tau,C,sign=-1):
+	cte = constant_line_lcb(model,z,x0,r,tau0,tau1,C,sign)
+	m, s = get_moments(model, x0+tau*r)
+	return (-m + z * s + C)/cte
+
+def cum_line_norm(model,z,x0,r,tau0,tau1,tau,C,sign=-1):
+	cte = scipy.integrate.quad(lambda x: line_unnorm_lcb(model,z,x0,r,x,C,sign=-1), tau0, tau1)[0]
+	cumulative = scipy.integrate.quad(lambda x: line_unnorm_lcb(model,z,x0,r,x,C,sign=-1), tau0, tau)[0]
+	return cumulative/cte
+
+def generate_samples_line(N,model,bounds,z,x0,r,tau0,tau1,sign=-1):
+	X = model.X
+	C = max(model.predict(X)[0])
+	samples  = np.zeros((N,X.shape[1]))
+
+	for i in range(N):
+		U = random()
+		f = lambda tau: (cum_line_norm(model=model,z=z,x0=x0,r=r,tau0=tau0,tau1=tau1,tau=tau, C=C,sign=sign) - U)**2
+		res = minimize_scalar(f,bounds=(tau0,tau1), method='bounded')
+		samples[i,:] = x0 + r*res.x
+	return samples
+
+def genererte_line(model,bounds,z,sign):
+	input_dim = len(bounds)
+	X = model.X
+	C = max(model.predict(X)[0])
+	pos = X.mean(axis=0)
+	cov = np.cov(X, rowvar=False) 	
+	x0 =  np.random.multivariate_normal(pos, cov,1)
+
+	while x0[0,0]<bounds[0][0] or x0[0,0]>bounds[0][1] or  x0[0,1]<bounds[1][0] or x0[0,1]>bounds[1][1]:
+		x0 =  np.random.multivariate_normal(pos, cov,1)
+		r0 =  np.random.multivariate_normal(pos, cov,1)
+		r = r0/np.linalg.norm(r0) 
+		tau0,tau1 = get_limits(x0,r,bounds)
+		integral = constant_line_lcb(model,z,x0,r,tau0,tau1,C,sign=sign)
+	return (x0,r,tau0,tau1,integral)
 
 
 
 
-	
+
+
+
+
+
+
+
+
+
+
