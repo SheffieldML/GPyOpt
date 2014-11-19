@@ -19,6 +19,8 @@ def samples_multidimensional_uniform(bounds,num_data):
     return Z_rand
 
 def multigrid(bounds, Ngrid):
+    if len(bounds)==1:
+        return np.linspace(bounds[0][0], bounds[0][1], Ngrid).reshape(Ngrid, 1)
     xx = np.meshgrid(*[np.linspace(b[0], b[1], Ngrid) for b in bounds], order='xy')
     return np.vstack([x.flatten(order='F') for x in xx]).T
 
