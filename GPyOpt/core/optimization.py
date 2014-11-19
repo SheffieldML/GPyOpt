@@ -3,18 +3,23 @@ from ..util.general import multigrid, samples_multidimensional_uniform, reshape
 import scipy
 import GPyOpt
 
-def grid_optimization(acquisition_function, bounds, n_init):
-	grid = multigrid(bounds, n_init)
-	pred_grid = acquisition_function(grid)
-	x0 =  grid[np.argmin(pred_grid)]
+def fast_surrogate_optimization(acquisition_function, bounds, n_init, method='random'):
+	if method=='random':#
+                samples = samples_multidimensional_uniform(bounds,n_init)
+        else:
+		samples = multigrid(bounds, n_init)
+	pred_samples = acquisition_function(samples)
+	x0 =  samples[np.argmin(pred_samples)]
 	res = scipy.optimize.minimize(acquisition_function, x0=np.array(x0),method='SLSQP',bounds=bounds)
 	return res.x
 
-def multi_init_optimization(acquisition_function, bounds, n_init):
-	# sample Ninit initial points 
+def surrogate_optimization(acquisition_function, bounds, n_init, method='random'):
+	if method=='random':
+		samples = samples_multidimensional_uniform(bounds,n_init)
+	else:
+		samples = multigrid(bounds, n_init)	
 	mins = np.zeros((n_init,len(bounds)))
 	fmins = np.zeros(n_init)
-	samples = samples_multidimensional_uniform(bounds,n_init)
 	for k in range(n_init):
 		res = scipy.optimize.minimize(acquisition_function, x0 = samples[k,:] ,method='SLSQP',bounds=bounds)
 		mins[k] = res.x
@@ -22,11 +27,19 @@ def multi_init_optimization(acquisition_function, bounds, n_init):
 	return mins[np.argmin(fmins)]
 
 def batch_optimization(self):
+	'''
+	This function merges the different approaches for optimizing the acquisition function with a batch optimization in which
+	points within the batch are collected using the prrdictive mean of the model to generate sequential new data points.
+	'''	
 	
 	if self.acqu_optimize_method=='brute':
-		X_batch = grid_optimization(self.acquisition_func.acquisition_function, self.bounds,self.acqu_optimize_restarts)
+		X_batch = surrogate_optimization(self.acquisition_func.acquisition_function, self.bounds,self.acqu_optimize_restarts, method='brute')
 	elif self.acqu_optimize_method=='random':
-		X_batch =  multi_init_optimization(self.acquisition_func.acquisition_function,self.bounds,self.acqu_optimize_restarts)
+		X_batch =  surrogate_optimization(self.acquisition_func.acquisition_function,self.bounds,self.acqu_optimize_restarts, method='random')
+	elif self.acqu_optimize_method=='fast_brute':
+                X_batch =  fast_surrogate_optimization(self.acquisition_func.acquisition_function,self.bounds,self.acqu_optimize_restarts, method='brute')
+	elif self.acqu_optimize_method=='fast_random':
+                X_batch =  fast_surrogate_optimization(self.acquisition_func.acquisition_function,self.bounds,self.acqu_optimize_restarts, method='random')
 	else:
 		print 'Wrong aquisition optimizer inserted.'
 	k=1 

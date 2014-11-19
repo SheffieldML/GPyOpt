@@ -8,28 +8,10 @@ Gaussian process optimization using GPy (http://sheffieldml.github.io/GPy/). Per
 * [Online documentation]()
 
 
-Citation
-========
-
-    @Misc{gpy2014,
-      author =   {The GPy authors},
-      title =    {{GPy}: A Gaussian process framework in python},
-      howpublished = {\url{http://github.com/SheffieldML/GPy}},
-      year = {2012--2014}
-    }
-
-    @Misc{gpyopt2014,
-      author =   {The GPy authors},
-      title =    {{GPyOpt}: A GPy-based framework for Bayesian optimization in python},
-      howpublished = {\url{http://github.com/SheffieldML/GPyOpt}},
-      year = {2014}
-    }
-
-
 Getting started
 ===============
 
-Installing with pip
+**TODO?: Installing with pip
 -------------------
 The simplest way to install GPyOpt is using pip. ubuntu users can do:
 
