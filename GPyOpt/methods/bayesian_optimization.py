@@ -71,7 +71,7 @@ class BayesianOptimization(BO):
         elif acquisition=='MPI':
             acq = AcquisitionMPI(acquisition_par)
         elif acquisition=='LCB':
-            acq = AcquisitionEI(acquisition_par)
+            acq = AcquisitionLCB(acquisition_par)
         else:   
             print 'The selected acquisition fucntion is not valid. Please try again with EI, MPI, or LCB'
         if (acquisition=='EI' or acquisition=='MPI' or acquisition =='LCB'):
