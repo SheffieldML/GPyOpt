@@ -5,20 +5,20 @@ import os
 from setuptools import setup
 
 # Version number
-version = '0.1.0'
+version = '0.6.0'
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-setup(name = 'GPyOpt',
+setup(name = 'GPy',
       version = version,
       author = read('AUTHORS.txt'),
-      author_email = "javi6681@gmail.com",
-      description = ("The Bayesian Optimization Toolbox"),
+      author_email = "james.hensman@gmail.com",
+      description = ("The Gaussian Process Toolbox"),
       license = "BSD 3-clause",
-      keywords = "machine-learning bayesian-optimization kernels",
+      keywords = "machine-learning gaussian-processes kernels",
       url = "http://sheffieldml.github.com/GPy/",
-      packages = ["GPy.models",                     (NEED TO EDIT THIS)
+      packages = ["GPy.models",
                   "GPy.inference.optimization",
                   "GPy.inference.mcmc",
                   "GPy.inference",

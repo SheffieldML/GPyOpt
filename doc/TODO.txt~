@@ -1,0 +1,35 @@
+# TODO list to improve GPyOpt   
+# 14/11/2014
+
+# 
+# Big additions
+#
+
+- Start writting reference manual.
+- Finish the implementation of ES.
+- Add Multi-task optimization (contact Tudor for this)
+- Add Batch optimization (new ideas and well as the Azimi update). Potential for paralellizaion here.
+- Add a commamd line interface (usefull for the optimization of physical experiments).
+
+
+#
+# Small addtions
+#
+
+- add default function for phisical experiment
+- check the option to change the sign of the function to maximize
+- remove the dependencies from scitools
+- Flag to plot the true function if available.
+- Robust test. Sometimes it is instable (when two data points are very close). Need to save the results before that happens (solved with stopping condition)
+
+
+
+
+
+
+
+
+
+
+
+

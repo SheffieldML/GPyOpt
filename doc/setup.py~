@@ -18,7 +18,7 @@ setup(name = 'GPyOpt',
       license = "BSD 3-clause",
       keywords = "machine-learning bayesian-optimization kernels",
       url = "http://sheffieldml.github.com/GPy/",
-      packages = ["GPy.models",                     (NEED TO EDIT THIS)
+      packages = ["GPy.models",
                   "GPy.inference.optimization",
                   "GPy.inference.mcmc",
                   "GPy.inference",
