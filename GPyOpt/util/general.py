@@ -21,16 +21,16 @@ def samples_multidimensional_uniform(bounds,num_data):
 def multigrid(bounds, Ngrid):
     if len(bounds)==1:
         return np.linspace(bounds[0][0], bounds[0][1], Ngrid).reshape(Ngrid, 1)
-    xx = np.meshgrid(*[np.linspace(b[0], b[1], Ngrid) for b in bounds], order='xy')
+    xx = np.meshgrid(*[np.linspace(b[0], b[1], Ngrid) for b in bounds]) # , order='xy'
     return np.vstack([x.flatten(order='F') for x in xx]).T
 
 
 def reshape(x,input_dim):
     x = np.array(x)
-    if len(x)==input_dim:
+    if len(x.flatten())==input_dim:
         x = x.reshape((1,input_dim))
-    else:
-        x = x.reshape((len(x),input_dim))
+    #else:
+    #    x = x.reshape((len(x),input_dim))
     return x
 
 def ellipse(points, nstd=2, Nb=100):

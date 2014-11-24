@@ -73,7 +73,7 @@ class BayesianOptimization(BO):
         elif acquisition=='LCB':
             acq = AcquisitionLCB(acquisition_par)
         else:   
-            print 'The selected acquisition fucntion is not valid. Please try again with EI, MPI, or LCB'
+            print 'The selected acquisition function is not valid. Please try again with EI, MPI, or LCB'
         if (acquisition=='EI' or acquisition=='MPI' or acquisition =='LCB'):
             super(BayesianOptimization ,self).__init__(acquisition_func=acq, bounds=bounds, model_optimize_interval=model_optimize_interval, model_optimize_restarts=model_optimize_restarts, model_data_init=model_data_init, normalize=normalize, verbosity=verbosity)
     
