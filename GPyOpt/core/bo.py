@@ -149,8 +149,8 @@ class BO(object):
         Optimizes the acquisition function. It combines initial grid search with local optimzation starting on the minimum of the grid
 
         """
-        acquisition = self.acquisition_func.acquisition_function
         acqu_name = self.acqu_name
+        acquisition = self.acquisition_func.acquisition_function
         acquisition_par = self.acquisition_par
         model = self.model
         acqu_optimize_restarts = self.acqu_optimize_restarts
@@ -165,8 +165,8 @@ class BO(object):
         elif self.batch_method == 'adaptive':
             X_batch = adaptive_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch, alpha_L, alpha_Min)
         elif self.batch_method == 'random':
-            X_batch = random_batch_optimization(acquisition, bounds, acqu_optimize_restarts, model, n_inbatch)
-        return X_batch
+            X_batch = random_batch_optimization(acquisition, bounds, acqu_optimize_restarts,acqu_optimize_method, model, n_inbatch)
+        return reshape(X_batch,self.input_dim)
 
     def _update_model(self):
         """        

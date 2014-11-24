@@ -8,6 +8,7 @@ from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import minimize
+from ..util.general import reshape
 
 '''
 Benchmark of optimzation functions. 
@@ -80,7 +81,7 @@ class branin(function2d):
 		self.name = 'Branin'
 	
 	def f(self,X):
-		if len(X)==self.D: X = X.reshape((1,2))
+		X= reshape(X,self.D)
 		n = X.shape[0]
 		if X.shape[1] != self.D: 
 			return 'Wrong input dimension'  

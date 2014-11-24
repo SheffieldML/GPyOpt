@@ -80,7 +80,7 @@ class branin(function2d):
 		self.name = 'Branin'
 	
 	def f(self,X):
-		if len(X)==self.D: X = X.reshape((1,2))
+		
 		n = X.shape[0]
 		if X.shape[1] != self.D: 
 			return 'Wrong input dimension'  

@@ -1,24 +1,24 @@
 import numpy as np
 from ..util.general import multigrid, samples_multidimensional_uniform, reshape
+from scipy.stats import norm
 import scipy
 import GPyOpt
 
 
-
-def random_batch_optimization(acquisition, bounds, restarts, method, model):
+def random_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch):
     '''
 
     '''
-    X_batch = optimize_acquisition(acquisition, bounds, restarts, method, model)
+    X_batch = optimize_acquisition(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model)
     k=1 
     while k<n_inbatch:
-        new_sample = samples_multimensional_uniform(bounds,1)
+        new_sample = samples_multidimensional_uniform(bounds,1)
         X_batch = np.vstack((X_batch,new_sample))  
         k +=1
     return X_batch
 
 
-def adaptive_batch_optimization(acquisition, bounds, restarts, method, model, n_inbatch, alpha_L, alpha_Min):
+def adaptive_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch, alpha_L, alpha_Min):
     '''
     Computes batch optimzation using by acquisition penalization
     :param acquisition: acquisition function in which the batch selection is based
@@ -30,14 +30,14 @@ def adaptive_batch_optimization(acquisition, bounds, restarts, method, model, n_
     :alpha_L: z quantile for the estimation of the lipchiz constant L
     :alpha_Min: z quantile for the estimation of the minimum Min
     '''
-    X_batch = optimize_acquisition(acquisition, bounds, restarts, method, model, X_batch=None, L=None, Min=None)
+    X_batch = optimize_acquisition(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch=None, L=None, Min=None)
     k=1
     if n_inbatch>1:
         L = estimate_L(model,bounds,alpha_L)
         Min = estimate_Min(model,bounds,alpha_Min)
         
     while k<n_inbatch:
-        new_sample = optimize_acquisition(acquisition, bounds, restarts, method, model, X_batch, L, Min)
+        new_sample = optimize_acquisition(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch, L, Min)
         X_batch = np.vstack((X_batch,new_sample))  
         k +=1
     return X_batch
@@ -60,16 +60,17 @@ def estimate_L(model,bounds,alpha=0.025):
 
 # Estimates 'the minimum' of a model
 def estimate_Min(model,bounds,alpha=0.025):
-    def f(x,model,alpha):
-        if len(x.flatten())==2:
-            x = x.reshape(1,2)
-        m,v = model.predict(x)
-        res = -m + norm.ppf(1-alpha)*np.sqrt(abs(v))
-        return res
-    samples = samples_multidimensional_uniform(bounds,10)
-    pred_samples = f(samples,model,alpha)
-    x0 = samples[np.argmin(pred_samples)]
-    return scipy.optimize.minimize(f,x0, method='SLSQP',bounds=bounds, args = (model,alpha)).fun[0][0]
+    return 0
+#    def f(x,model,alpha):
+#        if len(x.flatten())==2:
+#            x = x.reshape(1,2)
+#        m,v = model.predict(x)
+#        res = -m + norm.ppf(1-alpha)*np.sqrt(abs(v))
+#        return res
+#    samples = samples_multidimensional_uniform(bounds,10)
+#    pred_samples = f(samples,model,alpha)
+#    x0 = samples[np.argmin(pred_samples)]
+#    return scipy.optimize.minimize(f,x0, method='SLSQP',bounds=bounds, args = (model,alpha)).fun[0][0]
 
 # creates the function to define the esclusion zones
 def hammer_function(x,x0,L,Min,model):
@@ -93,38 +94,37 @@ def penalized_acquisition(x, acquisition, bounds, model, X_batch=None, L=None, M
     return -fval
 
 ### Optimization of the aquisition function
-def optimize_acquisition(acquisition, bounds, n_init, method, model, X_batch=None, L=None, Min=None):
-    if method=='brute':
-        res = full_acquisition_optimization(acquisition,bounds,n_init, model, 'brute', X_batch, L, Min)
-    elif method=='random':
-        res =  full_acquisition_optimization(acquisition,bounds,n_init, model, 'random', X_batch, L, Min)
-    elif method=='fast_brute':
-        res =  fast_acquisition_optimization(acquisition,bounds,n_init, model, 'brute', X_batch, L, Min)
-    else method=='fast_random':
-        res =  fast_acquisition_optimization(acquisition,bounds,n_init, model, 'random', X_batch, L, Min)
+def optimize_acquisition(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch=None, L=None, Min=None):
+    if acqu_optimize_method=='brute':
+        res = full_acquisition_optimization(acquisition,bounds,acqu_optimize_restarts, model, 'brute', X_batch, L, Min)
+    elif acqu_optimize_method=='random':
+        res =  full_acquisition_optimization(acquisition,bounds,acqu_optimize_restarts, model, 'random', X_batch, L, Min)
+    elif acqu_optimize_method=='fast_brute':
+        res =  fast_acquisition_optimization(acquisition,bounds,acqu_optimize_restarts, model, 'brute', X_batch, L, Min)
+    elif acqu_optimize_method=='fast_random':
+        res =  fast_acquisition_optimization(acquisition,bounds,acqu_optimize_restarts, model, 'random', X_batch, L, Min)
     return res
 
-
 ### optimizes the acquisition function using a local optimizer in the best point
-def fast_acquisition_optimization(acquisition, bounds, n_init, model, method, X_batch=None, L=None, Min=None):
-    if method=='random':
-                samples = samples_multidimensional_uniform(bounds,n_init)
+def fast_acquisition_optimization(acquisition, bounds,acqu_optimize_restarts, model, method_type, X_batch=None, L=None, Min=None):
+    if method_type=='random':
+                samples = samples_multidimensional_uniform(bounds,acqu_optimize_restarts)
     else:
-        samples = multigrid(bounds, n_init)
+        samples = multigrid(bounds, acqu_optimize_restarts)
     pred_samples = acquisition(samples)
     x0 =  samples[np.argmin(pred_samples)]
     res = scipy.optimize.minimize(penalized_acquisition, x0=np.array(x0),method='SLSQP',bounds=bounds, args=(acquisition, bounds, model, X_batch, L, Min))
     return res.x
 
 ### optimizes the acquisition function by taking the best of a number of local optimizers
-def full_acquisition_optimization(acquisition, bounds, n_init, model, method, X_batch=None, L=None, Min=None):
-    if method=='random':
-        samples = samples_multidimensional_uniform(bounds,n_init)
+def full_acquisition_optimization(acquisition, bounds, acqu_optimize_restarts, model, method_type, X_batch=None, L=None, Min=None):
+    if method_type=='random':
+        samples = samples_multidimensional_uniform(bounds,acqu_optimize_restarts)
     else:
-        samples = multigrid(bounds, n_init)
-    mins = np.zeros((n_init,len(bounds)))
-    fmins = np.zeros(n_init)
-    for k in range(n_init):
+        samples = multigrid(bounds, acqu_optimize_restarts)
+    mins = np.zeros((acqu_optimize_restarts,len(bounds)))
+    fmins = np.zeros(acqu_optimize_restarts)
+    for k in range(acqu_optimize_restarts):
         res = scipy.optimize.minimize(penalized_acquisition, x0 = samples[k,:] ,method='SLSQP',bounds=bounds, args=(acquisition, bounds, model, X_batch, L, Min))
         mins[k] = res.x
         fmins[k] = res.fun
