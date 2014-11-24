@@ -86,7 +86,7 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
 		#plt.plot(eX1,eY1,"k.-",ms=1,lw=3,alpha = 0.9)
 		#plt.plot(eX2,eY2,"k.-",ms=1,lw=3,alpha = 0.6)
 		#plt.plot(eX3,eY3,"k.-",ms=1,lw=3,alpha = 0.3)
-		plt.plot(suggested_sample[0],suggested_sample[1],'k.', markersize=10)
+		plt.plot(suggested_sample[:,0],suggested_sample[:,1],'k.', markersize=10)
 		plt.xlabel('X1')
 		plt.ylabel('X2')
 		plt.title('Acquisition function')

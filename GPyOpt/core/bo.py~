@@ -7,7 +7,7 @@ import random
 
 from ..util.general import samples_multidimensional_uniform, multigrid, reshape, ellipse, best_value, reshape 
 #from ..core.optimization import grid_optimization, multi_init_optimization
-from ..core.optimization import batch_optimization
+from ..core.optimization import adaptive_batch_optimization, random_batch_optimization, hybrid_batch_optimization
 from ..plotting.plots_bo import plot_acquisition, plot_convergence
 
 
@@ -35,7 +35,7 @@ class BO(object):
     def _init_model(self):
         pass
         
-    def start_optimization(self, max_iter, n_inbatch=1, acqu_optimize_method='random', batch_method='predmean', acqu_optimize_restarts=None, stop_criteria = 1e-6):
+    def start_optimization(self, max_iter, n_inbatch=1, acqu_optimize_method='random', batch_method='predmean', acqu_optimize_restarts=None, alpha_L = 0.5, alpha_Min = 0.5, stop_criteria = 1e-6):
         """ 
         Starts Bayesian Optimization for a number H of iterations (after the initial exploration data)
 
@@ -56,6 +56,7 @@ class BO(object):
         """
         self.num_acquisitions = 0
         self.n_inbatch=n_inbatch
+        self.batch_method = batch_method
         self.stop_criteria = stop_criteria 
         if max_iter == None: 
             max_iter=0
@@ -73,6 +74,10 @@ class BO(object):
         self.m_in_min = prediction[0]
         self.s_in_min = np.sqrt(prediction[1]) 
         self.optimization_started = True
+        self.alpha_L = alpha_L
+        self.alpha_Min = alpha_Min
+        print self.alpha_Min
+
         return self.continue_optimization(max_iter)
     
     def change_to_sparseGP(self, num_inducing):
@@ -143,14 +148,24 @@ class BO(object):
         Optimizes the acquisition function. It combines initial grid search with local optimzation starting on the minimum of the grid
 
         """
-        return batch_optimization(self)
+        acquisition = self.acquisition_func.acquisition_function
+        acqu_name = self.acqu_name
+        acquisition_par = self.acquisition_par
+        model = self.model
+        acqu_optimize_restarts = self.acqu_optimize_restarts
+        acqu_optimize_method = self.acqu_optimize_method
+        n_inbatch = self.n_inbatch
+        bounds = self.bounds
+        alpha_L = self.alpha_L
+        alpha_Min = self.alpha_Min
 
-        #if self.acqu_optimize_method=='brute':
-        #    res = grid_optimization(self.acquisition_func.acquisition_function, self.bounds, self.acqu_optimize_restarts)
-        #if self.acqu_optimize_method=='random':
-        #    res = multi_init_optimization(self.acquisition_func.acquisition_function,self.bounds, self.acqu_optimize_restarts)
-        # TODO return density_sampling_optimization(self.acquisition_function, self.bounds, self.model)
-        #return res
+        if self.batch_method == 'predmean':
+            X_batch = hybrid_batch_optimization(acqu_name, acquisition_par, acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch)            
+        elif self.batch_method == 'adaptive':
+            X_batch = adaptive_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch, alpha_L, alpha_Min)
+        elif self.batch_method == 'random':
+            X_batch = random_batch_optimization(acquisition, bounds, acqu_optimize_restarts, model, n_inbatch)
+        return X_batch
 
     def _update_model(self):
         """        
