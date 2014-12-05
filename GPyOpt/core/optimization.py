@@ -34,8 +34,12 @@ def adaptive_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acq
     k=1
     if n_inbatch>1:
         L = estimate_L(model,bounds,alpha_L)
+       # print 'L is'
+       # print  L
         Min = estimate_Min(model,bounds,alpha_Min)
-        
+       # print 'Min is'
+       # print Min
+
     while k<n_inbatch:
         new_sample = optimize_acquisition(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch, L, Min)
         X_batch = np.vstack((X_batch,new_sample))  
@@ -45,32 +49,34 @@ def adaptive_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acq
 
 # TODO Estimates 'the lipchitz constant' of a model. Note that we need to use the gradients here. The lipchiz constant is bounded by the maximum derivative.
 def estimate_L(model,bounds,alpha=0.025):
-    return 100
-   # def df(x,model,alpha):
-   #     if len(x.flatten())==2:
-   #         x = x.reshape(1,2)
-   #     dmdx, dsdx = model.predictive_gradients(x)
-   #     res = -dmdx + norm.ppf(1-alpha)*dsdx
-   #     return res
-   #
-   # samples = samples_multidimensional_uniform(bounds,10)
-   # pred_samples = df(samples,model,alpha)
-   # x0 = samples[np.argmin(pred_samples)]
-   # return scipy.optimize.minimize(df,x0, method='SLSQP',bounds=bounds, args = (model,alpha)).fun[0][0]
+    def df(x,model,alpha):
+        x = reshape(x,model.X.shape[1])
+        dmdx, dsdx = model.predictive_gradients(x)
+        res = np.sqrt((dmdx*dmdx).sum(1)) #+ norm.ppf(1-alpha)*dsdx
+        return -res
+   
+    samples = samples_multidimensional_uniform(bounds,25)
+    pred_samples = df(samples,model,alpha)
+    x0 = samples[np.argmin(pred_samples)]
+    #print x0
+    #print df(x0,model,alpha)
+    minusL = scipy.optimize.minimize(df,x0, method='SLSQP',bounds=bounds, args = (model,alpha)).fun[0][0]
+    L = -minusL
+    if L< 0.1: L =100  ## to avoid problems in cases in which the mode is flat
+    return L
 
 # Estimates 'the minimum' of a model
 def estimate_Min(model,bounds,alpha=0.025):
-    return 0
-#    def f(x,model,alpha):
-#        if len(x.flatten())==2:
-#            x = x.reshape(1,2)
-#        m,v = model.predict(x)
-#        res = -m + norm.ppf(1-alpha)*np.sqrt(abs(v))
-#        return res
-#    samples = samples_multidimensional_uniform(bounds,10)
-#    pred_samples = f(samples,model,alpha)
-#    x0 = samples[np.argmin(pred_samples)]
-#    return scipy.optimize.minimize(f,x0, method='SLSQP',bounds=bounds, args = (model,alpha)).fun[0][0]
+    def f(x,model,alpha):
+        if len(x.flatten())==2:
+            x = x.reshape(1,2)
+        m,v = model.predict(x)
+        res = m #+ norm.ppf(1-alpha)*np.sqrt(abs(v))
+        return res
+    samples = samples_multidimensional_uniform(bounds,25)
+    pred_samples = f(samples,model,alpha)
+    x0 = samples[np.argmin(pred_samples)]
+    return scipy.optimize.minimize(f,x0, method='SLSQP',bounds=bounds, args = (model,alpha)).fun[0][0]
 
 # creates the function to define the esclusion zones
 def hammer_function(x,x0,L,Min,model):
