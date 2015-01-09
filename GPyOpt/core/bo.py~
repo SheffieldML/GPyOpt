@@ -6,7 +6,6 @@ import scipy
 import random
 
 from ..util.general import samples_multidimensional_uniform, multigrid, reshape, ellipse, best_value, reshape 
-#from ..core.optimization import grid_optimization, multi_init_optimization
 from ..core.optimization import adaptive_batch_optimization, random_batch_optimization, hybrid_batch_optimization
 from ..plotting.plots_bo import plot_acquisition, plot_convergence
 
@@ -116,7 +115,6 @@ class BO(object):
             distance_lastX = self.stop_criteria + 1
             while k<max_iter and distance_lastX > self.stop_criteria:
                 self.X = np.vstack((self.X,self.suggested_sample))
-                #self.Y = np.vstack((self.Y,self.f(np.array([self.suggested_sample]))))
                 self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
                 self.num_acquisitions += 1
                 pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))
@@ -130,12 +128,12 @@ class BO(object):
                 k +=1
                 current = self.X.shape[0]
                 distance_lastX = np.sqrt(sum((self.X[current-1,:]-self.X[current-2,:])**2))		
-            print '*Optimization completed:'
+            #print '*Optimization completed:'
  
-            if k==max_iter:
-                print '   -Maximum number of iterations reached.'
-            else:
-                print '   -Close samples collected below admisible tolerance.'
+            # if k==max_iter:
+            #     print '   -Maximum number of iterations reached.'
+            # else:
+            #  print '   -Close samples collected below admisible tolerance.'
             
             self.Y_best = best_value(self.Y)
             self.x_opt = self.X[np.argmin(self.Y),:]
@@ -149,6 +147,7 @@ class BO(object):
         Optimizes the acquisition function. It combines initial grid search with local optimzation starting on the minimum of the grid
 
         """
+        acqu_name = self.acqu_name
         acquisition = self.acquisition_func.acquisition_function
         acquisition_par = self.acquisition_par
         model = self.model

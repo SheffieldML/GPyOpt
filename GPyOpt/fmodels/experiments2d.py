@@ -57,9 +57,37 @@ class function2d:
 		plt.show()
 
 
+
+class cosines(function2d):
+	def __init__(self,bounds=None,sd=None):
+		self.input_dim = 2
+		if bounds == None: self.bounds = [(0,1),(0,1)]
+		else: self.bounds = bounds
+		self.min = [(0.31426205,  0.30249864)]
+		self.fmin = -1.59622468
+		if sd==None: self.sd = 0
+		else: self.sd=sd
+		self.name = 'Cosines'
+
+	def f(self,X):
+		X = reshape(X,self.input_dim)
+		n = X.shape[0]
+		if X.shape[1] != self.input_dim:
+			return 'Wrong input dimension'
+		else:
+			u = 1.6*X[:,0]-0.5
+			v = 1.6*X[:,1]-0.5
+			fval = 1-(u**2 + v**2 - 0.3*np.cos(3*np.pi*u) - 0.3*np.cos(3*np.pi*v) )
+			if self.sd ==0:
+				noise = np.zeros(n).reshape(n,1)
+			else:
+				noise = np.random.normal(0,self.sd,n).reshape(n,1)
+			return -fval.reshape(n,1) + noise
+
+
 class branin(function2d):
 	def __init__(self,bounds=None,a=None,b=None,c=None,r=None,s=None,t=None,sd=None):
-		self.D = 2
+		self.input_dim = 2
 		if bounds == None: self.bounds = [(-5,10),(1,15)]
 		else: self.bounds = bounds
 		if a==None: self.a = 1
@@ -81,9 +109,9 @@ class branin(function2d):
 		self.name = 'Branin'
 	
 	def f(self,X):
-		X= reshape(X,self.D)
+		X = reshape(X,self.input_dim)
 		n = X.shape[0]
-		if X.shape[1] != self.D: 
+		if X.shape[1] != self.input_dim: 
 			return 'Wrong input dimension'  
 		else:
 			x1 = X[:,0]
@@ -99,7 +127,7 @@ class branin(function2d):
 
 class crossintray(function2d):
 	def __init__(self,bounds=None,sd=None):
-		self.D = 2
+		self.input_dim = 2
 		if bounds == None: self.bounds = [(-10,10),(-10,10)]
 		else: self.bounds = bounds
 		self.min = [(1.3491,-1.3491),(1.3491,1.3491),(-1.3491,1.3491),(-1.3491,-1.3491)]
@@ -109,9 +137,9 @@ class crossintray(function2d):
 		self.name = 'Cross in tray'
 
 	def f(self,X):
-		if len(X)==self.D: X = X.reshape((1,2))
+		X = reshape(X,self.input_dim)
 		n = X.shape[0]
-		if X.shape[1] != self.D:
+		if X.shape[1] != self.input_dim:
 			return 'Wrong input dimension'
 		else:
 			x1 = X[:,0]
@@ -126,7 +154,7 @@ class crossintray(function2d):
 
 class dropwave(function2d):
 	def __init__(self,bounds=None,sd=None):
-		self.D = 2
+		self.input_dim = 2
 		if bounds == None: self.bounds = [(-5.12,5.12),(-5.12,5.12)]
 		else: self.bounds = bounds
 		self.min = [(0,0)]
@@ -136,9 +164,9 @@ class dropwave(function2d):
 		self.name = 'Drop wave'
 
 	def f(self,X):
-		if len(X)==self.D: X = X.reshape((1,2))
+		X = reshape(X,self.input_dim)
 		n = X.shape[0]
-		if X.shape[1] != self.D:
+		if X.shape[1] != self.input_dim:
 			return 'Wrong input dimension'
 		else:
 			x1 = X[:,0]
@@ -154,7 +182,7 @@ class dropwave(function2d):
 
 class eggholder(function2d):
 	def __init__(self,bounds=None,sd=None):
-		self.D = 2
+		self.input_dim = 2
 		if bounds == None: self.bounds = [(-512,512),(-512,512)]
 		else: self.bounds = bounds
 		self.min = [(512,404.2319)]
@@ -164,7 +192,7 @@ class eggholder(function2d):
 		self.name = 'Egg-holder'
 
 	def f(self,X):
-		if len(X)==self.D: X = X.reshape((1,2))
+		X = reshape(X,self.input_dim)
 		n = X.shape[0]
 		if X.shape[1] != self.D:
 			return 'Wrong input dimension'
@@ -182,7 +210,7 @@ class eggholder(function2d):
 
 class goldstein(function2d):
 	def __init__(self,bounds=None,sd=None):
-		self.D = 2
+		self.input_dim = 2
 		if bounds == None: self.bounds = [(-2,2),(-2,2)]
 		else: self.bounds = bounds
 		self.min = [(0,-1)]
@@ -192,9 +220,9 @@ class goldstein(function2d):
 		self.name = 'Goldstein'
 
 	def f(self,X):
-		if len(X)==self.D: X = X.reshape((1,2))
+		X = reshape(X,self.input_dim)
 		n = X.shape[0]
-		if X.shape[1] != self.D:
+		if X.shape[1] != self.input_dim:
 			return 'Wrong input dimension'
 		else:
 			x1 = X[:,0]
@@ -215,7 +243,7 @@ class goldstein(function2d):
 
 class beale(function2d):
 	def __init__(self,bounds=None,sd=None):
-		self.D = 2
+		self.input_dim = 2
 		if bounds == None: self.bounds = [(-4.5,4.5),(-4.5,4.5)]
 		else: self.bounds = bounds
 		self.min = [(3,0.5)]
@@ -225,9 +253,9 @@ class beale(function2d):
 		self.name = 'Beale'
 
 	def f(self,X):
-		if len(X)==self.D: X = X.reshape((1,2))
+		X = reshape(X,self.input_dim)
 		n = X.shape[0]
-		if X.shape[1] != self.D:
+		if X.shape[1] != self.input_dim:
 			return 'Wrong input dimension'
 		else:
 			x1 = X[:,0]
@@ -245,7 +273,7 @@ class beale(function2d):
 
 class sixhumpcamel(function2d):
 	def __init__(self,bounds=None,sd=None):
-		self.d = 2
+		self.input_dim = 2
 		if bounds == None: self.bounds = [(-2,2),(-1,1)]
 		else: self.bounds = bounds
 		self.min = [(0.0898,-0.7126),(-0.0898,0.7126)]
@@ -255,9 +283,9 @@ class sixhumpcamel(function2d):
 		self.name = 'Six-hump camel'
 
 	def f(self,x):
-		if len(x)==self.d: x = x.reshape((1,2))
+		x = reshape(x,self.input_dim)
 		n = x.shape[0]
-		if x.shape[1] != self.d:
+		if x.shape[1] != self.input_dim:
 			return 'wrong input dimension'
 		else:
 			x1 = x[:,0]
@@ -276,7 +304,7 @@ class sixhumpcamel(function2d):
 
 class mccormick(function2d):
 	def __init__(self,bounds=None,sd=None):
-		self.d = 2
+		self.input_dim = 2
 		if bounds == None: self.bounds = [(-1.5,4),(-3,4)]
 		else: self.bounds = bounds
 		self.min = [(-0.54719,-1.54719)]
@@ -286,7 +314,7 @@ class mccormick(function2d):
 		self.name = 'Mccormick'
 
 	def f(self,x):
-		if len(x)==self.d: x = x.reshape((1,2))
+		x = reshape(x,self.input_dim)
 		n = x.shape[0]
 		if x.shape[1] != self.d:
 			return 'wrong input dimension'
@@ -307,7 +335,7 @@ class mccormick(function2d):
 
 class levy2(function2d):
 	def __init__(self,bounds=None,sd=None):
-		self.d = 2
+		self.input_dim = 2
 		if bounds == None: self.bounds = [(-10,10),(-10,10)]
 		else: self.bounds = bounds
 		self.min = [(1,1)]
@@ -317,7 +345,7 @@ class levy2(function2d):
 		self.name = 'Levy2'
 
 	def f(self,x):
-		if len(x)==self.d: x = x.reshape((1,2))
+		x = reshape(x,self.input_dim)
 		n = x.shape[0]
 		if x.shape[1] != self.d:
 			return 'wrong input dimension'
@@ -340,7 +368,7 @@ class levy2(function2d):
 
 class schaffer2(function2d):
 	def __init__(self,bounds=None,sd=None):
-		self.d = 2
+		self.input_dim = 2
 		if bounds == None: self.bounds = [(-2,2),(-2,2)]
 		else: self.bounds = bounds
 		self.min = [(0,0)]
@@ -350,7 +378,7 @@ class schaffer2(function2d):
 		self.name = 'Schaffer2'
 
 	def f(self,x):
-		if len(x)==self.d: x = x.reshape((1,2))
+		x = reshape(x,self.input_dim)
 		n = x.shape[0]
 		if x.shape[1] != self.d:
 			return 'wrong input dimension'
@@ -370,7 +398,7 @@ class schaffer2(function2d):
 
 class powers(function2d):
 	def __init__(self,bounds=None,sd=None):
-		self.d = 2
+		self.input_dim = 2
 		if bounds == None: self.bounds = [(-1,1),(-1,1)]
 		else: self.bounds = bounds
 		self.min = [(0,0)]
@@ -380,9 +408,9 @@ class powers(function2d):
 		self.name = 'Sum of Powers'
 
 	def f(self,x):
-		if len(x)==self.d: x = x.reshape((1,2))
+		x = reshape(x,self.input_dim)
 		n = x.shape[0]
-		if x.shape[1] != self.d:
+		if x.shape[1] != self.input_dim:
 			return 'wrong input dimension'
 		else:
 			x1 = x[:,0]

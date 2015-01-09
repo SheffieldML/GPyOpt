@@ -90,7 +90,7 @@ class AcquisitionLCB(AcquisitionBase):
 		return -df_acqu
 
 ######
-###### TODO, the derivatives are with respet to the variance not the standard deviation.
+###### NOTE!!, the derivatives are with respet to the variance not the standard deviation.
 ######
 
 

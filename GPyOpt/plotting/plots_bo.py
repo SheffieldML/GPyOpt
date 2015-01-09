@@ -3,16 +3,16 @@ from pylab import plot, xlabel, ylabel, title, grid
 import matplotlib.pyplot as plt
 from pylab import savefig
 
-from ..util.general import ellipse, best_value
-
 def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,suggested_sample, filename = None):
 	'''
-	Plots the model and the acquisition function in 1D and 2D examples
+	Plots of the model and the acquisition function in 1D and 2D examples
 	'''
+	# Plots in dimension 1
 	if input_dim ==1:
 		X = np.arange(bounds[0][0], bounds[0][1], 0.001)
-       		acqu = acquisition_function(X)
-		acqu_normalized = (-acqu - min(-acqu))/(max(-acqu - min(-acqu))) # normalize acq in (0,1)
+       	        X = X.reshape(len(X),1)
+	        acqu = acquisition_function(X)
+		acqu_normalized = (-acqu - min(-acqu))/(max(-acqu - min(-acqu))) # normalize acquisition function in (0,1)
 		m, v = model.predict(X.reshape(len(X),1))
 		plt.figure(figsize=(10,5)) 
 		plt.subplot(2, 1, 1)
@@ -39,6 +39,7 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
 		plt.title('Acquisition function')
 		grid(True)
                 plt.xlim(*bounds)
+		if filename!=None:savefig(filename)
 
 	if input_dim ==2:
 		X1 = np.linspace(bounds[0][0], bounds[0][1], 200)
@@ -50,10 +51,6 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
 		acqu_normalized = acqu_normalized.reshape((200,200))
 		m, v = model.predict(X)	
 		#
-		eX3, eY3 = ellipse(Xdata,nstd=3)
-		eX2, eY2 = ellipse(Xdata,nstd=2)
-		eX1, eY1 = ellipse(Xdata,nstd=1)
-		pos = X.mean(axis=0)
 			##
 		plt.figure(figsize=(15,5))
 		plt.subplot(1, 3, 1)			
@@ -66,7 +63,7 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
 		plt.xlabel('X1')
 		plt.ylabel('X2')			
 		plt.title('Posterior mean')
-		plt.axis((bounds[0][0]-0.5,bounds[0][1]+0.5,bounds[1][0]-0.5,bounds[1][1]+0.5))
+		plt.axis((bounds[0][0],bounds[0][1],bounds[1][0],bounds[1][1]))
 		##
 		plt.subplot(1, 3, 2)
 		plt.plot(Xdata[:,0], Xdata[:,1], 'r.', markersize=10, label=u'Observations')
@@ -78,7 +75,7 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
 		plt.xlabel('X1')
 		plt.ylabel('X2')
 		plt.title('Posterior sd.')
-		plt.axis((bounds[0][0]-0.5,bounds[0][1]+0.5,bounds[1][0]-0.5,bounds[1][1]+0.5))
+		plt.axis((bounds[0][0],bounds[0][1],bounds[1][0],bounds[1][1]))
 		##
 		plt.subplot(1, 3, 3)
 		plt.contourf(X1, X2, acqu_normalized,100)
@@ -90,20 +87,21 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
 		plt.xlabel('X1')
 		plt.ylabel('X2')
 		plt.title('Acquisition function')
-		plt.axis((bounds[0][0]-0.5,bounds[0][1]+0.5,bounds[1][0]-0.5,bounds[1][1]+0.5))
+		plt.axis((bounds[0][0],bounds[0][1],bounds[1][0],bounds[1][1]))
 		#plt.subtitle((np.around(suggested_sample,3))
-
+		if filename!=None:savefig(filename)
 
 
 
 def plot_convergence(Xdata,best_Y,s_in_min):
 	'''
-	Plots three plots to evaluate the convergence of the algorithm
+	Plots to evaluate the convergence of the algorithms
 	'''
 	n = Xdata.shape[0]	
 	aux = (Xdata[1:n,:]-Xdata[0:n-1,:])**2		
 	distances = np.sqrt(aux.sum(axis=1))
-	## plot of distances between consecutive x's
+
+	## Distances between consecutive x's
 	plt.figure(figsize=(15,5))
 	plt.subplot(1, 3, 1)
 	plt.plot(range(n-1), distances, '-ro')
@@ -111,13 +109,15 @@ def plot_convergence(Xdata,best_Y,s_in_min):
 	plt.ylabel('d(x[n], x[n-1])')
 	plt.title('Distance between consecutive x\'s')
 	grid(True)
-	# plot of the estimated m(x) at the proposed sampling points
+
+	# Estimated m(x) at the proposed sampling points
 	plt.subplot(1, 3, 2)
 	plt.plot(range(n),best_Y,'-o')
 	plt.title('Value of the best selected sample')
 	plt.xlabel('Iteration')
 	plt.ylabel('Best y')
 	grid(True)
+
 	# Plot of the proposed v(x) at the proposed sampling points
 	plt.subplot(1, 3, 3)
 	plt.errorbar(range(n),[0]*n , yerr=s_in_min[:,0],ecolor='b', capthick=1)

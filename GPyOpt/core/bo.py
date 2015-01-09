@@ -6,7 +6,6 @@ import scipy
 import random
 
 from ..util.general import samples_multidimensional_uniform, multigrid, reshape, ellipse, best_value, reshape 
-#from ..core.optimization import grid_optimization, multi_init_optimization
 from ..core.optimization import adaptive_batch_optimization, random_batch_optimization, hybrid_batch_optimization
 from ..plotting.plots_bo import plot_acquisition, plot_convergence
 
@@ -116,7 +115,6 @@ class BO(object):
             distance_lastX = self.stop_criteria + 1
             while k<max_iter and distance_lastX > self.stop_criteria:
                 self.X = np.vstack((self.X,self.suggested_sample))
-                #self.Y = np.vstack((self.Y,self.f(np.array([self.suggested_sample]))))
                 self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
                 self.num_acquisitions += 1
                 pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))
@@ -130,12 +128,12 @@ class BO(object):
                 k +=1
                 current = self.X.shape[0]
                 distance_lastX = np.sqrt(sum((self.X[current-1,:]-self.X[current-2,:])**2))		
-            print '*Optimization completed:'
+            #print '*Optimization completed:'
  
-            if k==max_iter:
-                print '   -Maximum number of iterations reached.'
-            else:
-                print '   -Close samples collected below admisible tolerance.'
+            # if k==max_iter:
+            #     print '   -Maximum number of iterations reached.'
+            # else:
+            #  print '   -Close samples collected below admisible tolerance.'
             
             self.Y_best = best_value(self.Y)
             self.x_opt = self.X[np.argmin(self.Y),:]
@@ -182,16 +180,16 @@ class BO(object):
             self.model.optimize_restarts(num_restarts=self.model_optimize_restarts, verbose=self.verbosity)            
         self.suggested_sample = self._optimize_acquisition()
 
-    def plot_acquisition(self):
+    def plot_acquisition(self,filename=None):
         """        
         Plots the model and the acquisition function.
             if self.input_dim = 1: Plots data, mean and variance in one plot and the acquisition function in another plot
             if self.input_dim = 2: as before but it separates the mean and variance of the model in two different plots
 
         """  
-        return plot_acquisition(self.bounds,self.input_dim,self.model,self.model.X,self.model.Y,self.acquisition_func.acquisition_function,self.suggested_sample)
+        return plot_acquisition(self.bounds,self.input_dim,self.model,self.model.X,self.model.Y,self.acquisition_func.acquisition_function,self.suggested_sample,filename)
 
-    def plot_convergence(self):
+    def plot_convergence(self,filename=None):
         """
         Makes three plots to evaluate the convergence of the model
             plot 1: Iterations vs. distance between consecutive selected x's
