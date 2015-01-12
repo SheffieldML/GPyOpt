@@ -28,20 +28,24 @@ Javier Gonzalez August, 2014
 '''
 
 class function1d:
-	def plot(self):
-		X = np.arange(0.0, 1.0, 0.01)
+	def plot(self,bounds=None):
+		if bounds == None: bounds = self.bounds
+		X = np.arange(bounds[0][0], bounds[0][1], 0.01)
 		Y = self.f(X)
 		fig = plt.figure()
 		plt.plot(X, Y, lw=2)
+                plt.xlabel('x')
+                plt.ylabel('f(x)')
 		plt.show()
 
 class forrester(function1d):
 	def __init__(self,sd=None):
-		self.D = 1		
+		self.input_dim = 1		
 		if sd==None: self.sd = 0
 		else: self.sd=sd
 		self.min = 0.78 ## approx
 		self.fmin = -6 ## approx
+		self.bounds = [(0,1)]
                 
 	def f(self,X):
 		X = X.reshape((len(X),1))

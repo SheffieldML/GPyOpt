@@ -84,7 +84,10 @@ def get_quantiles(acquisition_par, fmin, m, s):
     '''
     Quantiles of the Gaussian distribution useful to detemine the acquisition function values
     '''
-    u = ((1+acquisition_par)*fmin-m)/s
+    if sum(s)==0: # in case of null variances
+        u = 10e16
+    else:
+        u = ((1+acquisition_par)*fmin-m)/s
     phi = np.exp(-0.5 * u**2) / np.sqrt(2*np.pi)
     Phi = 0.5 * erfc(-u / np.sqrt(2))
     return (phi, Phi, u)

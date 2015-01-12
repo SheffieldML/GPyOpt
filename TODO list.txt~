@@ -6,7 +6,7 @@
 - Add entropy based method as aquisitions.
 - Add Multi-task optimization. 
 - Add interface in the same fashion Spermint run experiments.
-- Implement different methods for the preliminary design steps.
+- Add initializations based on optimal experimental designs. 
 
 
 

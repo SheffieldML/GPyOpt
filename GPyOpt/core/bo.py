@@ -34,7 +34,7 @@ class BO(object):
     def _init_model(self):
         pass
         
-    def start_optimization(self, max_iter, n_inbatch=1, acqu_optimize_method='random', batch_method='predmean', acqu_optimize_restarts=None, alpha_L = 0.5, alpha_Min = 0.5, stop_criteria = 1e-6):
+    def start_optimization(self, max_iter=0, n_inbatch=1, acqu_optimize_method='random', batch_method='predmean', acqu_optimize_restarts=10, alpha_L = 0.5, alpha_Min = 0.5, stop_criteria = 1e-16):
         """ 
         Starts Bayesian Optimization for a number H of iterations (after the initial exploration data)
 
@@ -59,24 +59,17 @@ class BO(object):
         self.stop_criteria = stop_criteria 
         self.alpha_L = alpha_L
         self.alpha_Min = alpha_Min
-
-        if max_iter == None: 
-            max_iter=0
-        
-        if acqu_optimize_restarts == None: 
-            self.acqu_optimize_restarts = 10
-        else: 
-            self.acqu_optimize_restarts = acqu_optimize_restarts
-
         self.acqu_optimize_method = acqu_optimize_method
+        self.acqu_optimize_restarts = acqu_optimize_restarts
         self.batch_method = batch_method
         self.acquisition_func.model = self.model
+        
         self._update_model()
         prediction = self.model.predict(self.X)
+        
         self.m_in_min = prediction[0]
         self.s_in_min = np.sqrt(prediction[1]) 
         self.optimization_started = True
-
 
         return self.continue_optimization(max_iter)
     
@@ -115,15 +108,15 @@ class BO(object):
             distance_lastX = self.stop_criteria + 1
             while k<max_iter and distance_lastX > self.stop_criteria:
                 self.X = np.vstack((self.X,self.suggested_sample))
+                #self.Y = np.vstack((self.Y,self.f(np.array([self.suggested_sample]))))
                 self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
                 self.num_acquisitions += 1
                 pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))
                 self.m_in_min = np.vstack((self.m_in_min,pred_min[0]))
-                self.s_in_min = np.vstack((self.s_in_min,np.sqrt(pred_min[1])))
+                self.s_in_min = np.vstack((self.s_in_min,np.sqrt(abs(pred_min[1]))))
                 try:
                     self._update_model()                
                 except np.linalg.linalg.LinAlgError:
-                    print 'Optimization stopped. Two equal points selected.'
                     break
                 k +=1
                 current = self.X.shape[0]
@@ -138,7 +131,9 @@ class BO(object):
             self.Y_best = best_value(self.Y)
             self.x_opt = self.X[np.argmin(self.Y),:]
             self.fx_opt = min(self.Y) 
-            return self.x_opt 
+	    print '*Optimization completed:'
+            if k==max_iter: print '   -Maximum number of iterations reached.'
+            else: print '   -Method converged to a global optimum.'
 
         else: print 'Optimization not initiated: Use .start_optimization and provide a function to optimize'
         

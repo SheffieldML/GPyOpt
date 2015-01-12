@@ -32,7 +32,7 @@ class BayesianOptimization(BO):
     .. Note:: Multiple independent outputs are allowed using columns of Y
 
     """
-    def __init__(self, f, bounds=None, kernel=None, X=None, Y=None, optimize_model=None, model_optimize_interval=1, model_optimize_restarts=5, acquisition='EI', acquisition_par=None,  model_data_init = None, sparse=False, num_inducing=None, normalize=False, verbosity=0):
+    def __init__(self, f, bounds=None, kernel=None, X=None, Y=None, optimize_model=None, model_optimize_interval=1, model_optimize_restarts=5, acquisition='EI', acquisition_par= 0.01,  model_data_init = None, sparse=False, num_inducing=None, normalize=False, verbosity=0):
         self.model_data_init = model_data_init  
         self.num_inducing = num_inducing
         self.sparse = sparse
@@ -49,7 +49,7 @@ class BayesianOptimization(BO):
         else:
             self.bounds = bounds
         if  model_data_init ==None:
-            self.model_data_init = 2*self.input_dim
+            self.model_data_init = 3*self.input_dim
         else:
             self.model_data_init = model_data_init
         if X==None or Y == None:
