@@ -10,7 +10,13 @@ from ..core.optimization import adaptive_batch_optimization, random_batch_optimi
 from ..plotting.plots_bo import plot_acquisition, plot_convergence
 
 
-#from .acquisition import AcquisitionEI 
+#from .acquisition import AcquisitionEI
+
+def spawn(f):
+    def fun(pipe,x):
+        pipe.send(f(x))
+        pipe.close()
+    return fun
 
 class BO(object):
     def __init__(self, acquisition_func, bounds=None, model_optimize_interval=None, model_optimize_restarts=None, model_data_init=None, normalize=None, verbosity=None):
@@ -34,7 +40,7 @@ class BO(object):
     def _init_model(self):
         pass
         
-    def start_optimization(self, max_iter=0, n_inbatch=1, acqu_optimize_method='random', batch_method='predmean', acqu_optimize_restarts=10, alpha_L = 0.5, alpha_Min = 0.5, stop_criteria = 1e-16):
+    def start_optimization(self, max_iter=0, n_inbatch=1, acqu_optimize_method='random', batch_method='predmean', acqu_optimize_restarts=10, alpha_L = 0.5, alpha_Min = 0.5, stop_criteria = 1e-16, n_procs=1):
         """ 
         Starts Bayesian Optimization for a number H of iterations (after the initial exploration data)
 
@@ -49,6 +55,7 @@ class BO(object):
             -'adaptive': used a penalization of the aquisition fucntion to based on exclusion zones.
         :param acqu_optimize_restarts: numbers of random restarts in the optimization of the acquisition function, default=10.
     	:param stop_criteria: minimum distance between two consecuve x's to keep running the model
+    	:param n_procs: The number of processes used for evaluating the given fucntion *f*
 
         ..Note : X and Y can be None. In this case Nrandom*model_dimension data are uniformly generated to initialize the model.
     
@@ -70,6 +77,8 @@ class BO(object):
         self.m_in_min = prediction[0]
         self.s_in_min = np.sqrt(prediction[1]) 
         self.optimization_started = True
+        
+        self.n_procs = n_procs
 
         return self.continue_optimization(max_iter)
     
@@ -95,7 +104,7 @@ class BO(object):
         else:
             self.sparse = False
             self._init_model(self.X,self.Y)
-
+    
     def continue_optimization(self,max_iter):
         """
         Continues Bayesian Optimization for a number H of iterations. Requieres prior initialization with self.start_optimization
@@ -109,7 +118,26 @@ class BO(object):
             while k<max_iter and distance_lastX > self.stop_criteria:
                 self.X = np.vstack((self.X,self.suggested_sample))
                 #self.Y = np.vstack((self.Y,self.f(np.array([self.suggested_sample]))))
-                self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
+                if self.n_procs==1:
+                    self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
+                else:
+                    try:
+                        from multiprocessing import Process, Pipe
+                        from itertools import izip
+                        
+                        divided_samples = [self.suggested_sample[i::self.n_procs] for i in xrange(self.n_procs)]
+                        pipe=[Pipe() for i in xrange(self.n_procs)]
+                        proc=[Process(target=spawn(self.f),args=(c,x)) for x,(p,c) in izip(divided_samples,pipe)]
+                        [p.start() for p in proc]
+                        [p.join() for p in proc]
+                        rs = [p.recv() for (p,c) in pipe]
+                        self.Y = np.vstack([self.Y]+rs)
+                    except:
+                        if not hasattr(self, 'parallel_error'):
+                            print 'Error in parallel computation. Fall back to single process!'
+                            self.parallel_error = True 
+                        self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
+                    
                 self.num_acquisitions += 1
                 pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))
                 self.m_in_min = np.vstack((self.m_in_min,pred_min[0]))
