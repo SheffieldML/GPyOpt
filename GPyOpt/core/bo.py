@@ -40,7 +40,7 @@ class BO(object):
     def _init_model(self):
         pass
         
-    def start_optimization(self, max_iter=0, n_inbatch=1, acqu_optimize_method='random', batch_method='predmean', acqu_optimize_restarts=10, alpha_L = 0.5, alpha_Min = 0.5, stop_criteria = 1e-16, n_procs=1):
+    def start_optimization(self, max_iter=0, n_inbatch=1, acqu_optimize_method='random', batch_method='predmean', acqu_optimize_restarts=10, alpha_L = 0.5, alpha_Min = 0.5, stop_criteria = 1e-16, n_procs=1, verbose=True):
         """ 
         Starts Bayesian Optimization for a number H of iterations (after the initial exploration data)
 
@@ -75,12 +75,13 @@ class BO(object):
         prediction = self.model.predict(self.X)
         
         self.m_in_min = prediction[0]
-        self.s_in_min = np.sqrt(prediction[1]) 
+        prediction[1][prediction[1]<0] = 0
+        self.s_in_min = np.sqrt(prediction[1])
         self.optimization_started = True
         
         self.n_procs = n_procs
 
-        return self.continue_optimization(max_iter)
+        return self.continue_optimization(max_iter, verbose=verbose)
     
     def change_to_sparseGP(self, num_inducing):
         """
@@ -105,7 +106,7 @@ class BO(object):
             self.sparse = False
             self._init_model(self.X,self.Y)
     
-    def continue_optimization(self,max_iter):
+    def continue_optimization(self,max_iter, verbose=True):
         """
         Continues Bayesian Optimization for a number H of iterations. Requieres prior initialization with self.start_optimization
 
@@ -145,6 +146,8 @@ class BO(object):
                 try:
                     self._update_model()                
                 except np.linalg.linalg.LinAlgError:
+                    print 'ENCOUNTER LINALGERROR!!!'
+                    print self.suggested_sample
                     break
                 k +=1
                 current = self.X.shape[0]
@@ -158,12 +161,18 @@ class BO(object):
             
             self.Y_best = best_value(self.Y)
             self.x_opt = self.X[np.argmin(self.Y),:]
-            self.fx_opt = min(self.Y) 
-	    print '*Optimization completed:'
-            if k==max_iter: print '   -Maximum number of iterations reached.'
-            else: print '   -Method converged to a global optimum.'
+            self.fx_opt = min(self.Y)
+            if verbose: print '*Optimization completed:'
+            if k==max_iter:
+                if verbose: print '   -Maximum number of iterations reached.'
+                return 1
+            else: 
+                if verbose: print '   -Method converged to a global optimum.'
+                return 0
+        else:
+            if verbose: print 'Optimization not initiated: Use .start_optimization and provide a function to optimize'
+            return -1 
 
-        else: print 'Optimization not initiated: Use .start_optimization and provide a function to optimize'
         
     def _optimize_acquisition(self):
         """

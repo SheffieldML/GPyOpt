@@ -126,7 +126,9 @@ def hammer_function(x,x0,L,Min,model):
     '''
     x0 = x0.reshape(1,len(x0))
     m = model.predict(x0)[0]
-    s = np.sqrt(model.predict(x0)[1])
+    pred = model.predict(x0)[1].copy()
+    pred[pred<1e-16] = 1e-16
+    s = np.sqrt(pred)
     r_x0 = (m-Min)/L
     s_x0 = s/L
     return (norm.cdf((np.sqrt(((x-x0)**2).sum(1))- r_x0)/s_x0)).T
