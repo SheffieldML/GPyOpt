@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.special import erfc
+import random
 
 def best_gess(f,X):
     '''
@@ -106,6 +107,40 @@ def best_value(Y,sign=1):
         else:
             Y_best[i]=Y[:(i+1)].max()
     return Y_best
+
+def cluster_points(X, w, mu):
+    clusters  = {}
+    n = X.shape[0]
+    for k in range(n):
+        bestmukey = min([(i[0], w[k,:]*np.linalg.norm(X[k,:]-mu[i[0]])) \
+                    for i in enumerate(mu)], key=lambda t:t[1])[0]
+        try:
+            clusters[bestmukey].append(X[k,:])
+        except KeyError:
+            clusters[bestmukey] = [X[k,:]]
+    return clusters
+ 
+def reevaluate_centers(mu, clusters):
+    newmu = []
+    keys = sorted(clusters.keys())
+    for k in keys:
+        newmu.append(np.mean(clusters[k], axis = 0))
+    return newmu
+    
+def WKmeans(X,w,n_centroids):
+    # Initialize to K random centers
+    oldmu = random.sample(X, n_centroids)
+    mu = random.sample(X, n_centroids)
+    while not has_converged(mu, oldmu):
+        oldmu = mu
+        # Assign all points in X to clusters
+        clusters = cluster_points(X,w, mu)
+        # Reevaluate centers
+        mu = reevaluate_centers(oldmu, clusters)
+    return mu
+
+def has_converged(mu, oldmu):
+    return set([tuple(a) for a in mu]) == set([tuple(a) for a in oldmu])
 
 
 

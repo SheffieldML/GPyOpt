@@ -10,7 +10,13 @@ from ..core.optimization import adaptive_batch_optimization, random_batch_optimi
 from ..plotting.plots_bo import plot_acquisition, plot_convergence
 
 
-#from .acquisition import AcquisitionEI 
+#from .acquisition import AcquisitionEI
+
+def spawn(f):
+    def fun(pipe,x):
+        pipe.send(f(x))
+        pipe.close()
+    return fun
 
 class BO(object):
     def __init__(self, acquisition_func, bounds=None, model_optimize_interval=None, model_optimize_restarts=None, model_data_init=None, normalize=None, verbosity=None):
@@ -34,7 +40,7 @@ class BO(object):
     def _init_model(self):
         pass
         
-    def start_optimization(self, max_iter=0, n_inbatch=1, acqu_optimize_method='random', batch_method='predmean', acqu_optimize_restarts=10, alpha_L = 0.5, alpha_Min = 0.5, stop_criteria = 1e-16):
+    def start_optimization(self, max_iter=0, n_inbatch=1, acqu_optimize_method='random', batch_method='predmean', acqu_optimize_restarts=10, alpha_L = 0.5, alpha_Min = 0.5, stop_criteria = 1e-16, n_procs=1, verbose=True):
         """ 
         Starts Bayesian Optimization for a number H of iterations (after the initial exploration data)
 
@@ -49,6 +55,7 @@ class BO(object):
             -'adaptive': used a penalization of the aquisition fucntion to based on exclusion zones.
         :param acqu_optimize_restarts: numbers of random restarts in the optimization of the acquisition function, default=10.
     	:param stop_criteria: minimum distance between two consecuve x's to keep running the model
+    	:param n_procs: The number of processes used for evaluating the given fucntion *f*
 
         ..Note : X and Y can be None. In this case Nrandom*model_dimension data are uniformly generated to initialize the model.
     
@@ -68,10 +75,13 @@ class BO(object):
         prediction = self.model.predict(self.X)
         
         self.m_in_min = prediction[0]
-        self.s_in_min = np.sqrt(prediction[1]) 
+        prediction[1][prediction[1]<0] = 0
+        self.s_in_min = np.sqrt(prediction[1])
         self.optimization_started = True
+        
+        self.n_procs = n_procs
 
-        return self.continue_optimization(max_iter)
+        return self.continue_optimization(max_iter, verbose=verbose)
     
     def change_to_sparseGP(self, num_inducing):
         """
@@ -95,8 +105,8 @@ class BO(object):
         else:
             self.sparse = False
             self._init_model(self.X,self.Y)
-
-    def continue_optimization(self,max_iter):
+    
+    def continue_optimization(self,max_iter, verbose=True):
         """
         Continues Bayesian Optimization for a number H of iterations. Requieres prior initialization with self.start_optimization
 
@@ -108,37 +118,62 @@ class BO(object):
             distance_lastX = self.stop_criteria + 1
             while k<max_iter and distance_lastX > self.stop_criteria:
                 self.X = np.vstack((self.X,self.suggested_sample))
-                self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
-                flag_instable = True    
-                counter = 0   
-                while flag_instable and counter <100:   
+                #self.Y = np.vstack((self.Y,self.f(np.array([self.suggested_sample]))))
+                if self.n_procs==1:
+                    self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
+                else:
                     try:
-                        flag_instable = False
-                        self._update_model()                
-                    except np.linalg.linalg.LinAlgError:
-                        flag_instable = True
-                        self.suggested_sample = self.suggested_sample + np.random.multivariate_normal(np.zeros(self.input_dim),np.eye(self.input_dim)*1e-6,self.n_inbatch) 
-                        self.X[-self.n_inbatch,:] = self.suggested_sample
-                        self.Y[-self.n_inbatch,:] = self.f(np.array(self.suggested_sample)) 
-                        counter+=1
-
-                #self._update_model()          
+                        from multiprocessing import Process, Pipe
+                        from itertools import izip
+                        
+                        divided_samples = [self.suggested_sample[i::self.n_procs] for i in xrange(self.n_procs)]
+                        pipe=[Pipe() for i in xrange(self.n_procs)]
+                        proc=[Process(target=spawn(self.f),args=(c,x)) for x,(p,c) in izip(divided_samples,pipe)]
+                        [p.start() for p in proc]
+                        [p.join() for p in proc]
+                        rs = [p.recv() for (p,c) in pipe]
+                        self.Y = np.vstack([self.Y]+rs)
+                    except:
+                        if not hasattr(self, 'parallel_error'):
+                            print 'Error in parallel computation. Fall back to single process!'
+                            self.parallel_error = True 
+                        self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
+                    
                 self.num_acquisitions += 1
                 pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))
                 self.m_in_min = np.vstack((self.m_in_min,pred_min[0]))
-                self.s_in_min = np.vstack((self.s_in_min,np.sqrt(pred_min[1])))            	
+                self.s_in_min = np.vstack((self.s_in_min,np.sqrt(abs(pred_min[1]))))
+                self.batch_labels = np.vstack((self.batch_labels,np.ones((self.n_inbatch,1))*k))  
+                try:
+                    self._update_model()                
+                except np.linalg.linalg.LinAlgError:
+                    print 'ENCOUNTER LINALGERROR!!!'
+                    print self.suggested_sample
+                    break
                 k +=1
                 current = self.X.shape[0]
                 distance_lastX = np.sqrt(sum((self.X[current-1,:]-self.X[current-2,:])**2))		
-
+            #print '*Optimization completed:'
+ 
+            # if k==max_iter:
+            #     print '   -Maximum number of iterations reached.'
+            # else:
+            #  print '   -Close samples collected below admisible tolerance.'
+            
             self.Y_best = best_value(self.Y)
             self.x_opt = self.X[np.argmin(self.Y),:]
-            self.fx_opt = min(self.Y) 
-	    print '*Optimization completed:'
-            if k==max_iter: print '   -Maximum number of iterations reached.'
-            else: print '   -Close samples collected below admisible tolerance.'
+            self.fx_opt = min(self.Y)
+            if verbose: print '*Optimization completed:'
+            if k==max_iter:
+                if verbose: print '   -Maximum number of iterations reached.'
+                return 1
+            else: 
+                if verbose: print '   -Method converged to a global optimum.'
+                return 0
+        else:
+            if verbose: print 'Optimization not initiated: Use .start_optimization and provide a function to optimize'
+            return -1 
 
-        else: print 'Optimization not initiated: Use .start_optimization and provide a function to optimize'
         
     def _optimize_acquisition(self):
         """
@@ -155,6 +190,7 @@ class BO(object):
         bounds = self.bounds
         alpha_L = self.alpha_L
         alpha_Min = self.alpha_Min
+        batch_labels = self.batch_labels
 
         if self.batch_method == 'predmean':
             X_batch = hybrid_batch_optimization(acqu_name, acquisition_par, acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch)            
@@ -162,6 +198,8 @@ class BO(object):
             X_batch = adaptive_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch, alpha_L, alpha_Min)
         elif self.batch_method == 'random':
             X_batch = random_batch_optimization(acquisition, bounds, acqu_optimize_restarts,acqu_optimize_method, model, n_inbatch)
+        elif self.batch_method == 'sm': 
+            X_batch = sm_batch_optimization(model, n_inbatch, batch_labels)
         return reshape(X_batch,self.input_dim)
 
     def _update_model(self):

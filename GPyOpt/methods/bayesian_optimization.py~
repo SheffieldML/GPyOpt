@@ -3,6 +3,7 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 import GPy
+import numpy as np
 from ..core.acquisition import AcquisitionEI, AcquisitionMPI, AcquisitionLCB 
 from ..core.bo import BO
 from ..util.general import samples_multidimensional_uniform
@@ -32,7 +33,7 @@ class BayesianOptimization(BO):
     .. Note:: Multiple independent outputs are allowed using columns of Y
 
     """
-    def __init__(self, f, bounds=None, kernel=None, X=None, Y=None, optimize_model=None, model_optimize_interval=1, model_optimize_restarts=5, acquisition='EI', acquisition_par= 0.01,  model_data_init = None, sparse=False, num_inducing=None, normalize=True, verbosity=0):
+    def __init__(self, f, bounds=None, kernel=None, X=None, Y=None, optimize_model=None, model_optimize_interval=1, model_optimize_restarts=5, acquisition='EI', acquisition_par= 0.01,  model_data_init = None, sparse=False, num_inducing=None, normalize=False, verbosity=0):
         self.model_data_init = model_data_init  
         self.num_inducing = num_inducing
         self.sparse = sparse
@@ -49,7 +50,7 @@ class BayesianOptimization(BO):
         else:
             self.bounds = bounds
         if  model_data_init ==None:
-            self.model_data_init = 2*self.input_dim
+            self.model_data_init = 3*self.input_dim
         else:
             self.model_data_init = model_data_init
         if X==None or Y == None:
@@ -60,7 +61,7 @@ class BayesianOptimization(BO):
             self.Y = Y
         if kernel is None: 
             self.kernel = GPy.kern.RBF(self.input_dim, variance=.1, lengthscale=.1) + GPy.kern.Bias(self.input_dim)
-        else: 
+        else:
             self.kernel = kernel
         self._init_model()
         self.acqu_name = acquisition
@@ -68,6 +69,8 @@ class BayesianOptimization(BO):
             self.acquisition_par = 0
         else:
             self.acquisition_par = acquisition_par
+
+	self.batch_labels = np.zeros((self.X.shape[0],1))
 
         # Initilize aquisition function
         if acquisition==None or acquisition=='EI': 

@@ -6,7 +6,7 @@ import scipy
 import random
 
 from ..util.general import samples_multidimensional_uniform, multigrid, reshape, ellipse, best_value, reshape 
-from ..core.optimization import adaptive_batch_optimization, random_batch_optimization, hybrid_batch_optimization
+from ..core.optimization import adaptive_batch_optimization, random_batch_optimization, hybrid_batch_optimization, sm_batch_optimization
 from ..plotting.plots_bo import plot_acquisition, plot_convergence
 
 
@@ -143,6 +143,7 @@ class BO(object):
                 pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))
                 self.m_in_min = np.vstack((self.m_in_min,pred_min[0]))
                 self.s_in_min = np.vstack((self.s_in_min,np.sqrt(abs(pred_min[1]))))
+                self.batch_labels = np.vstack((self.batch_labels,np.ones((self.n_inbatch,1))*k))  
                 try:
                     self._update_model()                
                 except np.linalg.linalg.LinAlgError:
@@ -189,6 +190,7 @@ class BO(object):
         bounds = self.bounds
         alpha_L = self.alpha_L
         alpha_Min = self.alpha_Min
+        batch_labels = self.batch_labels
 
         if self.batch_method == 'predmean':
             X_batch = hybrid_batch_optimization(acqu_name, acquisition_par, acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch)            
@@ -196,6 +198,8 @@ class BO(object):
             X_batch = adaptive_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch, alpha_L, alpha_Min)
         elif self.batch_method == 'random':
             X_batch = random_batch_optimization(acquisition, bounds, acqu_optimize_restarts,acqu_optimize_method, model, n_inbatch)
+        elif self.batch_method == 'sm': 
+            X_batch = sm_batch_optimization(model, n_inbatch, batch_labels)
         return reshape(X_batch,self.input_dim)
 
     def _update_model(self):

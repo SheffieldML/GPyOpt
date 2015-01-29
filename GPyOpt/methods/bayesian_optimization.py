@@ -3,6 +3,7 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 import GPy
+import numpy as np
 from ..core.acquisition import AcquisitionEI, AcquisitionMPI, AcquisitionLCB 
 from ..core.bo import BO
 from ..util.general import samples_multidimensional_uniform
@@ -60,7 +61,7 @@ class BayesianOptimization(BO):
             self.Y = Y
         if kernel is None: 
             self.kernel = GPy.kern.RBF(self.input_dim, variance=.1, lengthscale=.1) + GPy.kern.Bias(self.input_dim)
-        else: 
+        else:
             self.kernel = kernel
         self._init_model()
         self.acqu_name = acquisition
@@ -68,6 +69,8 @@ class BayesianOptimization(BO):
             self.acquisition_par = 0
         else:
             self.acquisition_par = acquisition_par
+
+	self.batch_labels = np.zeros((self.X.shape[0],1))
 
         # Initilize aquisition function
         if acquisition==None or acquisition=='EI': 

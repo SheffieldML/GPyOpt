@@ -1,9 +1,11 @@
 import numpy as np
-from ..util.general import multigrid, samples_multidimensional_uniform, reshape
+from ..util.general import multigrid, samples_multidimensional_uniform, reshape, WKmeans
 from scipy.stats import norm
 import scipy
 import GPyOpt
-
+import random
+from functools import reduce
+import operator
 
 def random_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch):
     '''
@@ -21,6 +23,7 @@ def random_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acqu_
 def adaptive_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch, alpha_L, alpha_Min):
     '''
     Computes batch optimzation using by acquisition penalization using Lipschizt inference
+
     :param acquisition: acquisition function in which the batch selection is based
     :param bounds: the box constrains of the optimization
     :restarts: the number of restarts in the optimization of the surrogate
@@ -33,7 +36,7 @@ def adaptive_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acq
     X_batch = optimize_acquisition(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch=None, L=None, Min=None)
     k=1
     if n_inbatch>1:
-        L = estimate_L(model,bounds,alpha_L)		# Estimation of the Lipschizt constat
+        L = estimate_L(model,bounds,alpha_L)		# Estimation of the Lipschitz constat
         Min = estimate_Min(model,bounds,alpha_Min)      # Estimation of the minimum value
 
     while k<n_inbatch:
@@ -46,6 +49,7 @@ def adaptive_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acq
 def hybrid_batch_optimization(acqu_name, acquisition_par, acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch):   
     '''
     Computes batch optimzation using by acquisition penalization using Lipschizt inference
+
     :param acquisition: acquisition function in which the batch selection is based
     :param bounds: the box constrains of the optimization
     :restarts: the number of restarts in the optimization of the surrogate
@@ -91,7 +95,61 @@ def hybrid_batch_optimization(acqu_name, acquisition_par, acquisition, bounds, a
         k+=1    
     return X_batch
 
+
+def sm_batch_optimization(model, n_inbatch, batch_labels):
+    n = model.X.shape[0]
+    if(n<n_inbatch):
+        print 'Initial points should be larger than the batch size'
+    weights = np.zeros((n,1))
+    X = model.X
+    
+    ## compute weights
+    for k in np.unique(batch_labels):
+        x = X[(batch_labels == k)[:,0],:]
+        weights[(batch_labels == k)[:,0],:] = compute_batch_weigths(x,model)
+        
+        ## compute centroids
+        X_batch = WKmeans(X,weights,n_inbatch)
+    return np.vstack(X_batch)
+
+
+def compute_w(mu,Sigma):
+    n_data = Sigma.shape[0]
+    w = np.zeros((n_data,1))
+    Sigma12 = scipy.linalg.sqrtm(np.linalg.inv(Sigma)).real
+    probabilities = norm.cdf(np.dot(Sigma12,mu))
+   
+    for i in range(n_data):
+        w[i,:] = reduce(operator.mul, np.delete(probabilities,i,0), 1)
+    return w
+
+def compute_batch_weigths(x,model):
+    Sigma = model.kern.K(x)
+    mu = model.predict(x)[0]
+    w = compute_w(mu,Sigma)
+    return w
+    
+
+def sm_batch_optimization(model, n_inbatch, batch_labels):
+    n = model.X.shape[0]
+    weights = np.zeros((n,1))
+    X = model.X
+    
+    ## compute weights
+    for k in np.unique(batch_labels):
+        x = X[batch_labels == k,:]
+        weights[batch_labels == k,:] = compute_batch_weigths(x,model)
+        
+        ## compute centroids
+        X_batch = WKmeans(X,weights,n_inbatch)
+    return np.vstack(X_batch)
+        
+
+
 def estimate_L(model,bounds,alpha=0.025):
+    '''
+    Estimate the Lipschitz constant of f by taking maximizing the norm of the expectation of the gradient of  f.
+    '''
     def df(x,model,alpha):
         x = reshape(x,model.X.shape[1])
         dmdx, dsdx = model.predictive_gradients(x)
@@ -106,45 +164,45 @@ def estimate_L(model,bounds,alpha=0.025):
     if L<0.1: L=100  ## to avoid problems in cases in which the mode is flat
     return L
 
-# Estimates 'the minimum' of a model
-#def estimate_Min(model,bounds,alpha=0.025):
-#    def f(x,model,alpha):
-#        if len(x.flatten())==2:
-#            x = x.reshape(1,2)
-#        m,v = model.predict(x)
-#        res = m #+ norm.ppf(1-alpha)*np.sqrt(abs(v))
-#        return res
-#    samples = samples_multidimensional_uniform(bounds,25)
-#    pred_samples = f(samples,model,alpha)
-#    x0 = samples[np.argmin(pred_samples)]
-#    return scipy.optimize.minimize(f,x0, method='SLSQP',bounds=bounds, args = (model,alpha)).fun[0][0]
 
 def estimate_Min(model,bounds,alpha=0.025):
+    '''
+    Takes the estimated minumum as the minimum value in the sample
+    '''
     return model.Y.min()
 
 
-# Creates the function to define the esclusion zones
 def hammer_function(x,x0,L,Min,model):
+    '''
+    Creates the function to define the esclusion zones
+    '''
     x0 = x0.reshape(1,len(x0))
     m = model.predict(x0)[0]
-    s = np.sqrt(model.predict(x0)[1])
+    pred = model.predict(x0)[1].copy()
+    pred[pred<1e-16] = 1e-16
+    s = np.sqrt(pred)
     r_x0 = (m-Min)/L
     s_x0 = s/L
     return (norm.cdf((np.sqrt(((x-x0)**2).sum(1))- r_x0)/s_x0)).T
 
 
-# Creates a penalized acquisition function using 'hammer' functions around the points collected in the batch
 def penalized_acquisition(x, acquisition, bounds, model, X_batch=None, L=None, Min=None):
+    '''
+    Creates a penalized acquisition function using 'hammer' functions around the points collected in the batch
+    '''
     sur_min = min(-acquisition(model.X))  # assumed minimum of the minus acquisition
     fval = -acquisition(x)-np.sign(sur_min)*(abs(sur_min)) 
     if X_batch!=None:
-        X_batch = reshape(X_batch,model.X.shape[1]) ## !!!!!! model.X.shape[1] insted of 2
+        X_batch = reshape(X_batch,model.X.shape[1]) ## 
         for i in range(X_batch.shape[0]):            
             fval = np.multiply(fval,hammer_function(x, X_batch[i,], L, Min, model))
     return -fval
 
-### Optimization of the aquisition function
+
 def optimize_acquisition(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch=None, L=None, Min=None):
+    '''
+    Optimization of the aquisition function
+    '''
     if acqu_optimize_method=='brute':
         res = full_acquisition_optimization(acquisition,bounds,acqu_optimize_restarts, model, 'brute', X_batch, L, Min)
     elif acqu_optimize_method=='random':
@@ -155,8 +213,11 @@ def optimize_acquisition(acquisition, bounds, acqu_optimize_restarts, acqu_optim
         res =  fast_acquisition_optimization(acquisition,bounds,acqu_optimize_restarts, model, 'random', X_batch, L, Min)
     return res
 
-### Optimizes the acquisition function using a local optimizer in the best point
+
 def fast_acquisition_optimization(acquisition, bounds,acqu_optimize_restarts, model, method_type, X_batch=None, L=None, Min=None):
+    '''
+    Optimizes the acquisition function using a local optimizer in the best point
+    '''
     if method_type=='random':
                 samples = samples_multidimensional_uniform(bounds,acqu_optimize_restarts)
     else:
@@ -166,8 +227,11 @@ def fast_acquisition_optimization(acquisition, bounds,acqu_optimize_restarts, mo
     res = scipy.optimize.minimize(penalized_acquisition, x0=np.array(x0),method='SLSQP',bounds=bounds, args=(acquisition, bounds, model, X_batch, L, Min))
     return res.x
 
-### Optimizes the acquisition function by taking the best of a number of local optimizers
+
 def full_acquisition_optimization(acquisition, bounds, acqu_optimize_restarts, model, method_type, X_batch=None, L=None, Min=None):
+    '''
+    Optimizes the acquisition function by taking the best of a number of local optimizers
+    '''
     if method_type=='random':
         samples = samples_multidimensional_uniform(bounds,acqu_optimize_restarts)
     else:

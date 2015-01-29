@@ -1,9 +1,11 @@
 import numpy as np
-from ..util.general import multigrid, samples_multidimensional_uniform, reshape
+from ..util.general import multigrid, samples_multidimensional_uniform, reshape, WKmeans
 from scipy.stats import norm
 import scipy
 import GPyOpt
-
+import random
+from functools import reduce
+import operator
 
 def random_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch):
     '''
@@ -92,6 +94,44 @@ def hybrid_batch_optimization(acqu_name, acquisition_par, acquisition, bounds, a
         model_batch = batchBO.model
         k+=1    
     return X_batch
+
+
+def sm_batch_optimization(model, n_inbatch, batch_labels):
+    n = model.X.shape[0]
+    if(n<n_inbatch):
+        print 'Initial points should be larger than the batch size'
+    weights = np.zeros((n,1))
+    X = model.X
+    
+    ## compute weights
+    for k in np.unique(batch_labels):
+        x = X[(batch_labels == k)[:,0],:]
+        weights[(batch_labels == k)[:,0],:] = compute_batch_weigths(x,model)
+        
+        ## compute centroids
+        X_batch = WKmeans(X,weights,n_inbatch)
+    return np.vstack(X_batch)
+
+
+
+def compute_w(mu,Sigma):
+    n_data = Sigma.shape[0]
+    w = np.zeros((n_data,1))
+    Sigma12 = scipy.linalg.sqrtm(np.linalg.inv(Sigma)).real
+    probabilities = norm.cdf(np.dot(Sigma12,mu))
+   
+    for i in range(n_data):
+        w[i,:] = reduce(operator.mul, np.delete(probabilities,i,0), 1)
+    return w
+
+def compute_batch_weigths(x,model):
+    Sigma = model.kern.K(x)
+    mu = model.predict(x)[0]
+    w = compute_w(mu,Sigma)
+    return w
+    
+
+
 
 
 def estimate_L(model,bounds,alpha=0.025):
