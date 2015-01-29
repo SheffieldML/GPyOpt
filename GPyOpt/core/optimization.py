@@ -87,7 +87,7 @@ def hybrid_batch_optimization(acqu_name, acquisition_par, acquisition, bounds, a
                                     n_inbatch=1, 
                                     acqu_optimize_method = acqu_optimize_method,  
                                     acqu_optimize_restarts = acqu_optimize_restarts, 
-                                    stop_criteria = 1e-6)
+                                    stop_criteria = 1e-6,verbose = False)
         
         X_new = batchBO.suggested_sample
         X_batch = np.vstack((X_batch,X_new))
