@@ -13,16 +13,15 @@ from scipy.optimize import minimize
 '''
 Benchmark of one dimensional functions interesting to optimize. 
 
-List of avaiable functions so far:
-- forrester
+List of available functions so far:
+- Forrester
 
 The classes are oriented to create a python function which contain.
-- *.f : the funtion itself
+- *.f : the function itself
 - *.plot: a plot of the function if the dimension is <=2.
-- *.sensitivity: The Sobol coefficient per dimension when these are available.
 - *.min : value of the global minimum(s) for the default parameters.
 
-NOTE: the imput of .f must be a nxD numpy array. The dimension is calculated within the function.
+NOTE: the input of .f must be a nxD numpy array. The dimension is calculated within the function.
 
 Javier Gonzalez August, 2014
 '''
@@ -43,8 +42,8 @@ class forrester(function1d):
 		self.input_dim = 1		
 		if sd==None: self.sd = 0
 		else: self.sd=sd
-		self.min = 0.78 ## approx
-		self.fmin = -6 ## approx
+		self.min = 0.78 		## approx
+		self.fmin = -6 			## approx
 		self.bounds = [(0,1)]
                 
 	def f(self,X):

@@ -58,16 +58,11 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
         acqu_normalized = (-acqu - min(-acqu))/(max(-acqu - min(-acqu)))
         acqu_normalized = acqu_normalized.reshape((200,200))
         m, v = model.predict(X) 
-        #
-            ##
         plt.figure(figsize=(15,5))
         plt.subplot(1, 3, 1)            
         plt.contourf(X1, X2, m.reshape(200,200),100)
         plt.plot(Xdata[:,0], Xdata[:,1], 'r.', markersize=10, label=u'Observations')
-        plt.colorbar()
-        #plt.plot(eX1,eY1,"k.-",ms=1,lw=3,alpha = 0.9)
-        #plt.plot(eX2,eY2,"k.-",ms=1,lw=3,alpha = 0.6)
-        #plt.plot(eX3,eY3,"k.-",ms=1,lw=3,alpha = 0.3)      
+        plt.colorbar()  
         plt.xlabel('X1')
         plt.ylabel('X2')            
         plt.title('Posterior mean')
@@ -77,9 +72,6 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
         plt.plot(Xdata[:,0], Xdata[:,1], 'r.', markersize=10, label=u'Observations')
         plt.contourf(X1, X2, np.sqrt(v.reshape(200,200)),100)
         plt.colorbar()
-        #plt.plot(eX1,eY1,"k.-",ms=1,lw=3,alpha = 0.9)
-        #plt.plot(eX2,eY2,"k.-",ms=1,lw=3,alpha = 0.6)
-        #plt.plot(eX3,eY3,"k.-",ms=1,lw=3,alpha = 0.3)
         plt.xlabel('X1')
         plt.ylabel('X2')
         plt.title('Posterior sd.')
@@ -88,17 +80,12 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
         plt.subplot(1, 3, 3)
         plt.contourf(X1, X2, acqu_normalized,100)
         plt.colorbar()
-        #plt.plot(eX1,eY1,"k.-",ms=1,lw=3,alpha = 0.9)
-        #plt.plot(eX2,eY2,"k.-",ms=1,lw=3,alpha = 0.6)
-        #plt.plot(eX3,eY3,"k.-",ms=1,lw=3,alpha = 0.3)
         plt.plot(suggested_sample[:,0],suggested_sample[:,1],'k.', markersize=10)
         plt.xlabel('X1')
         plt.ylabel('X2')
         plt.title('Acquisition function')
         plt.axis((bounds[0][0],bounds[0][1],bounds[1][0],bounds[1][1]))
-        #plt.subtitle((np.around(suggested_sample,3))
         if filename!=None:savefig(filename)
-
 
 
 def plot_convergence(Xdata,best_Y,s_in_min):

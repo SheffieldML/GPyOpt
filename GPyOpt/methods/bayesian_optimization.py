@@ -16,7 +16,7 @@ class BayesianOptimization(BO):
     This is a thin wrapper around the methods.BO class, with a set of sensible defaults
 
     :param: f the function to optimize
-    :param bounds: Tuple containing the box contrains of the function to optimize. Example: for [0,1]x[0,1] insert [(0,1),(0,1)].  
+    :param bounds: Tuple containing the box constrains of the function to optimize. Example: for [0,1]x[0,1] insert [(0,1),(0,1)].  
     :param X: input observations
     :param Y: output values
     :param kernel: a GPy kernel, defaults to rbf + bias.
@@ -25,7 +25,7 @@ class BayesianOptimization(BO):
     :param model_optimize_restarts: number of initial points for the GP parameters optimization.
     :param acquisition: acquisition function ('EI' 'MPI' or LCB). Default set to EI.
     :param acquisition_par: parameter of the acquisition function. To avoid local minima.
-    :param nodel_data_init: number of initial random evaluatios of f is X and Y are not provided (2*input_dim is used by default).  
+    :param nodel_data_init: number of initial random evaluations of f is X and Y are not provided (2*input_dim is used by default).  
     :param sparse: if sparse is True, and sparse GP is used.
     :param normalize: normalization of the Y's. Default is False.
     :param verbosity: whether to show (1) or not (0, default) the value of the log-likelihood of the model for the optimized parameters.
@@ -40,13 +40,13 @@ class BayesianOptimization(BO):
         self.input_dim = len(bounds)
         self.normalize = normalize
         if f==None: 
-            print 'Function to optimize is requiered'
+            print 'Function to optimize is required.'
         else:
             self.f = f
         
-        ## Initilize model 
+        ## Initialize model 
         if bounds==None: 
-            raise 'Box contrainst are needed. Please insert box constrains' 
+            raise 'Box constraints are needed. Please insert box constrains.' 
         else:
             self.bounds = bounds
         if  model_data_init ==None:
@@ -72,7 +72,7 @@ class BayesianOptimization(BO):
 
 	self.batch_labels = np.zeros((self.X.shape[0],1))
 
-        # Initilize aquisition function
+        # Initialize acquisition function
         if acquisition==None or acquisition=='EI': 
             acq = AcquisitionEI(acquisition_par)
         elif acquisition=='MPI':
@@ -87,13 +87,12 @@ class BayesianOptimization(BO):
     
     def _init_model(self):
         '''
-        Initializes the prior measure, or Gaussian Process, over the function f to optimize
-
-        :param X: input observations
-        :param Y: output values
+        Initializes the prior measure, or Gaussian Process, over the function f to optimize.
+        :param X: input observations.
+        :param Y: output values.
 
         ..Note : X and Y can be None. In this case Nrandom*model_dimension data are uniformly generated to initialize the model.
-
+        
         '''
         if self.sparse == True:
             if self.num_inducing ==None:

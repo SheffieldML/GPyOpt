@@ -4,7 +4,7 @@ import random
 
 def best_gess(f,X):
     '''
-    Gets the best current guess from a vertor and
+    Gets the best current guess from a vector and
 
     '''
     n = X.shape[0]
@@ -33,7 +33,7 @@ def multigrid(bounds, Ngrid):
     '''
     if len(bounds)==1:
         return np.linspace(bounds[0][0], bounds[0][1], Ngrid).reshape(Ngrid, 1)
-    xx = np.meshgrid(*[np.linspace(b[0], b[1], Ngrid) for b in bounds]) # , order='xy'
+    xx = np.meshgrid(*[np.linspace(b[0], b[1], Ngrid) for b in bounds]) 
     return np.vstack([x.flatten(order='F') for x in xx]).T
 
 
@@ -83,7 +83,7 @@ def get_moments(model,x):
 
 def get_quantiles(acquisition_par, fmin, m, s):
     '''
-    Quantiles of the Gaussian distribution useful to detemine the acquisition function values
+    Quantiles of the Gaussian distribution useful to determine the acquisition function values
     '''
     if isinstance(s, np.ndarray):
         s[s<1e-10] = 1e-10

@@ -22,22 +22,22 @@ def random_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acqu_
 
 def adaptive_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch, alpha_L, alpha_Min):
     '''
-    Computes batch optimzation using by acquisition penalization using Lipschizt inference
+    Computes batch optimization using by acquisition penalization using Lipschitz inference
 
     :param acquisition: acquisition function in which the batch selection is based
     :param bounds: the box constrains of the optimization
     :restarts: the number of restarts in the optimization of the surrogate
-    :method: the method to optimize the aquisition function
+    :method: the method to optimize the acquisition function
     :model: the GP model based on the current samples
     :n_inbatch: the number of samples to collect
-    :alpha_L: z quantile for the estimation of the lipchiz constant L
+    :alpha_L: z quantile for the estimation of the Lipschitz constant L
     :alpha_Min: z quantile for the estimation of the minimum Min
     '''
     X_batch = optimize_acquisition(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch=None, L=None, Min=None)
     k=1
     if n_inbatch>1:
-        L = estimate_L(model,bounds,alpha_L)		# Estimation of the Lipschitz constat
-        Min = estimate_Min(model,bounds,alpha_Min)      # Estimation of the minimum value
+        L = estimate_L(model,bounds,alpha_L)		          # Estimation of the Lipschitz constant
+        Min = estimate_Min(model,bounds,alpha_Min)            # Estimation of the minimum value
 
     while k<n_inbatch:
         new_sample = optimize_acquisition(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch, L, Min)
@@ -48,15 +48,15 @@ def adaptive_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acq
 
 def hybrid_batch_optimization(acqu_name, acquisition_par, acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch):   
     '''
-    Computes batch optimzation using by acquisition penalization using Lipschizt inference
+    Computes batch optimzation using by acquisition penalization using Lipschitz inference
 
     :param acquisition: acquisition function in which the batch selection is based
     :param bounds: the box constrains of the optimization
     :restarts: the number of restarts in the optimization of the surrogate
-    :method: the method to optimize the aquisition function
+    :method: the method to optimize the acquisition function
     :model: the GP model based on the current samples
     :n_inbatch: the number of samples to collect
-    :alpha_L: z quantile for the estimation of the lipchiz constant L
+    :alpha_L: z quantile for the estimation of the Lipschitz constant L
     :alpha_Min: z quantile for the estimation of the minimum Min
     '''
     model_copy = model.copy()
@@ -113,7 +113,6 @@ def sm_batch_optimization(model, n_inbatch, batch_labels):
     return np.vstack(X_batch)
 
 
-
 def compute_w(mu,Sigma):
     n_data = Sigma.shape[0]
     w = np.zeros((n_data,1))
@@ -131,9 +130,6 @@ def compute_batch_weigths(x,model):
     return w
     
 
-
-
-
 def estimate_L(model,bounds,alpha=0.025):
     '''
     Estimate the Lipschitz constant of f by taking maximizing the norm of the expectation of the gradient of  f.
@@ -149,7 +145,7 @@ def estimate_L(model,bounds,alpha=0.025):
     x0 = samples[np.argmin(pred_samples)]
     minusL = scipy.optimize.minimize(df,x0, method='SLSQP',bounds=bounds, args = (model,alpha)).fun[0][0]
     L = -minusL
-    if L<0.1: L=100  ## to avoid problems in cases in which the mode is flat
+    if L<0.1: L=100  ## to avoid problems in cases in which the model is flat.
     return L
 
 
