@@ -22,7 +22,7 @@ class BO(object):
     def __init__(self, acquisition_func, bounds=None, model_optimize_interval=None, model_optimize_restarts=None, model_data_init=None, normalize=None, verbosity=None):
              
        # if bounds==None: 
-       #     print 'Box contrainst are needed. Please insert box constrains'    
+       #     print 'Box constraint are needed. Please insert box constrains'    
        # else:
        #     self.bounds = bounds
         self.input_dim = len(self.bounds)        
@@ -30,7 +30,7 @@ class BO(object):
         self.model_optimize_interval = model_optimize_interval
         self.model_optimize_restarts = model_optimize_restarts
         if  model_data_init ==None: 
-            self.model_data_init = 2*self.input_dim # number or samples for initial random exploration
+            self.model_data_init = 2*self.input_dim            # number or samples for initial random exploration
         else: 
             self.model_data_init = model_data_init  
         self.normalize = normalize
@@ -46,16 +46,16 @@ class BO(object):
 
         :param max_iter: exploration horizon, or number of iterations  
 	    :n_inbatch: number of samples to collect in each batch (one by default)
-        :acqu_optimize_method: method to optimize the aquisition function 
+        :acqu_optimize_method: method to optimize the acquisition function 
 	    :nb: number of samples to collect in each batch (one by default)
 	        -'brute': uses a uniform lattice with 'acqu_optimize_restarts' points per dimension. A local CG gradient is run the best point.
 	        -'random': takes the best of 'acqu_optimize_restarts' local random optimizers.
 	    :batch_method: method to collect samples in batches
             -'predmean': uses the predicted mean in the selected sample to update the acquisition function.
-            -'adaptive': used a penalization of the aquisition fucntion to based on exclusion zones.
+            -'adaptive': used a penalization of the acquisition function to based on exclusion zones.
         :param acqu_optimize_restarts: numbers of random restarts in the optimization of the acquisition function, default=10.
-    	:param stop_criteria: minimum distance between two consecuve x's to keep running the model
-    	:param n_procs: The number of processes used for evaluating the given fucntion *f*
+    	:param stop_criteria: minimum distance between two consecutive x's to keep running the model
+    	:param n_procs: The number of processes used for evaluating the given function *f*
 
         ..Note : X and Y can be None. In this case Nrandom*model_dimension data are uniformly generated to initialize the model.
     
@@ -87,7 +87,7 @@ class BO(object):
         """
         Changes standard GP estimation to sparse GP estimation
 	       
-	    :param num__inducing: number of inducing points for sparse-GP modelling
+	    :param num__inducing: number of inducing points for sparse-GP modeling
 	     """
         if self.sparse == True:
             raise 'Sparse GP is already in use'
@@ -118,7 +118,6 @@ class BO(object):
             distance_lastX = self.stop_criteria + 1
             while k<max_iter and distance_lastX > self.stop_criteria:
                 self.X = np.vstack((self.X,self.suggested_sample))
-                #self.Y = np.vstack((self.Y,self.f(np.array([self.suggested_sample]))))
                 if self.n_procs==1:
                     self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
                 else:
@@ -158,7 +157,7 @@ class BO(object):
             # if k==max_iter:
             #     print '   -Maximum number of iterations reached.'
             # else:
-            #  print '   -Close samples collected below admisible tolerance.'
+            #  print '   -Close samples collected below admissible tolerance.'
             
             self.Y_best = best_value(self.Y)
             self.x_opt = self.X[np.argmin(self.Y),:]
