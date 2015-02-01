@@ -2,6 +2,7 @@ import numpy as np
 from ..util.general import multigrid, samples_multidimensional_uniform, reshape, WKmeans
 from scipy.stats import norm
 import scipy
+from scipy import spatial 
 import GPyOpt
 import random
 from functools import reduce
@@ -118,7 +119,7 @@ def estimate_L(model,bounds):
     samples = samples_multidimensional_uniform(bounds,5)
     pred_samples = df(samples,model,0)
     x0 = samples[np.argmin(pred_samples)]
-    minusL = scipy.optimize.minimize(df,x0, method='SLSQP',bounds=bounds, args = (model,x0), options = {'maxiter': 1000}).fun[0][0]
+    minusL = scipy.optimize.minimize(df,x0, method='SLSQP',bounds=bounds, args = (model,x0), options = {'maxiter': 1500}).fun[0][0]
     L = -minusL1
     if L<0.1: L=100  ## to avoid problems in cases in which the model is flat.
     return L
@@ -229,7 +230,10 @@ def sm_batch_optimization(model, n_inbatch, batch_labels):
         
         ## compute centroids
         X_batch = WKmeans(X,weights,n_inbatch)
-    return np.vstack(X_batch)
+
+        ## perturb points that are equal to already collected locations
+        X_batch = perturb_equal_points(model.X,np.vstack(X_batch))
+    return X_batch
 
 
 def compute_w(mu,Sigma):
@@ -249,6 +253,20 @@ def compute_batch_weigths(x,model):
     return w
     
 
+# test for equally selected points 
+
+def perturb_equal_points(X,X_batch):
+    # distance from the points in the batch to the collected points
+    min_dist = scipy.spatial.distance.cdist(X,X_batch,'euclidean').min(0)
+    input_dim = X.shape[1]
+
+    # indexes of the problematic points
+    indexes = [i for i,x in enumerate(min_dist) if x < 1e-9]
+            
+    # perturb the x
+    for k in indexes:
+        X_batch [k,:] += np.random.multivariate_normal(np.zeros(input_dim),1e-2*np.eye(input_dim),1).flatten()
+    return X_batch
 
 
 

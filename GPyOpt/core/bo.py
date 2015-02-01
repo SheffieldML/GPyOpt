@@ -119,10 +119,10 @@ class BO(object):
             distance_lastX = self.stop_criteria + 1
             while k<max_iter and distance_lastX > self.stop_criteria:
                 
-                # ------- Augment with the collected X
+                # ------- Augment X
                 self.X = np.vstack((self.X,self.suggested_sample))
                 
-                # ------- Evaluate Y and augment
+                # ------- Evaluate *f* in X and augment Y
                 if self.n_procs==1:
                     self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
                 else:
@@ -143,19 +143,19 @@ class BO(object):
                             self.parallel_error = True 
                         self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
                 
-                # -------- Update internal elements
+                # -------- Update internal elements needed for plotting and batch collection
                 self.num_acquisitions += 1
-                pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))       # for plotting
+                pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))       
                 self.m_in_min = np.vstack((self.m_in_min,pred_min[0]))
                 self.s_in_min = np.vstack((self.s_in_min,np.sqrt(abs(pred_min[1]))))
-                self.batch_labels = np.vstack((self.batch_labels,np.ones((self.suggested_sample.shape[0],1))*k+1))   # for batch optimization  
+                self.batch_labels = np.vstack((self.batch_labels,np.ones((self.suggested_sample.shape[0],1))*k+1)) 
                 
                 # -------- Update model
                 try:
                     self._update_model()                
                 except np.linalg.linalg.LinAlgError:
-                    print 'ENCOUNTER LINALGERROR!!!'
-                    print self.suggested_sample
+                    #print 'ENCOUNTER LINALGERROR!!!'
+                    #print self.suggested_sample
                     break
 
                 # ------- Update stop conditions
@@ -209,11 +209,13 @@ class BO(object):
         Updates X and Y in the model and re-optimizes the parameters of the new model
 
         """  
-        # ------- Optimize model
+        # ------- Normalize acquisition function (if needed)
         if self.normalize:      
             self.model.set_XY(self.X,(self.Y-self.Y.mean())/self.Y.std())
         else:
             self.model.set_XY(self.X,self.Y)
+        
+        # ------- Optimize model when required
         if (self.num_acquisitions%self.model_optimize_interval)==0:
             self.model.optimization_runs = [] # clear previous optimization runs so they don't get used.
             self.model.optimize_restarts(num_restarts=self.model_optimize_restarts, verbose=self.verbosity)            
