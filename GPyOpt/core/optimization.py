@@ -120,7 +120,7 @@ def estimate_L(model,bounds):
     pred_samples = df(samples,model,0)
     x0 = samples[np.argmin(pred_samples)]
     minusL = scipy.optimize.minimize(df,x0, method='SLSQP',bounds=bounds, args = (model,x0), options = {'maxiter': 1500}).fun[0][0]
-    L = -minusL1
+    L = -minusL
     if L<0.1: L=100  ## to avoid problems in cases in which the model is flat.
     return L
 
