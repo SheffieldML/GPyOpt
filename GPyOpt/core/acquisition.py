@@ -70,7 +70,7 @@ class AcquisitionMPI(AcquisitionBase):
 
 class AcquisitionLCB(AcquisitionBase):
 	"""
-	Class for Upper Confidence Band acquisition functions.
+	Class for Upper (lower) Confidence Band acquisition functions.
 	"""
 	def acquisition_function(self,x):
 		"""
@@ -90,7 +90,7 @@ class AcquisitionLCB(AcquisitionBase):
 		return -df_acqu
 
 ######
-###### NOTE!!, the derivatives are with respet to the variance not the standard deviation.
+###### NOTE!!, the derivatives are with respect to the variance not the standard deviation.
 ######
 
 
