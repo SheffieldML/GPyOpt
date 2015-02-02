@@ -29,32 +29,32 @@ Javier Gonzalez August, 2014
 
 
 class function2d:
-        def plot(self):
-		bounds = self.bounds
-                x1 = np.linspace(bounds[0][0], bounds[0][1], 100)
-                x2 = np.linspace(bounds[1][0], bounds[1][1], 100)
-                X1, X2 = np.meshgrid(x1, x2)
-                X = np.hstack((X1.reshape(100*100,1),X2.reshape(100*100,1)))
-                Y = self.f(X)
-
-        	fig = plt.figure()
-                ax = fig.gca(projection='3d')
-                surf = ax.plot_surface(X1, X2, Y.reshape((100,100)), rstride=1, cstride=1, cmap=cm.coolwarm,linewidth=0, antialiased=False)
-                ax.zaxis.set_major_locator(LinearLocator(10))
-                ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
-               	ax.set_title(self.name)	
-			
-		plt.figure()	
-		plt.contourf(X1, X2, Y.reshape((100,100)),100)
-		if (len(self.min)>1):	
-			plt.plot(np.array(self.min)[:,0], np.array(self.min)[:,1], 'w.', markersize=20, label=u'Observations')
-		else:
-			plt.plot(self.min[0][0], self.min[0][1], 'w.', markersize=20, label=u'Observations')
-		plt.colorbar()
-		plt.xlabel('X1')
-		plt.ylabel('X2')
-		plt.title(self.name)
-		plt.show()
+    def plot(self):
+        bounds = self.bounds
+        x1 = np.linspace(bounds[0][0], bounds[0][1], 100)
+        x2 = np.linspace(bounds[1][0], bounds[1][1], 100)
+        X1, X2 = np.meshgrid(x1, x2)
+        X = np.hstack((X1.reshape(100*100,1),X2.reshape(100*100,1)))
+        Y = self.f(X)
+        
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+        surf = ax.plot_surface(X1, X2, Y.reshape((100,100)), rstride=1, cstride=1, cmap=cm.coolwarm,linewidth=0, antialiased=False)
+        ax.zaxis.set_major_locator(LinearLocator(10))
+        ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+        ax.set_title(self.name)	
+        	
+        plt.figure()	
+        plt.contourf(X1, X2, Y.reshape((100,100)),100)
+        if (len(self.min)>1):	
+        	plt.plot(np.array(self.min)[:,0], np.array(self.min)[:,1], 'w.', markersize=20, label=u'Observations')
+        else:
+        	plt.plot(self.min[0][0], self.min[0][1], 'w.', markersize=20, label=u'Observations')
+        plt.colorbar()
+        plt.xlabel('X1')
+        plt.ylabel('X2')
+        plt.title(self.name)
+        plt.show()
 
 
 
@@ -95,7 +95,7 @@ class branin(function2d):
 		if b==None: self.b = 5.1/(4*np.pi**2)
 		else: self.b = b
 		if c==None: self.c = 5/np.pi
-                else: self.c = c
+        else: self.c = c
 		if r==None: self.r = 6
 		else: self.r = r
 		if s==None: self.s = 10 

@@ -3,12 +3,8 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib import cm
-from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.optimize import minimize
 
 '''
 Benchmark of one dimensional functions interesting to optimize. 
@@ -33,8 +29,8 @@ class function1d:
 		Y = self.f(X)
 		fig = plt.figure()
 		plt.plot(X, Y, lw=2)
-                plt.xlabel('x')
-                plt.ylabel('f(x)')
+		plt.xlabel('x')
+		plt.ylabel('f(x)')
 		plt.show()
 
 class forrester(function1d):
@@ -45,7 +41,7 @@ class forrester(function1d):
 		self.min = 0.78 		## approx
 		self.fmin = -6 			## approx
 		self.bounds = [(0,1)]
-                
+
 	def f(self,X):
 		X = X.reshape((len(X),1))
 		n = X.shape[0]
