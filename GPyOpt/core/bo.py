@@ -1,13 +1,11 @@
-import GPy
 import numpy as np
-from scipy.stats import norm
-from scipy.optimize import minimize
-import scipy
-import random
 
 from ..util.general import samples_multidimensional_uniform, multigrid, reshape, ellipse, best_value, reshape 
 from ..core.optimization import mp_batch_optimization, random_batch_optimization, predictive_batch_optimization, sm_batch_optimization
-from ..plotting.plots_bo import plot_acquisition, plot_convergence
+try:
+    from ..plotting.plots_bo import plot_acquisition, plot_convergence
+except:
+    pass
 
 
 def spawn(f):
@@ -243,9 +241,6 @@ class BO(object):
         """
         return plot_convergence(self.X,self.Y_best,self.s_in_min)
 
-	
-    	    	
-		
 
 
 
