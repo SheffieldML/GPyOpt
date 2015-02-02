@@ -2,11 +2,12 @@ import numpy as np
 import pickle
 import cPickle
 from ..util.general import  reshape
+import os
 
 class gene_optimization:
 	def __init__(self,sd=None):
 		# load the model
-		with open('model_genes_desing') as f:
+		with open(os.path.join(os.path.dirname(__file__),'model_genes_desing')) as f:
 			model = cPickle.load(f)
 		
 		# model
