@@ -43,7 +43,7 @@ def reshape(x,input_dim):
 
     '''
     x = np.array(x)
-    if len(x.flatten())==input_dim:
+    if x.size ==input_dim:
         x = x.reshape((1,input_dim))
     return x
 

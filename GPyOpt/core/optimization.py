@@ -37,7 +37,8 @@ def fast_acquisition_optimization(acquisition, bounds,acqu_optimize_restarts, mo
         samples = multigrid(bounds, acqu_optimize_restarts)
     pred_samples = acquisition(samples)
     x0 =  samples[np.argmin(pred_samples)]
-    res = scipy.optimize.minimize(penalized_acquisition, x0=np.array(x0),method='SLSQP',bounds=bounds, args=(acquisition, bounds, model, X_batch, L, Min))
+    h_func_args = hammer_function_precompute(X_batch, L, Min, model)
+    res = scipy.optimize.minimize(penalized_acquisition, x0=np.array(x0),method='SLSQP',bounds=bounds, args=(acquisition, bounds, model, X_batch)+h_func_args)
     return res.x
 
 
@@ -51,8 +52,9 @@ def full_acquisition_optimization(acquisition, bounds, acqu_optimize_restarts, m
         samples = multigrid(bounds, acqu_optimize_restarts)
     mins = np.zeros((acqu_optimize_restarts,len(bounds)))
     fmins = np.zeros(acqu_optimize_restarts)
+    h_func_args = hammer_function_precompute(X_batch, L, Min, model)
     for k in range(acqu_optimize_restarts):
-        res = scipy.optimize.minimize(penalized_acquisition, x0 = samples[k,:] ,method='SLSQP',bounds=bounds, args=(acquisition, bounds, model, X_batch, L, Min))
+        res = scipy.optimize.minimize(penalized_acquisition, x0 = samples[k,:] ,method='SLSQP',bounds=bounds, args=(acquisition, bounds, model, X_batch)+h_func_args)
         mins[k] = res.x
         fmins[k] = res.fun
     return mins[np.argmin(fmins)]
@@ -133,30 +135,37 @@ def estimate_Min(model,bounds):
     return model.Y.min()
 
 
-def hammer_function(x,x0,L,Min,model):
-    '''
-    Creates the function to define the exclusion zones
-    '''
-    x0 = x0.reshape(1,len(x0))
+def hammer_function_precompute(x0, L, Min, model):
+    if x0 is None: return None, None
+    if len(x0.shape)==1: x0 = x0[None,:]
     m = model.predict(x0)[0]
     pred = model.predict(x0)[1].copy()
     pred[pred<1e-16] = 1e-16
     s = np.sqrt(pred)
     r_x0 = (m-Min)/L
     s_x0 = s/L
-    return (norm.cdf((np.sqrt(((x-x0)**2).sum(1))- r_x0)/s_x0)).T
+    return r_x0, s_x0
+
+def hammer_function(x,x0,r_x0, s_x0):
+    '''
+    Creates the function to define the exclusion zones
+    '''
+#    return (norm.cdf((np.sqrt(((x-x0)**2).sum(1))- r_x0)/s_x0)).T
+    return norm.cdf((np.sqrt((np.square(np.atleast_2d(x-x0))).sum(1))- r_x0)/s_x0)
 
 
-def penalized_acquisition(x, acquisition, bounds, model, X_batch=None, L=None, Min=None):
+def penalized_acquisition(x, acquisition, bounds, model, X_batch, r_x0, s_x0):
     '''
     Creates a penalized acquisition function using 'hammer' functions around the points collected in the batch
     '''
     sur_min = min(-acquisition(model.X))  # assumed minimum of the minus acquisition
     fval = -acquisition(x)-np.sign(sur_min)*(abs(sur_min)) 
     if X_batch!=None:
-        X_batch = reshape(X_batch,model.X.shape[1]) ## TODO: remove this loop
-        for i in range(X_batch.shape[0]):            
-            fval = np.multiply(fval,hammer_function(x, X_batch[i,], L, Min, model))
+#        X_batch = reshape(X_batch,model.X.shape[1]) ## TODO: remove this loop
+#         for i in range(X_batch.shape[0]):
+#             fval = np.multiply(fval,hammer_function(x, X_batch[i,], r_x0, s_x0))
+        h_vals = hammer_function(x, X_batch, r_x0, s_x0)
+        fval = fval*np.prod(h_vals)
     return -fval
 
 
