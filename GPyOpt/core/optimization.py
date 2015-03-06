@@ -161,9 +161,6 @@ def penalized_acquisition(x, acquisition, bounds, model, X_batch, r_x0, s_x0):
     sur_min = min(-acquisition(model.X))  # assumed minimum of the minus acquisition
     fval = -acquisition(x)-np.sign(sur_min)*(abs(sur_min)) 
     if X_batch!=None:
-#        X_batch = reshape(X_batch,model.X.shape[1]) ## TODO: remove this loop
-#         for i in range(X_batch.shape[0]):
-#             fval = np.multiply(fval,hammer_function(x, X_batch[i,], r_x0, s_x0))
         h_vals = hammer_function(x, X_batch, r_x0, s_x0)
         fval = fval*np.prod(h_vals)
     return -fval
@@ -221,61 +218,18 @@ def predictive_batch_optimization(acqu_name, acquisition_par, acquisition, bound
     return X_batch
 
 
-##
-## ----------- Simulating and matching batch optimization
-##
-
-def sm_batch_optimization(model, n_inbatch, batch_labels):
-    n = model.X.shape[0]
-    if(n<n_inbatch):
-        print 'Initial points should be larger than the batch size'
-    weights = np.zeros((n,1))
-    X = model.X
-    
-    ## compute weights
-    for k in np.unique(batch_labels):
-        x = X[(batch_labels == k)[:,0],:]
-        weights[(batch_labels == k)[:,0],:] = compute_batch_weigths(x,model)
-        
-        ## compute centroids
-        X_batch = WKmeans(X,weights,n_inbatch)
-
-        ## perturb points that are equal to already collected locations
-        X_batch = perturb_equal_points(model.X,np.vstack(X_batch))
-    return X_batch
-
-
-def compute_w(mu,Sigma):
-    n_data = Sigma.shape[0]
-    w = np.zeros((n_data,1))
-    Sigma12 = scipy.linalg.sqrtm(np.linalg.inv(Sigma)).real
-    probabilities = norm.cdf(np.dot(Sigma12,mu))
-   
-    for i in range(n_data):
-        w[i,:] = reduce(operator.mul, np.delete(probabilities,i,0), 1)
-    return w
-
-def compute_batch_weigths(x,model):
-    Sigma = model.kern.K(x)
-    mu = model.predict(x)[0]
-    w = compute_w(mu,Sigma)
-    return w
-    
-
-# test for equally selected points 
-
-def perturb_equal_points(X,X_batch):
-    # distance from the points in the batch to the collected points
-    min_dist = scipy.spatial.distance.cdist(X,X_batch,'euclidean').min(0)
-    input_dim = X.shape[1]
-
-    # indexes of the problematic points
-    indexes = [i for i,x in enumerate(min_dist) if x < 1e-9]
-            
-    # perturb the x
-    for k in indexes:
-        X_batch [k,:] += np.random.multivariate_normal(np.zeros(input_dim),1e-2*np.eye(input_dim),1).flatten()
-    return X_batch
+#def perturb_equal_points(X,X_batch):
+#    # distance from the points in the batch to the collected points
+#    min_dist = scipy.spatial.distance.cdist(X,X_batch,'euclidean').min(0)
+#    input_dim = X.shape[1]
+#
+#    # indexes of the problematic points
+#    indexes = [i for i,x in enumerate(min_dist) if x < 1e-9]
+#            
+#    # perturb the x
+#    for k in indexes:
+#        X_batch [k,:] += np.random.multivariate_normal(np.zeros(input_dim),1e-2*np.eye(input_dim),1).flatten()
+#    return X_batch
 
 
 

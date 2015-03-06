@@ -30,8 +30,6 @@ class BayesianOptimization(BO):
     :param normalize: normalization of the Y's. Default is False.
     :param verbosity: whether to show (1) or not (0, default) the value of the log-likelihood of the model for the optimized parameters.
 
-    .. Note:: Multiple independent outputs are allowed using columns of Y
-
     """
     def __init__(self, f, bounds=None, kernel=None, X=None, Y=None, optimize_model=None, model_optimize_interval=1, model_optimize_restarts=5, acquisition='EI', acquisition_par= 0.01,  model_data_init = None, sparse=False, num_inducing=None, normalize=False, verbosity=0):
         self.model_data_init = model_data_init  
