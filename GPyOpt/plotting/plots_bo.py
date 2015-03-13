@@ -1,7 +1,6 @@
 import numpy as np
-from pylab import plot, xlabel, ylabel, title, grid
+from pylab import grid
 import matplotlib.pyplot as plt
-import matplotlib
 from pylab import savefig
 
 

@@ -1,33 +1,21 @@
 import numpy as np
 
-from ..util.general import samples_multidimensional_uniform, multigrid, reshape, ellipse, best_value, reshape 
-from ..core.optimization import mp_batch_optimization, random_batch_optimization, predictive_batch_optimization, sm_batch_optimization
+from ..util.general import best_value, reshape, spawn
+from ..core.optimization import mp_batch_optimization, random_batch_optimization, predictive_batch_optimization
+
 try:
     from ..plotting.plots_bo import plot_acquisition, plot_convergence
 except:
     pass
 
-
-def spawn(f):
-    def fun(pipe,x):
-        pipe.send(f(x))
-        pipe.close()
-    return fun
-
-
 class BO(object):
     def __init__(self, acquisition_func, bounds=None, model_optimize_interval=None, model_optimize_restarts=None, model_data_init=None, normalize=None, verbosity=None):
-             
-       # if bounds==None: 
-       #     print 'Box constraint are needed. Please insert box constrains'    
-       # else:
-       #     self.bounds = bounds
         self.input_dim = len(self.bounds)        
         self.acquisition_func = acquisition_func
         self.model_optimize_interval = model_optimize_interval
         self.model_optimize_restarts = model_optimize_restarts
         if  model_data_init ==None: 
-            self.model_data_init = 2*self.input_dim            # number or samples for initial random exploration
+            self.model_data_init = 2*self.input_dim      # default number or samples for initial random exploration
         else: 
             self.model_data_init = model_data_init  
         self.normalize = normalize
@@ -146,14 +134,11 @@ class BO(object):
                 pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))       
                 self.m_in_min = np.vstack((self.m_in_min,pred_min[0]))
                 self.s_in_min = np.vstack((self.s_in_min,np.sqrt(abs(pred_min[1]))))
-                self.batch_labels = np.vstack((self.batch_labels,np.ones((self.suggested_sample.shape[0],1))*k+1)) 
                 
                 # -------- Update model
                 try:
                     self._update_model()                
                 except np.linalg.linalg.LinAlgError:
-                    #print 'ENCOUNTER LINALGERROR!!!'
-                    #print self.suggested_sample
                     break
 
                 # ------- Update stop conditions
@@ -189,17 +174,14 @@ class BO(object):
         acqu_optimize_method = self.acqu_optimize_method
         n_inbatch = self.n_inbatch
         bounds = self.bounds
-        batch_labels = self.batch_labels
 
         if self.batch_method == 'predictive':
             X_batch = predictive_batch_optimization(acqu_name, acquisition_par, acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch)            
         elif self.batch_method == 'mp':
             X_batch = mp_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch)
         elif self.batch_method == 'random':
-            X_batch = random_batch_optimization(acquisition, bounds, acqu_optimize_restarts,acqu_optimize_method, model, n_inbatch)
-        elif self.batch_method == 'sm': 
-            X_batch = sm_batch_optimization(model, n_inbatch, batch_labels)
-        return reshape(X_batch,self.input_dim)
+            X_batch = random_batch_optimization(acquisition, bounds, acqu_optimize_restarts,acqu_optimize_method, model, n_inbatch)        
+        return X_batch
 
 
     def _update_model(self):

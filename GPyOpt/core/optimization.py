@@ -1,12 +1,9 @@
 import numpy as np
-from ..util.general import multigrid, samples_multidimensional_uniform, reshape, WKmeans
-from scipy.stats import norm
 import scipy
-from scipy import spatial 
 import GPyOpt
-import random
-from functools import reduce
-import operator
+
+from ..util.general import multigrid, samples_multidimensional_uniform, reshape
+from scipy.stats import norm
 
 ##
 ## ----------- General functions for the optimization of the acquisition function
@@ -114,7 +111,7 @@ def estimate_L(model,bounds):
     '''
     def df(x,model,x0):
         x = reshape(x,model.X.shape[1])
-        dmdx, dsdx = model.predictive_gradients(x)
+        dmdx,_ = model.predictive_gradients(x)
         res = np.sqrt((dmdx*dmdx).sum(1)) # simply take the norm of the expectation of the gradient
         return -res
    
@@ -172,7 +169,7 @@ def penalized_acquisition(x, acquisition, bounds, model, X_batch, r_x0, s_x0):
 
 def predictive_batch_optimization(acqu_name, acquisition_par, acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch):   
     '''
-    Computes batch optimization using by acquisition penalization using Lipschitz inference
+    Computes batch optimization using the predictive mean to obtain new batch elements
 
     :param acquisition: acquisition function in which the batch selection is based
     :param bounds: the box constrains of the optimization
@@ -213,23 +210,7 @@ def predictive_batch_optimization(acqu_name, acquisition_par, acquisition, bound
         
         X_new = batchBO.suggested_sample
         X_batch = np.vstack((X_batch,X_new))
-        model_batch = batchBO.model
         k+=1    
     return X_batch
-
-
-#def perturb_equal_points(X,X_batch):
-#    # distance from the points in the batch to the collected points
-#    min_dist = scipy.spatial.distance.cdist(X,X_batch,'euclidean').min(0)
-#    input_dim = X.shape[1]
-#
-#    # indexes of the problematic points
-#    indexes = [i for i,x in enumerate(min_dist) if x < 1e-9]
-#            
-#    # perturb the x
-#    for k in indexes:
-#        X_batch [k,:] += np.random.multivariate_normal(np.zeros(input_dim),1e-2*np.eye(input_dim),1).flatten()
-#    return X_batch
-
 
 

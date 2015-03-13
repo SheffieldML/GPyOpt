@@ -1,9 +1,9 @@
-# Copyright (c) 2014, Javier Gonzalez
-# Copyright (c) 2014, the GPy Authors (see GPy AUTHORS.txt)
+# Copyright (c) 2015, Javier Gonzalez
+# Copyright (c) 2015, the GPy Authors (see GPy AUTHORS.txt)
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 import GPy
-import numpy as np
+
 from ..core.acquisition import AcquisitionEI, AcquisitionMPI, AcquisitionLCB 
 from ..core.bo import BO
 from ..util.general import samples_multidimensional_uniform
@@ -21,13 +21,14 @@ class BayesianOptimization(BO):
     :param Y: output values
     :param kernel: a GPy kernel, defaults to rbf + bias.
     :param optimize_model: Unless specified otherwise the parameters of the model are updated after each iteration. 
-    :param model_optimize_interval: iterations after which the parameters of the model are optimized.   
-    :param model_optimize_restarts: number of initial points for the GP parameters optimization.
-    :param acquisition: acquisition function ('EI' 'MPI' or LCB). Default set to EI.
-    :param acquisition_par: parameter of the acquisition function. To avoid local minima.
-    :param nodel_data_init: number of initial random evaluations of f is X and Y are not provided (2*input_dim is used by default).  
-    :param sparse: if sparse is True, and sparse GP is used.
-    :param normalize: normalization of the Y's. Default is False.
+    :param model_optimize_interval: number of iterations after which the parameters of the model are optimized.   
+    :param model_optimize_restarts: number of initial points for the GP parameters optimization (5, default)
+    :param acquisition: acquisition function ('EI' 'MPI' or LCB). Default, EI.
+    :param acquisition_par: parameter of the acquisition function. 
+    :param model_data_init: number of initial random evaluations of f is X and Y are not provided (default, 3*input_dim).  
+    :param sparse: whether to use an sparse GP (False, default).
+    :param num_inducing: number of inducing points for a Sparse GP (None, default)
+    :param normalize: whether to normalize the Y's for optimization (False, default).
     :param verbosity: whether to show (1) or not (0, default) the value of the log-likelihood of the model for the optimized parameters.
 
     """
@@ -42,7 +43,7 @@ class BayesianOptimization(BO):
         else:
             self.f = f
         
-        ## Initialize model 
+        # ------- Initialize model 
         if bounds==None: 
             raise 'Box constraints are needed. Please insert box constrains.' 
         else:
@@ -62,15 +63,15 @@ class BayesianOptimization(BO):
         else:
             self.kernel = kernel
         self._init_model()
+        
+
+        # ------- Initialize acquisition function
         self.acqu_name = acquisition
         if  acquisition_par == None:
             self.acquisition_par = 0
         else:
             self.acquisition_par = acquisition_par
-
-	self.batch_labels = np.zeros((self.X.shape[0],1))
-
-        # Initialize acquisition function
+        
         if acquisition==None or acquisition=='EI': 
             acq = AcquisitionEI(acquisition_par)
         elif acquisition=='MPI':
@@ -85,7 +86,7 @@ class BayesianOptimization(BO):
     
     def _init_model(self):
         '''
-        Initializes the prior measure, or Gaussian Process, over the function f to optimize.
+        Initializes the Gaussian Process over *f*.
         :param X: input observations.
         :param Y: output values.
 
@@ -99,7 +100,4 @@ class BayesianOptimization(BO):
                 self.model = GPy.models.SparseGPRegression(self.X, self.Y, kernel=self.kernel, num_inducing=self.num_inducing)
         else:       
             self.model = GPy.models.GPRegression(self.X,self.Y,kernel=self.kernel)
-
-
-
 
