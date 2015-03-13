@@ -25,7 +25,7 @@ class BO(object):
     def _init_model(self):
         pass
         
-    def start_optimization(self, max_iter=0, n_inbatch=1, acqu_optimize_method='random', batch_method='predictive', acqu_optimize_restarts=10, stop_criteria = 1e-16, n_procs=1, verbose=True):
+    def start_optimization(self, max_iter=25, n_inbatch=1, acqu_optimize_method='random', batch_method='predictive', acqu_optimize_restarts=10, stop_criteria = 1e-16, n_procs=1, verbose=True):
         """ 
         Starts Bayesian Optimization for a number H of iterations (after the initial exploration data)
 
