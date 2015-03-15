@@ -507,17 +507,25 @@ html { box-sizing: border-box; }
   
   
   
-  nav .p-updating { border-color: #c869bf; }
-  #updating { background-color: #c869bf !important; color: #f8f8f8; }
-  #updating a { color: #f8f8f8; }
-  #updating .sectiondivider { color: #c869bf; }
+  nav .p-releases { border-color: #c869bf; }
+  #releases { background-color: #c869bf !important; color: #111111; }
+  #releases a { color: #111111; }
+  #releases .sectiondivider { color: #c869bf; }
+
+  
+  
+  
+  nav .p-applications { border-color: brown; }
+  #applications { background-color: brown !important; color: #111111; }
+  #applications a { color: #111111; }
+  #applications .sectiondivider { color: brown; }
 
   
   
   
   nav .p-usage { border-color: #63BD2F; }
-  #usage { background-color: #63BD2F !important; color: #f8f8f8; }
-  #usage a { color: #f8f8f8; }
+  #usage { background-color: #63BD2F !important; color: #111111; }
+  #usage a { color: #111111; }
   #usage .sectiondivider { color: #63BD2F; }
 
   
@@ -532,8 +540,8 @@ html { box-sizing: border-box; }
   
   
   nav .p-why { border-color: #49a7e9; }
-  #why { background-color: #49a7e9 !important; color: #f8f8f8; }
-  #why a { color: #f8f8f8; }
+  #why { background-color: #49a7e9 !important; color: #111111; }
+  #why a { color: #111111; }
   #why .sectiondivider { color: #49a7e9; }
 
   

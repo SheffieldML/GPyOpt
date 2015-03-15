@@ -24,13 +24,16 @@
         <li class="p-why"><a href="#why">Why?</a></li>
       
         
-        <li class="p-details"><a href="#details">setup details</a></li>
+        <li class="p-details"><a href="#details">setup</a></li>
       
         
         <li class="p-usage"><a href="#usage">usage</a></li>
       
         
-        <li class="p-updating"><a href="#updating">updating</a></li>
+        <li class="p-applications"><a href="#applications">Applications</a></li>
+      
+        
+        <li class="p-releases"><a href="#releases">Releases</a></li>
       
     </ul></nav>
 
@@ -40,19 +43,20 @@
       <div id="intro" class="section p-intro">
         
         <div class="container center">
-          <h3 class="text-purple" id="tune-your-machine-learning-algorithms-or-design-your-wetlab-experiments-automatically-dont-wait-more"><em>Tune your Machine Learning algorithms or design your wetlab experiments automatically! Don’t wait more!</em></h3>
+          <h1 class="text-purple" id="gpyopt"><strong>GPyOpt</strong></h1>
 
-<center> <img src="enigma2.jpeg" style="width:244px" align="middle" /></center>
+<h3 class="text-purple" id="tune-your-machine-learning-algorithms-authomatically-and-design-efficiently-your-wetlab-experiments-save-time-and-money-dont-wait-more"><em>Tune your Machine Learning algorithms authomatically and design efficiently your wetlab experiments. Save time and money, don’t wait more!</em></h3>
 
-<h1 class="text-purple" id="gpyopt">GPyOpt</h1>
+<center> <img src="animation.gif" style="width:644px" align="middle" /></center>
 
-<p>Python open-source package for Bayesian Optimization. </p>
+<p>GPyOpt is a Python open-source library for Bayesian Optimization. </p>
 
-<p>Developed by the Machine Learning group of the Univeristy of Sheffield.</p>
+<p>Developed by the <a href="https://github.com/SheffieldML">Machine Learning</a> group of the Univeristy of Sheffield. </p>
 
-<p>Based on <a href="http://sheffieldml.github.io/GPy/">GPy</a>, our library for Gaussian process modeling.</p>
+<p>Based on <a href="http://sheffieldml.github.io/GPy/">GPy</a>, our python framework for Gaussian process modeling.</p>
 
-<p><span id="forkongithub">
+<p>Check the online <a href="documentation">documentation</a> and the Reference manual in our <a href="somewhere">collection of notebooks</a>.
+<span id="forkongithub">
   <a href="https://github.com/t413/SinglePaged" class="bg-blue">
     Fork me on GitHub
   </a>
@@ -67,46 +71,27 @@
         <div class="subtlecircle sectiondivider faicon">
           <span class="fa-stack">
             <i class="fa fa-circle fa-stack-2x"></i>
-            <i class="fa fa-check-square-o fa-stack-1x"></i>
+            <i class="fa fa-check-square fa-stack-1x"></i>
           </span>
           <h5 class="icon-title">Why?</h5>
         </div>
         
         <div class="container ">
-          <h4 id="basically">Basically</h4>
-
-<h1 id="this-theme-rocks">this theme rocks.</h1>
-
-<p>GPyOpt is a simple a fast way to authomatically tune your algorithms using Bayesian Optimization. </p>
-
-<p>Got some <em>killer app</em>, some <em>neat project</em>, a cool portfolio? Make an easy single-page site to show it all off. SinglePaged uses jekyll niceties to make a <strong><em>polished, modular, and beautiful</em> single page site</strong>.</p>
-
-<p>Oh– go see <a href="https://github.com/t413/SinglePaged#fancy-jekyll-powered-single-page-site">some examples</a>!</p>
-
-<ul>
-  <li>Each vertical section is a markdown file in <strong>_posts/</strong> directory.
-    <ul>
-      <li>They’re sorted by ‘date’. (we don’t use date anywhere, it only sorts)</li>
-    </ul>
-  </li>
-  <li>Each vertical section sets it’s own <strong>color</strong>, <strong>header icon</strong> (or image), <strong>title</strong>, and easy-to-write markdown body.</li>
-  <li>Only <strong>two things</strong> to edit:
-    <ol>
-      <li>Edit <code>_config.yml</code> to set the site title, description, etc</li>
-      <li>Add <code>_posts/*.md</code> to make each vertical section. Copy some examples and add the sections from your README.md for a fast start!</li>
-    </ol>
-  </li>
-  <li>Easy adding of <strong>SEO terms</strong>, <strong>favicon</strong> &amp; such, and <strong>google analytics token</strong>.</li>
-</ul>
-
-<p>Sound good? Let’s go!</p>
-
-<p>There are three way to get started: (links jump to that section)</p>
+          <p>With GPyOpt you can:</p>
 
 <ol>
-  <li>Make a <a href="#setup-as-user-homepage"><strong>user homepage</strong></a> (or organization)</li>
-  <li>Make a <a href="#setup-as-standalone-project-page"><strong>standalone project</strong></a> page</li>
-  <li>Make a <a href="#setup-inside-existing-project">site under an <strong>existing project</strong></a></li>
+  <li>
+    <p><strong>Solve global optimization problems</strong>: Use Bayesian Optimization to solve global optimization problems using Gaussian processes as surrogate models. </p>
+  </li>
+  <li>
+    <p><strong>Import GPy functionalities</strong>: you can use any functionality of GPy in your optimization. Choose between a large variety of kernels, kernel combinations, likelihoods, etc.</p>
+  </li>
+  <li>
+    <p><strong>Run Parallel optimization</strong>: make use of all your computational/physical resources by optimizing your funtion of interest in parallel or by designing batches of wetlab experiments.  </p>
+  </li>
+  <li>
+    <p><strong>Run Big Data optimization</strong>: Use sparse Gaussian process and use Bayesian optimization with massive datasets.</p>
+  </li>
 </ol>
 
         </div>
@@ -120,66 +105,58 @@
             <i class="fa fa-circle fa-stack-2x"></i>
             <i class="fa fa-toggle-on fa-stack-1x"></i>
           </span>
-          <h5 class="icon-title">setup details</h5>
+          <h5 class="icon-title">setup</h5>
         </div>
         
         <div class="container ">
-          <h2 id="setup-as-user-homepage">Setup as user homepage</h2>
+          <h3 id="easy-install-using-pip"><em>Easy install using pip</em></h3>
+
+<p>The simplest way to install GPyOpt is using pip. Be sure that all the dependencies (GPy, numpy, scipy, matplotlib, pylab, random) are also installed.</p>
 
 <ul>
-  <li>Go click <strong>fork</strong> on the <a href="https://github.com/t413/SinglePaged">github project page</a></li>
-  <li>Rename your new repository to <code>**username**.github.io</code>. (click settings in the right column)</li>
-  <li>Clone your repository, <strong>cd into the project</strong></li>
-  <li>Run <code>git checkout publish &amp;&amp; git branch -m master &amp;&amp; git push -u origin master &amp;&amp; git branch -D gh-pages</code> to get the <em>publish</em> branch as master for a clean, empty starting point.</li>
-  <li>On your github project page go to <em>settings</em> again and change your <strong>default branch</strong> to <strong><em>master</em></strong></li>
-  <li>Run <code>git push origin --delete gh-pages</code> to delete your remote’s development branch</li>
+  <li><em>Ubuntu</em> users can do:</li>
 </ul>
 
-<p>Now hop over to <a href="#usage">Usage</a> to get it running with your own stuff!</p>
-
-<p><strong>When you publish changes use <code>git push -u origin master</code></strong></p>
-
-<hr />
-
-<h2 id="setup-as-standalone-project-page">Setup as standalone project page</h2>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><code class="language-text" data-lang="text">1
+2</code></pre></div></td><td class="code"><div class="highlight"><pre>sudo apt-get install python-pip
+pip install GPyOpt
+</pre></div>
+</td></tr></table>
 
 <ul>
-  <li>Go click <strong>fork</strong> on the <a href="https://github.com/t413/SinglePaged">github project page</a></li>
-  <li>Rename your new repository to <code>whatever you want</code>. (click settings in the right column)
-    <ul>
-      <li>It will go live at yourusername.github.io/<strong>WhateverYouWant</strong></li>
-    </ul>
+  <li>GPyOpt and its dependencies are all available for <em>Mac</em> users. Write (if you use homebew):</li>
+</ul>
+
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><code class="language-text" data-lang="text">1
+2</code></pre></div></td><td class="code"><div class="highlight"><pre>sudo brew install python-pip
+pip install GPyOpt
+</pre></div>
+</td></tr></table>
+
+<ul>
+  <li>On <em>Windows</em>, we recommend the anaconda python distribution. From the anaconda command prompt type:</li>
+</ul>
+
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><code class="language-text" data-lang="text">1</code></pre></div></td><td class="code"><div class="highlight"><pre>pip install GPyOpt
+</pre></div>
+</td></tr></table>
+
+<h3 id="install-from-source-and-contribute"><em>Install from source and contribute</em></h3>
+
+<ul>
+  <li>
+    <p>You can install GPyOpt from source. To fork the repository click <strong>fork</strong> on the <a href="https://github.com/t413/SinglePaged">GPyOpt project page</a></p>
   </li>
-  <li>Clone your repository, cd into the project</li>
-  <li>Run <code>git checkout publish &amp;&amp; git branch -D gh-pages &amp;&amp; git branch -m gh-pages &amp;&amp; git push -uf origin gh-pages</code> to swap the <em>publish</em> and <em>gh-pages</em> branch.</li>
+  <li>
+    <p>You can also contribute to the repository. Just clone the repository, add it to your python, and send a pull request</p>
+  </li>
 </ul>
 
-<p>Now hop over to <a href="#usage">Usage</a> to get it running with your own stuff!</p>
-
-<p><strong>When you publish changes use <code>git push -u origin gh-pages</code></strong></p>
-
-<hr />
-
-<h2 id="setup-inside-existing-project">Setup inside existing project</h2>
-
-<p>This is the most complicated use-case .. but it’s the coolest.
-Say you’ve got your kickass project <code>github.com/t413/kicker</code> and want to have
-some web presence to post about on <a href="http://news.ycombinator.com">hacker news</a>.
-This will create an orphan branch called <code>gh_pages</code> in your repository
-where you can publish changes, posts, images, and such. It won’t alter your code at all.</p>
-
-<ul>
-  <li><code>cd</code> into your project on the command line</li>
-  <li>use <code>git remote add -t publish singlepage git@github.com:t413/SinglePaged.git</code> to get access to this repository.</li>
-  <li>use <code>git fetch singlepage publish:gh-pages</code> to fetch the remote branch</li>
-  <li>use <code>git branch --set-upstream gh-pages singlepage/publish &amp;&amp; git checkout gh-pages;</code>
-This creates and checks out an orphan branch called gh-pages that tracks the original and lets you make changes.</li>
-  <li>When you run <code>git push gh-pages:origin/gh-pages</code> it’ll be live at <em>yourusername.github.io/repositoryName</em></li>
-</ul>
-
-<p>Now hop over to <a href="#usage">Usage</a> to get it running with your own stuff!</p>
-
-<p><strong>When you publish changes use <code>git push -u origin gh-pages</code></strong></p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><code class="language-text" data-lang="text">1
+2</code></pre></div></td><td class="code"><div class="highlight"><pre>git clone git@github.com:SheffieldML/GPy.git ~/SheffieldML
+echo &#39;PYTHONPATH=$PYTHONPATH:~/SheffieldML&#39; &gt;&gt; ~/.bashrc
+</pre></div>
+</td></tr></table>
 
 
         </div>
@@ -197,12 +174,20 @@ This creates and checks out an orphan branch called gh-pages that tracks the ori
         </div>
         
         <div class="container ">
-          <p>Alright, you’ve got a clean copy and are ready to push some schmancy pages for the world to ogle at.</p>
+          <p>There are two ways of using GPyOpt: from the python command line and using a probelm/config file. </p>
+
+<h3 id="gpyopt-using-the-command-line"><em>GPyOpt using the command line</em></h3>
 
 <ul>
-  <li>Edit <code>_config.yml</code> to change your title, keywords, and description.</li>
-  <li>Create a new file in <code>_posts/</code> called <code>2014-01-01-intro.md</code>
-Edit it, and add:</li>
+  <li>Load GPyOpt:</li>
+</ul>
+
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><code class="language-text" data-lang="text">1</code></pre></div></td><td class="code"><div class="highlight"><pre>import GPyOpt
+</pre></div>
+</td></tr></table>
+
+<ul>
+  <li>Define your (minimization) problem:</li>
 </ul>
 
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><code class="language-text" data-lang="text">1
@@ -210,110 +195,67 @@ Edit it, and add:</li>
 3
 4
 5
-6
-7
-8
-9</code></pre></div></td><td class="code"><div class="highlight"><pre>---
-title: &quot;home&quot;
-bg: white     #defined in _config.yml, can use html color like &#39;#010101&#39;
-color: black  #text color
-style: center
----
+6</code></pre></div></td><td class="code"><div class="highlight"><pre>def myf(x):
+    return (5*x)**2
 
-# Example headline!
-and so on..
+bounds = [(-2,2)]
+
+myProblem = GPyOpt.methods.BayesianOptimization(myf,bounds)
 </pre></div>
 </td></tr></table>
 
 <ul>
-  <li>Create a second post called <code>2014-01-02-art.md</code> with an divider image this time:</li>
+  <li>Solve it!</li>
 </ul>
 
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><code class="language-text" data-lang="text">1
 2
-3
-4
-5
-6
-7
-8</code></pre></div></td><td class="code"><div class="highlight"><pre>---
-title: &quot;Art&quot;
-bg: turquoise  #defined in _config.yml, can use html color like &#39;#0fbfcf&#39;
-color: white   #text color
-fa-icon: paint-brush
----
-
-#### A new section- oh the humanity!
+3</code></pre></div></td><td class="code"><div class="highlight"><pre>myProblem.start_optimization()
+myProblem.x_opt
+array([ 0.00340391])
 </pre></div>
 </td></tr></table>
 
-<p><strong>Note:</strong> That part <code>fa-icon: paint-brush</code> will use a font-awesome icon of <a href="http://fortawesome.github.io/Font-Awesome/icon/paint-brush/">paint-brush</a>. You can use any icon from this <a href="http://fortawesome.github.io/Font-Awesome/icons/">font-awesome icon directory</a>.</p>
-
-<ul>
-  <li>install Jekyll with <code>sudo gem install github-pages</code></li>
-  <li>run <code>jekyll serve -w</code>
-    <ul>
-      <li>visit <a href="http://localhost:4000">localhost:4000</a> to see a live locally served preview.</li>
-    </ul>
-  </li>
-  <li>Push changes and see them live!</li>
-</ul>
-
-<h2 style="margin-top:100px;" id="changing-your-colors"><strong>Changing your colors</strong></h2>
-
-<ul>
-  <li>In each post file you can define <code>bg: mycolor</code> and <code>color: myothercolor</code> to change the background and text colors for that section.</li>
-  <li><strong>mycolor</strong> can be a quoted html color like <code>'#0fbfcf'</code> or a key to a special color defined in <strong>_config.yml</strong> under ‘colors’.
-    <ul>
-      <li><strong>Note:</strong> Changes to _config.yml require a manual restart to your local server with <code>^C</code> and <code>jekyll serve -w</code>.</li>
-    </ul>
-  </li>
-</ul>
-
-<p>Nifty, right!</p>
-
-<h3 style="margin-top:100px;" id="also-see-readmemd-on-githubhttpsgithubcomt413singlepagedusage">Also see <strong>README.md</strong> <a href="https://github.com/t413/SinglePaged#usage"><em>on github!</em></a></h3>
-
+<h3 id="gpyopt-using-a-problemconfig-file-todo"><em>GPyOpt using a problem/config file (TODO)</em></h3>
 
         </div>
       </div>
     
       
-      <div id="updating" class="section p-updating">
+      <div id="applications" class="section p-applications">
+        
+        <div class="subtlecircle sectiondivider faicon">
+          <span class="fa-stack">
+            <i class="fa fa-circle fa-stack-2x"></i>
+            <i class="fa fa-gears fa-stack-1x"></i>
+          </span>
+          <h5 class="icon-title">Applications</h5>
+        </div>
+        
+        <div class="container ">
+          
+
+        </div>
+      </div>
+    
+      
+      <div id="releases" class="section p-releases">
         
         <div class="subtlecircle sectiondivider faicon">
           <span class="fa-stack">
             <i class="fa fa-circle fa-stack-2x"></i>
             <i class="fa fa-cloud-upload fa-stack-1x"></i>
           </span>
-          <h5 class="icon-title">updating</h5>
+          <h5 class="icon-title">Releases</h5>
         </div>
         
         <div class="container ">
-          <h2 id="updating">Updating</h2>
+          <h3 id="gpyopt-releases-and-new-functionalities"><em>GPyOpt releases and new functionalities</em></h3>
 
-<p>So you’ve got a copy running and there’s some new update? Let’s update!</p>
+<ul>
+  <li><em>May, 2015</em>: The first release of GPyOpt is available on line.</li>
+</ul>
 
-<ol>
-  <li>Checkout your github-pages branch
-    <ul>
-      <li><code>git checkout gh-pages</code> for a standalone or existing page</li>
-      <li><code>git checkout master</code> for a <em>username.github.io</em> page</li>
-    </ul>
-  </li>
-  <li>run <code>git remote | grep -q "singlepage" || git remote add -t publish singlepage https://github.com/t413/SinglePaged.git</code> to be sure you have access to this repository (you can run this command at any time).</li>
-  <li><code>git fetch singlepage</code> to fetch-in-place new changes.</li>
-  <li>Update to the new base (using merge)
-    <ol>
-      <li><code>git merge singlepage/publish</code></li>
-    </ol>
-  </li>
-  <li>You can alternatively update using rebase. This <em>rewrites history</em> (<strong>bad</strong>), but it is cleaner.
-    <ol>
-      <li><code>git rebase singlepage/publish</code></li>
-    </ol>
-  </li>
-</ol>
 
         </div>
       </div>
