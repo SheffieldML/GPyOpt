@@ -1,0 +1,435 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>GPyOpt.core package &mdash; GPyOpt  documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="GPyOpt  documentation" href="index.html" />
+    <link rel="up" title="GPyOpt package" href="GPyOpt.html" />
+    <link rel="next" title="GPyOpt.fmodels package" href="GPyOpt.fmodels.html" />
+    <link rel="prev" title="GPyOpt package" href="GPyOpt.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.fmodels.html" title="GPyOpt.fmodels package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.html" title="GPyOpt package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="GPyOpt.html" accesskey="U">GPyOpt package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="gpyopt-core-package">
+<h1>GPyOpt.core package<a class="headerlink" href="#gpyopt-core-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-GPyOpt.core.acquisition">
+<span id="gpyopt-core-acquisition-module"></span><h2>GPyOpt.core.acquisition module<a class="headerlink" href="#module-GPyOpt.core.acquisition" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.core.acquisition.AcquisitionBase">
+<em class="property">class </em><code class="descclassname">GPyOpt.core.acquisition.</code><code class="descname">AcquisitionBase</code><span class="sig-paren">(</span><em>acquisition_par=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/acquisition.html#AcquisitionBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.acquisition.AcquisitionBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Base class for acquisition functions in Bayesian Optimization</p>
+<dl class="method">
+<dt id="GPyOpt.core.acquisition.AcquisitionBase.acquisition_function">
+<code class="descname">acquisition_function</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/acquisition.html#AcquisitionBase.acquisition_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.acquisition.AcquisitionBase.acquisition_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.core.acquisition.AcquisitionBase.d_acquisition_function">
+<code class="descname">d_acquisition_function</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/acquisition.html#AcquisitionBase.d_acquisition_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.acquisition.AcquisitionBase.d_acquisition_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.core.acquisition.AcquisitionEI">
+<em class="property">class </em><code class="descclassname">GPyOpt.core.acquisition.</code><code class="descname">AcquisitionEI</code><span class="sig-paren">(</span><em>acquisition_par=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/acquisition.html#AcquisitionEI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.acquisition.AcquisitionEI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.core.acquisition.AcquisitionBase" title="GPyOpt.core.acquisition.AcquisitionBase"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.core.acquisition.AcquisitionBase</span></code></a></p>
+<p>Class for Expected improvement acquisition functions.</p>
+<dl class="method">
+<dt id="GPyOpt.core.acquisition.AcquisitionEI.acquisition_function">
+<code class="descname">acquisition_function</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/acquisition.html#AcquisitionEI.acquisition_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.acquisition.AcquisitionEI.acquisition_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expected Improvement</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.core.acquisition.AcquisitionEI.d_acquisition_function">
+<code class="descname">d_acquisition_function</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/acquisition.html#AcquisitionEI.d_acquisition_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.acquisition.AcquisitionEI.d_acquisition_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derivative of the Expected Improvement</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.core.acquisition.AcquisitionLCB">
+<em class="property">class </em><code class="descclassname">GPyOpt.core.acquisition.</code><code class="descname">AcquisitionLCB</code><span class="sig-paren">(</span><em>acquisition_par=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/acquisition.html#AcquisitionLCB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.acquisition.AcquisitionLCB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.core.acquisition.AcquisitionBase" title="GPyOpt.core.acquisition.AcquisitionBase"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.core.acquisition.AcquisitionBase</span></code></a></p>
+<p>Class for Upper (lower) Confidence Band acquisition functions.</p>
+<dl class="method">
+<dt id="GPyOpt.core.acquisition.AcquisitionLCB.acquisition_function">
+<code class="descname">acquisition_function</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/acquisition.html#AcquisitionLCB.acquisition_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.acquisition.AcquisitionLCB.acquisition_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upper Confidence Band</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.core.acquisition.AcquisitionLCB.d_acquisition_function">
+<code class="descname">d_acquisition_function</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/acquisition.html#AcquisitionLCB.d_acquisition_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.acquisition.AcquisitionLCB.d_acquisition_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derivative of the Upper Confidence Band</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.core.acquisition.AcquisitionMPI">
+<em class="property">class </em><code class="descclassname">GPyOpt.core.acquisition.</code><code class="descname">AcquisitionMPI</code><span class="sig-paren">(</span><em>acquisition_par=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/acquisition.html#AcquisitionMPI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.acquisition.AcquisitionMPI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.core.acquisition.AcquisitionBase" title="GPyOpt.core.acquisition.AcquisitionBase"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.core.acquisition.AcquisitionBase</span></code></a></p>
+<p>Class for Maximum Posterior Improvement acquisition functions.</p>
+<dl class="method">
+<dt id="GPyOpt.core.acquisition.AcquisitionMPI.acquisition_function">
+<code class="descname">acquisition_function</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/acquisition.html#AcquisitionMPI.acquisition_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.acquisition.AcquisitionMPI.acquisition_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum Posterior Improvement</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.core.acquisition.AcquisitionMPI.d_acquisition_function">
+<code class="descname">d_acquisition_function</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/acquisition.html#AcquisitionMPI.d_acquisition_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.acquisition.AcquisitionMPI.d_acquisition_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derivative of the Maximum Posterior Improvement</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.core.bo">
+<span id="gpyopt-core-bo-module"></span><h2>GPyOpt.core.bo module<a class="headerlink" href="#module-GPyOpt.core.bo" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.core.bo.BO">
+<em class="property">class </em><code class="descclassname">GPyOpt.core.bo.</code><code class="descname">BO</code><span class="sig-paren">(</span><em>acquisition_func</em>, <em>bounds=None</em>, <em>model_optimize_interval=None</em>, <em>model_optimize_restarts=None</em>, <em>model_data_init=None</em>, <em>normalize=None</em>, <em>verbosity=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/bo.html#BO"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.bo.BO" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="GPyOpt.core.bo.BO.change_to_sparseGP">
+<code class="descname">change_to_sparseGP</code><span class="sig-paren">(</span><em>num_inducing</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/bo.html#BO.change_to_sparseGP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.bo.BO.change_to_sparseGP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes standard GP estimation to sparse GP estimation</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">param num__inducing:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">number of inducing points for sparse-GP modeling</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.core.bo.BO.change_to_standardGP">
+<code class="descname">change_to_standardGP</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/bo.html#BO.change_to_standardGP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.bo.BO.change_to_standardGP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes sparse GP estimation to standard GP estimation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.core.bo.BO.continue_optimization">
+<code class="descname">continue_optimization</code><span class="sig-paren">(</span><em>max_iter</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/bo.html#BO.continue_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.bo.BO.continue_optimization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Continues Bayesian Optimization for a number H of iterations. Requires prior initialization with self.start_optimization</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>max_iter</strong> &#8211; new exploration horizon, or number of extra iterations</li>
+<li><strong>verbose</strong> &#8211; show messages</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.core.bo.BO.plot_acquisition">
+<code class="descname">plot_acquisition</code><span class="sig-paren">(</span><em>filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/bo.html#BO.plot_acquisition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.bo.BO.plot_acquisition" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Plots the model and the acquisition function.</dt>
+<dd>if self.input_dim = 1: Plots data, mean and variance in one plot and the acquisition function in another plot
+if self.input_dim = 2: as before but it separates the mean and variance of the model in two different plots</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> &#8211; name of the file where the plot is saved</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.core.bo.BO.plot_convergence">
+<code class="descname">plot_convergence</code><span class="sig-paren">(</span><em>filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/bo.html#BO.plot_convergence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.bo.BO.plot_convergence" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Makes three plots to evaluate the convergence of the model</dt>
+<dd>plot 1: Iterations vs. distance between consecutive selected x&#8217;s
+plot 2: Iterations vs. the mean of the current model in the selected sample.
+plot 3: Iterations vs. the variance of the current model in the selected sample.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> &#8211; name of the file where the plot is saved</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.core.bo.BO.start_optimization">
+<code class="descname">start_optimization</code><span class="sig-paren">(</span><em>max_iter=25</em>, <em>n_inbatch=1</em>, <em>acqu_optimize_method='random'</em>, <em>batch_method='predictive'</em>, <em>acqu_optimize_restarts=10</em>, <em>stop_criteria=1e-16</em>, <em>n_procs=1</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/bo.html#BO.start_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.bo.BO.start_optimization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Starts Bayesian Optimization for a number H of iterations (after the initial exploration data)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>max_iter</strong> &#8211; exploration horizon, or number of iterations  
+:param n_inbatch: number of samples to collect in each batch (one by default)</li>
+<li><strong>acqu_optimize_method</strong> &#8211; <dl class="docutils">
+<dt>method to optimize the acquisition function </dt>
+<dd>-&#8216;brute&#8217;: uses a uniform lattice with &#8216;acqu_optimize_restarts&#8217; points per dimension. A local CG gradient is run the best point.
+-&#8216;random&#8217;: takes the best of &#8216;acqu_optimize_restarts&#8217; local random optimizers.</dd>
+</dl>
+<p>-&#8216;fast_brute&#8217;:
+-&#8216;fast_random&#8217;:</p>
+</li>
+<li><strong>nb</strong> &#8211; number of samples to collect in each batch (one by default)
+:param batch_method: method to collect samples in batches
+-&#8216;predictive&#8217;: uses the predicted mean in the selected sample to update the acquisition function.
+-&#8216;mp&#8217;: used a penalization of the acquisition function to based on exclusion zones.
+-&#8216;random&#8217;: collects the element of the batch randomly
+-&#8216;sm&#8217;: simulating matching methods.</li>
+<li><strong>acqu_optimize_restarts</strong> &#8211; numbers of random restarts in the optimization of the acquisition function, default = 10.</li>
+<li><strong>stop_criteria</strong> &#8211; minimum distance between two consecutive x&#8217;s to keep running the model</li>
+<li><strong>n_procs</strong> &#8211; The number of processes used for evaluating the given function <em>f</em></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>..Note : X and Y can be None. In this case Nrandom*model_dimension data are uniformly generated to initialize the model.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.core.optimization">
+<span id="gpyopt-core-optimization-module"></span><h2>GPyOpt.core.optimization module<a class="headerlink" href="#module-GPyOpt.core.optimization" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="GPyOpt.core.optimization.estimate_L">
+<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">estimate_L</code><span class="sig-paren">(</span><em>model</em>, <em>bounds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#estimate_L"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.estimate_L" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate the Lipschitz constant of f by taking maximizing the norm of the expectation of the gradient of <em>f</em>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="GPyOpt.core.optimization.estimate_Min">
+<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">estimate_Min</code><span class="sig-paren">(</span><em>model</em>, <em>bounds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#estimate_Min"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.estimate_Min" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes the estimated minimum as the minimum value in the sample</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="GPyOpt.core.optimization.fast_acquisition_optimization">
+<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">fast_acquisition_optimization</code><span class="sig-paren">(</span><em>acquisition</em>, <em>bounds</em>, <em>acqu_optimize_restarts</em>, <em>model</em>, <em>method_type</em>, <em>X_batch=None</em>, <em>L=None</em>, <em>Min=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#fast_acquisition_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.fast_acquisition_optimization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimizes the acquisition function using a local optimizer in the best point</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="GPyOpt.core.optimization.full_acquisition_optimization">
+<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">full_acquisition_optimization</code><span class="sig-paren">(</span><em>acquisition</em>, <em>bounds</em>, <em>acqu_optimize_restarts</em>, <em>model</em>, <em>method_type</em>, <em>X_batch=None</em>, <em>L=None</em>, <em>Min=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#full_acquisition_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.full_acquisition_optimization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimizes the acquisition function by taking the best of a number of local optimizers</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="GPyOpt.core.optimization.hammer_function">
+<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">hammer_function</code><span class="sig-paren">(</span><em>x</em>, <em>x0</em>, <em>r_x0</em>, <em>s_x0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#hammer_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.hammer_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the function to define the exclusion zones</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="GPyOpt.core.optimization.hammer_function_precompute">
+<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">hammer_function_precompute</code><span class="sig-paren">(</span><em>x0</em>, <em>L</em>, <em>Min</em>, <em>model</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#hammer_function_precompute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.hammer_function_precompute" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="GPyOpt.core.optimization.mp_batch_optimization">
+<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">mp_batch_optimization</code><span class="sig-paren">(</span><em>acquisition</em>, <em>bounds</em>, <em>acqu_optimize_restarts</em>, <em>acqu_optimize_method</em>, <em>model</em>, <em>n_inbatch</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#mp_batch_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.mp_batch_optimization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes batch optimization using by acquisition penalization using Lipschitz inference.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>acquisition</strong> &#8211; acquisition function in which the batch selection is based</li>
+<li><strong>bounds</strong> &#8211; the box constrains of the optimization</li>
+<li><strong>restarts</strong> &#8211; the number of restarts in the optimization of the surrogate</li>
+<li><strong>method</strong> &#8211; the method to optimize the acquisition function</li>
+<li><strong>model</strong> &#8211; the GP model based on the current samples</li>
+<li><strong>n_inbatch</strong> &#8211; the number of samples to collect</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="GPyOpt.core.optimization.optimize_acquisition">
+<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">optimize_acquisition</code><span class="sig-paren">(</span><em>acquisition</em>, <em>bounds</em>, <em>acqu_optimize_restarts</em>, <em>acqu_optimize_method</em>, <em>model</em>, <em>X_batch=None</em>, <em>L=None</em>, <em>Min=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#optimize_acquisition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.optimize_acquisition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimization of the acquisition function</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="GPyOpt.core.optimization.penalized_acquisition">
+<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">penalized_acquisition</code><span class="sig-paren">(</span><em>x</em>, <em>acquisition</em>, <em>bounds</em>, <em>model</em>, <em>X_batch</em>, <em>r_x0</em>, <em>s_x0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#penalized_acquisition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.penalized_acquisition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a penalized acquisition function using &#8216;hammer&#8217; functions around the points collected in the batch</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="GPyOpt.core.optimization.predictive_batch_optimization">
+<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">predictive_batch_optimization</code><span class="sig-paren">(</span><em>acqu_name</em>, <em>acquisition_par</em>, <em>acquisition</em>, <em>bounds</em>, <em>acqu_optimize_restarts</em>, <em>acqu_optimize_method</em>, <em>model</em>, <em>n_inbatch</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#predictive_batch_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.predictive_batch_optimization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes batch optimization using the predictive mean to obtain new batch elements</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>acquisition</strong> &#8211; acquisition function in which the batch selection is based</li>
+<li><strong>bounds</strong> &#8211; the box constrains of the optimization</li>
+<li><strong>restarts</strong> &#8211; the number of restarts in the optimization of the surrogate</li>
+<li><strong>method</strong> &#8211; the method to optimize the acquisition function</li>
+<li><strong>model</strong> &#8211; the GP model based on the current samples</li>
+<li><strong>n_inbatch</strong> &#8211; the number of samples to collect</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="GPyOpt.core.optimization.random_batch_optimization">
+<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">random_batch_optimization</code><span class="sig-paren">(</span><em>acquisition</em>, <em>bounds</em>, <em>acqu_optimize_restarts</em>, <em>acqu_optimize_method</em>, <em>model</em>, <em>n_inbatch</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#random_batch_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.random_batch_optimization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the batch optimization taking random samples (only for comparative purposes)</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.core">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-GPyOpt.core" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">GPyOpt.core package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.core.acquisition">GPyOpt.core.acquisition module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.core.bo">GPyOpt.core.bo module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.core.optimization">GPyOpt.core.optimization module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.core">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="GPyOpt.html"
+                        title="previous chapter">GPyOpt package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="GPyOpt.fmodels.html"
+                        title="next chapter">GPyOpt.fmodels package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/GPyOpt.core.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Javier Gonzalez.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+      |
+      <a href="_sources/GPyOpt.core.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>
