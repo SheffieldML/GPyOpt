@@ -1,0 +1,182 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>GPyOpt.core.acquisition &mdash; GPyOpt  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="GPyOpt  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for GPyOpt.core.acquisition</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">..util.general</span> <span class="kn">import</span> <span class="n">get_moments</span><span class="p">,</span> <span class="n">get_quantiles</span>
+
+<div class="viewcode-block" id="AcquisitionBase"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.acquisition.AcquisitionBase">[docs]</a><span class="k">class</span> <span class="nc">AcquisitionBase</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Base class for acquisition functions in Bayesian Optimization</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acquisition_par</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">None</span>
+		<span class="k">if</span> <span class="n">acquisition_par</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> 
+			<span class="bp">self</span><span class="o">.</span><span class="n">acquisition_par</span> <span class="o">=</span> <span class="mf">0.01</span>
+		<span class="k">else</span><span class="p">:</span> 
+			<span class="bp">self</span><span class="o">.</span><span class="n">acquisition_par</span> <span class="o">=</span> <span class="n">acquisition_par</span> 		
+
+<div class="viewcode-block" id="AcquisitionBase.acquisition_function"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.acquisition.AcquisitionBase.acquisition_function">[docs]</a>	<span class="k">def</span> <span class="nf">acquisition_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+		<span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="AcquisitionBase.d_acquisition_function"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.acquisition.AcquisitionBase.d_acquisition_function">[docs]</a>	<span class="k">def</span> <span class="nf">d_acquisition_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+		<span class="k">pass</span>
+
+</div></div>
+<div class="viewcode-block" id="AcquisitionEI"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.acquisition.AcquisitionEI">[docs]</a><span class="k">class</span> <span class="nc">AcquisitionEI</span><span class="p">(</span><span class="n">AcquisitionBase</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Class for Expected improvement acquisition functions.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="AcquisitionEI.acquisition_function"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.acquisition.AcquisitionEI.acquisition_function">[docs]</a>	<span class="k">def</span> <span class="nf">acquisition_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Expected Improvement</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">m</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">fmin</span> <span class="o">=</span> <span class="n">get_moments</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> 	
+		<span class="n">phi</span><span class="p">,</span> <span class="n">Phi</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">get_quantiles</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acquisition_par</span><span class="p">,</span> <span class="n">fmin</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>	
+		<span class="n">f_acqu</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">acquisition_par</span><span class="p">)</span><span class="o">*</span><span class="n">fmin</span><span class="o">-</span><span class="n">m</span><span class="p">)</span> <span class="o">*</span> <span class="n">Phi</span> <span class="o">+</span> <span class="n">s</span> <span class="o">*</span> <span class="n">phi</span>
+		<span class="k">return</span> <span class="o">-</span><span class="n">f_acqu</span>  <span class="c"># note: returns negative value for posterior minimization </span>
+</div>
+<div class="viewcode-block" id="AcquisitionEI.d_acquisition_function"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.acquisition.AcquisitionEI.d_acquisition_function">[docs]</a>	<span class="k">def</span> <span class="nf">d_acquisition_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Derivative of the Expected Improvement</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">m</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">fmin</span> <span class="o">=</span> <span class="n">get_moments</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+		<span class="n">phi</span><span class="p">,</span> <span class="n">Phi</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">get_quantiles</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acquisition_par</span><span class="p">,</span> <span class="n">fmin</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>	
+		<span class="n">dmdx</span><span class="p">,</span> <span class="n">dsdx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predictive_gradients</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+		<span class="n">df_acqu</span> <span class="o">=</span> <span class="o">-</span><span class="n">dmdx</span> <span class="o">*</span> <span class="n">Phi</span>  <span class="o">+</span> <span class="n">dsdx</span> <span class="o">*</span> <span class="n">phi</span>
+		<span class="k">return</span> <span class="o">-</span><span class="n">df_acqu</span>
+		
+</div></div>
+<div class="viewcode-block" id="AcquisitionMPI"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.acquisition.AcquisitionMPI">[docs]</a><span class="k">class</span> <span class="nc">AcquisitionMPI</span><span class="p">(</span><span class="n">AcquisitionBase</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Class for Maximum Posterior Improvement acquisition functions.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="AcquisitionMPI.acquisition_function"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.acquisition.AcquisitionMPI.acquisition_function">[docs]</a>	<span class="k">def</span> <span class="nf">acquisition_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Maximum Posterior Improvement</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">m</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">fmin</span> <span class="o">=</span> <span class="n">get_moments</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> 	
+		<span class="n">_</span><span class="p">,</span> <span class="n">Phi</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">get_quantiles</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acquisition_par</span><span class="p">,</span> <span class="n">fmin</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>	
+		<span class="n">f_acqu</span> <span class="o">=</span>  <span class="n">Phi</span>
+		<span class="k">return</span> <span class="o">-</span><span class="n">f_acqu</span>  <span class="c"># note: returns negative value for posterior minimization </span>
+</div>
+<div class="viewcode-block" id="AcquisitionMPI.d_acquisition_function"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.acquisition.AcquisitionMPI.d_acquisition_function">[docs]</a>	<span class="k">def</span> <span class="nf">d_acquisition_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Derivative of the Maximum Posterior Improvement</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">m</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">fmin</span> <span class="o">=</span> <span class="n">get_moments</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+		<span class="n">_</span><span class="p">,</span> <span class="n">Phi</span><span class="p">,</span> <span class="n">u</span> <span class="o">=</span> <span class="n">get_quantiles</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acquisition_par</span><span class="p">,</span> <span class="n">fmin</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>	
+		<span class="n">dmdx</span><span class="p">,</span> <span class="n">dsdx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predictive_gradients</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+		<span class="n">df_acqu</span> <span class="o">=</span> <span class="p">(</span><span class="n">Phi</span><span class="o">/</span><span class="n">s</span><span class="p">)</span><span class="o">*</span> <span class="p">(</span><span class="n">dmdx</span> <span class="o">+</span> <span class="n">dsdx</span> <span class="o">+</span> <span class="n">u</span><span class="p">)</span>
+		<span class="k">return</span> <span class="o">-</span><span class="n">df_acqu</span>
+
+</div></div>
+<div class="viewcode-block" id="AcquisitionLCB"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.acquisition.AcquisitionLCB">[docs]</a><span class="k">class</span> <span class="nc">AcquisitionLCB</span><span class="p">(</span><span class="n">AcquisitionBase</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Class for Upper (lower) Confidence Band acquisition functions.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="AcquisitionLCB.acquisition_function"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.acquisition.AcquisitionLCB.acquisition_function">[docs]</a>	<span class="k">def</span> <span class="nf">acquisition_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Upper Confidence Band</span>
+<span class="sd">		&quot;&quot;&quot;</span>		
+		<span class="n">m</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">get_moments</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> 	
+		<span class="n">f_acqu</span> <span class="o">=</span> <span class="o">-</span><span class="n">m</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_par</span> <span class="o">*</span> <span class="n">s</span>
+		<span class="k">return</span> <span class="o">-</span><span class="n">f_acqu</span>  <span class="c"># note: returns negative value for posterior minimization </span>
+</div>
+<div class="viewcode-block" id="AcquisitionLCB.d_acquisition_function"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.acquisition.AcquisitionLCB.d_acquisition_function">[docs]</a>	<span class="k">def</span> <span class="nf">d_acquisition_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Derivative of the Upper Confidence Band</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">dmdx</span><span class="p">,</span> <span class="n">dsdx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predictive_gradients</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+		<span class="n">df_acqu</span> <span class="o">=</span> <span class="o">-</span><span class="n">dmdx</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_par</span> <span class="o">*</span> <span class="n">dsdx</span>
+		<span class="k">return</span> <span class="o">-</span><span class="n">df_acqu</span>
+
+<span class="c">######</span>
+<span class="c">###### NOTE!!, the derivatives are with respect to the variance not the standard deviation.</span>
+<span class="c">######</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Javier Gonzalez.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

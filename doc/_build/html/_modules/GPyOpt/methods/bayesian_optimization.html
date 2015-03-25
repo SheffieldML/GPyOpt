@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>GPyOpt.methods.bayesian_optimization &mdash; GPyOpt  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="GPyOpt  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for GPyOpt.methods.bayesian_optimization</h1><div class="highlight"><pre>
+<span class="c"># Copyright (c) 2015, Javier Gonzalez</span>
+<span class="c"># Copyright (c) 2015, the GPy Authors (see GPy AUTHORS.txt)</span>
+<span class="c"># Licensed under the BSD 3-clause license (see LICENSE.txt)</span>
+
+<span class="kn">import</span> <span class="nn">GPy</span>
+
+<span class="kn">from</span> <span class="nn">..core.acquisition</span> <span class="kn">import</span> <span class="n">AcquisitionEI</span><span class="p">,</span> <span class="n">AcquisitionMPI</span><span class="p">,</span> <span class="n">AcquisitionLCB</span> 
+<span class="kn">from</span> <span class="nn">..core.bo</span> <span class="kn">import</span> <span class="n">BO</span>
+<span class="kn">from</span> <span class="nn">..util.general</span> <span class="kn">import</span> <span class="n">samples_multidimensional_uniform</span>
+
+
+<div class="viewcode-block" id="BayesianOptimization"><a class="viewcode-back" href="../../../GPyOpt.methods.html#GPyOpt.methods.bayesian_optimization.BayesianOptimization">[docs]</a><span class="k">class</span> <span class="nc">BayesianOptimization</span><span class="p">(</span><span class="n">BO</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Bayesian Optimization using EI, MPI and LCB (or UCB) acquisition functions.</span>
+
+<span class="sd">    This is a thin wrapper around the methods.BO class, with a set of sensible defaults</span>
+
+<span class="sd">    :param: f the function to optimize</span>
+<span class="sd">    :param bounds: Tuple containing the box constrains of the function to optimize. Example: for [0,1]x[0,1] insert [(0,1),(0,1)].  </span>
+<span class="sd">    :param X: input observations</span>
+<span class="sd">    :param Y: output values</span>
+<span class="sd">    :param kernel: a GPy kernel, defaults to rbf + bias.</span>
+<span class="sd">    :param optimize_model: Unless specified otherwise the parameters of the model are updated after each iteration. </span>
+<span class="sd">    :param model_optimize_interval: number of iterations after which the parameters of the model are optimized.   </span>
+<span class="sd">    :param model_optimize_restarts: number of initial points for the GP parameters optimization (5, default)</span>
+<span class="sd">    :param acquisition: acquisition function (&#39;EI&#39; &#39;MPI&#39; or LCB). Default, EI.</span>
+<span class="sd">    :param acquisition_par: parameter of the acquisition function. </span>
+<span class="sd">    :param model_data_init: number of initial random evaluations of f is X and Y are not provided (default, 3*input_dim).  </span>
+<span class="sd">    :param sparse: whether to use an sparse GP (False, default).</span>
+<span class="sd">    :param num_inducing: number of inducing points for a Sparse GP (None, default)</span>
+<span class="sd">    :param normalize: whether to normalize the Y&#39;s for optimization (False, default).</span>
+<span class="sd">    :param verbosity: whether to show (1) or not (0, default) the value of the log-likelihood of the model for the optimized parameters.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">optimize_model</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">model_optimize_interval</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">model_optimize_restarts</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">acquisition</span><span class="o">=</span><span class="s">&#39;EI&#39;</span><span class="p">,</span> <span class="n">acquisition_par</span><span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>  <span class="n">model_data_init</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">sparse</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">num_inducing</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_data_init</span> <span class="o">=</span> <span class="n">model_data_init</span>  
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_inducing</span> <span class="o">=</span> <span class="n">num_inducing</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sparse</span> <span class="o">=</span> <span class="n">sparse</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span> <span class="o">=</span> <span class="n">normalize</span>
+        <span class="k">if</span> <span class="n">f</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span> 
+            <span class="k">print</span> <span class="s">&#39;Function to optimize is required.&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">f</span>
+        
+        <span class="c"># ------- Initialize model </span>
+        <span class="k">if</span> <span class="n">bounds</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span> 
+            <span class="k">raise</span> <span class="s">&#39;Box constraints are needed. Please insert box constrains.&#39;</span> 
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span>
+        <span class="k">if</span>  <span class="n">model_data_init</span> <span class="o">==</span><span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_data_init</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_data_init</span> <span class="o">=</span> <span class="n">model_data_init</span>
+        <span class="k">if</span> <span class="n">X</span><span class="o">==</span><span class="bp">None</span> <span class="ow">or</span> <span class="n">Y</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">samples_multidimensional_uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_data_init</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Y</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span>
+        <span class="k">if</span> <span class="n">kernel</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="o">=</span> <span class="n">GPy</span><span class="o">.</span><span class="n">kern</span><span class="o">.</span><span class="n">RBF</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">variance</span><span class="o">=.</span><span class="mi">1</span><span class="p">,</span> <span class="n">lengthscale</span><span class="o">=.</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">GPy</span><span class="o">.</span><span class="n">kern</span><span class="o">.</span><span class="n">Bias</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="o">=</span> <span class="n">kernel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_model</span><span class="p">()</span>
+        
+
+        <span class="c"># ------- Initialize acquisition function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acqu_name</span> <span class="o">=</span> <span class="n">acquisition</span>
+        <span class="k">if</span>  <span class="n">acquisition_par</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_par</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_par</span> <span class="o">=</span> <span class="n">acquisition_par</span>
+        
+        <span class="k">if</span> <span class="n">acquisition</span><span class="o">==</span><span class="bp">None</span> <span class="ow">or</span> <span class="n">acquisition</span><span class="o">==</span><span class="s">&#39;EI&#39;</span><span class="p">:</span> 
+            <span class="n">acq</span> <span class="o">=</span> <span class="n">AcquisitionEI</span><span class="p">(</span><span class="n">acquisition_par</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">acquisition</span><span class="o">==</span><span class="s">&#39;MPI&#39;</span><span class="p">:</span>
+            <span class="n">acq</span> <span class="o">=</span> <span class="n">AcquisitionMPI</span><span class="p">(</span><span class="n">acquisition_par</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">acquisition</span><span class="o">==</span><span class="s">&#39;LCB&#39;</span><span class="p">:</span>
+            <span class="n">acq</span> <span class="o">=</span> <span class="n">AcquisitionLCB</span><span class="p">(</span><span class="n">acquisition_par</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>   
+            <span class="k">print</span> <span class="s">&#39;The selected acquisition function is not valid. Please try again with EI, MPI, or LCB&#39;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">acquisition</span><span class="o">==</span><span class="s">&#39;EI&#39;</span> <span class="ow">or</span> <span class="n">acquisition</span><span class="o">==</span><span class="s">&#39;MPI&#39;</span> <span class="ow">or</span> <span class="n">acquisition</span> <span class="o">==</span><span class="s">&#39;LCB&#39;</span><span class="p">):</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">BayesianOptimization</span> <span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">acquisition_func</span><span class="o">=</span><span class="n">acq</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">model_optimize_interval</span><span class="o">=</span><span class="n">model_optimize_interval</span><span class="p">,</span> <span class="n">model_optimize_restarts</span><span class="o">=</span><span class="n">model_optimize_restarts</span><span class="p">,</span> <span class="n">model_data_init</span><span class="o">=</span><span class="n">model_data_init</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="n">normalize</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="n">verbosity</span><span class="p">)</span>
+    
+    
+    <span class="k">def</span> <span class="nf">_init_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Initializes the Gaussian Process over *f*.</span>
+<span class="sd">        :param X: input observations.</span>
+<span class="sd">        :param Y: output values.</span>
+
+<span class="sd">        ..Note : X and Y can be None. In this case Nrandom*model_dimension data are uniformly generated to initialize the model.</span>
+<span class="sd">        </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sparse</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_inducing</span> <span class="o">==</span><span class="bp">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="s">&#39;Sparse model, please insert the number of inducing points&#39;</span>
+            <span class="k">else</span><span class="p">:</span>           
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">GPy</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">SparseGPRegression</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="p">,</span> <span class="n">num_inducing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_inducing</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>       
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">GPy</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">GPRegression</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">,</span><span class="n">kernel</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="p">)</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Javier Gonzalez.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
