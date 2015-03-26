@@ -15,7 +15,7 @@ The code can be found on our Github project page. It is open source and provided
 Contents:
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    GPyOpt
 

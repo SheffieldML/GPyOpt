@@ -59,12 +59,11 @@
 
 
 <div class="viewcode-block" id="BayesianOptimization"><a class="viewcode-back" href="../../../GPyOpt.methods.html#GPyOpt.methods.bayesian_optimization.BayesianOptimization">[docs]</a><span class="k">class</span> <span class="nc">BayesianOptimization</span><span class="p">(</span><span class="n">BO</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Bayesian Optimization using EI, MPI and LCB (or UCB) acquisition functions.</span>
 
 <span class="sd">    This is a thin wrapper around the methods.BO class, with a set of sensible defaults</span>
-
-<span class="sd">    :param f the function to optimize</span>
+<span class="sd">    :param f the function to optimize.</span>
 <span class="sd">    :param bounds: Tuple containing the box constrains of the function to optimize. Example: for [0,1]x[0,1] insert [(0,1),(0,1)].  </span>
 <span class="sd">    :param X: input observations</span>
 <span class="sd">    :param Y: output values</span>
@@ -80,7 +79,7 @@
 <span class="sd">    :param normalize: whether to normalize the Y&#39;s for optimization (False, default).</span>
 <span class="sd">    :param verbosity: whether to show (1) or not (0, default) the value of the log-likelihood of the model for the optimized parameters.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">optimize_model</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">model_optimize_interval</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">model_optimize_restarts</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">acquisition</span><span class="o">=</span><span class="s">&#39;EI&#39;</span><span class="p">,</span> <span class="n">acquisition_par</span><span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>  <span class="n">model_data_init</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">sparse</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">num_inducing</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_data_init</span> <span class="o">=</span> <span class="n">model_data_init</span>  
         <span class="bp">self</span><span class="o">.</span><span class="n">num_inducing</span> <span class="o">=</span> <span class="n">num_inducing</span>

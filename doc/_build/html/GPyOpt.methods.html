@@ -66,8 +66,8 @@
 <em class="property">class </em><code class="descclassname">GPyOpt.methods.bayesian_optimization.</code><code class="descname">BayesianOptimization</code><span class="sig-paren">(</span><em>f</em>, <em>bounds=None</em>, <em>kernel=None</em>, <em>X=None</em>, <em>Y=None</em>, <em>optimize_model=None</em>, <em>model_optimize_interval=1</em>, <em>model_optimize_restarts=5</em>, <em>acquisition='EI'</em>, <em>acquisition_par=0.01</em>, <em>model_data_init=None</em>, <em>sparse=False</em>, <em>num_inducing=None</em>, <em>normalize=False</em>, <em>verbosity=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/methods/bayesian_optimization.html#BayesianOptimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.methods.bayesian_optimization.BayesianOptimization" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="GPyOpt.core.html#GPyOpt.core.bo.BO" title="GPyOpt.core.bo.BO"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.core.bo.BO</span></code></a></p>
 <p>Bayesian Optimization using EI, MPI and LCB (or UCB) acquisition functions.</p>
-<p>This is a thin wrapper around the methods.BO class, with a set of sensible defaults</p>
-<p>:param f the function to optimize
+<p>This is a thin wrapper around the methods.BO class, with a set of sensible defaults
+:param f the function to optimize.
 :param bounds: Tuple containing the box constrains of the function to optimize. Example: for [0,1]x[0,1] insert [(0,1),(0,1)].  
 :param X: input observations
 :param Y: output values
