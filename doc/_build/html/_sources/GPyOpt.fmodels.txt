@@ -28,22 +28,6 @@ GPyOpt.fmodels.experimentsNd module
     :undoc-members:
     :show-inheritance:
 
-GPyOpt.fmodels.genesdesign module
----------------------------------
-
-.. automodule:: GPyOpt.fmodels.genesdesign
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-GPyOpt.fmodels.physical module
-------------------------------
-
-.. automodule:: GPyOpt.fmodels.physical
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 
 Module contents
 ---------------

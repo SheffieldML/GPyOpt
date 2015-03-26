@@ -8,7 +8,7 @@
     
     <title>GPyOpt.methods package &mdash; GPyOpt  documentation</title>
     
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -26,11 +26,7 @@
     <link rel="top" title="GPyOpt  documentation" href="index.html" />
     <link rel="up" title="GPyOpt package" href="GPyOpt.html" />
     <link rel="next" title="GPyOpt.plotting package" href="GPyOpt.plotting.html" />
-    <link rel="prev" title="GPyOpt.fmodels package" href="GPyOpt.fmodels.html" />
-   
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
-
+    <link rel="prev" title="GPyOpt.fmodels package" href="GPyOpt.fmodels.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -71,33 +67,21 @@
 <dd><p>Bases: <a class="reference internal" href="GPyOpt.core.html#GPyOpt.core.bo.BO" title="GPyOpt.core.bo.BO"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.core.bo.BO</span></code></a></p>
 <p>Bayesian Optimization using EI, MPI and LCB (or UCB) acquisition functions.</p>
 <p>This is a thin wrapper around the methods.BO class, with a set of sensible defaults</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Param:</th><td class="field-body"><p class="first">f the function to optimize</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>bounds</strong> &#8211; Tuple containing the box constrains of the function to optimize. Example: for [0,1]x[0,1] insert [(0,1),(0,1)].</li>
-<li><strong>X</strong> &#8211; input observations</li>
-<li><strong>Y</strong> &#8211; output values</li>
-<li><strong>kernel</strong> &#8211; a GPy kernel, defaults to rbf + bias.</li>
-<li><strong>optimize_model</strong> &#8211; Unless specified otherwise the parameters of the model are updated after each iteration.</li>
-<li><strong>model_optimize_interval</strong> &#8211; number of iterations after which the parameters of the model are optimized.</li>
-<li><strong>model_optimize_restarts</strong> &#8211; number of initial points for the GP parameters optimization (5, default)</li>
-<li><strong>acquisition</strong> &#8211; acquisition function (&#8216;EI&#8217; &#8216;MPI&#8217; or LCB). Default, EI.</li>
-<li><strong>acquisition_par</strong> &#8211; parameter of the acquisition function.</li>
-<li><strong>model_data_init</strong> &#8211; number of initial random evaluations of f is X and Y are not provided (default, 3*input_dim).</li>
-<li><strong>sparse</strong> &#8211; whether to use an sparse GP (False, default).</li>
-<li><strong>num_inducing</strong> &#8211; number of inducing points for a Sparse GP (None, default)</li>
-<li><strong>normalize</strong> &#8211; whether to normalize the Y&#8217;s for optimization (False, default).</li>
-<li><strong>verbosity</strong> &#8211; whether to show (1) or not (0, default) the value of the log-likelihood of the model for the optimized parameters.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
+<p>:param f the function to optimize
+:param bounds: Tuple containing the box constrains of the function to optimize. Example: for [0,1]x[0,1] insert [(0,1),(0,1)].  
+:param X: input observations
+:param Y: output values
+:param kernel: a GPy kernel, defaults to rbf + bias.
+:param optimize_model: Unless specified otherwise the parameters of the model are updated after each iteration. 
+:param model_optimize_interval: number of iterations after which the parameters of the model are optimized.   
+:param model_optimize_restarts: number of initial points for the GP parameters optimization (5, default)
+:param acquisition: acquisition function (&#8216;EI&#8217; &#8216;MPI&#8217; or LCB). Default, EI.
+:param acquisition_par: parameter of the acquisition function. 
+:param model_data_init: number of initial random evaluations of f is X and Y are not provided (default, 3*input_dim).  
+:param sparse: whether to use an sparse GP (False, default).
+:param num_inducing: number of inducing points for a Sparse GP (None, default)
+:param normalize: whether to normalize the Y&#8217;s for optimization (False, default).
+:param verbosity: whether to show (1) or not (0, default) the value of the log-likelihood of the model for the optimized parameters.</p>
 </dd></dl>
 
 </div>
@@ -152,20 +136,28 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="footer">
-      &copy;2015, Javier Gonzalez.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
-      
-      |
-      <a href="_sources/GPyOpt.methods.txt"
-          rel="nofollow">Page source</a></li>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.plotting.html" title="GPyOpt.plotting package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.fmodels.html" title="GPyOpt.fmodels package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="GPyOpt.html" >GPyOpt package</a> &raquo;</li> 
+      </ul>
     </div>
-
-    
-
-    
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Javier Gonzalez.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
   </body>
 </html>

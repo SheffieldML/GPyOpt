@@ -55,7 +55,11 @@ def get_moments(model,x):
     x = reshape(x,input_dim)
     fmin = min(model.predict(model.X)[0])
     m, v = model.predict(x)
-    return (m, np.sqrt(np.clip(v, 0, np.inf)), fmin)
+    dmdx, dvdx = model.predictive_gradients(x)
+    s = np.sqrt(np.clip(v, 0, np.inf))
+    dmdx = dmdx[:,:,0]
+    dsdx = 0.5 * v * dvdx
+    return (m,s, fmin, dmdx, dsdx)
 
 
 def get_quantiles(acquisition_par, fmin, m, s):
@@ -66,7 +70,7 @@ def get_quantiles(acquisition_par, fmin, m, s):
         s[s<1e-10] = 1e-10
     elif s< 1e-10:
         s = 1e-10
-    u = ((1+acquisition_par)*fmin-m)/s
+    u = (fmin-m+acquisition_par)/s
     phi = np.exp(-0.5 * u**2) / np.sqrt(2*np.pi)
     Phi = 0.5 * erfc(-u / np.sqrt(2))
     return (phi, Phi, u)

@@ -8,7 +8,7 @@
     
     <title>GPyOpt.fmodels.experiments2d &mdash; GPyOpt  documentation</title>
     
-    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -24,11 +24,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="top" title="GPyOpt  documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" />
-   
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
-
+    <link rel="up" title="Module code" href="../../index.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -64,25 +60,13 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">..util.general</span> <span class="kn">import</span> <span class="n">reshape</span>
 
-<span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">Benchmark of optimzation functions. </span>
-
-<span class="sd">List of avaiable functions so far:</span>
-<span class="sd">- Branin</span>
-
-<span class="sd">The classes are oriented to create a python function which contain.</span>
-<span class="sd">- *.f : the funtion itself</span>
-<span class="sd">- *.plot: a plot of the function if the dimension is &lt;=2.</span>
-<span class="sd">- *.sensitivity: The Sobol coefficient per dimension when these are available.</span>
-<span class="sd">- *.min : value of the global minimum(s) for the default parameters.</span>
-
-<span class="sd">NOTE: the imput of .f must be a nxD numpy array. The dimension is calculated within the fucntion.</span>
-
-<span class="sd">Javier Gonzalez August, 2014</span>
-<span class="sd">&#39;&#39;&#39;</span>
-
 
 <div class="viewcode-block" id="function2d"><a class="viewcode-back" href="../../../GPyOpt.fmodels.html#GPyOpt.fmodels.experiments2d.function2d">[docs]</a><span class="k">class</span> <span class="nc">function2d</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This is a benchmark of bidimensional functions interesting to optimize. </span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    
 <div class="viewcode-block" id="function2d.plot"><a class="viewcode-back" href="../../../GPyOpt.fmodels.html#GPyOpt.fmodels.experiments2d.function2d.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span>
         <span class="n">x1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="mi">100</span><span class="p">)</span>
@@ -93,7 +77,7 @@
         
         <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">gca</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s">&#39;3d&#39;</span><span class="p">)</span>
-        <span class="n">surf</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot_surface</span><span class="p">(</span><span class="n">X1</span><span class="p">,</span> <span class="n">X2</span><span class="p">,</span> <span class="n">Y</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">100</span><span class="p">,</span><span class="mi">100</span><span class="p">)),</span> <span class="n">rstride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cstride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cm</span><span class="o">.</span><span class="n">coolwarm</span><span class="p">,</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">antialiased</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot_surface</span><span class="p">(</span><span class="n">X1</span><span class="p">,</span> <span class="n">X2</span><span class="p">,</span> <span class="n">Y</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">100</span><span class="p">,</span><span class="mi">100</span><span class="p">)),</span> <span class="n">rstride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cstride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cm</span><span class="o">.</span><span class="n">coolwarm</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">antialiased</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">zaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">LinearLocator</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">zaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">FormatStrFormatter</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%.02f</span><span class="s">&#39;</span><span class="p">))</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>    
@@ -113,6 +97,12 @@
 
 </div></div>
 <div class="viewcode-block" id="cosines"><a class="viewcode-back" href="../../../GPyOpt.fmodels.html#GPyOpt.fmodels.experiments2d.cosines">[docs]</a><span class="k">class</span> <span class="nc">cosines</span><span class="p">(</span><span class="n">function2d</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Cosines function</span>
+<span class="sd">    </span>
+<span class="sd">    :param bounds: the box constraints to define the domain in which the function is optimized.</span>
+<span class="sd">    :param sd: standard deviation, to generate noisy evaluations of the function.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">sd</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="k">if</span> <span class="n">bounds</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)]</span>
@@ -140,6 +130,12 @@
 
 </div></div>
 <div class="viewcode-block" id="branin"><a class="viewcode-back" href="../../../GPyOpt.fmodels.html#GPyOpt.fmodels.experiments2d.branin">[docs]</a><span class="k">class</span> <span class="nc">branin</span><span class="p">(</span><span class="n">function2d</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Branin function</span>
+<span class="sd">    </span>
+<span class="sd">    :param bounds: the box constraints to define the domain in which the function is optimized.</span>
+<span class="sd">    :param sd: standard deviation, to generate noisy evaluations of the function.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">a</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">r</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">s</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">t</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">sd</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="k">if</span> <span class="n">bounds</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="p">[(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">),(</span><span class="mi">1</span><span class="p">,</span><span class="mi">15</span><span class="p">)]</span>
@@ -177,92 +173,14 @@
                 <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sd</span><span class="p">,</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">fval</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">noise</span>
 
-
-</div></div>
-<div class="viewcode-block" id="crossintray"><a class="viewcode-back" href="../../../GPyOpt.fmodels.html#GPyOpt.fmodels.experiments2d.crossintray">[docs]</a><span class="k">class</span> <span class="nc">crossintray</span><span class="p">(</span><span class="n">function2d</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">sd</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span> <span class="o">=</span> <span class="mi">2</span>
-        <span class="k">if</span> <span class="n">bounds</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="p">[(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">),(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">)]</span>
-        <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">1.3491</span><span class="p">,</span><span class="o">-</span><span class="mf">1.3491</span><span class="p">),(</span><span class="mf">1.3491</span><span class="p">,</span><span class="mf">1.3491</span><span class="p">),(</span><span class="o">-</span><span class="mf">1.3491</span><span class="p">,</span><span class="mf">1.3491</span><span class="p">),(</span><span class="o">-</span><span class="mf">1.3491</span><span class="p">,</span><span class="o">-</span><span class="mf">1.3491</span><span class="p">)]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fmin</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.06261</span>
-        <span class="k">if</span> <span class="n">sd</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span><span class="o">=</span><span class="n">sd</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;Cross in tray&#39;</span>
-
-<div class="viewcode-block" id="crossintray.f"><a class="viewcode-back" href="../../../GPyOpt.fmodels.html#GPyOpt.fmodels.experiments2d.crossintray.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">X</span><span class="p">):</span>
-        <span class="n">X</span> <span class="o">=</span> <span class="n">reshape</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span><span class="p">)</span>
-        <span class="n">n</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s">&#39;Wrong input dimension&#39;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">x1</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">x2</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">fval</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.0001</span> <span class="o">*</span><span class="p">(</span><span class="nb">abs</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span> <span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="mi">100</span><span class="o">-</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x1</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">x2</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="p">)</span> <span class="p">)</span> <span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">)</span><span class="o">**.</span><span class="mi">1</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span> <span class="o">==</span><span class="mi">0</span><span class="p">:</span>
-                <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sd</span><span class="p">,</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">fval</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">noise</span>
-
-</div></div>
-<div class="viewcode-block" id="dropwave"><a class="viewcode-back" href="../../../GPyOpt.fmodels.html#GPyOpt.fmodels.experiments2d.dropwave">[docs]</a><span class="k">class</span> <span class="nc">dropwave</span><span class="p">(</span><span class="n">function2d</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">sd</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span> <span class="o">=</span> <span class="mi">2</span>
-        <span class="k">if</span> <span class="n">bounds</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="p">[(</span><span class="o">-</span><span class="mf">5.12</span><span class="p">,</span><span class="mf">5.12</span><span class="p">),(</span><span class="o">-</span><span class="mf">5.12</span><span class="p">,</span><span class="mf">5.12</span><span class="p">)]</span>
-        <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fmin</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-        <span class="k">if</span> <span class="n">sd</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span><span class="o">=</span><span class="n">sd</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;Drop wave&#39;</span>
-
-<div class="viewcode-block" id="dropwave.f"><a class="viewcode-back" href="../../../GPyOpt.fmodels.html#GPyOpt.fmodels.experiments2d.dropwave.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">X</span><span class="p">):</span>
-        <span class="n">X</span> <span class="o">=</span> <span class="n">reshape</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span><span class="p">)</span>
-        <span class="n">n</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s">&#39;Wrong input dimension&#39;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">x1</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">x2</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">fval</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">12</span><span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x1</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">x2</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span><span class="o">/</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">x1</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">x2</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span> <span class="o">==</span><span class="mi">0</span><span class="p">:</span>
-                <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sd</span><span class="p">,</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">fval</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">noise</span>
-
-
-</div></div>
-<div class="viewcode-block" id="eggholder"><a class="viewcode-back" href="../../../GPyOpt.fmodels.html#GPyOpt.fmodels.experiments2d.eggholder">[docs]</a><span class="k">class</span> <span class="nc">eggholder</span><span class="p">(</span><span class="n">function2d</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">sd</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span> <span class="o">=</span> <span class="mi">2</span>
-        <span class="k">if</span> <span class="n">bounds</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="p">[(</span><span class="o">-</span><span class="mi">512</span><span class="p">,</span><span class="mi">512</span><span class="p">),(</span><span class="o">-</span><span class="mi">512</span><span class="p">,</span><span class="mi">512</span><span class="p">)]</span>
-        <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">512</span><span class="p">,</span><span class="mf">404.2319</span><span class="p">)]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fmin</span> <span class="o">=</span> <span class="o">-</span><span class="mf">959.6407</span>
-        <span class="k">if</span> <span class="n">sd</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span><span class="o">=</span><span class="n">sd</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;Egg-holder&#39;</span>
-
-<div class="viewcode-block" id="eggholder.f"><a class="viewcode-back" href="../../../GPyOpt.fmodels.html#GPyOpt.fmodels.experiments2d.eggholder.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">X</span><span class="p">):</span>
-        <span class="n">X</span> <span class="o">=</span> <span class="n">reshape</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span><span class="p">)</span>
-        <span class="n">n</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s">&#39;Wrong input dimension&#39;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">x1</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">x2</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">fval</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">x2</span><span class="o">+</span><span class="mi">47</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x2</span><span class="o">+</span><span class="n">x1</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">47</span><span class="p">)))</span> <span class="o">+</span> <span class="o">-</span><span class="n">x1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x1</span><span class="o">-</span><span class="p">(</span><span class="n">x2</span><span class="o">+</span><span class="mi">47</span><span class="p">))))</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span> <span class="o">==</span><span class="mi">0</span><span class="p">:</span>
-                <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sd</span><span class="p">,</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">fval</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">noise</span>
-
-
 </div></div>
 <div class="viewcode-block" id="goldstein"><a class="viewcode-back" href="../../../GPyOpt.fmodels.html#GPyOpt.fmodels.experiments2d.goldstein">[docs]</a><span class="k">class</span> <span class="nc">goldstein</span><span class="p">(</span><span class="n">function2d</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Goldstein function</span>
+<span class="sd">    </span>
+<span class="sd">    :param bounds: the box constraints to define the domain in which the function is optimized.</span>
+<span class="sd">    :param sd: standard deviation, to generate noisy evaluations of the function.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">sd</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="k">if</span> <span class="n">bounds</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="p">[(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">),(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)]</span>
@@ -294,38 +212,15 @@
                 <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sd</span><span class="p">,</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">fval</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">noise</span>
 
-</div></div>
-<div class="viewcode-block" id="beale"><a class="viewcode-back" href="../../../GPyOpt.fmodels.html#GPyOpt.fmodels.experiments2d.beale">[docs]</a><span class="k">class</span> <span class="nc">beale</span><span class="p">(</span><span class="n">function2d</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">sd</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span> <span class="o">=</span> <span class="mi">2</span>
-        <span class="k">if</span> <span class="n">bounds</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="p">[(</span><span class="o">-</span><span class="mf">4.5</span><span class="p">,</span><span class="mf">4.5</span><span class="p">),(</span><span class="o">-</span><span class="mf">4.5</span><span class="p">,</span><span class="mf">4.5</span><span class="p">)]</span>
-        <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">3</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fmin</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">if</span> <span class="n">sd</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span><span class="o">=</span><span class="n">sd</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;Beale&#39;</span>
-
-<div class="viewcode-block" id="beale.f"><a class="viewcode-back" href="../../../GPyOpt.fmodels.html#GPyOpt.fmodels.experiments2d.beale.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">X</span><span class="p">):</span>
-        <span class="n">X</span> <span class="o">=</span> <span class="n">reshape</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span><span class="p">)</span>
-        <span class="n">n</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s">&#39;Wrong input dimension&#39;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">x1</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">x2</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">term1</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.5</span> <span class="o">-</span> <span class="n">x1</span> <span class="o">+</span> <span class="n">x1</span><span class="o">*</span><span class="n">x2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
-            <span class="n">term2</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.25</span> <span class="o">-</span> <span class="n">x1</span> <span class="o">+</span> <span class="n">x1</span><span class="o">*</span><span class="n">x2</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
-            <span class="n">term3</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.625</span> <span class="o">-</span> <span class="n">x1</span> <span class="o">+</span> <span class="n">x1</span><span class="o">*</span><span class="n">x2</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
-            <span class="n">fval</span> <span class="o">=</span> <span class="n">term1</span> <span class="o">+</span> <span class="n">term2</span><span class="o">+</span> <span class="n">term3</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span> <span class="o">==</span><span class="mi">0</span><span class="p">:</span>
-                <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sd</span><span class="p">,</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">fval</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">noise</span>
 
 </div></div>
 <div class="viewcode-block" id="sixhumpcamel"><a class="viewcode-back" href="../../../GPyOpt.fmodels.html#GPyOpt.fmodels.experiments2d.sixhumpcamel">[docs]</a><span class="k">class</span> <span class="nc">sixhumpcamel</span><span class="p">(</span><span class="n">function2d</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Six hump camel function</span>
+<span class="sd">    </span>
+<span class="sd">    :param bounds: the box constraints to define the domain in which the function is optimized.</span>
+<span class="sd">    :param sd: standard deviation, to generate noisy evaluations of the function.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">sd</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="k">if</span> <span class="n">bounds</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="p">[(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">),(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)]</span>
@@ -357,6 +252,12 @@
 
 </div></div>
 <div class="viewcode-block" id="mccormick"><a class="viewcode-back" href="../../../GPyOpt.fmodels.html#GPyOpt.fmodels.experiments2d.mccormick">[docs]</a><span class="k">class</span> <span class="nc">mccormick</span><span class="p">(</span><span class="n">function2d</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Mccormick function</span>
+<span class="sd">    </span>
+<span class="sd">    :param bounds: the box constraints to define the domain in which the function is optimized.</span>
+<span class="sd">    :param sd: standard deviation, to generate noisy evaluations of the function.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">sd</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="k">if</span> <span class="n">bounds</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="p">[(</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span><span class="mi">4</span><span class="p">),(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">)]</span>
@@ -370,7 +271,7 @@
 <div class="viewcode-block" id="mccormick.f"><a class="viewcode-back" href="../../../GPyOpt.fmodels.html#GPyOpt.fmodels.experiments2d.mccormick.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span><span class="p">)</span>
         <span class="n">n</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span><span class="p">:</span>
             <span class="k">return</span> <span class="s">&#39;wrong input dimension&#39;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">x1</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
@@ -387,70 +288,13 @@
             <span class="k">return</span> <span class="n">fval</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">noise</span>
 
 </div></div>
-<div class="viewcode-block" id="levy2"><a class="viewcode-back" href="../../../GPyOpt.fmodels.html#GPyOpt.fmodels.experiments2d.levy2">[docs]</a><span class="k">class</span> <span class="nc">levy2</span><span class="p">(</span><span class="n">function2d</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">sd</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span> <span class="o">=</span> <span class="mi">2</span>
-        <span class="k">if</span> <span class="n">bounds</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="p">[(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">),(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">)]</span>
-        <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fmin</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">if</span> <span class="n">sd</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span><span class="o">=</span><span class="n">sd</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;Levy2&#39;</span>
-
-<div class="viewcode-block" id="levy2.f"><a class="viewcode-back" href="../../../GPyOpt.fmodels.html#GPyOpt.fmodels.experiments2d.levy2.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span><span class="p">)</span>
-        <span class="n">n</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s">&#39;wrong input dimension&#39;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">x1</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">x2</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">w1</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">x1</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">4</span>
-            <span class="n">w2</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">x2</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">4</span>
-            <span class="n">term1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">w1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
-            <span class="n">term2</span> <span class="o">=</span> <span class="p">(</span><span class="n">w1</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="mi">10</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">w1</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-            <span class="n">term3</span> <span class="o">=</span> <span class="p">(</span><span class="n">w2</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">w2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>            
-            <span class="n">fval</span> <span class="o">=</span> <span class="n">term1</span> <span class="o">+</span> <span class="n">term2</span> <span class="o">+</span> <span class="n">term3</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span> <span class="o">==</span><span class="mi">0</span><span class="p">:</span>
-                <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sd</span><span class="p">,</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">fval</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">noise</span>
-
-
-</div></div>
-<div class="viewcode-block" id="schaffer2"><a class="viewcode-back" href="../../../GPyOpt.fmodels.html#GPyOpt.fmodels.experiments2d.schaffer2">[docs]</a><span class="k">class</span> <span class="nc">schaffer2</span><span class="p">(</span><span class="n">function2d</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">sd</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span> <span class="o">=</span> <span class="mi">2</span>
-        <span class="k">if</span> <span class="n">bounds</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="p">[(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">),(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)]</span>
-        <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fmin</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">if</span> <span class="n">sd</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span><span class="o">=</span><span class="n">sd</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;Schaffer2&#39;</span>
-
-<div class="viewcode-block" id="schaffer2.f"><a class="viewcode-back" href="../../../GPyOpt.fmodels.html#GPyOpt.fmodels.experiments2d.schaffer2.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span><span class="p">)</span>
-        <span class="n">n</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s">&#39;wrong input dimension&#39;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">x1</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">x2</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">fact1</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x1</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="n">x2</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mf">0.5</span>
-            <span class="n">fact2</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.001</span><span class="o">*</span><span class="p">(</span><span class="n">x1</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">x2</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span>
-            <span class="n">fval</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">+</span> <span class="n">fact1</span><span class="o">/</span><span class="n">fact2</span><span class="p">;</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span> <span class="o">==</span><span class="mi">0</span><span class="p">:</span>
-                <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sd</span><span class="p">,</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">fval</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">noise</span>
-
-
-</div></div>
 <div class="viewcode-block" id="powers"><a class="viewcode-back" href="../../../GPyOpt.fmodels.html#GPyOpt.fmodels.experiments2d.powers">[docs]</a><span class="k">class</span> <span class="nc">powers</span><span class="p">(</span><span class="n">function2d</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Powers function</span>
+<span class="sd">    </span>
+<span class="sd">    :param bounds: the box constraints to define the domain in which the function is optimized.</span>
+<span class="sd">    :param sd: standard deviation, to generate noisy evaluations of the function.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">sd</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="k">if</span> <span class="n">bounds</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="p">[(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)]</span>
@@ -499,17 +343,22 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="footer">
-      &copy;2015, Javier Gonzalez.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
-      
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
     </div>
-
-    
-
-    
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Javier Gonzalez.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
   </body>
 </html>

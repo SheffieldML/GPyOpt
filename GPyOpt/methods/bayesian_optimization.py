@@ -15,7 +15,7 @@ class BayesianOptimization(BO):
 
     This is a thin wrapper around the methods.BO class, with a set of sensible defaults
 
-    :param: f the function to optimize
+    :param f the function to optimize
     :param bounds: Tuple containing the box constrains of the function to optimize. Example: for [0,1]x[0,1] insert [(0,1),(0,1)].  
     :param X: input observations
     :param Y: output values

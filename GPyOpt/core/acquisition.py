@@ -26,19 +26,18 @@ class AcquisitionEI(AcquisitionBase):
 		"""
 		Expected Improvement
 		"""
-		m, s, fmin = get_moments(self.model, x) 	
-		phi, Phi,_ = get_quantiles(self.acquisition_par, fmin, m, s)	
-		f_acqu = ((1+self.acquisition_par)*fmin-m) * Phi + s * phi
+		m, s, fmin, _, _ = get_moments(self.model, x) 	
+		phi, Phi, _ = get_quantiles(self.acquisition_par, fmin, m, s)	
+		f_acqu = (fmin - m + self.acquisition_par) * Phi + s * phi
 		return -f_acqu  # note: returns negative value for posterior minimization 
 
 	def d_acquisition_function(self,x):
 		"""
-		Derivative of the Expected Improvement
+		Derivative of the Expected Improvement (has a very easy derivative!)
 		"""
-		m, s, fmin = get_moments(self.model, x)
-		phi, Phi,_ = get_quantiles(self.acquisition_par, fmin, m, s)	
-		dmdx, dsdx = self.model.predictive_gradients(x)
-		df_acqu = -dmdx * Phi  + dsdx * phi
+		m, s, fmin, dmdx, dsdx = get_moments(self.model, x) 
+		phi, Phi, _ = get_quantiles(self.acquisition_par, fmin, m, s)	
+		df_acqu = dsdx * phi - Phi * dmdx
 		return -df_acqu
 		
 
@@ -50,7 +49,7 @@ class AcquisitionMPI(AcquisitionBase):
 		"""
 		Maximum Posterior Improvement
 		"""
-		m, s, fmin = get_moments(self.model, x) 	
+		m, s, fmin,_,_ = get_moments(self.model, x) 	
 		_, Phi,_ = get_quantiles(self.acquisition_par, fmin, m, s)	
 		f_acqu =  Phi
 		return -f_acqu  # note: returns negative value for posterior minimization 
@@ -59,10 +58,9 @@ class AcquisitionMPI(AcquisitionBase):
 		"""
 		Derivative of the Maximum Posterior Improvement
 		"""
-		m, s, fmin = get_moments(self.model, x)
-		_, Phi, u = get_quantiles(self.acquisition_par, fmin, m, s)	
-		dmdx, dsdx = self.model.predictive_gradients(x)
-		df_acqu = (Phi/s)* (dmdx + dsdx + u)
+		m, s, fmin, dmdx, dsdx = get_moments(self.model, x) 
+		phi, _, u = get_quantiles(self.acquisition_par, fmin, m, s)	
+		df_acqu = -(phi/s)* (dmdx + dsdx + u)
 		return -df_acqu
 
 
@@ -74,7 +72,7 @@ class AcquisitionLCB(AcquisitionBase):
 		"""
 		Upper Confidence Band
 		"""		
-		m, s,_ = get_moments(self.model, x) 	
+		m, s, _,_,_ = get_moments(self.model, x) 	
 		f_acqu = -m + self.acquisition_par * s
 		return -f_acqu  # note: returns negative value for posterior minimization 
 
@@ -82,13 +80,9 @@ class AcquisitionLCB(AcquisitionBase):
 		"""
 		Derivative of the Upper Confidence Band
 		"""
-		dmdx, dsdx = self.model.predictive_gradients(x)
+		_, _, _, dmdx, dsdx = get_moments(self.model, x) 
 		df_acqu = -dmdx + self.acquisition_par * dsdx
 		return -df_acqu
-
-######
-###### NOTE!!, the derivatives are with respect to the variance not the standard deviation.
-######
 
 
 
