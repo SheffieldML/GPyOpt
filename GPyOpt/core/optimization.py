@@ -99,8 +99,6 @@ def mp_batch_optimization(acquisition, d_acquisition, bounds, acqu_optimize_rest
         k +=1
     return X_batch
 
-
-
 def optimize_acquisition(acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch=None, L=None, Min=None):
     '''
     Optimization of the acquisition function
