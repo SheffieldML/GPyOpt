@@ -55,25 +55,115 @@
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">norm</span>
 
 <span class="c">##</span>
-<span class="c">## ----------- General functions for the optimization of the acquisition function</span>
+<span class="c">## ----------- Functions for the optimization of the acquisition function</span>
 <span class="c">##</span>
 
-<div class="viewcode-block" id="optimize_acquisition"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.optimization.optimize_acquisition">[docs]</a><span class="k">def</span> <span class="nf">optimize_acquisition</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">acqu_optimize_method</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_batch</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Min</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+<span class="c">## ---- Predictive batch optimization</span>
+<div class="viewcode-block" id="predictive_batch_optimization"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.optimization.predictive_batch_optimization">[docs]</a><span class="k">def</span> <span class="nf">predictive_batch_optimization</span><span class="p">(</span><span class="n">acqu_name</span><span class="p">,</span> <span class="n">acquisition_par</span><span class="p">,</span> <span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">acqu_optimize_method</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">n_inbatch</span><span class="p">):</span>   
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Computes batch optimization using the predictive mean to obtain new batch elements</span>
+
+<span class="sd">    :param acquisition: acquisition function in which the batch selection is based</span>
+<span class="sd">    :param bounds: the box constrains of the optimization</span>
+<span class="sd">    :param restarts: the number of restarts in the optimization of the surrogate</span>
+<span class="sd">    :param method: the method to optimize the acquisition function</span>
+<span class="sd">    :param model: the GP model based on the current samples</span>
+<span class="sd">    :param n_inbatch: the number of samples to collect</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">model_copy</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">model_copy</span><span class="o">.</span><span class="n">X</span> 
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">model_copy</span><span class="o">.</span><span class="n">Y</span>
+    <span class="n">input_dim</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> 
+    <span class="n">kernel</span> <span class="o">=</span> <span class="n">model_copy</span><span class="o">.</span><span class="n">kern</span>    
+    <span class="n">X_new</span> <span class="o">=</span> <span class="n">optimize_acquisition</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">acqu_optimize_method</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_batch</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Min</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">X_batch</span> <span class="o">=</span> <span class="n">reshape</span><span class="p">(</span><span class="n">X_new</span><span class="p">,</span><span class="n">input_dim</span><span class="p">)</span>
+    <span class="n">k</span><span class="o">=</span><span class="mi">1</span>
+    <span class="k">while</span> <span class="n">k</span><span class="o">&lt;</span><span class="n">n_inbatch</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">X</span><span class="p">,</span><span class="n">reshape</span><span class="p">(</span><span class="n">X_new</span><span class="p">,</span><span class="n">input_dim</span><span class="p">)))</span>       <span class="c"># update the sample within the batch</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">Y</span><span class="p">,</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">reshape</span><span class="p">(</span><span class="n">X_new</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">))[</span><span class="mi">0</span><span class="p">]))</span>
+       
+        <span class="k">try</span><span class="p">:</span> <span class="c"># this exception is included in case two equal points are selected in a batch, in this case the method stops</span>
+            <span class="n">batchBO</span> <span class="o">=</span> <span class="n">GPyOpt</span><span class="o">.</span><span class="n">methods</span><span class="o">.</span><span class="n">BayesianOptimization</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+                                        <span class="n">bounds</span><span class="o">=</span> <span class="n">bounds</span><span class="p">,</span> 
+                                        <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> 
+                                        <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> 
+                                        <span class="n">kernel</span> <span class="o">=</span> <span class="n">kernel</span><span class="p">,</span>
+                                        <span class="n">acquisition</span> <span class="o">=</span> <span class="n">acqu_name</span><span class="p">,</span> 
+                                        <span class="n">acquisition_par</span> <span class="o">=</span> <span class="n">acquisition_par</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinAlgError</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;Optimization stopped. Two equal points selected.&#39;</span>
+            <span class="k">break</span>        
+
+        <span class="n">batchBO</span><span class="o">.</span><span class="n">start_optimization</span><span class="p">(</span><span class="n">max_iter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> 
+                                    <span class="n">n_inbatch</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
+                                    <span class="n">acqu_optimize_method</span> <span class="o">=</span> <span class="n">acqu_optimize_method</span><span class="p">,</span>  
+                                    <span class="n">acqu_optimize_restarts</span> <span class="o">=</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> 
+                                    <span class="n">stop_criteria</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span><span class="n">verbose</span> <span class="o">=</span> <span class="bp">False</span><span class="p">)</span>
+        
+        <span class="n">X_new</span> <span class="o">=</span> <span class="n">batchBO</span><span class="o">.</span><span class="n">suggested_sample</span>
+        <span class="n">X_batch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">X_batch</span><span class="p">,</span><span class="n">X_new</span><span class="p">))</span>
+        <span class="n">k</span><span class="o">+=</span><span class="mi">1</span>    
+    <span class="k">return</span> <span class="n">X_batch</span>
+
+
+<span class="c">## ---- Random batch optimization</span></div>
+<div class="viewcode-block" id="random_batch_optimization"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.optimization.random_batch_optimization">[docs]</a><span class="k">def</span> <span class="nf">random_batch_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">acqu_optimize_method</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">n_inbatch</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Computes the batch optimization taking random samples (only for comparative purposes)</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">X_batch</span> <span class="o">=</span> <span class="n">optimize_acquisition</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">acqu_optimize_method</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+    <span class="n">k</span><span class="o">=</span><span class="mi">1</span> 
+    <span class="k">while</span> <span class="n">k</span><span class="o">&lt;</span><span class="n">n_inbatch</span><span class="p">:</span>
+        <span class="n">new_sample</span> <span class="o">=</span> <span class="n">samples_multidimensional_uniform</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">X_batch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">X_batch</span><span class="p">,</span><span class="n">new_sample</span><span class="p">))</span>  
+        <span class="n">k</span> <span class="o">+=</span><span class="mi">1</span>
+    <span class="k">return</span> <span class="n">X_batch</span>
+
+
+<span class="c">## ---- Local penalization for batch optimization</span></div>
+<div class="viewcode-block" id="mp_batch_optimization"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.optimization.mp_batch_optimization">[docs]</a><span class="k">def</span> <span class="nf">mp_batch_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">acqu_optimize_method</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">n_inbatch</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Computes batch optimization using by acquisition penalization using Lipschitz inference.</span>
+
+<span class="sd">    :param acquisition: acquisition function in which the batch selection is based</span>
+<span class="sd">    :param bounds: the box constrains of the optimization</span>
+<span class="sd">    :param restarts: the number of restarts in the optimization of the surrogate</span>
+<span class="sd">    :param method: the method to optimize the acquisition function</span>
+<span class="sd">    :param model: the GP model based on the current samples</span>
+<span class="sd">    :param n_inbatch: the number of samples to collect</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">X_batch</span> <span class="o">=</span> <span class="n">optimize_acquisition</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">acqu_optimize_method</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_batch</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Min</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">k</span><span class="o">=</span><span class="mi">1</span>
+    <span class="k">if</span> <span class="n">n_inbatch</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+        <span class="c"># ---------- Approximate the constants of the the method</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="n">estimate_L</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="n">bounds</span><span class="p">)</span>
+        <span class="n">Min</span> <span class="o">=</span> <span class="n">estimate_Min</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="n">bounds</span><span class="p">)</span>    
+
+    <span class="k">while</span> <span class="n">k</span><span class="o">&lt;</span><span class="n">n_inbatch</span><span class="p">:</span>
+        <span class="c"># ---------- Collect the batch (the gradients of the acquisition are approximated for k =2,...,n_inbathc)</span>
+        <span class="n">new_sample</span> <span class="o">=</span> <span class="n">optimize_acquisition</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">acqu_optimize_method</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">)</span>
+        <span class="n">X_batch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">X_batch</span><span class="p">,</span><span class="n">new_sample</span><span class="p">))</span>  
+        <span class="n">k</span> <span class="o">+=</span><span class="mi">1</span>
+    <span class="k">return</span> <span class="n">X_batch</span>
+</div>
+<div class="viewcode-block" id="optimize_acquisition"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.optimization.optimize_acquisition">[docs]</a><span class="k">def</span> <span class="nf">optimize_acquisition</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">acqu_optimize_method</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_batch</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Min</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Optimization of the acquisition function</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="n">acqu_optimize_method</span><span class="o">==</span><span class="s">&#39;brute&#39;</span><span class="p">:</span>
-        <span class="n">res</span> <span class="o">=</span> <span class="n">full_acquisition_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span><span class="n">bounds</span><span class="p">,</span><span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="s">&#39;brute&#39;</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">full_acquisition_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span><span class="n">bounds</span><span class="p">,</span><span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="s">&#39;brute&#39;</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">acqu_optimize_method</span><span class="o">==</span><span class="s">&#39;random&#39;</span><span class="p">:</span>
-        <span class="n">res</span> <span class="o">=</span>  <span class="n">full_acquisition_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span><span class="n">bounds</span><span class="p">,</span><span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="s">&#39;random&#39;</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span>  <span class="n">full_acquisition_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span><span class="n">bounds</span><span class="p">,</span><span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="s">&#39;random&#39;</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">acqu_optimize_method</span><span class="o">==</span><span class="s">&#39;fast_brute&#39;</span><span class="p">:</span>
-        <span class="n">res</span> <span class="o">=</span>  <span class="n">fast_acquisition_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span><span class="n">bounds</span><span class="p">,</span><span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="s">&#39;brute&#39;</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span>  <span class="n">fast_acquisition_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span><span class="n">bounds</span><span class="p">,</span><span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="s">&#39;brute&#39;</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">acqu_optimize_method</span><span class="o">==</span><span class="s">&#39;fast_random&#39;</span><span class="p">:</span>
-        <span class="n">res</span> <span class="o">=</span>  <span class="n">fast_acquisition_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span><span class="n">bounds</span><span class="p">,</span><span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="s">&#39;random&#39;</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span>  <span class="n">fast_acquisition_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span><span class="n">bounds</span><span class="p">,</span><span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="s">&#39;random&#39;</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">res</span>
 
 </div>
-<div class="viewcode-block" id="fast_acquisition_optimization"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.optimization.fast_acquisition_optimization">[docs]</a><span class="k">def</span> <span class="nf">fast_acquisition_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span><span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">method_type</span><span class="p">,</span> <span class="n">X_batch</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Min</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="fast_acquisition_optimization"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.optimization.fast_acquisition_optimization">[docs]</a><span class="k">def</span> <span class="nf">fast_acquisition_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span><span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">method_type</span><span class="p">,</span> <span class="n">X_batch</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Min</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Optimizes the acquisition function using a local optimizer in the best point</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -84,11 +174,14 @@
     <span class="n">pred_samples</span> <span class="o">=</span> <span class="n">acquisition</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
     <span class="n">x0</span> <span class="o">=</span>  <span class="n">samples</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">pred_samples</span><span class="p">)]</span>
     <span class="n">h_func_args</span> <span class="o">=</span> <span class="n">hammer_function_precompute</span><span class="p">(</span><span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
-    <span class="n">res</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">penalized_acquisition</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x0</span><span class="p">),</span><span class="n">method</span><span class="o">=</span><span class="s">&#39;SLSQP&#39;</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">)</span><span class="o">+</span><span class="n">h_func_args</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">X_batch</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x0</span><span class="p">),</span><span class="n">method</span><span class="o">=</span><span class="s">&#39;SLSQP&#39;</span><span class="p">,</span><span class="n">jac</span><span class="o">=</span><span class="n">d_acquisition</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;maxiter&#39;</span><span class="p">:</span> <span class="mi">500</span><span class="p">})</span> 
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">penalized_acquisition</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x0</span><span class="p">),</span><span class="n">method</span><span class="o">=</span><span class="s">&#39;SLSQP&#39;</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">)</span><span class="o">+</span><span class="n">h_func_args</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span>
 
 </div>
-<div class="viewcode-block" id="full_acquisition_optimization"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.optimization.full_acquisition_optimization">[docs]</a><span class="k">def</span> <span class="nf">full_acquisition_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">method_type</span><span class="p">,</span> <span class="n">X_batch</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Min</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="full_acquisition_optimization"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.optimization.full_acquisition_optimization">[docs]</a><span class="k">def</span> <span class="nf">full_acquisition_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">method_type</span><span class="p">,</span> <span class="n">X_batch</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Min</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Optimizes the acquisition function by taking the best of a number of local optimizers</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -100,58 +193,13 @@
     <span class="n">fmins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">acqu_optimize_restarts</span><span class="p">)</span>
     <span class="n">h_func_args</span> <span class="o">=</span> <span class="n">hammer_function_precompute</span><span class="p">(</span><span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">acqu_optimize_restarts</span><span class="p">):</span>
-        <span class="n">res</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">penalized_acquisition</span><span class="p">,</span> <span class="n">x0</span> <span class="o">=</span> <span class="n">samples</span><span class="p">[</span><span class="n">k</span><span class="p">,:]</span> <span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s">&#39;SLSQP&#39;</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">)</span><span class="o">+</span><span class="n">h_func_args</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">X_batch</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span> <span class="c"># gradients are approximated within the batch collection</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">samples</span><span class="p">[</span><span class="n">k</span><span class="p">,:],</span><span class="n">method</span><span class="o">=</span><span class="s">&#39;SLSQP&#39;</span><span class="p">,</span><span class="n">jac</span><span class="o">=</span><span class="n">d_acquisition</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;maxiter&#39;</span><span class="p">:</span> <span class="mi">500</span><span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">penalized_acquisition</span><span class="p">,</span> <span class="n">x0</span> <span class="o">=</span> <span class="n">samples</span><span class="p">[</span><span class="n">k</span><span class="p">,:]</span> <span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s">&#39;SLSQP&#39;</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">)</span><span class="o">+</span><span class="n">h_func_args</span><span class="p">)</span>
         <span class="n">mins</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span>
         <span class="n">fmins</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">fun</span>
     <span class="k">return</span> <span class="n">mins</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">fmins</span><span class="p">)]</span>
-
-
-<span class="c">##</span>
-<span class="c">## ----------- Random batch optimization</span>
-<span class="c">##</span>
-</div>
-<div class="viewcode-block" id="random_batch_optimization"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.optimization.random_batch_optimization">[docs]</a><span class="k">def</span> <span class="nf">random_batch_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">acqu_optimize_method</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">n_inbatch</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Computes the batch optimization taking random samples (only for comparative purposes)</span>
-
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">X_batch</span> <span class="o">=</span> <span class="n">optimize_acquisition</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">acqu_optimize_method</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
-    <span class="n">k</span><span class="o">=</span><span class="mi">1</span> 
-    <span class="k">while</span> <span class="n">k</span><span class="o">&lt;</span><span class="n">n_inbatch</span><span class="p">:</span>
-        <span class="n">new_sample</span> <span class="o">=</span> <span class="n">samples_multidimensional_uniform</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">X_batch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">X_batch</span><span class="p">,</span><span class="n">new_sample</span><span class="p">))</span>  
-        <span class="n">k</span> <span class="o">+=</span><span class="mi">1</span>
-    <span class="k">return</span> <span class="n">X_batch</span>
-
-
-<span class="c">##</span>
-<span class="c">## ----------- Maximization-penalization batch optimization</span>
-<span class="c">##</span>
-</div>
-<div class="viewcode-block" id="mp_batch_optimization"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.optimization.mp_batch_optimization">[docs]</a><span class="k">def</span> <span class="nf">mp_batch_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">acqu_optimize_method</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">n_inbatch</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Computes batch optimization using by acquisition penalization using Lipschitz inference.</span>
-
-<span class="sd">    :param acquisition: acquisition function in which the batch selection is based</span>
-<span class="sd">    :param bounds: the box constrains of the optimization</span>
-<span class="sd">    :param restarts: the number of restarts in the optimization of the surrogate</span>
-<span class="sd">    :param method: the method to optimize the acquisition function</span>
-<span class="sd">    :param model: the GP model based on the current samples</span>
-<span class="sd">    :param n_inbatch: the number of samples to collect</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">X_batch</span> <span class="o">=</span> <span class="n">optimize_acquisition</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">acqu_optimize_method</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_batch</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Min</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
-    <span class="n">k</span><span class="o">=</span><span class="mi">1</span>
-    <span class="k">if</span> <span class="n">n_inbatch</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
-        <span class="c"># ---------- Approximate the constants of the the method</span>
-        <span class="n">L</span> <span class="o">=</span> <span class="n">estimate_L</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="n">bounds</span><span class="p">)</span>
-        <span class="n">Min</span> <span class="o">=</span> <span class="n">estimate_Min</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="n">bounds</span><span class="p">)</span>    
-
-    <span class="k">while</span> <span class="n">k</span><span class="o">&lt;</span><span class="n">n_inbatch</span><span class="p">:</span>
-        <span class="c"># ---------- Collect the batch</span>
-        <span class="n">new_sample</span> <span class="o">=</span> <span class="n">optimize_acquisition</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">acqu_optimize_method</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">)</span>
-        <span class="n">X_batch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">X_batch</span><span class="p">,</span><span class="n">new_sample</span><span class="p">))</span>  
-        <span class="n">k</span> <span class="o">+=</span><span class="mi">1</span>
-    <span class="k">return</span> <span class="n">X_batch</span>
 
 </div>
 <div class="viewcode-block" id="estimate_L"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.optimization.estimate_L">[docs]</a><span class="k">def</span> <span class="nf">estimate_L</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="n">bounds</span><span class="p">):</span>
@@ -191,6 +239,7 @@
     <span class="n">r_x0</span> <span class="o">=</span> <span class="p">(</span><span class="n">m</span><span class="o">-</span><span class="n">Min</span><span class="p">)</span><span class="o">/</span><span class="n">L</span>
     <span class="n">s_x0</span> <span class="o">=</span> <span class="n">s</span><span class="o">/</span><span class="n">L</span>
     <span class="k">return</span> <span class="n">r_x0</span><span class="p">,</span> <span class="n">s_x0</span>
+
 </div>
 <div class="viewcode-block" id="hammer_function"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.optimization.hammer_function">[docs]</a><span class="k">def</span> <span class="nf">hammer_function</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">x0</span><span class="p">,</span><span class="n">r_x0</span><span class="p">,</span> <span class="n">s_x0</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
@@ -215,52 +264,6 @@
 <span class="c">##</span>
 <span class="c">## ----------- Predictive batch optimization</span>
 <span class="c">##</span>
-</div>
-<div class="viewcode-block" id="predictive_batch_optimization"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.optimization.predictive_batch_optimization">[docs]</a><span class="k">def</span> <span class="nf">predictive_batch_optimization</span><span class="p">(</span><span class="n">acqu_name</span><span class="p">,</span> <span class="n">acquisition_par</span><span class="p">,</span> <span class="n">acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">acqu_optimize_method</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">n_inbatch</span><span class="p">):</span>   
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Computes batch optimization using the predictive mean to obtain new batch elements</span>
-
-<span class="sd">    :param acquisition: acquisition function in which the batch selection is based</span>
-<span class="sd">    :param bounds: the box constrains of the optimization</span>
-<span class="sd">    :param restarts: the number of restarts in the optimization of the surrogate</span>
-<span class="sd">    :param method: the method to optimize the acquisition function</span>
-<span class="sd">    :param model: the GP model based on the current samples</span>
-<span class="sd">    :param n_inbatch: the number of samples to collect</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">model_copy</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">X</span> <span class="o">=</span> <span class="n">model_copy</span><span class="o">.</span><span class="n">X</span> 
-    <span class="n">Y</span> <span class="o">=</span> <span class="n">model_copy</span><span class="o">.</span><span class="n">Y</span>
-    <span class="n">input_dim</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> 
-    <span class="n">kernel</span> <span class="o">=</span> <span class="n">model_copy</span><span class="o">.</span><span class="n">kern</span>    
-    <span class="n">X_new</span> <span class="o">=</span> <span class="n">optimize_acquisition</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">acqu_optimize_method</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_batch</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Min</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
-    <span class="n">X_batch</span> <span class="o">=</span> <span class="n">reshape</span><span class="p">(</span><span class="n">X_new</span><span class="p">,</span><span class="n">input_dim</span><span class="p">)</span>
-    <span class="n">k</span><span class="o">=</span><span class="mi">1</span>
-    <span class="k">while</span> <span class="n">k</span><span class="o">&lt;</span><span class="n">n_inbatch</span><span class="p">:</span>
-        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">X</span><span class="p">,</span><span class="n">reshape</span><span class="p">(</span><span class="n">X_new</span><span class="p">,</span><span class="n">input_dim</span><span class="p">)))</span>       <span class="c"># update the sample within the batch</span>
-        <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">Y</span><span class="p">,</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">reshape</span><span class="p">(</span><span class="n">X_new</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">))[</span><span class="mi">0</span><span class="p">]))</span>
-       
-        <span class="k">try</span><span class="p">:</span> <span class="c"># this exception is included in case two equal points are selected in a batch, in this case the method stops</span>
-            <span class="n">batchBO</span> <span class="o">=</span> <span class="n">GPyOpt</span><span class="o">.</span><span class="n">methods</span><span class="o">.</span><span class="n">BayesianOptimization</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
-                                        <span class="n">bounds</span><span class="o">=</span> <span class="n">bounds</span><span class="p">,</span> 
-                                        <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> 
-                                        <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> 
-                                        <span class="n">kernel</span> <span class="o">=</span> <span class="n">kernel</span><span class="p">,</span>
-                                        <span class="n">acquisition</span> <span class="o">=</span> <span class="n">acqu_name</span><span class="p">,</span> 
-                                        <span class="n">acquisition_par</span> <span class="o">=</span> <span class="n">acquisition_par</span><span class="p">)</span>
-        <span class="k">except</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinAlgError</span><span class="p">:</span>
-            <span class="k">print</span> <span class="s">&#39;Optimization stopped. Two equal points selected.&#39;</span>
-            <span class="k">break</span>        
-
-        <span class="n">batchBO</span><span class="o">.</span><span class="n">start_optimization</span><span class="p">(</span><span class="n">max_iter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> 
-                                    <span class="n">n_inbatch</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
-                                    <span class="n">acqu_optimize_method</span> <span class="o">=</span> <span class="n">acqu_optimize_method</span><span class="p">,</span>  
-                                    <span class="n">acqu_optimize_restarts</span> <span class="o">=</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> 
-                                    <span class="n">stop_criteria</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span><span class="n">verbose</span> <span class="o">=</span> <span class="bp">False</span><span class="p">)</span>
-        
-        <span class="n">X_new</span> <span class="o">=</span> <span class="n">batchBO</span><span class="o">.</span><span class="n">suggested_sample</span>
-        <span class="n">X_batch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">X_batch</span><span class="p">,</span><span class="n">X_new</span><span class="p">))</span>
-        <span class="n">k</span><span class="o">+=</span><span class="mi">1</span>    
-    <span class="k">return</span> <span class="n">X_batch</span>
 </pre></div></div>
 
           </div>

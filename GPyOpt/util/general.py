@@ -55,11 +55,21 @@ def get_moments(model,x):
     x = reshape(x,input_dim)
     fmin = min(model.predict(model.X)[0])
     m, v = model.predict(x)
-    dmdx, dvdx = model.predictive_gradients(x)
     s = np.sqrt(np.clip(v, 0, np.inf))
+    return (m,s, fmin)
+
+def get_d_moments(model,x):
+    '''
+    Gradients with respect to x of the moments (mean and sdev.) of the GP
+
+    '''
+    input_dim = model.input_dim
+    x = reshape(x,input_dim)
+    _, v = model.predict(x)
+    dmdx, dvdx = model.predictive_gradients(x)
     dmdx = dmdx[:,:,0]
     dsdx = 0.5 * v * dvdx
-    return (m,s, fmin, dmdx, dsdx)
+    return (dmdx, dsdx)
 
 
 def get_quantiles(acquisition_par, fmin, m, s):

@@ -10,28 +10,28 @@ from ..util.general import samples_multidimensional_uniform
 
 
 class BayesianOptimization(BO):
-    '''
-    Bayesian Optimization using EI, MPI and LCB (or UCB) acquisition functions.
-
-    This is a thin wrapper around the methods.BO class, with a set of sensible defaults
-    :param f the function to optimize.
-    :param bounds: Tuple containing the box constrains of the function to optimize. Example: for [0,1]x[0,1] insert [(0,1),(0,1)].  
-    :param X: input observations
-    :param Y: output values
-    :param kernel: a GPy kernel, defaults to rbf + bias.
-    :param optimize_model: Unless specified otherwise the parameters of the model are updated after each iteration. 
-    :param model_optimize_interval: number of iterations after which the parameters of the model are optimized.   
-    :param model_optimize_restarts: number of initial points for the GP parameters optimization (5, default)
-    :param acquisition: acquisition function ('EI' 'MPI' or LCB). Default, EI.
-    :param acquisition_par: parameter of the acquisition function. 
-    :param model_data_init: number of initial random evaluations of f is X and Y are not provided (default, 3*input_dim).  
-    :param sparse: whether to use an sparse GP (False, default).
-    :param num_inducing: number of inducing points for a Sparse GP (None, default)
-    :param normalize: whether to normalize the Y's for optimization (False, default).
-    :param verbosity: whether to show (1) or not (0, default) the value of the log-likelihood of the model for the optimized parameters.
-
-    '''
     def __init__(self, f, bounds=None, kernel=None, X=None, Y=None, optimize_model=None, model_optimize_interval=1, model_optimize_restarts=5, acquisition='EI', acquisition_par= 0.01,  model_data_init = None, sparse=False, num_inducing=None, normalize=False, verbosity=0):
+        '''
+        Bayesian Optimization using EI, MPI and LCB (or UCB) acquisition functions.
+    
+        This is a thin wrapper around the methods.BO class, with a set of sensible defaults
+        :param f the function to optimize.
+        :param bounds: Tuple containing the box constrains of the function to optimize. Example: for [0,1]x[0,1] insert [(0,1),(0,1)].  
+        :param X: input observations
+        :param Y: output values
+        :param kernel: a GPy kernel, defaults to rbf + bias.
+        :param optimize_model: Unless specified otherwise the parameters of the model are updated after each iteration. 
+        :param model_optimize_interval: number of iterations after which the parameters of the model are optimized.   
+        :param model_optimize_restarts: number of initial points for the GP parameters optimization (5, default)
+        :param acquisition: acquisition function ('EI' 'MPI' or LCB). Default, EI.
+        :param acquisition_par: parameter of the acquisition function. 
+        :param model_data_init: number of initial random evaluations of f is X and Y are not provided (default, 3*input_dim).  
+        :param sparse: whether to use an sparse GP (False, default).
+        :param num_inducing: number of inducing points for a Sparse GP (None, default)
+        :param normalize: whether to normalize the Y's for optimization (False, default).
+        :param verbosity: whether to show (1) or not (0, default) the value of the log-likelihood of the model for the optimized parameters.
+    
+        '''
         self.model_data_init = model_data_init  
         self.num_inducing = num_inducing
         self.sparse = sparse

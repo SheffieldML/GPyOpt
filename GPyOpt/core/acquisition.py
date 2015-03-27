@@ -1,4 +1,4 @@
-from ..util.general import get_moments, get_quantiles
+from ..util.general import get_moments, get_d_moments, get_quantiles
 
 class AcquisitionBase(object):
 	"""
@@ -26,7 +26,7 @@ class AcquisitionEI(AcquisitionBase):
 		"""
 		Expected Improvement
 		"""
-		m, s, fmin, _, _ = get_moments(self.model, x) 	
+		m, s, fmin = get_moments(self.model, x) 	
 		phi, Phi, _ = get_quantiles(self.acquisition_par, fmin, m, s)	
 		f_acqu = (fmin - m + self.acquisition_par) * Phi + s * phi
 		return -f_acqu  # note: returns negative value for posterior minimization 
@@ -35,7 +35,8 @@ class AcquisitionEI(AcquisitionBase):
 		"""
 		Derivative of the Expected Improvement (has a very easy derivative!)
 		"""
-		m, s, fmin, dmdx, dsdx = get_moments(self.model, x) 
+		m, s, fmin = get_moments(self.model, x) 
+		dmdx, dsdx = get_d_moments(self.model, x)
 		phi, Phi, _ = get_quantiles(self.acquisition_par, fmin, m, s)	
 		df_acqu = dsdx * phi - Phi * dmdx
 		return -df_acqu
@@ -49,7 +50,7 @@ class AcquisitionMPI(AcquisitionBase):
 		"""
 		Maximum Posterior Improvement
 		"""
-		m, s, fmin,_,_ = get_moments(self.model, x) 	
+		m, s, fmin = get_moments(self.model, x) 	
 		_, Phi,_ = get_quantiles(self.acquisition_par, fmin, m, s)	
 		f_acqu =  Phi
 		return -f_acqu  # note: returns negative value for posterior minimization 
@@ -58,7 +59,8 @@ class AcquisitionMPI(AcquisitionBase):
 		"""
 		Derivative of the Maximum Posterior Improvement
 		"""
-		m, s, fmin, dmdx, dsdx = get_moments(self.model, x) 
+		m, s, fmin = get_moments(self.model, x) 
+		dmdx, dsdx = get_d_moments(self.model, x)
 		phi, _, u = get_quantiles(self.acquisition_par, fmin, m, s)	
 		df_acqu = -(phi/s)* (dmdx + dsdx + u)
 		return -df_acqu
@@ -72,7 +74,7 @@ class AcquisitionLCB(AcquisitionBase):
 		"""
 		Upper Confidence Band
 		"""		
-		m, s, _,_,_ = get_moments(self.model, x) 	
+		m, s, _ = get_moments(self.model, x) 	
 		f_acqu = -m + self.acquisition_par * s
 		return -f_acqu  # note: returns negative value for posterior minimization 
 
@@ -80,7 +82,7 @@ class AcquisitionLCB(AcquisitionBase):
 		"""
 		Derivative of the Upper Confidence Band
 		"""
-		_, _, _, dmdx, dsdx = get_moments(self.model, x) 
+		dmdx, dsdx = get_d_moments(self.model, x)
 		df_acqu = -dmdx + self.acquisition_par * dsdx
 		return -df_acqu
 

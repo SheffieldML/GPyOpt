@@ -275,13 +275,13 @@ plot 3: Iterations vs. the variance of the current model in the selected sample.
 
 <dl class="function">
 <dt id="GPyOpt.core.optimization.fast_acquisition_optimization">
-<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">fast_acquisition_optimization</code><span class="sig-paren">(</span><em>acquisition</em>, <em>bounds</em>, <em>acqu_optimize_restarts</em>, <em>model</em>, <em>method_type</em>, <em>X_batch=None</em>, <em>L=None</em>, <em>Min=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#fast_acquisition_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.fast_acquisition_optimization" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">fast_acquisition_optimization</code><span class="sig-paren">(</span><em>acquisition</em>, <em>d_acquisition</em>, <em>bounds</em>, <em>acqu_optimize_restarts</em>, <em>model</em>, <em>method_type</em>, <em>X_batch=None</em>, <em>L=None</em>, <em>Min=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#fast_acquisition_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.fast_acquisition_optimization" title="Permalink to this definition">¶</a></dt>
 <dd><p>Optimizes the acquisition function using a local optimizer in the best point</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="GPyOpt.core.optimization.full_acquisition_optimization">
-<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">full_acquisition_optimization</code><span class="sig-paren">(</span><em>acquisition</em>, <em>bounds</em>, <em>acqu_optimize_restarts</em>, <em>model</em>, <em>method_type</em>, <em>X_batch=None</em>, <em>L=None</em>, <em>Min=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#full_acquisition_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.full_acquisition_optimization" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">full_acquisition_optimization</code><span class="sig-paren">(</span><em>acquisition</em>, <em>d_acquisition</em>, <em>bounds</em>, <em>acqu_optimize_restarts</em>, <em>model</em>, <em>method_type</em>, <em>X_batch=None</em>, <em>L=None</em>, <em>Min=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#full_acquisition_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.full_acquisition_optimization" title="Permalink to this definition">¶</a></dt>
 <dd><p>Optimizes the acquisition function by taking the best of a number of local optimizers</p>
 </dd></dl>
 
@@ -298,7 +298,7 @@ plot 3: Iterations vs. the variance of the current model in the selected sample.
 
 <dl class="function">
 <dt id="GPyOpt.core.optimization.mp_batch_optimization">
-<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">mp_batch_optimization</code><span class="sig-paren">(</span><em>acquisition</em>, <em>bounds</em>, <em>acqu_optimize_restarts</em>, <em>acqu_optimize_method</em>, <em>model</em>, <em>n_inbatch</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#mp_batch_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.mp_batch_optimization" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">mp_batch_optimization</code><span class="sig-paren">(</span><em>acquisition</em>, <em>d_acquisition</em>, <em>bounds</em>, <em>acqu_optimize_restarts</em>, <em>acqu_optimize_method</em>, <em>model</em>, <em>n_inbatch</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#mp_batch_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.mp_batch_optimization" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes batch optimization using by acquisition penalization using Lipschitz inference.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -320,7 +320,7 @@ plot 3: Iterations vs. the variance of the current model in the selected sample.
 
 <dl class="function">
 <dt id="GPyOpt.core.optimization.optimize_acquisition">
-<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">optimize_acquisition</code><span class="sig-paren">(</span><em>acquisition</em>, <em>bounds</em>, <em>acqu_optimize_restarts</em>, <em>acqu_optimize_method</em>, <em>model</em>, <em>X_batch=None</em>, <em>L=None</em>, <em>Min=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#optimize_acquisition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.optimize_acquisition" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">optimize_acquisition</code><span class="sig-paren">(</span><em>acquisition</em>, <em>d_acquisition</em>, <em>bounds</em>, <em>acqu_optimize_restarts</em>, <em>acqu_optimize_method</em>, <em>model</em>, <em>X_batch=None</em>, <em>L=None</em>, <em>Min=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#optimize_acquisition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.optimize_acquisition" title="Permalink to this definition">¶</a></dt>
 <dd><p>Optimization of the acquisition function</p>
 </dd></dl>
 
@@ -332,7 +332,7 @@ plot 3: Iterations vs. the variance of the current model in the selected sample.
 
 <dl class="function">
 <dt id="GPyOpt.core.optimization.predictive_batch_optimization">
-<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">predictive_batch_optimization</code><span class="sig-paren">(</span><em>acqu_name</em>, <em>acquisition_par</em>, <em>acquisition</em>, <em>bounds</em>, <em>acqu_optimize_restarts</em>, <em>acqu_optimize_method</em>, <em>model</em>, <em>n_inbatch</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#predictive_batch_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.predictive_batch_optimization" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">predictive_batch_optimization</code><span class="sig-paren">(</span><em>acqu_name</em>, <em>acquisition_par</em>, <em>acquisition</em>, <em>d_acquisition</em>, <em>bounds</em>, <em>acqu_optimize_restarts</em>, <em>acqu_optimize_method</em>, <em>model</em>, <em>n_inbatch</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#predictive_batch_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.predictive_batch_optimization" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes batch optimization using the predictive mean to obtain new batch elements</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -354,7 +354,7 @@ plot 3: Iterations vs. the variance of the current model in the selected sample.
 
 <dl class="function">
 <dt id="GPyOpt.core.optimization.random_batch_optimization">
-<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">random_batch_optimization</code><span class="sig-paren">(</span><em>acquisition</em>, <em>bounds</em>, <em>acqu_optimize_restarts</em>, <em>acqu_optimize_method</em>, <em>model</em>, <em>n_inbatch</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#random_batch_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.random_batch_optimization" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">random_batch_optimization</code><span class="sig-paren">(</span><em>acquisition</em>, <em>d_acquisition</em>, <em>bounds</em>, <em>acqu_optimize_restarts</em>, <em>acqu_optimize_method</em>, <em>model</em>, <em>n_inbatch</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#random_batch_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.random_batch_optimization" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the batch optimization taking random samples (only for comparative purposes)</p>
 </dd></dl>
 
