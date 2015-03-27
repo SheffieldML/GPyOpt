@@ -166,21 +166,26 @@ class BO(object):
         Optimizes the acquisition function. It combines initial grid search with local optimization starting on the minimum of the grid
 
         """
+        # ------ Elements of the acquisition function
         acqu_name = self.acqu_name
         acquisition = self.acquisition_func.acquisition_function
+        d_acquisition = self.acquisition_func.d_acquisition_function
         acquisition_par = self.acquisition_par
         model = self.model
+        
+        # ------  Parameters to optimize the acquisition
         acqu_optimize_restarts = self.acqu_optimize_restarts
         acqu_optimize_method = self.acqu_optimize_method
         n_inbatch = self.n_inbatch
         bounds = self.bounds
 
+        # ------ Selection of the batch method (if any, predictive used when n_inbathc=1)
         if self.batch_method == 'predictive':
-            X_batch = predictive_batch_optimization(acqu_name, acquisition_par, acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch)            
+            X_batch = predictive_batch_optimization(acqu_name, acquisition_par, acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch)            
         elif self.batch_method == 'mp':
-            X_batch = mp_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch)
+            X_batch = mp_batch_optimization(acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch)
         elif self.batch_method == 'random':
-            X_batch = random_batch_optimization(acquisition, bounds, acqu_optimize_restarts,acqu_optimize_method, model, n_inbatch)        
+            X_batch = random_batch_optimization(acquisition, d_acquisition, bounds, acqu_optimize_restarts,acqu_optimize_method, model, n_inbatch)        
         return X_batch
 
 
