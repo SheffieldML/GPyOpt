@@ -29,6 +29,7 @@ class BayesianOptimization(BO):
         :param sparse: whether to use an sparse GP (False, default).
         :param num_inducing: number of inducing points for a Sparse GP (None, default)
         :param normalize: whether to normalize the Y's for optimization (False, default).
+        :param true_gradients: whether the true gradients of the acquisition function are used for optimization (True, default). 
         :param verbosity: whether to show (1) or not (0, default) the value of the log-likelihood of the model for the optimized parameters.
     
         '''
@@ -40,8 +41,8 @@ class BayesianOptimization(BO):
         if f==None: 
             print 'Function to optimize is required.'
         else:
-            self.f = f
-        
+            self.f = f  
+
         # ------- Initialize model 
         if bounds==None: 
             raise 'Box constraints are needed. Please insert box constrains.' 

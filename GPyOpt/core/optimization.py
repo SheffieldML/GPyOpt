@@ -16,9 +16,10 @@ def predictive_batch_optimization(acqu_name, acquisition_par, acquisition, d_acq
     Computes batch optimization using the predictive mean to obtain new batch elements
 
     :param acquisition: acquisition function in which the batch selection is based
+    :param d_acquisition: gradient of the acquisition
     :param bounds: the box constrains of the optimization
-    :param restarts: the number of restarts in the optimization of the surrogate
-    :param method: the method to optimize the acquisition function
+    :param acqu_optimize_restarts: the number of restarts in the optimization of the surrogate
+    :param acqu_optimize_method: the method to optimize the acquisition function
     :param model: the GP model based on the current samples
     :param n_inbatch: the number of samples to collect
     '''
@@ -27,7 +28,10 @@ def predictive_batch_optimization(acqu_name, acquisition_par, acquisition, d_acq
     Y = model_copy.Y
     input_dim = X.shape[1] 
     kernel = model_copy.kern    
+
+    # Optimization of the first element in the batch
     X_new = optimize_acquisition(acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch=None, L=None, Min=None)
+
     X_batch = reshape(X_new,input_dim)
     k=1
     while k<n_inbatch:
@@ -46,7 +50,7 @@ def predictive_batch_optimization(acqu_name, acquisition_par, acquisition, d_acq
             print 'Optimization stopped. Two equal points selected.'
             break        
 
-        batchBO.start_optimization(max_iter = 0, 
+        batchBO.run_optimization(max_iter = 0, 
                                     n_inbatch=1, 
                                     acqu_optimize_method = acqu_optimize_method,  
                                     acqu_optimize_restarts = acqu_optimize_restarts, 
@@ -63,8 +67,18 @@ def random_batch_optimization(acquisition, d_acquisition, bounds, acqu_optimize_
     '''
     Computes the batch optimization taking random samples (only for comparative purposes)
 
+    :param acquisition: acquisition function in which the batch selection is based
+    :param d_acquisition: gradient of the acquisition
+    :param bounds: the box constrains of the optimization
+    :param acqu_optimize_restarts: the number of restarts in the optimization of the surrogate
+    :param acqu_optimize_method: the method to optimize the acquisition function
+    :param model: the GP model based on the current samples
+    :param n_inbatch: the number of samples to collect
     '''
+
+    # Optimization of the first element in the batch
     X_batch = optimize_acquisition(acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model)
+
     k=1 
     while k<n_inbatch:
         new_sample = samples_multidimensional_uniform(bounds,1)
@@ -79,14 +93,18 @@ def mp_batch_optimization(acquisition, d_acquisition, bounds, acqu_optimize_rest
     Computes batch optimization using by acquisition penalization using Lipschitz inference.
 
     :param acquisition: acquisition function in which the batch selection is based
+    :param d_acquisition: gradient of the acquisition
     :param bounds: the box constrains of the optimization
-    :param restarts: the number of restarts in the optimization of the surrogate
-    :param method: the method to optimize the acquisition function
+    :param acqu_optimize_restarts: the number of restarts in the optimization of the surrogate
+    :param acqu_optimize_method: the method to optimize the acquisition function
     :param model: the GP model based on the current samples
     :param n_inbatch: the number of samples to collect
     '''
+
+    # Optimize the first element in the batch
     X_batch = optimize_acquisition(acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch=None, L=None, Min=None)
     k=1
+
     if n_inbatch>1:
         # ---------- Approximate the constants of the the method
         L = estimate_L(model,bounds)
@@ -104,13 +122,13 @@ def optimize_acquisition(acquisition, d_acquisition, bounds, acqu_optimize_resta
     Optimization of the acquisition function
     '''
     if acqu_optimize_method=='brute':
-        res = full_acquisition_optimization(acquisition, d_acquisition,bounds,acqu_optimize_restarts, model, 'brute', X_batch, L, Min)
+        res = full_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimize_restarts, model, 'brute', X_batch, L, Min)
     elif acqu_optimize_method=='random':
-        res =  full_acquisition_optimization(acquisition, d_acquisition,bounds,acqu_optimize_restarts, model, 'random', X_batch, L, Min)
+        res =  full_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimize_restarts, model, 'random', X_batch, L, Min)
     elif acqu_optimize_method=='fast_brute':
-        res =  fast_acquisition_optimization(acquisition, d_acquisition,bounds,acqu_optimize_restarts, model, 'brute', X_batch, L, Min)
+        res =  fast_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimize_restarts, model, 'brute', X_batch, L, Min)
     elif acqu_optimize_method=='fast_random':
-        res =  fast_acquisition_optimization(acquisition, d_acquisition,bounds,acqu_optimize_restarts, model, 'random', X_batch, L, Min)
+        res =  fast_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimize_restarts, model, 'random', X_batch, L, Min)
     return res
 
 
@@ -126,7 +144,7 @@ def fast_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimi
     x0 =  samples[np.argmin(pred_samples)]
     h_func_args = hammer_function_precompute(X_batch, L, Min, model)
     if X_batch==None:
-        res = scipy.optimize.minimize(acquisition, x0=np.array(x0),method='SLSQP',jac=d_acquisition,bounds=bounds, options = {'maxiter': 500}) 
+        res = scipy.optimize.minimize(acquisition, x0=np.array(x0),method='SLSQP',jac=d_acquisition,bounds=bounds, options = {'maxiter': 500,'gtol': 1e-6}) 
     else:
         res = scipy.optimize.minimize(penalized_acquisition, x0=np.array(x0),method='SLSQP',bounds=bounds, args=(acquisition, bounds, model, X_batch)+h_func_args)
     return res.x
@@ -145,7 +163,7 @@ def full_acquisition_optimization(acquisition, d_acquisition, bounds, acqu_optim
     h_func_args = hammer_function_precompute(X_batch, L, Min, model)
     for k in range(acqu_optimize_restarts):
         if X_batch==None: # gradients are approximated within the batch collection
-            res = scipy.optimize.minimize(acquisition, x0=samples[k,:],method='SLSQP',jac=d_acquisition,bounds=bounds, options = {'maxiter': 500})
+            res = scipy.optimize.minimize(acquisition, x0=samples[k,:],method='SLSQP',jac=d_acquisition,bounds=bounds, options = {'maxiter': 500,'gtol': 1e-6})
         else:
             res = scipy.optimize.minimize(penalized_acquisition, x0 = samples[k,:] ,method='SLSQP', bounds=bounds, args=(acquisition, bounds, model, X_batch)+h_func_args)
         mins[k] = res.x

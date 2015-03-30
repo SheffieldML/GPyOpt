@@ -25,7 +25,7 @@ class BO(object):
     def _init_model(self):
         pass
         
-    def start_optimization(self, max_iter=25, n_inbatch=1, acqu_optimize_method='random', batch_method='predictive', acqu_optimize_restarts=10, stop_criteria = 1e-16, n_procs=1, verbose=True):
+    def run_optimization(self, max_iter=25, n_inbatch=1, acqu_optimize_method='random', batch_method='predictive', acqu_optimize_restarts=10, stop_criteria = 1e-16, n_procs=1, true_gradients = True, verbose=True):
         """ 
         Starts Bayesian Optimization for a number H of iterations (after the initial exploration data)
 
@@ -45,10 +45,12 @@ class BO(object):
         :param acqu_optimize_restarts: numbers of random restarts in the optimization of the acquisition function, default = 10.
     	:param stop_criteria: minimum distance between two consecutive x's to keep running the model
     	:param n_procs: The number of processes used for evaluating the given function *f*
+        :param true_gradients: If the true gradients (can be slow) of the acquisition ar an approximation is used (True, default).
 
         ..Note : X and Y can be None. In this case Nrandom*model_dimension data are uniformly generated to initialize the model.
     
         """
+        # load the parameters of the function into the object.
         self.num_acquisitions = 0
         self.n_inbatch=n_inbatch
         self.batch_method = batch_method
@@ -59,15 +61,76 @@ class BO(object):
         self.acquisition_func.model = self.model
         self.n_procs = n_procs
 
-        # optimize model and acquisition function
+        # decide wether we use the true gradients to optimize the acquitision function
+        if true_gradients !=True:
+            self.true_gradients = False  
+            self.acquisition_func.d_acquisition_function = None
+        else: 
+            self.true_gradients = true_gradients
+
+        # optimize model and acquisition function by first time
         self._update_model()
         prediction = self.model.predict(self.X)       
         self.m_in_min = prediction[0]
         prediction[1][prediction[1]<0] = 0
         self.s_in_min = np.sqrt(prediction[1])
-        self.optimization_started = True
 
-        return self.continue_optimization(max_iter, verbose=verbose)
+        k=0
+        distance_lastX = self.stop_criteria + 1
+        while k<max_iter and distance_lastX > self.stop_criteria:
+                
+            # ------- Augment X
+            self.X = np.vstack((self.X,self.suggested_sample))
+            
+            # ------- Evaluate *f* in X and augment Y
+            if self.n_procs==1:
+                self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
+            else:
+                try:
+                    # Parallel evaluation of *f* is several cores are available
+                    from multiprocessing import Process, Pipe
+                    from itertools import izip          
+                    divided_samples = [self.suggested_sample[i::self.n_procs] for i in xrange(self.n_procs)]
+                    pipe=[Pipe() for i in xrange(self.n_procs)]
+                    proc=[Process(target=spawn(self.f),args=(c,x)) for x,(p,c) in izip(divided_samples,pipe)]
+                    [p.start() for p in proc]
+                    [p.join() for p in proc]
+                    rs = [p.recv() for (p,c) in pipe]
+                    self.Y = np.vstack([self.Y]+rs)
+                except:
+                    if not hasattr(self, 'parallel_error'):
+                        print 'Error in parallel computation. Fall back to single process!'
+                        self.parallel_error = True 
+                    self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
+                
+            # -------- Update internal elements (needed for plotting)
+            self.num_acquisitions += 1
+            pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))       
+            self.m_in_min = np.vstack((self.m_in_min,pred_min[0]))
+            self.s_in_min = np.vstack((self.s_in_min,np.sqrt(abs(pred_min[1]))))
+                
+            # -------- Update model
+            try:
+                self._update_model()                
+            except np.linalg.linalg.LinAlgError:
+                break
+
+            # ------- Update stop conditions
+            k +=1
+            distance_lastX = np.sqrt(sum((self.X[self.X.shape[0]-1,:]-self.X[self.X.shape[0]-2,:])**2))     
+
+        # ------- Stop messages            
+        self.Y_best = best_value(self.Y)
+        self.x_opt = self.X[np.argmin(self.Y),:]
+        self.fx_opt = min(self.Y)
+        if verbose: print '*Optimization completed:'
+        if k==max_iter:
+            if verbose: print '   -Maximum number of iterations reached.'
+            return 1
+        else: 
+            if verbose: print '   -Method converged.'
+            return 0
+
     
     def change_to_sparseGP(self, num_inducing):
         """
@@ -93,73 +156,6 @@ class BO(object):
             self.sparse = False
             self._init_model(self.X,self.Y)
     
-    def continue_optimization(self,max_iter, verbose=True):
-        """
-        Continues Bayesian Optimization for a number H of iterations. Requires prior initialization with self.start_optimization
-
-        :param max_iter: new exploration horizon, or number of extra iterations  
-        :param verbose: show messages
-        """
-        if self.optimization_started:
-            k=0
-            distance_lastX = self.stop_criteria + 1
-            while k<max_iter and distance_lastX > self.stop_criteria:
-                
-                # ------- Augment X
-                self.X = np.vstack((self.X,self.suggested_sample))
-                
-                # ------- Evaluate *f* in X and augment Y
-                if self.n_procs==1:
-                    self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
-                else:
-                    try:
-                        # Parallel evaluation of *f* is several cores are available
-                        from multiprocessing import Process, Pipe
-                        from itertools import izip          
-                        divided_samples = [self.suggested_sample[i::self.n_procs] for i in xrange(self.n_procs)]
-                        pipe=[Pipe() for i in xrange(self.n_procs)]
-                        proc=[Process(target=spawn(self.f),args=(c,x)) for x,(p,c) in izip(divided_samples,pipe)]
-                        [p.start() for p in proc]
-                        [p.join() for p in proc]
-                        rs = [p.recv() for (p,c) in pipe]
-                        self.Y = np.vstack([self.Y]+rs)
-                    except:
-                        if not hasattr(self, 'parallel_error'):
-                            print 'Error in parallel computation. Fall back to single process!'
-                            self.parallel_error = True 
-                        self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
-                
-                # -------- Update internal elements needed for plotting and batch collection
-                self.num_acquisitions += 1
-                pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))       
-                self.m_in_min = np.vstack((self.m_in_min,pred_min[0]))
-                self.s_in_min = np.vstack((self.s_in_min,np.sqrt(abs(pred_min[1]))))
-                
-                # -------- Update model
-                try:
-                    self._update_model()                
-                except np.linalg.linalg.LinAlgError:
-                    break
-
-                # ------- Update stop conditions
-                k +=1
-                distance_lastX = np.sqrt(sum((self.X[self.X.shape[0]-1,:]-self.X[self.X.shape[0]-2,:])**2))		
-
-            # ------- Stop messages            
-            self.Y_best = best_value(self.Y)
-            self.x_opt = self.X[np.argmin(self.Y),:]
-            self.fx_opt = min(self.Y)
-            if verbose: print '*Optimization completed:'
-            if k==max_iter:
-                if verbose: print '   -Maximum number of iterations reached.'
-                return 1
-            else: 
-                if verbose: print '   -Method converged.'
-                return 0
-        else:
-            if verbose: print 'Optimization not initiated: Use .start_optimization and provide a function to optimize'
-            return -1 
-
         
     def _optimize_acquisition(self):
         """
@@ -178,14 +174,15 @@ class BO(object):
         acqu_optimize_method = self.acqu_optimize_method
         n_inbatch = self.n_inbatch
         bounds = self.bounds
+        true_gradients = self.true_gradients
 
         # ------ Selection of the batch method (if any, predictive used when n_inbathc=1)
         if self.batch_method == 'predictive':
             X_batch = predictive_batch_optimization(acqu_name, acquisition_par, acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch)            
         elif self.batch_method == 'mp':
-            X_batch = mp_batch_optimization(acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch)
+            X_batch = mp_batch_optimization(acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch, n_inbatch)
         elif self.batch_method == 'random':
-            X_batch = random_batch_optimization(acquisition, d_acquisition, bounds, acqu_optimize_restarts,acqu_optimize_method, model, n_inbatch)        
+            X_batch = random_batch_optimization(acquisition, d_acquisition, bounds, acqu_optimize_restarts,acqu_optimize_method, model, n_inbatch, n_inbatch)        
         return X_batch
 
 

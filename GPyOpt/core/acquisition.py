@@ -85,11 +85,7 @@ class AcquisitionLCB(AcquisitionBase):
 		dmdx, dsdx = get_d_moments(self.model, x)
 		df_acqu = -dmdx + self.acquisition_par * dsdx
 		return -df_acqu
-
-
-
-
-
+ 
 
 
 
