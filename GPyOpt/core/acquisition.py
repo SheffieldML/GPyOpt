@@ -87,7 +87,24 @@ class AcquisitionLCB(AcquisitionBase):
 		return -df_acqu
  
 
+#### This is the acquisition function for Alessandra. We call it the GMF (grafient magnification factor).
+# class AcquisitionGMF(AcquisitionBase):
+# 	"""
+# 	Class for the GMF acquisition function
+# 	"""
+# 	def acquisition_function(self,x):
+# 		"""
+# 		Gradient magnification Factor
+# 		"""		
+# 		dmdx, dsdx = get_d_moments(self.model, x) # ----- whatever
+# 		return -f_acqu  # note: returns negative value for posterior minimization 
 
+# 	def d_acquisition_function(self,x):
+# 		"""
+# 		Derivative (gradient) of the Gradient magnification Factor
+# 		"""
+
+# 		return None
 
 
 
