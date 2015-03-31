@@ -1,50 +1,10 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Leap Day in Jekyll</title>
-    <link rel="stylesheet" href="assets/stylesheets/styles.css">
-    <link rel="stylesheet" href="assets/stylesheets/pygment_trac.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="assets/javascripts/main.js"></script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-  </head>
-  <body>
+{% include header.html %}
 
-  <header>
-    <a href="">
-      <h1>GPyOpt</h1>
-      <p>Tune your algorithms and design your wetlab experiments</p>
-    </a>
-  </header>
-
-
-  <div id="banner">
-  <div class="banner-inner">
-    <span id="logo"><span class="octicon octicon-mark-github"></span></span>
-
-    <a href="https://github.com/SheffieldML/GPyOpt" class="button fork"><strong>Fork On GitHub</strong></a>
-    <div class="downloads">
-      <span>Downloads:</span>
-      <ul>
-        <li><a href="  " class="button">ZIP</a></li>
-        <li><a href="  " class="button">TAR</a></li>
-      </ul>
-    </div>
-  </div>
-</div>
-
+  {% include banner.html %}
 
   <div class="wrapper">
 
-    <nav>
-  <ul></ul>
-</nav>
-
+    {% include page-nav.html %}
 
   <section>
     <h1>GPyOpt</h1>
@@ -140,14 +100,6 @@ if you use the package. We will be very happy to include you in the following li
 
 
 
-	
+	{{ content }}
 
-
-  <footer>
-    <span class="small"> Writen for you by the <a href="http://ml.dcs.shef.ac.uk/sitran/">  Machine Learning group </a> of the University of Sheffield  </span>
-  </footer>
-  </div>
-  <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
-  </body>
-</html>
-
+{% include footer.html %}

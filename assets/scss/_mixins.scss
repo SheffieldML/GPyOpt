@@ -1,0 +1,15 @@
+@mixin font-size($multiplier: 1) {
+  font-size: $font-size*$multiplier;
+}
+
+@mixin line-height($multiplier: 1) {
+  line-height: $line-height*$multiplier;
+}
+
+@mixin vertical-align {
+  position: relative;
+  top: 50%;
+  	-webkit-transform: translateY(-50%);
+  	-ms-transform: translateY(-50%);
+  	transform: translateY(-50%);
+}

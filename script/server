@@ -1,0 +1,13 @@
+#Quick and Dirty Jekyll/Compass setup by @michigangraham
+#!/bin/sh
+#
+# Usage:
+#   server
+#   open http://localhost:4000
+
+set -e
+cd $(dirname "$0")/..
+
+script/bootstrap && bundle exec foreman start
+exit=$?
+exit $exit

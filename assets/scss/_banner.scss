@@ -1,0 +1,92 @@
+#banner {
+  z-index: 100;
+  left:0;
+  right:50%;
+  height: 50px;
+  margin-right:-382px;
+  position: fixed;
+  top: 100px;
+  background: $color-brand-accent;
+  border: 1px solid darken($color-brand-accent, 10%);
+  @include box-shadow(0px 1px 3px rgba(0,0,0,.25));
+  @include border-radius(0px $border-radius $border-radius 0px);
+
+  .banner-inner {
+    max-width:650px;
+    width:100%;
+    overflow:hidden;
+    float:right;
+    margin-right:55px;
+  }
+
+  .button {
+    border: 1px solid darken($color-brand-accent, 10%);
+    @include font-size(1.4);
+    @include line-height(1.4);
+    @include border-radius($border-radius);
+    margin-left: 5px;
+    padding: 10px 12px;
+    margin-top: 6px;
+    color: #333;
+    font-weight: bold;
+    display: inline-block;
+    text-align: center;
+    box-shadow: inset 0 0 6px rgba(#fff, .2), inset 0 1px 0 rgba(#fff,.2), 0 1px 1px rgba(#000, .05);
+    background: darken(#ffe788, 7%);
+    transition: background .1s ease-in;
+
+    &:hover {
+      box-shadow: inset 0 1px 0 rgba(#fff,.2), 0 1px 1px rgba(#000, .05);
+      background: #ffe788;
+    }
+  }
+
+  .fork {
+    @include font-size(1.4);
+    @include line-height(1.4);
+    padding: 10px 12px;
+    margin-top: 6px;
+    margin-left:0;
+  }
+
+  .downloads {
+    float: right;
+    margin: 0;
+
+    span {
+      float: left;
+      display: inline-block;
+      @include line-height(4.6);
+      color: #9d7f0d;
+      text-shadow:rgba(#fff, 0.2) 0 1px 0;
+    }
+  }
+
+  ul {
+    list-style: none;
+    height: 40px;
+    padding: 0;
+    float: left;
+    margin-left: 10px;
+
+    li {
+      display: inline;
+      list-style: none;
+    }
+  }
+
+  #logo {
+    position:absolute;
+    height: 36px;
+    width: 36px;
+    right:7px;
+    top:7px;
+    display: block;
+    color: rgba(#FFE788, 1);
+
+    .octicon {
+      font-size: 36px;
+      margin-top: -1px;
+    }
+  }
+}

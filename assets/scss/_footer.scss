@@ -1,0 +1,14 @@
+footer {
+  width: 180px;
+  position: fixed;
+  left: 50%;
+  margin-left: -530px;
+  bottom: 40px;
+  text-align: left;
+
+  .small {
+    display: inline-block;
+    @include font-size(1.2);
+    @include line-height(1.6);
+  }
+}
