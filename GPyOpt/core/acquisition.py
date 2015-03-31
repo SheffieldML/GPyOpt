@@ -85,9 +85,9 @@ class AcquisitionLCB(AcquisitionBase):
 		dmdx, dsdx = get_d_moments(self.model, x)
 		df_acqu = -dmdx + self.acquisition_par * dsdx
 		return -df_acqu
- 
 
-#### This is the acquisition function for Alessandra. We call it the GMF (grafient magnification factor).
+
+#### This is the acquisition function for Alessandra. We call it the GMF (gradient magnification factor).
 # class AcquisitionGMF(AcquisitionBase):
 # 	"""
 # 	Class for the GMF acquisition function

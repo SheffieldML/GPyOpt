@@ -4,7 +4,7 @@ from ..util.general import best_value, reshape, spawn
 from ..core.optimization import mp_batch_optimization, random_batch_optimization, predictive_batch_optimization
 
 try:
-    from ..plotting.plots_bo import plot_acquisition, plot_convergence
+    from ..plotting.plots_bo import plot_acquisition, plot_convergence, plot_convergence_gradients
 except:
     pass
 
@@ -174,7 +174,6 @@ class BO(object):
         acqu_optimize_method = self.acqu_optimize_method
         n_inbatch = self.n_inbatch
         bounds = self.bounds
-        true_gradients = self.true_gradients
 
         # ------ Selection of the batch method (if any, predictive used when n_inbathc=1)
         if self.batch_method == 'predictive':
@@ -223,7 +222,10 @@ class BO(object):
             plot 3: Iterations vs. the variance of the current model in the selected sample.
         :param filename: name of the file where the plot is saved
         """
-        return plot_convergence(self.X,self.Y_best,self.s_in_min)
+        if self.acqu_name == 'GMF':
+            return plot_convergence_gradients(self.X)  ##check imputs  
+        else:
+            return plot_convergence(self.X,self.Y_best,self.s_in_min)
 
 
 
