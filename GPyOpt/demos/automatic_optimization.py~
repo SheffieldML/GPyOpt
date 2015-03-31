@@ -1,0 +1,43 @@
+# Copyright (c) 2015, Javier Gonzalez
+# Copyright (c) 2015, the GPy Authors (see GPy AUTHORS.txt)
+# Licensed under the BSD 3-clause license (see LICENSE.txt)
+
+
+"""
+This is a simple demo to demonstrate the use of Bayesian optimization for automatic
+optimization of functions. All the default values of the parameters in GPyOPt are used. To run the example execute
+
+>> import GPyOpt
+>> GPyOpt.demos.automatic_optimization()
+
+As a result you should see:
+
+- A plot with the model and the current acquisition function, the Expected Improvement in this example.#
+- A plot with the diagnostic plots of the optimization.
+- An object call BO_demo_auto that contains the results of the optimization process (see reference manual for details). Amonng the available results you have access to the GP model via
+
+>> BO_demo_auto.model
+
+and to the location of the best found location writting.
+
+BO_demo_auto.x_opt
+
+"""
+import GPyOpt
+from numpy.random import seed
+seed(12345)
+
+# --- Objective function
+def objective(x):
+    return (2*x)**2 + 5
+
+# --- Bounds
+bounds = [(-2,2)]
+
+# --- Problem definition and optimization
+BO_demo_auto = GPyOpt.methods.BayesianOptimization(objective,bounds)
+BO_demo_auto.run_optimization()
+
+# --- Plotsmy
+BO_demo_auto.plot_acquisition()
+BO_demo_auto.plot_convergence()

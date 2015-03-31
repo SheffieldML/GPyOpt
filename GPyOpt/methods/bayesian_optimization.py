@@ -59,7 +59,7 @@ class BayesianOptimization(BO):
             self.X = X
             self.Y = Y
         if kernel is None: 
-            self.kernel = GPy.kern.RBF(self.input_dim, variance=.1, lengthscale=.1) + GPy.kern.Bias(self.input_dim)
+            self.kernel = GPy.kern.RBF(self.input_dim, variance=.1, lengthscale=.1) # + GPy.kern.Bias(self.input_dim)
         else:
             self.kernel = kernel
         self._init_model()
@@ -100,4 +100,9 @@ class BayesianOptimization(BO):
                 self.model = GPy.models.SparseGPRegression(self.X, self.Y, kernel=self.kernel, num_inducing=self.num_inducing)
         else:       
             self.model = GPy.models.GPRegression(self.X,self.Y,kernel=self.kernel)
+            
+        self.model.Gaussian_noise.constrain_bounded(1e-3,1e6)
+            
+            
+            
 

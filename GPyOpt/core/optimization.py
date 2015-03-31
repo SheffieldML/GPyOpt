@@ -104,7 +104,8 @@ def mp_batch_optimization(acquisition, d_acquisition, bounds, acqu_optimize_rest
     # Optimize the first element in the batch
     X_batch = optimize_acquisition(acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch=None, L=None, Min=None)
     k=1
-
+    d_acquisition = None  # gradients are approximated  with the batch. 
+    
     if n_inbatch>1:
         # ---------- Approximate the constants of the the method
         L = estimate_L(model,bounds)
@@ -112,7 +113,7 @@ def mp_batch_optimization(acquisition, d_acquisition, bounds, acqu_optimize_rest
 
     while k<n_inbatch:
         # ---------- Collect the batch (the gradients of the acquisition are approximated for k =2,...,n_inbathc)
-        new_sample = optimize_acquisition(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch, L, Min)
+        new_sample = optimize_acquisition(acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch, L, Min)
         X_batch = np.vstack((X_batch,new_sample))  
         k +=1
     return X_batch
@@ -144,7 +145,7 @@ def fast_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimi
     x0 =  samples[np.argmin(pred_samples)]
     h_func_args = hammer_function_precompute(X_batch, L, Min, model)
     if X_batch==None:
-        res = scipy.optimize.minimize(acquisition, x0=np.array(x0),method='SLSQP',jac=d_acquisition,bounds=bounds, options = {'maxiter': 500,'gtol': 1e-6}) 
+        res = scipy.optimize.minimize(acquisition, x0=np.array(x0),method='SLSQP',jac=d_acquisition,bounds=bounds, options = {'maxiter': 500}) 
     else:
         res = scipy.optimize.minimize(penalized_acquisition, x0=np.array(x0),method='SLSQP',bounds=bounds, args=(acquisition, bounds, model, X_batch)+h_func_args)
     return res.x
@@ -163,7 +164,7 @@ def full_acquisition_optimization(acquisition, d_acquisition, bounds, acqu_optim
     h_func_args = hammer_function_precompute(X_batch, L, Min, model)
     for k in range(acqu_optimize_restarts):
         if X_batch==None: # gradients are approximated within the batch collection
-            res = scipy.optimize.minimize(acquisition, x0=samples[k,:],method='SLSQP',jac=d_acquisition,bounds=bounds, options = {'maxiter': 500,'gtol': 1e-6})
+            res = scipy.optimize.minimize(acquisition, x0=samples[k,:],method='SLSQP',jac=d_acquisition,bounds=bounds, options = {'maxiter': 500})
         else:
             res = scipy.optimize.minimize(penalized_acquisition, x0 = samples[k,:] ,method='SLSQP', bounds=bounds, args=(acquisition, bounds, model, X_batch)+h_func_args)
         mins[k] = res.x

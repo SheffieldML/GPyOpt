@@ -17,7 +17,7 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
         acqu_normalized = (-acqu - min(-acqu))/(max(-acqu - min(-acqu))) # normalize acquisition 
         m, v = model.predict(X.reshape(len(X),1))
         plt.ioff()        
-        fig = plt.figure(figsize=(10,5)) 
+        plt.figure(figsize=(10,5)) 
         plt.subplot(2, 1, 1)
         plt.plot(X, m, 'b-', label=u'Posterior mean',lw=2)
         plt.fill(np.concatenate([X, X[::-1]]), \
@@ -44,7 +44,6 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
         plt.xlim(*bounds)
         if filename!=None:
             savefig(filename)
-            plt.close(fig)
         else:
             plt.show()
 
@@ -87,7 +86,7 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
         if filename!=None:savefig(filename)
 
 
-def plot_convergence(Xdata,best_Y,s_in_min):
+def plot_convergence(Xdata,best_Y,s_in_min, filename = None):
     '''
     Plots to evaluate the convergence of standard Bayesian optimization algorithms
     '''
@@ -120,6 +119,10 @@ def plot_convergence(Xdata,best_Y,s_in_min):
     plt.ylim(0,max(s_in_min[:,0])+np.sqrt(max(s_in_min[:,0])))
     plt.ylabel('CI (centered at zero)')
     grid(True)
+    if filename!=None:
+        savefig(filename)
+    else:
+        plt.show()
 
 
 def plot_convergence_gradients(Xdata):

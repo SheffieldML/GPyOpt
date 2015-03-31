@@ -6,5 +6,6 @@ import methods
 import util
 import fmodels
 import plotting
+import demos
 
 
