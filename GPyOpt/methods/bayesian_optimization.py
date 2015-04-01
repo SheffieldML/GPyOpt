@@ -7,10 +7,12 @@ import GPy
 from ..core.acquisition import AcquisitionEI, AcquisitionMPI, AcquisitionLCB 
 from ..core.bo import BO
 from ..util.general import samples_multidimensional_uniform
+import warnings
+warnings.filterwarnings("ignore")
 
 
 class BayesianOptimization(BO):
-    def __init__(self, f, bounds=None, kernel=None, X=None, Y=None, optimize_model=None, model_optimize_interval=1, model_optimize_restarts=5, acquisition='EI', acquisition_par= 0.01,  model_data_init = None, sparse=False, num_inducing=None, normalize=False, verbosity=0):
+    def __init__(self, f, bounds=None, kernel=None, X=None, Y=None, optimize_model=None, model_optimize_interval=1, model_optimize_restarts=5, acquisition='EI', acquisition_par= 0.01,  model_data_init = None, sparse=False, num_inducing=None, normalize=False, exact_feval=False, verbosity=0):
         '''
         Bayesian Optimization using EI, MPI and LCB (or UCB) acquisition functions.
     
@@ -30,6 +32,7 @@ class BayesianOptimization(BO):
         :param num_inducing: number of inducing points for a Sparse GP (None, default)
         :param normalize: whether to normalize the Y's for optimization (False, default).
         :param true_gradients: whether the true gradients of the acquisition function are used for optimization (True, default). 
+        :param exact_feval: set the noise variance of the GP if True (False, default).
         :param verbosity: whether to show (1) or not (0, default) the value of the log-likelihood of the model for the optimized parameters.
     
         '''
@@ -38,6 +41,7 @@ class BayesianOptimization(BO):
         self.sparse = sparse
         self.input_dim = len(bounds)
         self.normalize = normalize
+        self.exact_feval = exact_feval
         if f==None: 
             print 'Function to optimize is required.'
         else:
@@ -101,7 +105,10 @@ class BayesianOptimization(BO):
         else:       
             self.model = GPy.models.GPRegression(self.X,self.Y,kernel=self.kernel)
             
-        self.model.Gaussian_noise.constrain_bounded(1e-3,1e6)
+        if self.exact_feval == True:
+            self.model.Gaussian_noise.constrain_fixed(1e-3)
+        else:
+            self.model.Gaussian_noise.constrain_bounded(1e-3,1e6)
             
             
             
