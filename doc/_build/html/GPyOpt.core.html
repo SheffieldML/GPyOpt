@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="GPyOpt  documentation" href="index.html" />
     <link rel="up" title="GPyOpt package" href="GPyOpt.html" />
-    <link rel="next" title="GPyOpt.fmodels package" href="GPyOpt.fmodels.html" />
+    <link rel="next" title="GPyOpt.demos package" href="GPyOpt.demos.html" />
     <link rel="prev" title="GPyOpt package" href="GPyOpt.html" /> 
   </head>
   <body role="document">
@@ -39,7 +39,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="GPyOpt.fmodels.html" title="GPyOpt.fmodels package"
+          <a href="GPyOpt.demos.html" title="GPyOpt.demos package"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="GPyOpt.html" title="GPyOpt package"
@@ -166,24 +166,6 @@
 </dd></dl>
 
 <dl class="method">
-<dt id="GPyOpt.core.bo.BO.continue_optimization">
-<code class="descname">continue_optimization</code><span class="sig-paren">(</span><em>max_iter</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/bo.html#BO.continue_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.bo.BO.continue_optimization" title="Permalink to this definition">¶</a></dt>
-<dd><p>Continues Bayesian Optimization for a number H of iterations. Requires prior initialization with self.start_optimization</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>max_iter</strong> &#8211; new exploration horizon, or number of extra iterations</li>
-<li><strong>verbose</strong> &#8211; show messages</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="GPyOpt.core.bo.BO.plot_acquisition">
 <code class="descname">plot_acquisition</code><span class="sig-paren">(</span><em>filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/bo.html#BO.plot_acquisition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.bo.BO.plot_acquisition" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
@@ -221,8 +203,8 @@ plot 3: Iterations vs. the variance of the current model in the selected sample.
 </dd></dl>
 
 <dl class="method">
-<dt id="GPyOpt.core.bo.BO.start_optimization">
-<code class="descname">start_optimization</code><span class="sig-paren">(</span><em>max_iter=25</em>, <em>n_inbatch=1</em>, <em>acqu_optimize_method='random'</em>, <em>batch_method='predictive'</em>, <em>acqu_optimize_restarts=10</em>, <em>stop_criteria=1e-16</em>, <em>n_procs=1</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/bo.html#BO.start_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.bo.BO.start_optimization" title="Permalink to this definition">¶</a></dt>
+<dt id="GPyOpt.core.bo.BO.run_optimization">
+<code class="descname">run_optimization</code><span class="sig-paren">(</span><em>max_iter=15</em>, <em>n_inbatch=1</em>, <em>acqu_optimize_method='random'</em>, <em>batch_method='predictive'</em>, <em>acqu_optimize_restarts=20</em>, <em>stop_criteria=1e-16</em>, <em>n_procs=1</em>, <em>true_gradients=True</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/bo.html#BO.run_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.bo.BO.run_optimization" title="Permalink to this definition">¶</a></dt>
 <dd><p>Starts Bayesian Optimization for a number H of iterations (after the initial exploration data)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -243,11 +225,11 @@ plot 3: Iterations vs. the variance of the current model in the selected sample.
 :param batch_method: method to collect samples in batches
 -&#8216;predictive&#8217;: uses the predicted mean in the selected sample to update the acquisition function.
 -&#8216;mp&#8217;: used a penalization of the acquisition function to based on exclusion zones.
--&#8216;random&#8217;: collects the element of the batch randomly
--&#8216;sm&#8217;: simulating matching methods.</li>
+-&#8216;random&#8217;: collects the element of the batch randomly</li>
 <li><strong>acqu_optimize_restarts</strong> &#8211; numbers of random restarts in the optimization of the acquisition function, default = 10.</li>
 <li><strong>stop_criteria</strong> &#8211; minimum distance between two consecutive x&#8217;s to keep running the model</li>
 <li><strong>n_procs</strong> &#8211; The number of processes used for evaluating the given function <em>f</em></li>
+<li><strong>true_gradients</strong> &#8211; If the true gradients (can be slow) of the acquisition ar an approximation is used (True, default).</li>
 </ul>
 </td>
 </tr>
@@ -306,9 +288,10 @@ plot 3: Iterations vs. the variance of the current model in the selected sample.
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>acquisition</strong> &#8211; acquisition function in which the batch selection is based</li>
+<li><strong>d_acquisition</strong> &#8211; gradient of the acquisition</li>
 <li><strong>bounds</strong> &#8211; the box constrains of the optimization</li>
-<li><strong>restarts</strong> &#8211; the number of restarts in the optimization of the surrogate</li>
-<li><strong>method</strong> &#8211; the method to optimize the acquisition function</li>
+<li><strong>acqu_optimize_restarts</strong> &#8211; the number of restarts in the optimization of the surrogate</li>
+<li><strong>acqu_optimize_method</strong> &#8211; the method to optimize the acquisition function</li>
 <li><strong>model</strong> &#8211; the GP model based on the current samples</li>
 <li><strong>n_inbatch</strong> &#8211; the number of samples to collect</li>
 </ul>
@@ -340,9 +323,10 @@ plot 3: Iterations vs. the variance of the current model in the selected sample.
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>acquisition</strong> &#8211; acquisition function in which the batch selection is based</li>
+<li><strong>d_acquisition</strong> &#8211; gradient of the acquisition</li>
 <li><strong>bounds</strong> &#8211; the box constrains of the optimization</li>
-<li><strong>restarts</strong> &#8211; the number of restarts in the optimization of the surrogate</li>
-<li><strong>method</strong> &#8211; the method to optimize the acquisition function</li>
+<li><strong>acqu_optimize_restarts</strong> &#8211; the number of restarts in the optimization of the surrogate</li>
+<li><strong>acqu_optimize_method</strong> &#8211; the method to optimize the acquisition function</li>
 <li><strong>model</strong> &#8211; the GP model based on the current samples</li>
 <li><strong>n_inbatch</strong> &#8211; the number of samples to collect</li>
 </ul>
@@ -356,6 +340,23 @@ plot 3: Iterations vs. the variance of the current model in the selected sample.
 <dt id="GPyOpt.core.optimization.random_batch_optimization">
 <code class="descclassname">GPyOpt.core.optimization.</code><code class="descname">random_batch_optimization</code><span class="sig-paren">(</span><em>acquisition</em>, <em>d_acquisition</em>, <em>bounds</em>, <em>acqu_optimize_restarts</em>, <em>acqu_optimize_method</em>, <em>model</em>, <em>n_inbatch</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/optimization.html#random_batch_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.optimization.random_batch_optimization" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the batch optimization taking random samples (only for comparative purposes)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>acquisition</strong> &#8211; acquisition function in which the batch selection is based</li>
+<li><strong>d_acquisition</strong> &#8211; gradient of the acquisition</li>
+<li><strong>bounds</strong> &#8211; the box constrains of the optimization</li>
+<li><strong>acqu_optimize_restarts</strong> &#8211; the number of restarts in the optimization of the surrogate</li>
+<li><strong>acqu_optimize_method</strong> &#8211; the method to optimize the acquisition function</li>
+<li><strong>model</strong> &#8211; the GP model based on the current samples</li>
+<li><strong>n_inbatch</strong> &#8211; the number of samples to collect</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -386,8 +387,8 @@ plot 3: Iterations vs. the variance of the current model in the selected sample.
   <p class="topless"><a href="GPyOpt.html"
                         title="previous chapter">GPyOpt package</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="GPyOpt.fmodels.html"
-                        title="next chapter">GPyOpt.fmodels package</a></p>
+  <p class="topless"><a href="GPyOpt.demos.html"
+                        title="next chapter">GPyOpt.demos package</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -422,7 +423,7 @@ plot 3: Iterations vs. the variance of the current model in the selected sample.
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="GPyOpt.fmodels.html" title="GPyOpt.fmodels package"
+          <a href="GPyOpt.demos.html" title="GPyOpt.demos package"
              >next</a> |</li>
         <li class="right" >
           <a href="GPyOpt.html" title="GPyOpt package"

@@ -134,6 +134,26 @@
 		<span class="n">dmdx</span><span class="p">,</span> <span class="n">dsdx</span> <span class="o">=</span> <span class="n">get_d_moments</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
 		<span class="n">df_acqu</span> <span class="o">=</span> <span class="o">-</span><span class="n">dmdx</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_par</span> <span class="o">*</span> <span class="n">dsdx</span>
 		<span class="k">return</span> <span class="o">-</span><span class="n">df_acqu</span>
+
+
+<span class="c">#### This is the acquisition function for Alessandra. We call it the GMF (gradient magnification factor).</span>
+<span class="c"># class AcquisitionGMF(AcquisitionBase):</span>
+<span class="c"># 	&quot;&quot;&quot;</span>
+<span class="c"># 	Class for the GMF acquisition function</span>
+<span class="c"># 	&quot;&quot;&quot;</span>
+<span class="c"># 	def acquisition_function(self,x):</span>
+<span class="c"># 		&quot;&quot;&quot;</span>
+<span class="c"># 		Gradient magnification Factor</span>
+<span class="c"># 		&quot;&quot;&quot;		</span>
+<span class="c"># 		dmdx, dsdx = get_d_moments(self.model, x) # ----- whatever</span>
+<span class="c"># 		return -f_acqu  # note: returns negative value for posterior minimization </span>
+
+<span class="c"># 	def d_acquisition_function(self,x):</span>
+<span class="c"># 		&quot;&quot;&quot;</span>
+<span class="c"># 		Derivative (gradient) of the Gradient magnification Factor</span>
+<span class="c"># 		&quot;&quot;&quot;</span>
+
+<span class="c"># 		return None</span>
 </pre></div></div></div>
 
           </div>

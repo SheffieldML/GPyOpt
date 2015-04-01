@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
 
     GPyOpt.core
+    GPyOpt.demos
     GPyOpt.fmodels
     GPyOpt.methods
     GPyOpt.plotting

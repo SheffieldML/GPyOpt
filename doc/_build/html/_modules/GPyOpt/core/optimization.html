@@ -65,9 +65,10 @@
 <span class="sd">    Computes batch optimization using the predictive mean to obtain new batch elements</span>
 
 <span class="sd">    :param acquisition: acquisition function in which the batch selection is based</span>
+<span class="sd">    :param d_acquisition: gradient of the acquisition</span>
 <span class="sd">    :param bounds: the box constrains of the optimization</span>
-<span class="sd">    :param restarts: the number of restarts in the optimization of the surrogate</span>
-<span class="sd">    :param method: the method to optimize the acquisition function</span>
+<span class="sd">    :param acqu_optimize_restarts: the number of restarts in the optimization of the surrogate</span>
+<span class="sd">    :param acqu_optimize_method: the method to optimize the acquisition function</span>
 <span class="sd">    :param model: the GP model based on the current samples</span>
 <span class="sd">    :param n_inbatch: the number of samples to collect</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -76,7 +77,10 @@
     <span class="n">Y</span> <span class="o">=</span> <span class="n">model_copy</span><span class="o">.</span><span class="n">Y</span>
     <span class="n">input_dim</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> 
     <span class="n">kernel</span> <span class="o">=</span> <span class="n">model_copy</span><span class="o">.</span><span class="n">kern</span>    
+
+    <span class="c"># Optimization of the first element in the batch</span>
     <span class="n">X_new</span> <span class="o">=</span> <span class="n">optimize_acquisition</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">acqu_optimize_method</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_batch</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Min</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+
     <span class="n">X_batch</span> <span class="o">=</span> <span class="n">reshape</span><span class="p">(</span><span class="n">X_new</span><span class="p">,</span><span class="n">input_dim</span><span class="p">)</span>
     <span class="n">k</span><span class="o">=</span><span class="mi">1</span>
     <span class="k">while</span> <span class="n">k</span><span class="o">&lt;</span><span class="n">n_inbatch</span><span class="p">:</span>
@@ -95,7 +99,7 @@
             <span class="k">print</span> <span class="s">&#39;Optimization stopped. Two equal points selected.&#39;</span>
             <span class="k">break</span>        
 
-        <span class="n">batchBO</span><span class="o">.</span><span class="n">start_optimization</span><span class="p">(</span><span class="n">max_iter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> 
+        <span class="n">batchBO</span><span class="o">.</span><span class="n">run_optimization</span><span class="p">(</span><span class="n">max_iter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> 
                                     <span class="n">n_inbatch</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
                                     <span class="n">acqu_optimize_method</span> <span class="o">=</span> <span class="n">acqu_optimize_method</span><span class="p">,</span>  
                                     <span class="n">acqu_optimize_restarts</span> <span class="o">=</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> 
@@ -112,8 +116,18 @@
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Computes the batch optimization taking random samples (only for comparative purposes)</span>
 
+<span class="sd">    :param acquisition: acquisition function in which the batch selection is based</span>
+<span class="sd">    :param d_acquisition: gradient of the acquisition</span>
+<span class="sd">    :param bounds: the box constrains of the optimization</span>
+<span class="sd">    :param acqu_optimize_restarts: the number of restarts in the optimization of the surrogate</span>
+<span class="sd">    :param acqu_optimize_method: the method to optimize the acquisition function</span>
+<span class="sd">    :param model: the GP model based on the current samples</span>
+<span class="sd">    :param n_inbatch: the number of samples to collect</span>
 <span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c"># Optimization of the first element in the batch</span>
     <span class="n">X_batch</span> <span class="o">=</span> <span class="n">optimize_acquisition</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">acqu_optimize_method</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+
     <span class="n">k</span><span class="o">=</span><span class="mi">1</span> 
     <span class="k">while</span> <span class="n">k</span><span class="o">&lt;</span><span class="n">n_inbatch</span><span class="p">:</span>
         <span class="n">new_sample</span> <span class="o">=</span> <span class="n">samples_multidimensional_uniform</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
@@ -128,14 +142,19 @@
 <span class="sd">    Computes batch optimization using by acquisition penalization using Lipschitz inference.</span>
 
 <span class="sd">    :param acquisition: acquisition function in which the batch selection is based</span>
+<span class="sd">    :param d_acquisition: gradient of the acquisition</span>
 <span class="sd">    :param bounds: the box constrains of the optimization</span>
-<span class="sd">    :param restarts: the number of restarts in the optimization of the surrogate</span>
-<span class="sd">    :param method: the method to optimize the acquisition function</span>
+<span class="sd">    :param acqu_optimize_restarts: the number of restarts in the optimization of the surrogate</span>
+<span class="sd">    :param acqu_optimize_method: the method to optimize the acquisition function</span>
 <span class="sd">    :param model: the GP model based on the current samples</span>
 <span class="sd">    :param n_inbatch: the number of samples to collect</span>
 <span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c"># Optimize the first element in the batch</span>
     <span class="n">X_batch</span> <span class="o">=</span> <span class="n">optimize_acquisition</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">acqu_optimize_method</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_batch</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Min</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
     <span class="n">k</span><span class="o">=</span><span class="mi">1</span>
+    <span class="n">d_acquisition</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c"># gradients are approximated  with the batch. </span>
+    
     <span class="k">if</span> <span class="n">n_inbatch</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
         <span class="c"># ---------- Approximate the constants of the the method</span>
         <span class="n">L</span> <span class="o">=</span> <span class="n">estimate_L</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="n">bounds</span><span class="p">)</span>
@@ -143,7 +162,7 @@
 
     <span class="k">while</span> <span class="n">k</span><span class="o">&lt;</span><span class="n">n_inbatch</span><span class="p">:</span>
         <span class="c"># ---------- Collect the batch (the gradients of the acquisition are approximated for k =2,...,n_inbathc)</span>
-        <span class="n">new_sample</span> <span class="o">=</span> <span class="n">optimize_acquisition</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">acqu_optimize_method</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">)</span>
+        <span class="n">new_sample</span> <span class="o">=</span> <span class="n">optimize_acquisition</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">acqu_optimize_method</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">)</span>
         <span class="n">X_batch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">X_batch</span><span class="p">,</span><span class="n">new_sample</span><span class="p">))</span>  
         <span class="n">k</span> <span class="o">+=</span><span class="mi">1</span>
     <span class="k">return</span> <span class="n">X_batch</span>
@@ -153,13 +172,13 @@
 <span class="sd">    Optimization of the acquisition function</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="n">acqu_optimize_method</span><span class="o">==</span><span class="s">&#39;brute&#39;</span><span class="p">:</span>
-        <span class="n">res</span> <span class="o">=</span> <span class="n">full_acquisition_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span><span class="n">bounds</span><span class="p">,</span><span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="s">&#39;brute&#39;</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">full_acquisition_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span><span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="s">&#39;brute&#39;</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">acqu_optimize_method</span><span class="o">==</span><span class="s">&#39;random&#39;</span><span class="p">:</span>
-        <span class="n">res</span> <span class="o">=</span>  <span class="n">full_acquisition_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span><span class="n">bounds</span><span class="p">,</span><span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="s">&#39;random&#39;</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span>  <span class="n">full_acquisition_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span><span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="s">&#39;random&#39;</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">acqu_optimize_method</span><span class="o">==</span><span class="s">&#39;fast_brute&#39;</span><span class="p">:</span>
-        <span class="n">res</span> <span class="o">=</span>  <span class="n">fast_acquisition_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span><span class="n">bounds</span><span class="p">,</span><span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="s">&#39;brute&#39;</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span>  <span class="n">fast_acquisition_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span><span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="s">&#39;brute&#39;</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">acqu_optimize_method</span><span class="o">==</span><span class="s">&#39;fast_random&#39;</span><span class="p">:</span>
-        <span class="n">res</span> <span class="o">=</span>  <span class="n">fast_acquisition_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span><span class="n">bounds</span><span class="p">,</span><span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="s">&#39;random&#39;</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span>  <span class="n">fast_acquisition_optimization</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">d_acquisition</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span><span class="n">acqu_optimize_restarts</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="s">&#39;random&#39;</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">res</span>
 
 </div>
