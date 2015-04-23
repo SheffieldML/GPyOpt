@@ -25,7 +25,7 @@ class BayesianOptimization(BO):
         :param optimize_model: Unless specified otherwise the parameters of the model are updated after each iteration. 
         :param model_optimize_interval: number of iterations after which the parameters of the model are optimized.   
         :param model_optimize_restarts: number of initial points for the GP parameters optimization (5, default)
-        :param acquisition: acquisition function ('EI' 'MPI' or LCB). Default, EI.
+        :param acquisition: acquisition function ('EI' 'MPI', 'EL1' or LCB). Default, EI.
         :param acquisition_par: parameter of the acquisition function. 
         :param model_data_init: number of initial random evaluations of f is X and Y are not provided (default, 3*input_dim).  
         :param sparse: whether to use an sparse GP (False, default).
@@ -82,9 +82,11 @@ class BayesianOptimization(BO):
             acq = AcquisitionMPI(acquisition_par)
         elif acquisition=='LCB':
             acq = AcquisitionLCB(acquisition_par)
+        elif acquisition=='EL1':
+            acq = AcquisitionEL1(acquisition_par)
         else:   
             print 'The selected acquisition function is not valid. Please try again with EI, MPI, or LCB'
-        if (acquisition=='EI' or acquisition=='MPI' or acquisition =='LCB'):
+        if (acquisition=='EI' or acquisition=='MPI' or acquisition =='EL1' or acquisition =='LCB'):
             super(BayesianOptimization ,self).__init__(acquisition_func=acq, bounds=bounds, model_optimize_interval=model_optimize_interval, model_optimize_restarts=model_optimize_restarts, model_data_init=model_data_init, normalize=normalize, verbosity=verbosity)
     
     

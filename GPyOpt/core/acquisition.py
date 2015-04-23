@@ -86,6 +86,29 @@ class AcquisitionLCB(AcquisitionBase):
 		df_acqu = -dmdx + self.acquisition_par * dsdx
 		return -df_acqu
 
+class AcquisitionEL1(AcquisitionBase):
+	"""
+	Class for acquisition function that accounts for the Expected loss 1 step ahead
+	"""
+	def acquisition_function(self,x):
+		"""
+		1-step ahead expected loss
+		"""		
+		m, s, fmin = get_moments(self.model, x)
+		phi, Phi, _ = get_quantiles(self.acquisition_par, fmin, m, s)  	# self.acquisition_par should be zero
+		loss =  fmin + (m-fmin)*Phi - s*phi   							# same as EI exceptin the first term fmin
+
+	def d_acquisition(self,x):
+		"""
+		Derivative of the 1-step ahead expected loss
+		"""	
+		m, s, fmin = get_moments(self.model, x) 
+		dmdx, dsdx = get_d_moments(self.model, x)
+		phi, Phi, _ = get_quantiles(self.acquisition_par, fmin, m, s)	
+		df_loss = -dsdx * phi + Phi * dmdx    							# same as the EI
+		return df_loss
+
+
 
 #### This is the acquisition function for Alessandra. We call it the GMF (gradient magnification factor).
 # class AcquisitionGMF(AcquisitionBase):
