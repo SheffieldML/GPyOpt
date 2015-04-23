@@ -1,0 +1,33 @@
+#!/bin/sh
+#/ Usage: bootstrap [bundle options]
+#/
+#/ Bundle install the dependencies.
+#/
+#/ Examples:
+#/
+#/   bootstrap
+#/   bootstrap --local
+#/
+
+set -e
+
+# install Bundler if missing
+(/usr/bin/gem spec bundler -v '1.3.3' > /dev/null 2>&1) && {
+	/usr/bin/sudo -p "Need to remove known bad Bundler 1.3.3 from sustem ruby, password for sudo: " \
+	/usr/bin/gem uninstall bundler -v '1.3.3'
+}
+
+(/usr/bin/gem spec bundler -v '~> 1.5.1' >/dev/null 2>&1) || {
+	/usr/bin/sudo -p "Need to install Bundler for system ruby, password for sudo: " \
+	/usr/bin/gem install bundler -v '~> 1.5.1' --no-rdoc --no-ri
+}
+
+cd $(dirname "$0")/..
+
+[ "$1" = "--help" -o "$1" = "-h" -o "$1" = "help" ] && {
+    grep '^#/' <"$0"| cut -c4-
+    exit 0
+}
+
+rm -rf .bundle/{binstubs,config}
+bundle install --binstubs .bundle/binstubs --path .bundle --quiet "$@"

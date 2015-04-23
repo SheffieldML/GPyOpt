@@ -145,9 +145,9 @@ def fast_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimi
     x0 =  samples[np.argmin(pred_samples)]
     h_func_args = hammer_function_precompute(X_batch, L, Min, model)
     if X_batch==None:
-        res = scipy.optimize.minimize(acquisition, x0=np.array(x0),method='SLSQP',jac=d_acquisition,bounds=bounds, options = {'maxiter': 500}) 
+        res = scipy.optimize.minimize(acquisition, x0=np.array(x0),method='L-BFGS-B',jac=d_acquisition,bounds=bounds, options = {'maxiter': 1000}) 
     else:
-        res = scipy.optimize.minimize(penalized_acquisition, x0=np.array(x0),method='SLSQP',bounds=bounds, args=(acquisition, bounds, model, X_batch)+h_func_args)
+        res = scipy.optimize.minimize(penalized_acquisition, x0=np.array(x0),method='L-BFGS-B',bounds=bounds, args=(acquisition, bounds, model, X_batch)+h_func_args)
     return res.x
 
 
@@ -164,9 +164,9 @@ def full_acquisition_optimization(acquisition, d_acquisition, bounds, acqu_optim
     h_func_args = hammer_function_precompute(X_batch, L, Min, model)
     for k in range(acqu_optimize_restarts):
         if X_batch==None: # gradients are approximated within the batch collection
-            res = scipy.optimize.minimize(acquisition, x0=samples[k,:],method='SLSQP',jac=d_acquisition,bounds=bounds, options = {'maxiter': 500})
+            res = scipy.optimize.minimize(acquisition, x0=samples[k,:],method='L-BFGS-B',jac=d_acquisition,bounds=bounds, options = {'maxiter': 1000})
         else:
-            res = scipy.optimize.minimize(penalized_acquisition, x0 = samples[k,:] ,method='SLSQP', bounds=bounds, args=(acquisition, bounds, model, X_batch)+h_func_args)
+            res = scipy.optimize.minimize(penalized_acquisition, x0 = samples[k,:] ,method='L-BFGS-B', bounds=bounds, args=(acquisition, bounds, model, X_batch)+h_func_args)
         mins[k] = res.x
         fmins[k] = res.fun
     return mins[np.argmin(fmins)]
@@ -185,7 +185,7 @@ def estimate_L(model,bounds):
     samples = samples_multidimensional_uniform(bounds,5)
     pred_samples = df(samples,model,0)
     x0 = samples[np.argmin(pred_samples)]
-    minusL = scipy.optimize.minimize(df,x0, method='SLSQP',bounds=bounds, args = (model,x0), options = {'maxiter': 1500}).fun[0][0]
+    minusL = scipy.optimize.minimize(df,x0, method='L-BFGS-B',bounds=bounds, args = (model,x0), options = {'maxiter': 1000}).fun[0][0]
     L = -minusL
     if L<0.1: L=100  ## to avoid problems in cases in which the model is flat.
     return L
