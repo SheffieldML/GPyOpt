@@ -7,7 +7,7 @@ class AcquisitionBase(object):
 	def __init__(self, acquisition_par=None):
 		self.model = None
 		if acquisition_par == None: 
-			self.acquisition_par = 0.01
+			self.acquisition_par = 0.00
 		else: 
 			self.acquisition_par = acquisition_par 		
 
@@ -91,12 +91,13 @@ class AcquisitionEL1(AcquisitionBase):
 	Class for acquisition function that accounts for the Expected loss 1 step ahead
 	"""
 	def acquisition_function(self,x):
-		"""
-		1-step ahead expected loss
-		"""		
-		m, s, fmin = get_moments(self.model, x)
-		phi, Phi, _ = get_quantiles(self.acquisition_par, fmin, m, s)  	# self.acquisition_par should be zero
-		loss =  fmin + (m-fmin)*Phi - s*phi   							# same as EI exceptin the first term fmin
+       		"""
+        	1-step ahead expected loss
+        	"""		
+        	m, s, fmin = get_moments(self.model, x)
+        	phi, Phi, _ = get_quantiles(self.acquisition_par, fmin, m, s)  	# self.acquisition_par should be zero
+        	loss =  fmin + (m-fmin)*Phi - s*phi   							# same as EI excepting the first term fmin
+        	return loss
 
 	def d_acquisition(self,x):
 		"""

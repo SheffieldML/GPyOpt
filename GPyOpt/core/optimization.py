@@ -130,6 +130,7 @@ def optimize_acquisition(acquisition, d_acquisition, bounds, acqu_optimize_resta
         res =  fast_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimize_restarts, model, 'brute', X_batch, L, Min)
     elif acqu_optimize_method=='fast_random':
         res =  fast_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimize_restarts, model, 'random', X_batch, L, Min)
+    #elif TODO add DIRECT here
     return res
 
 
@@ -145,10 +146,12 @@ def fast_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimi
     x0 =  samples[np.argmin(pred_samples)]
     h_func_args = hammer_function_precompute(X_batch, L, Min, model)
     if X_batch==None:
-        res = scipy.optimize.minimize(acquisition, x0=np.array(x0),method='L-BFGS-B',jac=d_acquisition,bounds=bounds, options = {'maxiter': 1000}) 
+        #res = scipy.optimize.minimize(acquisition, x0=np.array(x0),method='L-BFGS-B',jac=d_acquisition,bounds=bounds, options = {'maxiter': 1000}) 
+        best_x,_ = wrapper_lbfgsb(acquisition,d_acquisition,x0 = np.array(x0),bounds=bounds)
     else:
         res = scipy.optimize.minimize(penalized_acquisition, x0=np.array(x0),method='L-BFGS-B',bounds=bounds, args=(acquisition, bounds, model, X_batch)+h_func_args)
-    return res.x
+        best_x = res.x
+    return best_x
 
 
 def full_acquisition_optimization(acquisition, d_acquisition, bounds, acqu_optimize_restarts, model, method_type, X_batch=None, L=None, Min=None):
@@ -164,11 +167,12 @@ def full_acquisition_optimization(acquisition, d_acquisition, bounds, acqu_optim
     h_func_args = hammer_function_precompute(X_batch, L, Min, model)
     for k in range(acqu_optimize_restarts):
         if X_batch==None: # gradients are approximated within the batch collection
-            res = scipy.optimize.minimize(acquisition, x0=samples[k,:],method='L-BFGS-B',jac=d_acquisition,bounds=bounds, options = {'maxiter': 1000})
+            #res = scipy.optimize.minimize(acquisition, x0=samples[k,:],method='L-BFGS-B',jac=d_acquisition,bounds=bounds, options = {'maxiter': 1000})
+            mins[k],fmins[k] = wrapper_lbfgsb(acquisition,d_acquisition,x0 = samples[k,:],bounds=bounds)
         else:
             res = scipy.optimize.minimize(penalized_acquisition, x0 = samples[k,:] ,method='L-BFGS-B', bounds=bounds, args=(acquisition, bounds, model, X_batch)+h_func_args)
-        mins[k] = res.x
-        fmins[k] = res.fun
+            mins[k] = res.x
+            fmins[k] = res.fun
     return mins[np.argmin(fmins)]
 
 
@@ -231,9 +235,20 @@ def penalized_acquisition(x, acquisition, bounds, model, X_batch, r_x0, s_x0):
     return -fval
 
 
-##
-## ----------- Predictive batch optimization
-##
+def wrapper_lbfgsb(f,grad_f,x0,bounds):
+    '''
+    Wrapper for l-bfgs-b to use the true or the approximate gradients 
+    '''
+
+    def objective(x):
+        return float(f(x)), grad_f(x)[0]
+
+    if grad_f==None:
+        res = scipy.optimize.fmin_l_bfgs_b(f, x0=x0, bounds=bounds,approx_grad=True)
+    else:
+        res = scipy.optimize.fmin_l_bfgs_b(objective, x0=x0, bounds=bounds)
+    
+    return res[0],res[1]
 
 
 

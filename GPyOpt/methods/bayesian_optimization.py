@@ -4,7 +4,7 @@
 
 import GPy
 
-from ..core.acquisition import AcquisitionEI, AcquisitionMPI, AcquisitionLCB 
+from ..core.acquisition import AcquisitionEI, AcquisitionMPI, AcquisitionLCB, AcquisitionEL1 
 from ..core.bo import BO
 from ..util.general import samples_multidimensional_uniform
 import warnings
@@ -12,7 +12,7 @@ warnings.filterwarnings("ignore")
 
 
 class BayesianOptimization(BO):
-    def __init__(self, f, bounds=None, kernel=None, X=None, Y=None, optimize_model=None, model_optimize_interval=1, model_optimize_restarts=5, acquisition='EI', acquisition_par= 0.01,  model_data_init = None, sparse=False, num_inducing=None, normalize=False, exact_feval=False, verbosity=0):
+    def __init__(self, f, bounds=None, kernel=None, X=None, Y=None, optimize_model=None, model_optimize_interval=1, model_optimize_restarts=3, acquisition='EI', acquisition_par= 0.01,  model_data_init = None, sparse=False, num_inducing=None, normalize=False, exact_feval=False, verbosity=0):
         '''
         Bayesian Optimization using EI, MPI and LCB (or UCB) acquisition functions.
     
@@ -108,9 +108,9 @@ class BayesianOptimization(BO):
             self.model = GPy.models.GPRegression(self.X,self.Y,kernel=self.kernel)
             
         if self.exact_feval == True:
-            self.model.Gaussian_noise.constrain_fixed(1e-3)
+            self.model.Gaussian_noise.constrain_fixed(1e-4)
         else:
-            self.model.Gaussian_noise.constrain_bounded(1e-3,1e6)
+            self.model.Gaussian_noise.constrain_bounded(1e-4,1e6)
             
             
             

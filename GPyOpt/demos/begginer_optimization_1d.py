@@ -48,7 +48,7 @@ def begginer_optimization_1d(plots=True):
     BO_demo_1d.run_optimization(max_iter,                                   # Number of iterations
                                     acqu_optimize_method = 'fast_random',   # method to optimize the acq. function
                                     acqu_optimize_restarts = 30,            # number of local optimizers 
-                                    stop_criteria=10e-6)                    # secondary stop criteria (apart from the number of iterations) 
+                                    stop_criteria=10e-6)
                             
 
     # --- Plots

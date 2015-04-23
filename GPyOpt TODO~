@@ -1,5 +1,8 @@
 TODO list
 
+- check why some samples jump out of the range
+- implement Mike's loss function
+- check why exact gradients dont work
 - pack the paralellization
 - test (or remove) sparse GPy's
 - write manuals

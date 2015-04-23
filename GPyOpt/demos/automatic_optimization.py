@@ -29,7 +29,7 @@ BO_demo_auto.x_opt
 def automatic_optimization(plots=True):
     import GPyOpt
     from numpy.random import seed
-    seed(12345)
+    seed(12346)
     
     # --- Objective function
     def objective(x):
