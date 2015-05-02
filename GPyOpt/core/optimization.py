@@ -4,6 +4,7 @@ import GPyOpt
 
 from ..util.general import multigrid, samples_multidimensional_uniform, reshape
 from scipy.stats import norm
+import numpy as np
 
 ##
 ## ----------- Functions for the optimization of the acquisition function
@@ -130,9 +131,9 @@ def optimize_acquisition(acquisition, d_acquisition, bounds, acqu_optimize_resta
         res =  fast_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimize_restarts, model, 'brute', X_batch, L, Min)
     elif acqu_optimize_method=='fast_random':
         res =  fast_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimize_restarts, model, 'random', X_batch, L, Min)
-    #elif TODO add DIRECT here
+    elif acqu_optimize_method=='DIRECT': 
+        res = wrapper_DIRECT(acquisition,bounds)
     return res
-
 
 def fast_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimize_restarts, model, method_type, X_batch=None, L=None, Min=None):
     '''
@@ -146,7 +147,6 @@ def fast_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimi
     x0 =  samples[np.argmin(pred_samples)]
     h_func_args = hammer_function_precompute(X_batch, L, Min, model)
     if X_batch==None:
-        #res = scipy.optimize.minimize(acquisition, x0=np.array(x0),method='L-BFGS-B',jac=d_acquisition,bounds=bounds, options = {'maxiter': 1000}) 
         best_x,_ = wrapper_lbfgsb(acquisition,d_acquisition,x0 = np.array(x0),bounds=bounds)
     else:
         res = scipy.optimize.minimize(penalized_acquisition, x0=np.array(x0),method='L-BFGS-B',bounds=bounds, args=(acquisition, bounds, model, X_batch)+h_func_args)
@@ -167,7 +167,6 @@ def full_acquisition_optimization(acquisition, d_acquisition, bounds, acqu_optim
     h_func_args = hammer_function_precompute(X_batch, L, Min, model)
     for k in range(acqu_optimize_restarts):
         if X_batch==None: # gradients are approximated within the batch collection
-            #res = scipy.optimize.minimize(acquisition, x0=samples[k,:],method='L-BFGS-B',jac=d_acquisition,bounds=bounds, options = {'maxiter': 1000})
             mins[k],fmins[k] = wrapper_lbfgsb(acquisition,d_acquisition,x0 = samples[k,:],bounds=bounds)
         else:
             res = scipy.optimize.minimize(penalized_acquisition, x0 = samples[k,:] ,method='L-BFGS-B', bounds=bounds, args=(acquisition, bounds, model, X_batch)+h_func_args)
@@ -247,8 +246,20 @@ def wrapper_lbfgsb(f,grad_f,x0,bounds):
         res = scipy.optimize.fmin_l_bfgs_b(f, x0=x0, bounds=bounds,approx_grad=True)
     else:
         res = scipy.optimize.fmin_l_bfgs_b(objective, x0=x0, bounds=bounds)
-    
     return res[0],res[1]
 
-
+def wrapper_DIRECT(f,bounds):
+    try:
+        from DIRECT import solve
+        import numpy as np
+        def DIRECT_f_wrapper(f):
+            def g(x, user_data):
+                return f(np.array([x])), 0
+            return g
+        lB = np.asarray(bounds)[:,0]
+        uB = np.asarray(bounds)[:,1]
+        x,_,_ = solve(DIRECT_f_wrapper(f),lB,uB, maxT=2000, maxf=2000)
+        return reshape(x,len(bounds))
+    except:
+        print("Cannot find DIRECT library")
 

@@ -47,11 +47,12 @@ def advanced_optimization_2d(plots=True):
                                             bounds=bounds,                 # box-constrains of the problem
                                             acquisition='LCB',             # Selects the Expected improvement
                                             acquisition_par = 2,           # parameter of the acquisition function
+                                            model_optimize_interval= 3,     # The model is updated every three points are collected
                                             normalize = True)              # normalized acquisition function                        
     
     
     # Run the optimization
-    max_iter = 30                                                           
+    max_iter = 10                                                          
 
     print '-----'
     print '----- Running demo. It may take a few seconds.'
@@ -63,6 +64,8 @@ def advanced_optimization_2d(plots=True):
                                 acqu_optimize_restarts = 30,                # number of local optimizers
                                 stop_criteria=10e-6,                        # secondary stop criteria (apart from the number of iterations) 
                                 true_gradients = True)                     # The gradients of the acquisition function are approximated (faster)
+   
+
     # --- Plots
     if plots:
         objective_true.plot()

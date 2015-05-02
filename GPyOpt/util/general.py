@@ -3,8 +3,9 @@ from scipy.special import erfc
 
 def best_gess(f,X):
     '''
-    Gets the best current guess from a vector and
-
+    Gets the best current guess from a vector.
+    :param f: function to evaluate.
+    :param X: locations.
     '''
     n = X.shape[0]
     xbest = np.zeros(n)
@@ -16,7 +17,9 @@ def best_gess(f,X):
 
 def samples_multidimensional_uniform(bounds,num_data):
     '''
-    Generates a multidimensional grid uniformly distributed
+    Generates a multidimensional grid uniformly distributed.
+    :param bounds: tuple defining the box constrains.
+    :num_data: number of data to generate.
 
     '''
     dim = len(bounds)
@@ -28,7 +31,8 @@ def samples_multidimensional_uniform(bounds,num_data):
 def multigrid(bounds, Ngrid):
     '''
     Generates a multidimensional lattice
-
+    :param bounds: box constrains
+    :param Ngrid: number of points per dimension.
     '''
     if len(bounds)==1:
         return np.linspace(bounds[0][0], bounds[0][1], Ngrid).reshape(Ngrid, 1)
@@ -61,7 +65,8 @@ def get_moments(model,x):
 def get_d_moments(model,x):
     '''
     Gradients with respect to x of the moments (mean and sdev.) of the GP
-
+    :param model: GPy model.
+    :param x: location where the gradients are evaluated.
     '''
     input_dim = model.input_dim
     x = reshape(x,input_dim)
@@ -75,6 +80,10 @@ def get_d_moments(model,x):
 def get_quantiles(acquisition_par, fmin, m, s):
     '''
     Quantiles of the Gaussian distribution useful to determine the acquisition function values
+    :param acquisition_par: parameter of the acquisition function
+    :param fmin: current minimum.
+    :param m: vector of means.
+    :param s: vector of standard deviations. 
     '''
     if isinstance(s, np.ndarray):
         s[s<1e-10] = 1e-10
