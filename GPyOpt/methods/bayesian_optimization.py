@@ -6,14 +6,15 @@ import GPy
 
 from ..core.acquisition import AcquisitionEI, AcquisitionMPI, AcquisitionLCB, AcquisitionEL1 
 from ..core.bo import BO
-from ..util.general import samples_multidimensional_uniform
+from ..util.general import samples_multidimensional_uniform, reshape
 import warnings
 warnings.filterwarnings("ignore")
 
 
 class BayesianOptimization(BO):
-    def __init__(self, f, bounds=None, kernel=None, X=None, Y=None, model_data_init = None, model_optimize_interval=1, acquisition='EI', acquisition_par= 0.01, model_optimize_restarts=2, 
-        sparseGP=False, num_inducing=None, normalize=False, true_gradients=True, exact_feval=False, verbosity=0):
+    def __init__(self, f, bounds=None, kernel=None, X=None, Y=None, model_data_init = None, model_optimize_interval=1, acquisition='EI', 
+        acquisition_par= 0.00, model_optimize_restarts=2, sparseGP=False, num_inducing=None, normalize=False, true_gradients=True, 
+        exact_feval=False, verbosity=0):
         '''
         Bayesian Optimization using EI, MPI and LCB (or UCB) acquisition functions.
     
@@ -112,9 +113,9 @@ class BayesianOptimization(BO):
             self.model = GPy.models.GPRegression(self.X,self.Y,kernel=self.kernel)
             
         if self.exact_feval == True:
-            self.model.Gaussian_noise.constrain_fixed(1e-4) #to avoid numerical problems
+            self.model.Gaussian_noise.constrain_fixed(1e-6) #to avoid numerical problems
         else:
-            self.model.Gaussian_noise.constrain_bounded(1e-4,1e6) #to avoid numerical problems
+            self.model.Gaussian_noise.constrain_bounded(1e-6,1e6) #to avoid numerical problems
             
             
             

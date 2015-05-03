@@ -6,8 +6,8 @@
 """
 This is a simple demo to demonstrate the use of Bayesian optimization with GPyOpt with some simple options. Run the example by writing:
 
->> import GPyOpt
->> BO_demo_2d = GPyOpt.demos.advanced_optimization_2d()
+import GPyOpt
+BO_demo_2d = GPyOpt.demos.advanced_optimization_2d()
 
 As a result you should see:
 
@@ -52,7 +52,7 @@ def advanced_optimization_2d(plots=True):
     
     
     # Run the optimization
-    max_iter = 10                                                          
+    max_iter = 15                                                          
 
     print '-----'
     print '----- Running demo. It may take a few seconds.'
@@ -62,7 +62,7 @@ def advanced_optimization_2d(plots=True):
     BO_demo_2d.run_optimization(max_iter,                                   # Number of iterations
                                 acqu_optimize_method = 'fast_random',       # method to optimize the acq. function
                                 acqu_optimize_restarts = 30,                # number of local optimizers
-                                stop_criteria=10e-6,                        # secondary stop criteria (apart from the number of iterations) 
+                                eps=10e-6,                        # secondary stop criteria (apart from the number of iterations) 
                                 true_gradients = True)                     # The gradients of the acquisition function are approximated (faster)
    
 

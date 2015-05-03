@@ -2,3 +2,4 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 from .bayesian_optimization import BayesianOptimization
+from .auto_tune import autoTune

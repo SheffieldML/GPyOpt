@@ -17,45 +17,50 @@ class BO(object):
     def _init_model(self):
         pass
         
-    def run_optimization(self, max_iter=10, n_inbatch=1, acqu_optimize_method='DIRECT', acqu_optimize_restarts=20, batch_method='predictive', 
-        stop_criteria = 1e-16, n_procs=1, true_gradients = True, save_interval=5, save_file=None, verbose=True):
+    def run_optimization(self, max_iter = None, n_inbatch=1, acqu_optimize_method='DIRECT', acqu_optimize_restarts=200, batch_method='predictive', 
+        eps = 1e-8, n_procs=1, true_gradients = True, save_interval=5, report_file=None, verbose=True):
         """ 
         Runs Bayesian Optimization for a number 'max_iter' of iterations (after the initial exploration data)
 
-        :param max_iter: exploration horizon, or number of iterations  
+        :param max_iter: exploration horizon, or number of acquisitions. It nothing is provided optimizes the current acquisition.  
 	    :param n_inbatch: number of samples to collected everytime f is evaluated (one by default)
         :param acqu_optimize_method: method to optimize the acquisition function 
             -'DIRECT': uses the DIRECT algorith of Jones and Stuckmann. It is used by default.
-	        -'brute': Run local optimizers in a grid of points.
-	        -'random': Run local optimizers started at random locations.
+	    -'brute': Run local optimizers in a grid of points.
+	    -'random': Run local optimizers started at random locations.
             -'fast_brute': the same as brute but runs only one optimizer in the best location.
             -'fast_random': the same as random but runs only one optimizer in the best location.
         :param acqu_optimize_restarts: numbers of random restarts in the optimization of the acquisition function, default = 20.
-	    :param batch_method: method to collect samples in batches
+	:param batch_method: method to collect samples in batches
             -'predictive': uses the predicted mean in the selected sample to update the acquisition function.
             -'mp': used a penalization of the acquisition function to based on exclusion zones.
             -'random': collects the element of the batch randomly
-    	:param stop_criteria: minimum distance between two consecutive x's to keep running the model
+    	:param eps: minimum distance between two consecutive x's to keep running the model
     	:param n_procs: The number of processes used for evaluating the given function *f* (ideally nprocs=n_inbatch).
         :param true_gradients: If the true gradients (can be slow) of the acquisition ar an approximation is used (True, default).
         :param save_interval: number of iterations after which a file is produced with the current results.
-        :param save_file: name of the file in which the results of the optimization are saved.
+        :param report_file: name of the file in which the results of the optimization are saved.
 
         ..Note : X and Y can be None. In this case Nrandom*model_dimension data are uniformly generated to initialize the model.
     
         """
         # load the parameters of the function into the object.
+        if max_iter == None:
+            self.max_iter = 10*self.input_dim
+        else:
+            self.max_iter = max_iter 
+
         self.num_acquisitions = 0
         self.n_inbatch=n_inbatch
         self.batch_method = batch_method
-        self.stop_criteria = stop_criteria 
+        self.eps = eps 
         self.acqu_optimize_method = acqu_optimize_method
         self.acqu_optimize_restarts = acqu_optimize_restarts
         self.acquisition_func.model = self.model
         self.n_procs = n_procs
         self.save_interval = save_interval
-        if save_file==None:
-            self.save_file = 'GPyOpt_res ' + time.strftime("%c")+'.txt'
+        if report_file==None:
+            self.report_file = 'GPyOpt_results.txt ' 
 
         # decide wether we use the true gradients to optimize the acquitision function
         if true_gradients !=True:
@@ -72,9 +77,9 @@ class BO(object):
         self.s_in_min = np.sqrt(prediction[1])
 
         k=0
-        distance_lastX = self.stop_criteria + 1
-        while k<max_iter and distance_lastX > self.stop_criteria:
-                
+        distance_lastX = np.sqrt(sum((self.X[self.X.shape[0]-1,:]-self.X[self.X.shape[0]-2,:])**2))
+        while k<self.max_iter and distance_lastX > self.eps:
+
             # ------- Augment X
             self.X = np.vstack((self.X,self.suggested_sample))
             
@@ -126,7 +131,7 @@ class BO(object):
         self._save_results()
         
         if verbose: print '*Optimization completed:'
-        if k==max_iter:
+        if k==self.max_iter:
             if verbose: print '   -Maximum number of iterations reached.'
             return 1
         else: 
@@ -224,15 +229,14 @@ class BO(object):
             plot 3: Iterations vs. the variance of the current model in the selected sample.
         :param filename: name of the file where the plot is saved
         """
-        return plot_convergence(self.X,self.Y_best,self.s_in_min)
+        return plot_convergence(self.X,self.Y_best,self.s_in_min,filename)
 
     def _save_results(self):
         """
         Save a report with the results of the optimization. A file is produced every 
         """
-        file = open(self.save_file,'w')
+        file = open(self.report_file,'w')
         file.write(time.strftime("%c"))
-        file.write('TODO' )
         file.close()
 
 

@@ -32,7 +32,6 @@ def predictive_batch_optimization(acqu_name, acquisition_par, acquisition, d_acq
 
     # Optimization of the first element in the batch
     X_new = optimize_acquisition(acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch=None, L=None, Min=None)
-
     X_batch = reshape(X_new,input_dim)
     k=1
     while k<n_inbatch:
@@ -55,7 +54,7 @@ def predictive_batch_optimization(acqu_name, acquisition_par, acquisition, d_acq
                                     n_inbatch=1, 
                                     acqu_optimize_method = acqu_optimize_method,  
                                     acqu_optimize_restarts = acqu_optimize_restarts, 
-                                    stop_criteria = 1e-6,verbose = False)
+                                    eps = 1e-6,verbose = False)
         
         X_new = batchBO.suggested_sample
         X_batch = np.vstack((X_batch,X_new))

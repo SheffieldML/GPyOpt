@@ -29,6 +29,8 @@ Dependencies:
   - matplotlib
   - pylab
   - random
+  - DIRECT
+  - time
   
 
 Funding Acknowledgements

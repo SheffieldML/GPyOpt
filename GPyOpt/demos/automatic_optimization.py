@@ -8,8 +8,8 @@ This is a simple demo to demonstrate the use of Bayesian optimization for automa
 optimization of black-box functions. All the default values of the parameters in GPyOPt 
 are used. Run the example by writing:
 
->> import GPyOpt
->> BO_demo_auto = GPyOpt.demos.automatic_optimization()
+import GPyOpt
+BO_demo_auto = GPyOpt.demos.automatic_optimization()
 
 As a result you should see:
 
@@ -26,14 +26,14 @@ BO_demo_auto.x_opt
 
 """
 
-def automatic_optimization(plots=True):
+def automatic_optimization():
     import GPyOpt
     from numpy.random import seed
-    seed(12346)
+    seed(12345)
     
     # --- Objective function
     def objective(x):
-        return (2*x)**2
+        return (6*x)**2
 
     # --- Bounds
     bounds = [(-1,1)]
@@ -43,7 +43,7 @@ def automatic_optimization(plots=True):
     print '-----'
 
     # --- Problem definition and optimization
-    BO_demo_auto = GPyOpt.methods.BayesianOptimization(objective,bounds)
+    BO_demo_auto = GPyOpt.methods.BayesianOptimization(objective,bounds,exact_feval=True)
     BO_demo_auto.run_optimization()
 
     # --- Plots
