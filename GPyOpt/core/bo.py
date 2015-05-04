@@ -236,15 +236,26 @@ class BO(object):
         Save a report with the results of the optimization. A file is produced every 
         """
         file = open(self.report_file,'w')
-        file.write(time.strftime("%c"))
+        file.write('---------------------------------' + ' Results file ' + '--------------------------------\n')
+        file.write('GPyOpt Version 1.0.0 \n')
+        file.write('Date and time:              ' + time.strftime("%c")+'\n')
+        if self.num_acquisitions==self.max_iter: 
+            file.write('Optimization completed:     ' +'YES, ' + str(self.X.shape[0]).strip('[]') + ' samples collected.\n')
+        else:
+            file.write('Optimization completed:     ' +'NO,' + str(self.X.shape[0]).strip('[]') + ' samples collected.\n')
+        file.write('Optimization time:          ' + str(self.time).strip('[]') +'seconds.\n') 
+
+        file.write('---------------------------------' + ' Problem set up ' + '--------------------------------\n')
+        file.write('Problem Dimension:          ' + str(self.input_dim).strip('[]') +'\n')    
+        file.write('Problem bounds:             ' + str(self.bounds).strip('[]') +'\n') 
+        file.write('Batch size:                 ' + str(self.n_inbatch).strip('[]') +'\n')    
+        file.write('acquisition:                ' + self.acqu_name + '\n')  
+
+        file.write('---------------------------------' + ' Summmary ' + '--------------------------------\n')
+        file.write('Best found minimum:         ' + str(min(self.Y)).strip('[]') +'\n') 
+        file.write('Minumum location:           ' + str(self.X[np.argmin(self.Y),:]).strip('[]') +'\n') 
+
         file.close()
-
-
-
-
-
-
-
 
 
 
