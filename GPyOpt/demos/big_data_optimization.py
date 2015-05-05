@@ -6,8 +6,8 @@
 """
 This is a simple demo to demonstrate the use of Bayesian optimization with GPyOpt with using sparse GPs. Run the example by writing:
 
->> import GPyOpt
->> BO_demo_big_data = GPyOpt.demos.big_data_optimization()
+import GPyOpt
+BO_demo_big_data = GPyOpt.demos.big_data_optimization()
 
 As a result you should see:
 
@@ -38,7 +38,7 @@ def big_data_optimization(plots=True):
                                             acquisition='LCB',             # Selects the Expected improvement
                                             acquisition_par = 2,           # parameter of the acquisition function
                                             normalize = True,              # normalized acquisition function      
-                                            sparse = True,                 # Use a sparse GP
+                                            sparseGP = True,                 # Use a sparse GP
                                             num_inducing = 10,             # Number of inducing points
                                             model_data_init = 1000)         # Initialize the model with 500 points                          
     
@@ -53,7 +53,7 @@ def big_data_optimization(plots=True):
     BO_demo_big_data.run_optimization(max_iter,                                   # Number of iterations
                                 acqu_optimize_method = 'fast_random',       # method to optimize the acq. function
                                 acqu_optimize_restarts = 30,                # number of local optimizers
-                                stop_criteria=10e-6,                        # secondary stop criteria (apart from the number of iterations) 
+                                eps = 10e-6,                        # secondary stop criteria (apart from the number of iterations) 
                                 true_gradients = False)                     # The gradients of the acquisition function are approximated (faster)
     # --- Plots
     if plots:

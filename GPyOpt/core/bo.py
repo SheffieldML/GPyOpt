@@ -5,7 +5,7 @@ from ..util.general import best_value, reshape, spawn
 from ..core.optimization import mp_batch_optimization, random_batch_optimization, predictive_batch_optimization
 
 try:
-    from ..plotting.plots_bo import plot_acquisition, plot_convergence, plot_convergence_gradients
+    from ..plotting.plots_bo import plot_acquisition, plot_convergence
 except:
     pass
 
@@ -25,13 +25,13 @@ class BO(object):
         :param max_iter: exploration horizon, or number of acquisitions. It nothing is provided optimizes the current acquisition.  
 	    :param n_inbatch: number of samples to collected everytime f is evaluated (one by default)
         :param acqu_optimize_method: method to optimize the acquisition function 
-            -'DIRECT': uses the DIRECT algorith of Jones and Stuckmann. It is used by default.
+            -'DIRECT': uses the DIRECT algorithm of Jones and Stuckmann. It is used by default.
 	    -'brute': Run local optimizers in a grid of points.
 	    -'random': Run local optimizers started at random locations.
             -'fast_brute': the same as brute but runs only one optimizer in the best location.
             -'fast_random': the same as random but runs only one optimizer in the best location.
         :param acqu_optimize_restarts: numbers of random restarts in the optimization of the acquisition function, default = 20.
-	:param batch_method: method to collect samples in batches
+	    :param batch_method: method to collect samples in batches
             -'predictive': uses the predicted mean in the selected sample to update the acquisition function.
             -'mp': used a penalization of the acquisition function to based on exclusion zones.
             -'random': collects the element of the batch randomly
@@ -40,8 +40,6 @@ class BO(object):
         :param true_gradients: If the true gradients (can be slow) of the acquisition ar an approximation is used (True, default).
         :param save_interval: number of iterations after which a file is produced with the current results.
         :param report_file: name of the file in which the results of the optimization are saved.
-
-        ..Note : X and Y can be None. In this case Nrandom*model_dimension data are uniformly generated to initialize the model.
     
         """
         # load the parameters of the function into the object.
@@ -68,6 +66,9 @@ class BO(object):
             self.acquisition_func.d_acquisition_function = None
         else: 
             self.true_gradients = true_gradients
+
+        # Get starting of running time
+        self.time = time.time()
 
         # optimize model and acquisition function by first time
         self._update_model()
@@ -124,11 +125,15 @@ class BO(object):
             if (self.num_acquisitions%self.save_interval)==0:
                 self._save_results()
 
-        # ------- Stop messages            
+        # ------- Stop messages and execution time          
         self.Y_best = best_value(self.Y)
         self.x_opt = self.X[np.argmin(self.Y),:]
         self.fx_opt = min(self.Y)
+        self.time   = time.time() - self.time 
+        
+        
         self._save_results()
+        
         
         if verbose: print '*Optimization completed:'
         if k==self.max_iter:
@@ -243,21 +248,20 @@ class BO(object):
             file.write('Optimization completed:     ' +'YES, ' + str(self.X.shape[0]).strip('[]') + ' samples collected.\n')
         else:
             file.write('Optimization completed:     ' +'NO,' + str(self.X.shape[0]).strip('[]') + ' samples collected.\n')
-        file.write('Optimization time:          ' + str(self.time).strip('[]') +'seconds.\n') 
+        file.write('Optimization time:          ' + str(self.time).strip('[]') +' seconds.\n') 
 
         file.write('---------------------------------' + ' Problem set up ' + '------------------------------------\n')
         file.write('Problem Dimension:          ' + str(self.input_dim).strip('[]') +'\n')    
         file.write('Problem bounds:             ' + str(self.bounds).strip('[]') +'\n') 
         file.write('Batch size:                 ' + str(self.n_inbatch).strip('[]') +'\n')    
-        file.write('acquisition:                ' + self.acqu_name + '\n')  
-
-        file.write('---------------------------------' + ' Summmary ' + '------------------------------------------\n')
+        file.write('Acquisition:                ' + self.acqu_name + '\n')  
+        file.write('Acquisition optimizer:      ' + self.acqu_optimize_method+ '\n')  
+        file.write('Sparse GP:                  ' + str(self.sparseGP).strip('[]') + '\n')  
+        file.write('---------------------------------' + ' Summary ' + '------------------------------------------\n')
         file.write('Best found minimum:         ' + str(min(self.Y)).strip('[]') +'\n') 
         file.write('Minumum location:           ' + str(self.X[np.argmin(self.Y),:]).strip('[]') +'\n') 
 
         file.close()
-
-
 
 
 

@@ -6,8 +6,8 @@
 """
 This is a simple demo to demonstrate the use of Bayesian optimization with GPyOpt with some simple options. Run the example by writing:
 
->> import GPyOpt
->> BO_demo_1d = GPyOpt.demos.begginer_optimization_1d()
+import GPyOpt
+BO_demo_1d = GPyOpt.demos.begginer_optimization_1d()
 
 As a result you should see:
 
@@ -46,7 +46,7 @@ def begginer_optimization_1d(plots=True):
     
     # Run the optimization                                                  
     BO_demo_1d.run_optimization(max_iter,                                  # evaluation budget
-                                    stop_criteria=10e-6)                   # stop criterion
+                                    eps=10e-6)                   # stop criterion
                             
 
     # --- Plots

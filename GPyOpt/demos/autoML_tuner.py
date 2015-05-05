@@ -7,7 +7,7 @@
 This is a simple demo to demonstrate the use of Bayesian optimization with GPyOpt with some simple options. Run the example by writing:
 
 import GPyOpt
-autoML_demo = GPyOpt.demos.autoMLtuner()
+autoML_demo = GPyOpt.demos.autoML_tuner()
 
 As a result you should see:
 
@@ -22,14 +22,14 @@ autoML_demo.x_opt
 """
 
 def autoML_tuner():
-
     import GPyOpt
-    from numpy.random import seed
     import numpy as np
     import matplotlib.pyplot as plt
+    from numpy.random import seed
+    seed(123)   
     
     # --- Regression problem
-    n = 100
+    n = 150
     b0 = 1 
     b1 = 2.5 
     X = np.random.uniform(1,10,n).reshape(n,1)
@@ -46,7 +46,7 @@ def autoML_tuner():
                                    
     # --- Problem definition and optimization
     myobj = objective(X,Y)
-    bounds = [(0,10),(0,10)]  
+    bounds = [(0,5),(0,5)]  
     
     # --- Tuning the parameters
     tuner = GPyOpt.methods.autoTune(myobj.f, bounds)   
