@@ -36,6 +36,8 @@ class autoTune(BayesianOptimization):
         #  ---- File to save the report 
         if report_file==None: 
             self.report_file='GPyOpt_results.txt'
+	else:
+	    self.report_file=report_file	
 
         # ----- Asign super class 
         super(autoTune,self).__init__(f,bounds,exact_feval=True)
