@@ -28,13 +28,7 @@
     <span id="logo"><span class="octicon octicon-mark-github"></span></span>
 
     <a href="https://github.com/SheffieldML/GPyOpt" class="button fork"><strong>Fork On GitHub</strong></a>
-    <div class="downloads">
-      <span>Downloads:</span>
-      <ul>
-        <li><a href="  " class="button">ZIP</a></li>
-        <li><a href="  " class="button">TAR</a></li>
-      </ul>
-    </div>
+    
   </div>
 </div>
 
@@ -75,6 +69,8 @@ With GPyOpt you can:
 <li> <b>Run optimization methods in parallel </b> and make use of all your computational resources. Design batches of wetlab experiments.  </li>
 <p> </p>
 <li> <b>Solve Big-Data optimization problems </b> using sparse Gaussian process.</li>
+<p> </p>
+<li> <b>Tune automaticaly your Machine Learning algorithms </b> with GPyOpt.autoTune.</li>
 </p>
 
 <p> </p>
@@ -83,7 +79,7 @@ The simplest way to install GPyOpt is using pip. Be sure that all the dependenci
 
 
 <p> </p>
-<b>Ubuntu</b> users can do:
+<b>Ubuntu</b> users can use the setup.py file in the package forder or do:
 
 <pre><code>>> sudo apt-get install python-pip
 >> pip install GPyOpt
@@ -102,7 +98,7 @@ On <b>Windows</b>, we recommend the anaconda python distribution. From the anaco
 </code></pre>
 <p> </p>
 
-<b>Install from source and contribute: </b>You can install GPyOpt from source. To fork the repository click fork on the <a href=" https://github.com/t413/SinglePaged"> GPyOpt project page</a>. To contribute to the repository, clone it and add it to your pythonpath and send a pull request
+<b>Install from source and contribute: </b>You can install GPyOpt from source. To fork the repository click fork on the <a href=" https://github.com/SheffieldML/GPyOpt"> GPyOpt project page</a>. To contribute to the repository, clone it and add it to your pythonpath and send a pull request
 
 <pre><code>>> git clone git@github.com:SheffieldML/GPy.git ~/SheffieldML
 echo 'PYTHONPATH=$PYTHONPATH:~/SheffieldML' >> ~/.bashrc
@@ -112,7 +108,7 @@ echo 'PYTHONPATH=$PYTHONPATH:~/SheffieldML' >> ~/.bashrc
 <p> </p>
 <h2> Documentation </h2>
 
-<b>General users</b>: check the collection of <a href=" http://sheffieldml.github.io/GPyOpt/doc/_build/html" > notebooks. </a>
+<b>General users</b>: check the collection of <a href="https://github.com/SheffieldML/GPyOpt/tree/master/manual"> notebooks </a> and run the <a href="https://github.com/SheffieldML/GPyOpt/tree/master/GPyOpt/demos"> demos. </a>
 
 <p> </p>
 <b>Code developers</b>: check the online <a href=" http://sheffieldml.github.io/GPyOpt/doc/_build/html"> documentation. </a>
@@ -121,14 +117,14 @@ echo 'PYTHONPATH=$PYTHONPATH:~/SheffieldML' >> ~/.bashrc
 <h2> GPyOpt in...</h2>
 GPyOpt is free and runs under BSD 3-clause license. Please cite
 <p> </p>
-<pre><code>@Misc{gpy2015,
+<pre><code>@Misc{gpyopt2015,
   author =   {The GPyOpt authors},
   title =    {GPyOpt: A Bayesian Optimization framework in python},
   howpublished = {\url{http://github.com/SheffieldML/GPyOpt}},
   year = {2015}
 }
 </pre></code>
-if you use the package. If you contact us, we will be very happy to include you in the following list of GPyOpt applications:
+Plese contact us! If you use the package we will be very happy to include you in the following list of GPyOpt applications:
 <p> </p>
 <li> Javier González, Joseph Longworth, David James, Neil Lawrence. Bayesian Optimization for synthetic gene design. The Neural Information Processing Systems (NIPS'14), Workshop in Bayesian Optimization, 2014.  </li>
 
