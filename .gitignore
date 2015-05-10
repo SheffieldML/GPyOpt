@@ -14,8 +14,16 @@ develop-eggs
 .installed.cfg
 lib
 lib64
+
 # Installer logs
 pip-log.txt
+
+# Results from optimization in demos
+GPyOpt-results.txt
+
+# figures in notebooks
+.png
+
 # Unit test / coverage reports
 .coverage
 .tox
