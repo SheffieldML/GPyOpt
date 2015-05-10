@@ -1,34 +1,35 @@
+# Copyright (c) 2015, Javier Gonzalez
+# Copyright (c) 2015, the GPy Authors (see GPy AUTHORS.txt)
+# Licensed under the BSD 3-clause license (see LICENSE.txt)
+
 import numpy as np
 import time
-
 from ..util.general import best_value, reshape, spawn
 from ..core.optimization import mp_batch_optimization, random_batch_optimization, predictive_batch_optimization
-
 try:
     from ..plotting.plots_bo import plot_acquisition, plot_convergence
 except:
     pass
 
 class BO(object):
-    #def __init__(self, acquisition_func, bounds=None, model_optimize_interval=None, model_optimize_restarts=None, model_data_init=None, normalize=None, verbosity=None):
     def __init__(self, acquisition_func):      
         self.acquisition_func = acquisition_func
 
     def _init_model(self):
         pass
         
-    def run_optimization(self, max_iter = None, n_inbatch=1, acqu_optimize_method='DIRECT', acqu_optimize_restarts=200, batch_method='predictive', 
+    def run_optimization(self, max_iter = None, n_inbatch=1, acqu_optimize_method='fast_random', acqu_optimize_restarts=200, batch_method='predictive', 
         eps = 1e-8, n_procs=1, true_gradients = True, save_interval=5, report_file=None, verbose=True):
         """ 
         Runs Bayesian Optimization for a number 'max_iter' of iterations (after the initial exploration data)
 
         :param max_iter: exploration horizon, or number of acquisitions. It nothing is provided optimizes the current acquisition.  
-	    :param n_inbatch: number of samples to collected everytime f is evaluated (one by default)
+	    :param n_inbatch: number of samples to collected everytime *f* is evaluated (one by default).
         :param acqu_optimize_method: method to optimize the acquisition function 
-            -'DIRECT': uses the DIRECT algorithm of Jones and Stuckmann. It is used by default.
-	    -'brute': Run local optimizers in a grid of points.
-	    -'random': Run local optimizers started at random locations.
-            -'fast_brute': the same as brute but runs only one optimizer in the best location.
+            -'DIRECT': uses the DIRECT algorithm of Jones and Stuckmann. 
+	        -'brute': Run local optimizers in a grid of points.
+	        -'random': Run local optimizers started at random locations.
+            -'fast_brute': the same as brute but runs only one optimizer in the best location. It is used by default.
             -'fast_random': the same as random but runs only one optimizer in the best location.
         :param acqu_optimize_restarts: numbers of random restarts in the optimization of the acquisition function, default = 20.
 	    :param batch_method: method to collect samples in batches
@@ -58,7 +59,7 @@ class BO(object):
         self.n_procs = n_procs
         self.save_interval = save_interval
         if report_file==None:
-            self.report_file = 'GPyOpt_results.txt ' 
+            self.report_file = 'GPyOpt-results.txt ' 
 
         # decide wether we use the true gradients to optimize the acquitision function
         if true_gradients !=True:
@@ -77,8 +78,11 @@ class BO(object):
         prediction[1][prediction[1]<0] = 0
         self.s_in_min = np.sqrt(prediction[1])
 
+        # Initialization of stop conditions.
         k=0
         distance_lastX = np.sqrt(sum((self.X[self.X.shape[0]-1,:]-self.X[self.X.shape[0]-2,:])**2))
+        
+        # BO loop: this loop does the hard work.
         while k<self.max_iter and distance_lastX > self.eps:
 
             # ------- Augment X

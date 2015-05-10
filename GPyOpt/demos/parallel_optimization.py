@@ -57,7 +57,7 @@ def parallel_optimization(plots=True):
                                 n_inbatch = n_cores,                        # size of the collected batches (= number of cores)
                                 batch_method='mp',                          # method to collected the batches (maximization-penalization)
                                 acqu_optimize_restarts = 30,                # number of local optimizers
-                                eps = 10e-6)                      # secondary stop criteria (apart from the number of iterations) 
+                                eps = 10e-6)                                # secondary stop criteria (apart from the number of iterations) 
 
     # --- Plots
     if plots:

@@ -13,7 +13,7 @@ warnings.filterwarnings("ignore")
 
 class BayesianOptimization(BO):
     def __init__(self, f, bounds=None, kernel=None, X=None, Y=None, model_data_init = None, model_optimize_interval=1, acquisition='EI', 
-        acquisition_par= 0.00, model_optimize_restarts=2, sparseGP=False, num_inducing=None, normalize=False, true_gradients=True, 
+        acquisition_par= 0.00, model_optimize_restarts=5, sparseGP=False, num_inducing=None, normalize=False, true_gradients=True, 
         exact_feval=False, verbosity=0):
         '''
         Bayesian Optimization using EI, MPI and LCB (or UCB) acquisition functions.
@@ -21,14 +21,14 @@ class BayesianOptimization(BO):
         This is a thin wrapper around the methods.BO class, with a set of sensible defaults
         :param *f* the function to optimize. Should get a nxp numpy array as imput and return a nx1 numpy array.
         :param bounds: Tuple containing the box constrains of the function to optimize. Example: for [0,1]x[0,1] insert [(0,1),(0,1)].
-        :param kernel: a GPy kernel, defaults to rbf + bias.  
+        :param kernel: a GPy kernel, defaults to rbf.  
         :param X: input observations. If X=None, some  points are evaluated randomly.
         :param Y: output values. If Y=None, f(X) is used.
         :param model_data_init: number of initial random evaluations of f is X and Y are not provided (default, 3*input_dim).  
         :param model_optimize_interval: number of iterations after which the parameters of the model are optimized (1, Default). 
         :param acquisition: acquisition function ('EI': Expec. Improvement. 'MPI': Maximum Prob. Improvement. 'EL1': Expected Loss. LCB: Lower Confidence Bound). Default, EI.      
         :param acquisition_par: parameter of the acquisition function.    
-        :param model_optimize_restarts: number of initial points for the GP parameters optimization (2, default)
+        :param model_optimize_restarts: number of initial points for the GP parameters optimization (5, default)
         :param sparseGP: whether to use an sparse GP (False, default).
         :param num_inducing: number of inducing points for a Sparse GP (None, default)
         :param normalize: whether to normalize the Y's for optimization (False, default).
@@ -68,7 +68,7 @@ class BayesianOptimization(BO):
             self.X = X
             self.Y = Y
         if kernel is None: 
-            self.kernel = GPy.kern.RBF(self.input_dim, variance=.1, lengthscale=.1)  + GPy.kern.Bias(self.input_dim)
+            self.kernel = GPy.kern.RBF(self.input_dim, variance=.1, lengthscale=.1)
         else:
             self.kernel = kernel
         self._init_model()

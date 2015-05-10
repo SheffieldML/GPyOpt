@@ -19,7 +19,7 @@ As a result you should see:
 
 and to the location of the best found location writing.
 
-BO_demo_auto.x_opt
+BO_demo_2d.x_opt
 
 """
 
@@ -38,7 +38,7 @@ def advanced_optimization_2d(plots=True):
     input_dim = len(bounds)
 
     # Select an specific kernel from GPy
-    kernel = GPy.kern.RBF(input_dim, variance=.1, lengthscale=.1) + GPy.kern.Bias(input_dim)
+    kernel = GPy.kern.RBF(input_dim, variance=.1, lengthscale=.1) + GPy.kern.Bias(input_dim) # we add a bias kernel
 
 
     # --- Problem definition and optimization
@@ -47,8 +47,8 @@ def advanced_optimization_2d(plots=True):
                                             bounds=bounds,                 # box-constrains of the problem
                                             acquisition='LCB',             # Selects the Expected improvement
                                             acquisition_par = 2,           # parameter of the acquisition function
-                                            model_optimize_interval= 3,     # The model is updated every three points are collected
-                                            normalize = True)              # normalized acquisition function                        
+                                            model_optimize_interval= 2,    # The model is updated every two points are collected
+                                            normalize = True)              # normalized y                       
     
     
     # Run the optimization

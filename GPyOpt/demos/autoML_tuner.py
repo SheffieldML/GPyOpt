@@ -12,7 +12,7 @@ autoML_demo = GPyOpt.demos.autoML_tuner()
 As a result you should see:
 
 - A plot comparing an OLS estimator for a simple regression problem with the obtained parameters using the automatic tuner.
-- An object called autoML_dem that contains the results of the optimization process (see reference manual for details). Among the available results you have access to the GP model via
+- An object called autoML_demo that contains the results of the optimization process (see reference manual for details). Among the available results you have access to the GP model via
 
 
 and to the location of the best found location writing.

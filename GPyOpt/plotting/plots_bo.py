@@ -1,3 +1,7 @@
+# Copyright (c) 2015, Javier Gonzalez
+# Copyright (c) 2015, the GPy Authors (see GPy AUTHORS.txt)
+# Licensed under the BSD 3-clause license (see LICENSE.txt)
+
 import numpy as np
 from pylab import grid
 import matplotlib.pyplot as plt
@@ -6,7 +10,7 @@ from pylab import savefig
 
 def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,suggested_sample, filename = None):
     '''
-    Plots of the model and the acquisition function in 1D and 2D examples
+    Plots of the model and the acquisition function in 1D and 2D examples.
     '''
       
     # Plots in dimension 1
@@ -123,42 +127,6 @@ def plot_convergence(Xdata,best_Y,s_in_min, filename = None):
         savefig(filename)
     else:
         plt.show()
-
-
-def plot_convergence_gradients(Xdata):
-    '''
-    Plots to evaluate the convergence of Gradient Bayesian optimization 
-    '''
-    n = Xdata.shape[0]  
-    aux = (Xdata[1:n,:]-Xdata[0:n-1,:])**2      
-    distances = np.sqrt(aux.sum(axis=1))
-
-    ## Distances between consecutive x's
-#     plt.figure(figsize=(15,5))
-#     plt.subplot(1, 3, 1)
-    plt.plot(range(n-1), distances, '-ro')
-    plt.xlabel('Iteration')
-    plt.ylabel('d(x[n], x[n-1])')
-    plt.title('Distance between consecutive x\'s')
-    grid(True)
-
-#     # Estimated m(x) at the proposed sampling points
-#     plt.subplot(1, 3, 2)
-#     plt.plot(range(n),best_Y,'-o')
-#     plt.title('Value of the best selected sample')
-#     plt.xlabel('Iteration')
-#     plt.ylabel('Best y')
-#     grid(True)
-# 
-#     # Plot of the proposed v(x) at the proposed sampling points
-#     plt.subplot(1, 3, 3)
-#     plt.errorbar(range(n),[0]*n , yerr=s_in_min[:,0],ecolor='b', capthick=1)
-#     plt.title('Predicted sd. in the next sample')
-#     plt.xlabel('Iteration')
-#     plt.ylim(0,max(s_in_min[:,0])+np.sqrt(max(s_in_min[:,0])))
-#     plt.ylabel('CI (centered at zero)')
-#     grid(True)
-
 
 
     

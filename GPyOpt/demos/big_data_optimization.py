@@ -29,8 +29,8 @@ def big_data_optimization(plots=True):
     seed(12345)
     
     # --- Objective function
-    objective_noisy = GPyOpt.fmodels.experimentsNd.alpine2(10,sd = 0.1)     # noisy version
-    bounds = objective_noisy.bounds                                           # problem constrains 
+    objective_noisy = GPyOpt.fmodels.experimentsNd.alpine2(10,sd = 0.1)     # Alpine2 function in dimension 10.
+    bounds = objective_noisy.bounds                                         # problem constrains 
 
     # --- Problem definition and optimization
     BO_demo_big_data = GPyOpt.methods.BayesianOptimization(f=objective_noisy.f,  # function to optimize       
@@ -38,9 +38,9 @@ def big_data_optimization(plots=True):
                                             acquisition='LCB',             # Selects the Expected improvement
                                             acquisition_par = 2,           # parameter of the acquisition function
                                             normalize = True,              # normalized acquisition function      
-                                            sparseGP = True,                 # Use a sparse GP
+                                            sparseGP = True,               # Use a sparse GP for the sparse GP.
                                             num_inducing = 10,             # Number of inducing points
-                                            model_data_init = 1000)         # Initialize the model with 500 points                          
+                                            model_data_init = 1000)        # Initialize the model with 1000 points                          
     
     # Run the optimization
     max_iter = 10                                                           
@@ -50,10 +50,10 @@ def big_data_optimization(plots=True):
     print '-----'
     
     # --- Run the optimization                                              # evaluation budget
-    BO_demo_big_data.run_optimization(max_iter,                                   # Number of iterations
+    BO_demo_big_data.run_optimization(max_iter,                             # Number of iterations
                                 acqu_optimize_method = 'fast_random',       # method to optimize the acq. function
                                 acqu_optimize_restarts = 30,                # number of local optimizers
-                                eps = 10e-6,                        # secondary stop criteria (apart from the number of iterations) 
+                                eps = 10e-6,                                # secondary stop criteria (apart from the number of iterations) 
                                 true_gradients = False)                     # The gradients of the acquisition function are approximated (faster)
     # --- Plots
     if plots:

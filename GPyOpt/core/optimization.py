@@ -1,14 +1,17 @@
+# Copyright (c) 2015, Javier Gonzalez
+# Copyright (c) 2015, the GPy Authors (see GPy AUTHORS.txt)
+# Licensed under the BSD 3-clause license (see LICENSE.txt)
+
 import numpy as np
 import scipy
 import GPyOpt
-
 from ..util.general import multigrid, samples_multidimensional_uniform, reshape
 from scipy.stats import norm
 import numpy as np
 
-##
-## ----------- Functions for the optimization of the acquisition function
-##
+# Note this file includes all functions for the optimization of the aquisition functions. This include different batch methods. When data are not
+# collected in batches the code goes to predictive_batch_optimization, and runs the first optimization but does not enter in the loop. This 
+# should be the same in case of selecting n_inbatch=1 in the rest of the batch methods.
 
 
 ## ---- Predictive batch optimization
@@ -112,7 +115,7 @@ def mp_batch_optimization(acquisition, d_acquisition, bounds, acqu_optimize_rest
         Min = estimate_Min(model,bounds)    
 
     while k<n_inbatch:
-        # ---------- Collect the batch (the gradients of the acquisition are approximated for k =2,...,n_inbathc)
+        # ---------- Collect the batch (the gradients of the acquisition are approximated for k =2,...,n_inbatch)
         new_sample = optimize_acquisition(acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch, L, Min)
         X_batch = np.vstack((X_batch,new_sample))  
         k +=1
@@ -195,7 +198,7 @@ def estimate_L(model,bounds):
 
 def estimate_Min(model,bounds):
     '''
-    Takes the estimated minimum as the minimum value in the sample
+    Takes the estimated minimum as the minimum value in the sample. (this function is now nonsense but we will used in further generalizations)
     
     '''
     return model.Y.min()
@@ -217,7 +220,6 @@ def hammer_function(x,x0,r_x0, s_x0):
     '''
     Creates the function to define the exclusion zones
     '''
-#    return (norm.cdf((np.sqrt(((x-x0)**2).sum(1))- r_x0)/s_x0)).T
     return norm.cdf((np.sqrt((np.square(np.atleast_2d(x-x0))).sum(1))- r_x0)/s_x0)
 
 
@@ -235,7 +237,11 @@ def penalized_acquisition(x, acquisition, bounds, model, X_batch, r_x0, s_x0):
 
 def wrapper_lbfgsb(f,grad_f,x0,bounds):
     '''
-    Wrapper for l-bfgs-b to use the true or the approximate gradients 
+    Wrapper for l-bfgs-b to use the true or the approximate gradients. 
+    :param f: function to optimize, acquisition.
+    :param grad_f: gradients of f.
+    :param x0: initial value for optimization.
+    :param bounds: tuple determining the limits of the optimizer.
     '''
 
     def objective(x):
@@ -247,7 +253,11 @@ def wrapper_lbfgsb(f,grad_f,x0,bounds):
         res = scipy.optimize.fmin_l_bfgs_b(objective, x0=x0, bounds=bounds)
     return res[0],res[1]
 
+
 def wrapper_DIRECT(f,bounds):
+    '''
+    Wrapper for DIRECT optimization method.
+    '''
     try:
         from DIRECT import solve
         import numpy as np

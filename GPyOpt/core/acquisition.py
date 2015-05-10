@@ -1,3 +1,7 @@
+# Copyright (c) 2015, Javier Gonzalez
+# Copyright (c) 2015, the GPy Authors (see GPy AUTHORS.txt)
+# Licensed under the BSD 3-clause license (see LICENSE.txt)
+
 from ..util.general import get_moments, get_d_moments, get_quantiles
 
 class AcquisitionBase(object):
