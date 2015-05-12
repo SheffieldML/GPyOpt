@@ -113,9 +113,9 @@ class BayesianOptimization(BO):
             self.model = GPy.models.GPRegression(self.X,self.Y,kernel=self.kernel)
             
         if self.exact_feval == True:
-            self.model.Gaussian_noise.constrain_fixed(1e-6) #to avoid numerical problems
+            self.model.Gaussian_noise.constrain_fixed(1e-6, warning=False) #to avoid numerical problems
         else:
-            self.model.Gaussian_noise.constrain_bounded(1e-6,1e6) #to avoid numerical problems
+            self.model.Gaussian_noise.constrain_bounded(1e-6,1e6, warning=False) #to avoid numerical problems
             
             
             
