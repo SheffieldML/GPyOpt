@@ -52,10 +52,14 @@ class BO(object):
         self.num_acquisitions = 0
         self.n_inbatch=n_inbatch
         self.batch_method = batch_method
+        if batch_method=='mp':
+            from .acquisition import AcquisitionMP
+            if not isinstance(self.acquisition_func, AcquisitionMP):
+                self.acquisition_func = AcquisitionMP(self.acquisition_func, self.acquisition_func.acquisition_par)
         self.eps = eps 
         self.acqu_optimize_method = acqu_optimize_method
         self.acqu_optimize_restarts = acqu_optimize_restarts
-        self.acquisition_func.model = self.model
+        self.acquisition_func.set_model(self.model)
         self.n_procs = n_procs
         self.save_interval = save_interval
         if report_file==None:
@@ -195,7 +199,7 @@ class BO(object):
         if self.batch_method == 'predictive':
             X_batch = predictive_batch_optimization(acqu_name, acquisition_par, acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch)            
         elif self.batch_method == 'mp':
-            X_batch = mp_batch_optimization(acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch)
+            X_batch = mp_batch_optimization(self.acquisition_func, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch)
         elif self.batch_method == 'random':
             X_batch = random_batch_optimization(acquisition, d_acquisition, bounds, acqu_optimize_restarts,acqu_optimize_method, model, n_inbatch)        
         return X_batch

@@ -91,7 +91,7 @@ def random_batch_optimization(acquisition, d_acquisition, bounds, acqu_optimize_
 
 
 ## ---- Local penalization for batch optimization
-def mp_batch_optimization(acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch):
+def mp_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch):
     '''
     Computes batch optimization using by acquisition penalization using Lipschitz inference.
 
@@ -103,11 +103,16 @@ def mp_batch_optimization(acquisition, d_acquisition, bounds, acqu_optimize_rest
     :param model: the GP model based on the current samples
     :param n_inbatch: the number of samples to collect
     '''
+    from .acquisition import AcquisitionMP
+    assert isinstance(acquisition, AcquisitionMP)
+    acq_func = acquisition.acquisition_function
+    d_acq_func = acquisition.d_acquisition_function
 
+    acquisition.update_batches(None,None,None)    
     # Optimize the first element in the batch
-    X_batch = optimize_acquisition(acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch=None, L=None, Min=None)
+    X_batch = optimize_acquisition(acq_func, d_acq_func, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch=None, L=None, Min=None)
     k=1
-    d_acquisition = None  # gradients are approximated  with the batch. 
+    #d_acq_func = None  # gradients are approximated  with the batch. 
     
     if n_inbatch>1:
         # ---------- Approximate the constants of the the method
@@ -115,10 +120,12 @@ def mp_batch_optimization(acquisition, d_acquisition, bounds, acqu_optimize_rest
         Min = estimate_Min(model,bounds)    
 
     while k<n_inbatch:
+        acquisition.update_batches(X_batch,L,Min)
         # ---------- Collect the batch (the gradients of the acquisition are approximated for k =2,...,n_inbatch)
-        new_sample = optimize_acquisition(acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch, L, Min)
-        X_batch = np.vstack((X_batch,new_sample))  
+        new_sample = optimize_acquisition(acq_func, d_acq_func, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch, L, Min)
+        X_batch = np.vstack((X_batch,new_sample))
         k +=1
+    acquisition.update_batches(None,None,None)
     return X_batch
 
 def optimize_acquisition(acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch=None, L=None, Min=None):
@@ -142,17 +149,12 @@ def fast_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimi
     Optimizes the acquisition function using a local optimizer in the best point
     '''
     if method_type=='random':
-                samples = samples_multidimensional_uniform(bounds,acqu_optimize_restarts)
+        samples = samples_multidimensional_uniform(bounds,acqu_optimize_restarts)
     else:
         samples = multigrid(bounds, acqu_optimize_restarts)
     pred_samples = acquisition(samples)
     x0 =  samples[np.argmin(pred_samples)]
-    h_func_args = hammer_function_precompute(X_batch, L, Min, model)
-    if X_batch==None:
-        best_x,_ = wrapper_lbfgsb(acquisition,d_acquisition,x0 = np.array(x0),bounds=bounds)
-    else:
-        res = scipy.optimize.minimize(penalized_acquisition, x0=np.array(x0),method='L-BFGS-B',bounds=bounds, args=(acquisition, bounds, model, X_batch)+h_func_args)
-        best_x = res.x
+    best_x,_ = wrapper_lbfgsb(acquisition,d_acquisition,x0 = np.array(x0),bounds=bounds)
     return best_x
 
 
@@ -166,14 +168,8 @@ def full_acquisition_optimization(acquisition, d_acquisition, bounds, acqu_optim
         samples = multigrid(bounds, acqu_optimize_restarts)
     mins = np.zeros((acqu_optimize_restarts,len(bounds)))
     fmins = np.zeros(acqu_optimize_restarts)
-    h_func_args = hammer_function_precompute(X_batch, L, Min, model)
     for k in range(acqu_optimize_restarts):
-        if X_batch==None: # gradients are approximated within the batch collection
-            mins[k],fmins[k] = wrapper_lbfgsb(acquisition,d_acquisition,x0 = samples[k,:],bounds=bounds)
-        else:
-            res = scipy.optimize.minimize(penalized_acquisition, x0 = samples[k,:] ,method='L-BFGS-B', bounds=bounds, args=(acquisition, bounds, model, X_batch)+h_func_args)
-            mins[k] = res.x
-            fmins[k] = res.fun
+        mins[k],fmins[k] = wrapper_lbfgsb(acquisition,d_acquisition,x0 = samples[k,:],bounds=bounds)
     return mins[np.argmin(fmins)]
 
 
@@ -202,37 +198,6 @@ def estimate_Min(model,bounds):
     
     '''
     return model.Y.min()
-
-
-def hammer_function_precompute(x0, L, Min, model):
-    if x0 is None: return None, None
-    if len(x0.shape)==1: x0 = x0[None,:]
-    m = model.predict(x0)[0]
-    pred = model.predict(x0)[1].copy()
-    pred[pred<1e-16] = 1e-16
-    s = np.sqrt(pred)
-    r_x0 = (m-Min)/L
-    s_x0 = s/L
-    return r_x0, s_x0
-
-
-def hammer_function(x,x0,r_x0, s_x0):
-    '''
-    Creates the function to define the exclusion zones
-    '''
-    return norm.cdf((np.sqrt((np.square(np.atleast_2d(x-x0))).sum(1))- r_x0)/s_x0)
-
-
-def penalized_acquisition(x, acquisition, bounds, model, X_batch, r_x0, s_x0):
-    '''
-    Creates a penalized acquisition function using 'hammer' functions around the points collected in the batch
-    '''
-    sur_min = min(-acquisition(model.X))  # assumed minimum of the minus acquisition
-    fval = -acquisition(x)-np.sign(sur_min)*(abs(sur_min)) 
-    if X_batch!=None:
-        h_vals = hammer_function(x, X_batch, r_x0, s_x0)
-        fval = fval*np.prod(h_vals)
-    return -fval
 
 
 def wrapper_lbfgsb(f,grad_f,x0,bounds):

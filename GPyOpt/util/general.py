@@ -77,7 +77,7 @@ def get_d_moments(model,x):
     _, v = model.predict(x)
     dmdx, dvdx = model.predictive_gradients(x)
     dmdx = dmdx[:,:,0]
-    dsdx = 0.5 * v * dvdx
+    dsdx = dvdx / (2*np.sqrt(v))
     return (dmdx, dsdx)
 
 
