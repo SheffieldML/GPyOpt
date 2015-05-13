@@ -179,13 +179,14 @@ class AcquisitionEL1(AcquisitionBase):
 class AcquisitionMP(AcquisitionBase):
     """
     """
-    def __init__(self, acq, acquisition_par=None):
+    def __init__(self, acq, acquisition_par=None, transform='none'):
         """"""
         super(AcquisitionMP, self).__init__(acquisition_par)
         self.acq = acq
         self.X_batch = None
         self.r_x0=None
         self.s_x0=None
+        self.transform=transform.lower()
             
     def set_model(self,model):
         self.model = model
@@ -221,7 +222,16 @@ class AcquisitionMP(AcquisitionBase):
         '''
         Creates a penalized acquisition function using 'hammer' functions around the points collected in the batch
         '''
-        fval = self.acq.acquisition_function(x)[:,0]
+        fval = -self.acq.acquisition_function(x)[:,0]
+        
+        if self.transform=='softplus':
+            fval_org = fval.copy()
+            fval[fval_org>=40.] = np.log(fval_org[fval_org>=40.])
+            fval[fval_org<40.] = np.log(np.log1p(np.exp(fval_org[fval_org<40.])))
+        elif self.transform=='none':
+            fval = np.log(fval+1e-50)
+        
+        fval = -fval
         if X_batch!=None:
             h_vals = self._hammer_function(x, X_batch, r_x0, s_x0)
             fval += -h_vals.sum(axis=-1)
@@ -243,8 +253,18 @@ class AcquisitionMP(AcquisitionBase):
 
     def d_acquisition_function(self, x):
         x = np.atleast_2d(x)
-        if self.X_batch is None:
-            return self.acq.d_acquisition_function(x)
+        
+        if self.transform=='softplus':
+            fval = -self.acq.acquisition_function(x)[:,0]
+            scale = 1./(np.log1p(np.exp(fval))*(1.+np.exp(-fval)))
+        elif self.transform=='none':
+            fval = -self.acq.acquisition_function(x)[:,0]
+            scale = 1./fval
         else:
-            return self.acq.d_acquisition_function(x) - self._d_hammer_function(x, self.X_batch, self.r_x0, self.s_x0)
+            scale = 1.
+        
+        if self.X_batch is None:
+            return scale*self.acq.d_acquisition_function(x)
+        else:
+            return scale*self.acq.d_acquisition_function(x) - self._d_hammer_function(x, self.X_batch, self.r_x0, self.s_x0)
 
