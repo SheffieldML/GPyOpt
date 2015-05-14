@@ -209,7 +209,7 @@ class BO(object):
         """        
         Updates X and Y in the model and re-optimizes the parameters of the new model
 
-        """  
+        """              
         # ------- Normalize acquisition function (if needed)
         if self.normalize:      
             self.model.set_XY(self.X,(self.Y-self.Y.mean())/self.Y.std())

@@ -187,6 +187,8 @@ class AcquisitionMP(AcquisitionBase):
         self.r_x0=None
         self.s_x0=None
         self.transform=transform.lower()
+        if isinstance(acq, AcquisitionLCB) and self.transform=='none':
+            self.transform='softplus'
             
     def set_model(self,model):
         self.model = model
