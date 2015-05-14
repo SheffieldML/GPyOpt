@@ -212,7 +212,7 @@ class BO(object):
         """              
         # ------- Normalize acquisition function (if needed)
         if self.normalize:      
-            self.model.set_XY(self.X,(self.Y-self.Y.mean())/self.Y.std())
+            self.model.set_XY(self.X,(self.Y-self.Y.mean())/(self.Y.std()))
         else:
             self.model.set_XY(self.X,self.Y)
         

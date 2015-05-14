@@ -117,7 +117,7 @@ def mp_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acqu_opti
     if n_inbatch>1:
         # ---------- Approximate the constants of the the method
         L = estimate_L(model,bounds)
-        Min = estimate_Min(model,bounds)    
+        Min = estimate_Min(model,bounds)
 
     while k<n_inbatch:
         acquisition.update_batches(X_batch,L,Min)
@@ -173,7 +173,7 @@ def full_acquisition_optimization(acquisition, d_acquisition, bounds, acqu_optim
     return mins[np.argmin(fmins)]
 
 
-def estimate_L(model,bounds):
+def estimate_L(model,bounds,storehistory=True):
     '''
     Estimate the Lipschitz constant of f by taking maximizing the norm of the expectation of the gradient of *f*.
     '''
@@ -183,12 +183,15 @@ def estimate_L(model,bounds):
         res = np.sqrt((dmdx*dmdx).sum(1)) # simply take the norm of the expectation of the gradient
         return -res
    
-    samples = samples_multidimensional_uniform(bounds,5)
+    samples = samples_multidimensional_uniform(bounds,500)
+    samples = np.vstack([samples,model.X])
     pred_samples = df(samples,model,0)
     x0 = samples[np.argmin(pred_samples)]
-    minusL = scipy.optimize.minimize(df,x0, method='L-BFGS-B',bounds=bounds, args = (model,x0), options = {'maxiter': 1000}).fun[0][0]
+    res = scipy.optimize.minimize(df,x0, method='L-BFGS-B',bounds=bounds, args = (model,x0), options = {'maxiter': 1000})
+    minusL = res.fun[0][0]
     L = -minusL
-    if L<0.1: L=100  ## to avoid problems in cases in which the model is flat.
+    print L, model.kern.rbf.lengthscale.values
+    if L<1e-7: L=10  ## to avoid problems in cases in which the model is flat.
     return L
 
 

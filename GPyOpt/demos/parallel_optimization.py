@@ -30,7 +30,8 @@ def parallel_optimization(plots=True):
     
     # --- Objective function
     objective_true  = GPyOpt.fmodels.experiments2d.branin()                 # true function
-    objective_noisy = GPyOpt.fmodels.experiments2d.branin(sd = 0.1)         # noisy version
+#     objective_noisy = GPyOpt.fmodels.experiments2d.branin(sd = 0.1)         # noisy version
+    objective_noisy = GPyOpt.fmodels.experimentsNd.alpine2(5)         # noisy version
     bounds = objective_noisy.bounds                                         # problem constrains 
 
     # --- Problem definition and optimization
@@ -42,10 +43,10 @@ def parallel_optimization(plots=True):
     
     
     # --- Run the optimization
-    max_iter = 15                                                          
+    max_iter = 20                                                          
 
     # --- Number of cores to use in the optimization (parallel evaluations of f)
-    n_cores = 3
+    n_cores = 5
 
     print '-----'
     print '----- Running demo. It may take a few seconds.'
@@ -57,11 +58,11 @@ def parallel_optimization(plots=True):
                                 n_inbatch = n_cores,                        # size of the collected batches (= number of cores)
                                 batch_method='mp',                          # method to collected the batches (maximization-penalization)
                                 acqu_optimize_restarts = 30,                # number of local optimizers
-                                eps = 10e-6)                                # secondary stop criteria (apart from the number of iterations) 
+                                eps = 1e-6)                                # secondary stop criteria (apart from the number of iterations) 
 
     # --- Plots
     if plots:
-        objective_true.plot()
+#         objective_true.plot()
         BO_demo_parallel.plot_acquisition()
         BO_demo_parallel.plot_convergence()
         

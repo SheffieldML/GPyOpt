@@ -3,7 +3,7 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 import GPy
-
+import numpy as np
 from ..core.acquisition import AcquisitionEI, AcquisitionMPI, AcquisitionLCB, AcquisitionEL1 
 from ..core.bo import BO
 from ..util.general import samples_multidimensional_uniform, reshape
@@ -68,7 +68,7 @@ class BayesianOptimization(BO):
             self.X = X
             self.Y = Y
         if kernel is None: 
-            self.kernel = GPy.kern.RBF(self.input_dim, variance=.1, lengthscale=.1)
+            self.kernel = GPy.kern.RBF(self.input_dim, variance=1., lengthscale=np.max(self.bounds)/5.)+GPy.kern.Bias(self.input_dim)
         else:
             self.kernel = kernel
         self._init_model()
