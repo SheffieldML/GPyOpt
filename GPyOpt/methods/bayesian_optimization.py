@@ -13,7 +13,7 @@ warnings.filterwarnings("ignore")
 
 class BayesianOptimization(BO):
     def __init__(self, f, bounds=None, kernel=None, X=None, Y=None, model_data_init = None, model_optimize_interval=1, acquisition='EI', 
-        acquisition_par= 0.00, model_optimize_restarts=5, sparseGP=False, num_inducing=None, normalize=False, true_gradients=True, 
+        acquisition_par= 0.00, model_optimize_restarts=10, sparseGP=False, num_inducing=None, normalize=False, true_gradients=True, 
         exact_feval=False, verbosity=0):
         '''
         Bayesian Optimization using EI, MPI and LCB (or UCB) acquisition functions.

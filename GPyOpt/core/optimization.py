@@ -187,7 +187,7 @@ def estimate_L(model,bounds,storehistory=True):
     samples = np.vstack([samples,model.X])
     pred_samples = df(samples,model,0)
     x0 = samples[np.argmin(pred_samples)]
-    res = scipy.optimize.minimize(df,x0, method='L-BFGS-B',bounds=bounds, args = (model,x0), options = {'maxiter': 1000})
+    res = scipy.optimize.minimize(df,x0, method='L-BFGS-B',bounds=bounds, args = (model,x0), options = {'maxiter': 200})
     minusL = res.fun[0][0]
     L = -minusL
     print L, model.kern.rbf.lengthscale.values
@@ -216,9 +216,9 @@ def wrapper_lbfgsb(f,grad_f,x0,bounds):
         return float(f(x)), grad_f(x)[0]
 
     if grad_f==None:
-        res = scipy.optimize.fmin_l_bfgs_b(f, x0=x0, bounds=bounds,approx_grad=True)
+        res = scipy.optimize.fmin_l_bfgs_b(f, x0=x0, bounds=bounds,approx_grad=True, maxiter=1000)
     else:
-        res = scipy.optimize.fmin_l_bfgs_b(objective, x0=x0, bounds=bounds)
+        res = scipy.optimize.fmin_l_bfgs_b(objective, x0=x0, bounds=bounds, maxiter=1000)
     return res[0],res[1]
 
 
