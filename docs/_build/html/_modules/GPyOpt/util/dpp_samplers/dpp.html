@@ -1,0 +1,285 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>GPyOpt.util.dpp_samplers.dpp &mdash; GPyOpt  documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="GPyOpt  documentation" href="../../../../index.html"/>
+        <link rel="up" title="Module code" href="../../../index.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="../../../../index.html" class="fa fa-home"> GPyOpt</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../GPyOpt.html">GPyOpt package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../GPyOpt.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../GPyOpt.html#module-GPyOpt">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../../index.html">GPyOpt</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      
+    <li>GPyOpt.util.dpp_samplers.dpp</li>
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <h1>Source code for GPyOpt.util.dpp_samplers.dpp</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.sparse.linalg.eigen.arpack</span> <span class="kn">import</span> <span class="n">eigsh</span> <span class="k">as</span> <span class="n">largest_eigsh</span>
+<span class="kn">from</span>  <span class="nn">numpy.linalg</span> <span class="kn">import</span> <span class="n">inv</span>
+<span class="n">mtb</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="sample_dpp"><a class="viewcode-back" href="../../../../GPyOpt.util.dpp_samplers.html#GPyOpt.util.dpp_samplers.dpp.sample_dpp">[docs]</a><span class="k">def</span> <span class="nf">sample_dpp</span><span class="p">(</span><span class="n">L</span><span class="p">,</span><span class="n">k</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Wrapper function for the sample_dpp Matlab code written by Alex Kulesza</span>
+<span class="sd">    Given a kernel matrix L, returns a sample from a k-DPP.</span>
+<span class="sd">    The code is hacked in a way that if a set A is provied, samples from a conditional </span>
+<span class="sd">    dpp given A are produced</span>
+<span class="sd">    L:     kernel matrix</span>
+<span class="sd">    k:     size of the sample from the DPP</span>
+<span class="sd">    set:   index of the conditional elements. Integer numpy array containing the locations </span>
+<span class="sd">            (starting in zero) relative to the rows of L.</span>
+<span class="sd">       </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c"># Matlab link</span>
+    <span class="k">global</span> <span class="n">mtb</span>    
+    <span class="k">if</span> <span class="n">mtb</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">matlab_wrapper</span>
+        <span class="n">mtb</span> <span class="o">=</span> <span class="n">matlab_wrapper</span><span class="o">.</span><span class="n">MatlabSession</span><span class="p">()</span>
+
+    <span class="c"># load values in Matlab and get sample</span>
+    <span class="n">mtb</span><span class="o">.</span><span class="n">putvalue</span><span class="p">(</span><span class="s">&#39;L&#39;</span><span class="p">,</span><span class="n">L</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">k</span><span class="o">!=</span><span class="bp">None</span><span class="p">:</span> 
+        <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">k</span><span class="p">]])</span>  <span class="c"># matlab only undenstand matrices </span>
+        <span class="n">mtb</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s">&#39;k&#39;</span><span class="p">,</span><span class="n">k</span><span class="p">)</span>
+        <span class="n">mtb</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s">&quot;dpp_sample = sample_dpp(decompose_kernel(L),k)&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mtb</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s">&quot;dpp_sample = sample_dpp(decompose_kernel(L))&quot;</span><span class="p">)</span>
+        
+    <span class="c">#dpp_sample = mtb.getvalue(&#39;dpp_sample&#39;)</span>
+    <span class="n">dpp_sample</span> <span class="o">=</span> <span class="n">mtb</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;dpp_sample&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dpp_sample</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="sample_conditional_dpp"><a class="viewcode-back" href="../../../../GPyOpt.util.dpp_samplers.html#GPyOpt.util.dpp_samplers.dpp.sample_conditional_dpp">[docs]</a><span class="k">def</span> <span class="nf">sample_conditional_dpp</span><span class="p">(</span><span class="n">L</span><span class="p">,</span><span class="n">set0</span><span class="p">,</span><span class="n">k</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Wrapper function for the sample_dpp Matlab code written by Alex Kulesza</span>
+<span class="sd">    Given a kernel matrix L, returns a sample from a k-DPP.</span>
+<span class="sd">    The code is hacked in a way that if a set A is provied, samples from a conditional </span>
+<span class="sd">    dpp given A are produced</span>
+<span class="sd">    L:     kernel matrix</span>
+<span class="sd">    set:   index of the conditional elements. Integer numpy array containing the locations </span>
+<span class="sd">            (starting in zero) relative to the rows of L.</span>
+<span class="sd">    k:     size of the sample from the DPP</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c"># Calculate the kernel for the marginal</span>
+    <span class="n">Id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">L</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">Id</span><span class="p">[</span><span class="n">set0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">Id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">Id</span><span class="p">)</span>    
+    <span class="n">L_compset_full</span> <span class="o">=</span> <span class="n">inv</span><span class="p">(</span><span class="n">Id</span> <span class="o">+</span> <span class="n">L</span><span class="p">)</span>
+    <span class="n">L_minor</span> <span class="o">=</span> <span class="n">inv</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">L_compset_full</span><span class="p">,</span><span class="nb">tuple</span><span class="p">(</span><span class="n">set0</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span><span class="nb">tuple</span><span class="p">(</span><span class="n">set0</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">L_compset</span> <span class="o">=</span> <span class="n">L_minor</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">L_minor</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    
+    <span class="c"># Compute the sample</span>
+    <span class="n">sample</span> <span class="o">=</span> <span class="n">sample_dpp</span><span class="p">(</span><span class="n">L_compset</span><span class="p">,</span><span class="n">k</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">set0</span><span class="p">,</span><span class="n">sample</span><span class="p">)</span> <span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="sample_dual_conditional_dpp"><a class="viewcode-back" href="../../../../GPyOpt.util.dpp_samplers.html#GPyOpt.util.dpp_samplers.dpp.sample_dual_conditional_dpp">[docs]</a><span class="k">def</span> <span class="nf">sample_dual_conditional_dpp</span><span class="p">(</span><span class="n">L</span><span class="p">,</span><span class="n">set0</span><span class="p">,</span><span class="n">q</span><span class="p">,</span><span class="n">k</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Wrapper function for the sample_dpp Matlab code written by Alex Kulesza</span>
+<span class="sd">    Given a kernel matrix L, returns a sample from a dual k-DPP.</span>
+<span class="sd">    The code is hacked in a way that if a set0 A is provied, samples from a conditional </span>
+<span class="sd">    dpp given A are produced</span>
+<span class="sd">    L:     kernel matrix</span>
+<span class="sd">    set0:   index of the conditional elements. Integer numpy array containing the locations </span>
+<span class="sd">           (starting in zero) relative to the rows of L.</span>
+<span class="sd">    q:     is the number of used eigenvalues</span>
+<span class="sd">    k:     size of the sample from the DPP</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c"># Calculate the kernel of the marginal</span>
+    <span class="n">Id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">L</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">Id</span><span class="p">[</span><span class="n">set0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">Id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">Id</span><span class="p">)</span>    
+    <span class="n">L_compset_full</span> <span class="o">=</span> <span class="n">inv</span><span class="p">(</span><span class="n">Id</span> <span class="o">+</span> <span class="n">L</span><span class="p">)</span>
+    <span class="n">L_minor</span> <span class="o">=</span> <span class="n">inv</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">L_compset_full</span><span class="p">,</span><span class="nb">tuple</span><span class="p">(</span><span class="n">set0</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span><span class="nb">tuple</span><span class="p">(</span><span class="n">set0</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">L_compset</span> <span class="o">=</span> <span class="n">L_minor</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">L_minor</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> 
+    
+    <span class="c"># Take approximated sample</span>
+    <span class="n">sample</span> <span class="o">=</span> <span class="n">sample_dual_dpp</span><span class="p">(</span><span class="n">L_compset</span><span class="p">,</span><span class="n">q</span><span class="p">,</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">set0</span><span class="p">,</span><span class="n">sample</span><span class="p">)</span> <span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="sample_dual_dpp"><a class="viewcode-back" href="../../../../GPyOpt.util.dpp_samplers.html#GPyOpt.util.dpp_samplers.dpp.sample_dual_dpp">[docs]</a><span class="k">def</span> <span class="nf">sample_dual_dpp</span><span class="p">(</span><span class="n">L</span><span class="p">,</span><span class="n">q</span><span class="p">,</span><span class="n">k</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Wrapper function for the sample_dual_dpp Matlab code written by Alex Kulesza</span>
+<span class="sd">    Given a kernel matrix L, returns a sample from a k-DPP.</span>
+<span class="sd">    </span>
+<span class="sd">    L is the kernel matrix</span>
+<span class="sd">    q is the number of used eigenvalues</span>
+<span class="sd">    k is the number of elements in the sample from the DPP</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c"># Matlab link</span>
+    <span class="k">global</span> <span class="n">mtb</span>    
+    <span class="k">if</span> <span class="n">mtb</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">matlab_wrapper</span>
+        <span class="n">mtb</span> <span class="o">=</span> <span class="n">matlab_wrapper</span><span class="o">.</span><span class="n">MatlabSession</span><span class="p">()</span>
+        
+    <span class="c"># Extract the feature matrix from the kernel</span>
+    <span class="n">evals</span><span class="p">,</span> <span class="n">evecs</span> <span class="o">=</span> <span class="n">largest_eigsh</span><span class="p">(</span><span class="n">L</span><span class="p">,</span><span class="n">q</span><span class="p">,</span><span class="n">which</span><span class="o">=</span><span class="s">&#39;LM&#39;</span><span class="p">)</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">evecs</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">evals</span><span class="p">))</span>
+    
+    <span class="c"># load values in Matlab and get sample</span>
+    <span class="n">mtb</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s">&#39;B&#39;</span><span class="p">,</span><span class="n">B</span><span class="p">)</span>
+    <span class="c">#mtb.putvalue(&#39;B&#39;,B)</span>
+    
+    <span class="k">if</span> <span class="n">k</span><span class="o">!=</span><span class="bp">None</span><span class="p">:</span> 
+        <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">k</span><span class="p">]])</span>  <span class="c"># matlab only undernstand matrices </span>
+        <span class="n">mtb</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s">&#39;k&#39;</span><span class="p">,</span><span class="n">k</span><span class="p">)</span>
+        <span class="n">mtb</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s">&quot;dpp_sample = sample_dual_dpp(B,decompose_kernel(B&#39;*B),k)&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mtb</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s">&quot;dpp_sample = sample_dual_dpp(B,decompose_kernel(B&#39;*B))&quot;</span><span class="p">)</span>
+        
+    <span class="n">dpp_sample</span> <span class="o">=</span> <span class="n">mtb</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;dpp_sample&#39;</span><span class="p">)</span>
+    <span class="k">print</span> <span class="n">dpp_sample</span>
+    <span class="k">return</span> <span class="n">dpp_sample</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+</pre></div></div>
+
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Javier Gonzalez.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
