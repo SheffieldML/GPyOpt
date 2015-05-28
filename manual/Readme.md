@@ -1,1 +1,1 @@
-This folder contains a collection of IPython notebooks that detail GPyOpt functionalities. The notebooks can also be read online at http://nbviewer.ipython.org/github/SheffieldML/notebook/blob/master/GPyOpt/index.ipynb
+This folder contains a collection of IPython notebooks that detail GPyOpt functionalities. The notebooks can also be read online at http://nbviewer.ipython.org/github/SheffieldML/GPyOpt/blob/master/manual/index.ipynb
