@@ -118,64 +118,6 @@ class AcquisitionEL1(AcquisitionBase):
         df_loss = -dsdx * phi + Phi * dmdx                                # same as the EI
         return df_loss
 
-# class AcquisitionMP(AcquisitionBase):
-#     """
-#     """
-#     def __init__(self, acq, acquisition_par=None):
-#         """"""
-#         super(AcquisitionMP, self).__init__(acquisition_par)
-#         self.acq = acq
-#         self.X_batch = None
-#         self.r_x0=None
-#         self.s_x0=None
-#             
-#     def set_model(self,model):
-#         self.model = model
-#         self.acq.model = model
-# 
-#     def update_batches(self, X_batch, L, Min):
-#         self.X_batch = X_batch
-#         if X_batch is not None:
-#             self.r_x0, self.s_x0 = self._hammer_function_precompute(X_batch, L, Min, self.model)
-#         
-#     def _hammer_function_precompute(self,x0, L, Min, model):
-#         if x0 is None: return None, None
-#         if len(x0.shape)==1: x0 = x0[None,:]
-#         m = model.predict(x0)[0]
-#         pred = model.predict(x0)[1].copy()
-#         pred[pred<1e-16] = 1e-16
-#         s = np.sqrt(pred)
-#         r_x0 = (m-Min)/L
-#         s_x0 = s/L
-#         r_x0 = r_x0.reshape(r_x0.shape[0])
-#         s_x0 = s_x0.reshape(s_x0.shape[0])
-#         return r_x0, s_x0
-# 
-#     def _hammer_function(self, x,x0,r_x0, s_x0):
-#         '''
-#         Creates the function to define the exclusion zones
-#         '''
-#         from scipy.stats import norm
-# #         return norm.cdf((np.sqrt((np.square(np.atleast_2d(x-x0))).sum(1))- r_x0)/s_x0)
-#         return norm.cdf((np.sqrt((np.square(np.atleast_2d(x)[:,None,:]-np.atleast_2d(x0)[None,:,:])).sum(-1))- r_x0)/s_x0)
-# 
-#     def _penalized_acquisition(self, x,  model, X_batch, r_x0, s_x0):
-#         '''
-#         Creates a penalized acquisition function using 'hammer' functions around the points collected in the batch
-#         '''
-#         sur_min = min(-self.acq.acquisition_function(model.X))  # assumed minimum of the minus acquisition
-#         fval = -self.acq.acquisition_function(x)-np.sign(sur_min)*(abs(sur_min)) 
-#         if X_batch!=None:
-#             h_vals = self._hammer_function(x, X_batch, r_x0, s_x0)
-#             fval = fval[:,0]*np.prod(h_vals,axis=-1)
-#         return -fval
-# 
-#     def acquisition_function(self, x):
-#         return self._penalized_acquisition(x, self.model, self.X_batch, self.r_x0, self.s_x0)
-# 
-#     def d_acquisition_function(self, x):
-#         return self.acq.d_acquisition_function(x)
-
 class AcquisitionMP(AcquisitionBase):
     """
     """
@@ -216,8 +158,6 @@ class AcquisitionMP(AcquisitionBase):
         '''
         Creates the function to define the exclusion zones
         '''
-        
-#         return norm.cdf((np.sqrt((np.square(np.atleast_2d(x-x0))).sum(1))- r_x0)/s_x0)
         return norm.logcdf((np.sqrt((np.square(np.atleast_2d(x)[:,None,:]-np.atleast_2d(x0)[None,:,:])).sum(-1))- r_x0)/s_x0)
 
     def _penalized_acquisition(self, x,  model, X_batch, r_x0, s_x0):
