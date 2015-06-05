@@ -5,7 +5,7 @@
 import numpy as np
 import time
 from ..util.general import best_value, reshape, spawn
-from ..core.optimization import mp_batch_optimization, random_batch_optimization, predictive_batch_optimization
+from ..core.optimization import lp_batch_optimization, random_batch_optimization, predictive_batch_optimization
 try:
     from ..plotting.plots_bo import plot_acquisition, plot_convergence
 except:
@@ -34,7 +34,7 @@ class BO(object):
         :param acqu_optimize_restarts: numbers of random restarts in the optimization of the acquisition function, default = 20.
 	    :param batch_method: method to collect samples in batches
             -'predictive': uses the predicted mean in the selected sample to update the acquisition function.
-            -'mp': used a penalization of the acquisition function to based on exclusion zones.
+            -'lp': used a penalization of the acquisition function to based on exclusion zones.
             -'random': collects the element of the batch randomly
     	:param eps: minimum distance between two consecutive x's to keep running the model
     	:param n_procs: The number of processes used for evaluating the given function *f* (ideally nprocs=n_inbatch).
@@ -52,7 +52,7 @@ class BO(object):
         self.num_acquisitions = 0
         self.n_inbatch=n_inbatch
         self.batch_method = batch_method
-        if batch_method=='mp':
+        if batch_method=='lp':
             from .acquisition import AcquisitionMP
             if not isinstance(self.acquisition_func, AcquisitionMP):
                 self.acquisition_func = AcquisitionMP(self.acquisition_func, self.acquisition_func.acquisition_par)
@@ -198,8 +198,8 @@ class BO(object):
         # ------ Selection of the batch method (if any, predictive used when n_inbathc=1)
         if self.batch_method == 'predictive':
             X_batch = predictive_batch_optimization(acqu_name, acquisition_par, acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch)            
-        elif self.batch_method == 'mp':
-            X_batch = mp_batch_optimization(self.acquisition_func, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch)
+        elif self.batch_method == 'lp':
+            X_batch = lp_batch_optimization(self.acquisition_func, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch)
         elif self.batch_method == 'random':
             X_batch = random_batch_optimization(acquisition, d_acquisition, bounds, acqu_optimize_restarts,acqu_optimize_method, model, n_inbatch)        
         return X_batch

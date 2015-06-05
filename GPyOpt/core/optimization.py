@@ -91,7 +91,7 @@ def random_batch_optimization(acquisition, d_acquisition, bounds, acqu_optimize_
 
 
 ## ---- Local penalization for batch optimization
-def mp_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch):
+def lp_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch):
     '''
     Computes batch optimization using by acquisition penalization using Lipschitz inference.
 
@@ -190,7 +190,6 @@ def estimate_L(model,bounds,storehistory=True):
     res = scipy.optimize.minimize(df,x0, method='L-BFGS-B',bounds=bounds, args = (model,x0), options = {'maxiter': 200})
     minusL = res.fun[0][0]
     L = -minusL
-    print L, model.kern.rbf.lengthscale.values
     if L<1e-7: L=10  ## to avoid problems in cases in which the model is flat.
     return L
 

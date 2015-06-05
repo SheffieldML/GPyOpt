@@ -56,7 +56,7 @@ def parallel_optimization(plots=True):
     BO_demo_parallel.run_optimization(max_iter,                             # Number of iterations
                                 acqu_optimize_method = 'fast_random',       # method to optimize the acq. function
                                 n_inbatch = n_cores,                        # size of the collected batches (= number of cores)
-                                batch_method='mp',                          # method to collected the batches (maximization-penalization)
+                                batch_method='lp',                          # method to collected the batches (maximization-penalization)
                                 acqu_optimize_restarts = 30,                # number of local optimizers
                                 eps = 1e-6)                                # secondary stop criteria (apart from the number of iterations) 
 
