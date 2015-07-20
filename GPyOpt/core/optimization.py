@@ -142,6 +142,8 @@ def optimize_acquisition(acquisition, d_acquisition, bounds, acqu_optimize_resta
         res =  fast_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimize_restarts, model, 'random', X_batch, L, Min)
     elif acqu_optimize_method=='DIRECT': 
         res = wrapper_DIRECT(acquisition,bounds)
+    elif acqu_optimize_method=='CMA': 
+        res = wrapper_CMA(acquisition,bounds)
     return res
 
 def fast_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimize_restarts, model, method_type, X_batch=None, L=None, Min=None):
@@ -223,7 +225,11 @@ def wrapper_lbfgsb(f,grad_f,x0,bounds):
 
 def wrapper_DIRECT(f,bounds):
     '''
-    Wrapper for DIRECT optimization method.
+    Wrapper for DIRECT optimization method. It works partitioning iteratively the domain 
+    of the function. Only requieres f and the box constrains to work
+    :param f: function to optimize, acquisition.
+    :param bounds: tuple determining the limits of the optimizer.
+
     '''
     try:
         from DIRECT import solve
@@ -237,5 +243,29 @@ def wrapper_DIRECT(f,bounds):
         x,_,_ = solve(DIRECT_f_wrapper(f),lB,uB, maxT=2000, maxf=2000)
         return reshape(x,len(bounds))
     except:
-        print("Cannot find DIRECT library")
+        print("Cannot find DIRECT library, please install it to use this option.")
+
+
+def wrapper_CMA(f,bounds):
+    '''
+    Wrapper the Covariance Matrix Adaptation Evolutionary strategy (CMA-ES) optimization method. It works generating 
+    an stochastic seach based on mutivariate Gaussian samples. Only requieres f and the box constrains to work
+    :param f: function to optimize, acquisition.
+    :param bounds: tuple determining the limits of the optimizer.
+
+    '''
+    try:
+        import cma 
+        import numpy as np
+        def CMA_f_wrapper(f):
+            def g(x):
+                return f(np.array([x]))[0][0]
+            return g
+        lB = np.asarray(bounds)[:,0]
+        uB = np.asarray(bounds)[:,1]
+        x = cma.fmin(CMA_f_wrapper(f), (uB + lB) * 0.5, 0.6, options={"bounds":[lB, uB], "verbose":-1})[0]
+        print x
+        return reshape(x,len(bounds))
+    except:
+        print("Cannot find cma library, please install it to use this option.")
 

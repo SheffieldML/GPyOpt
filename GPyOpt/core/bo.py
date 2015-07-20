@@ -27,6 +27,7 @@ class BO(object):
 	    :param n_inbatch: number of samples to collected everytime *f* is evaluated (one by default).
         :param acqu_optimize_method: method to optimize the acquisition function 
             -'DIRECT': uses the DIRECT algorithm of Jones and Stuckmann. 
+            -'CMA': uses the Covariance Matrix Adaptation Algorithm.
 	        -'brute': Run local optimizers in a grid of points.
 	        -'random': Run local optimizers started at random locations.
             -'fast_brute': the same as brute but runs only one optimizer in the best location. It is used by default.
@@ -97,7 +98,7 @@ class BO(object):
                 self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
             else:
                 try:
-                    # ------- Parallel evaluation of *f* is several cores are available
+                    # ------- Parallel evaluation of *f* if several cores are available
                     from multiprocessing import Process, Pipe
                     from itertools import izip          
                     divided_samples = [self.suggested_sample[i::self.n_procs] for i in xrange(self.n_procs)]

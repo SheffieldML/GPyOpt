@@ -59,7 +59,7 @@ def get_moments(model,x):
     Moments (mean and sdev.) of a GP model at x
 
     '''
-    input_dim = model.input_dim
+    input_dim = model.X.shape[1]
     x = reshape(x,input_dim)
     fmin = min(model.predict(model.X)[0])
     m, v = model.predict(x)

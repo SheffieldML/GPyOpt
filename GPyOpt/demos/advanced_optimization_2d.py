@@ -60,7 +60,7 @@ def advanced_optimization_2d(plots=True):
     
     # --- Run the optimization                                              # evaluation budget
     BO_demo_2d.run_optimization(max_iter,                                   # Number of iterations
-                                acqu_optimize_method = 'fast_random',       # method to optimize the acq. function
+                                acqu_optimize_method = 'DIRECT',       # method to optimize the acq. function
                                 acqu_optimize_restarts = 30,                # number of local optimizers
                                 eps=10e-6,                        # secondary stop criteria (apart from the number of iterations) 
                                 true_gradients = True)                     # The gradients of the acquisition function are approximated (faster)
