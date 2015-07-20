@@ -7,12 +7,13 @@ import numpy as np
 from ..core.acquisition import AcquisitionEI, AcquisitionMPI, AcquisitionLCB, AcquisitionEL1 
 from ..core.bo import BO
 from ..util.general import samples_multidimensional_uniform, reshape
+from ..util.stats import initial_design
 import warnings
 warnings.filterwarnings("ignore")
 
 
 class BayesianOptimization(BO):
-    def __init__(self, f, bounds=None, kernel=None, X=None, Y=None, model_data_init = None, model_optimize_interval=1, acquisition='EI', 
+    def __init__(self, f, bounds=None, kernel=None, X=None, Y=None, numdata_inital_design = None,type_initial_design='random', model_optimize_interval=1, acquisition='EI', 
         acquisition_par= 0.00, model_optimize_restarts=10, sparseGP=False, num_inducing=None, normalize=False, true_gradients=True, 
         exact_feval=False, verbosity=0):
         '''
@@ -24,7 +25,10 @@ class BayesianOptimization(BO):
         :param kernel: a GPy kernel, defaults to rbf.  
         :param X: input observations. If X=None, some  points are evaluated randomly.
         :param Y: output values. If Y=None, f(X) is used.
-        :param model_data_init: number of initial random evaluations of f is X and Y are not provided (default, 3*input_dim).  
+        :param numdata_inital_design: number of initial random evaluations of f is X and Y are not provided (default, 3*input_dim).  
+        :param type_initial_design: type of initial design for the X matrix:
+            - 'random': random (uniform) design.
+            - 'latin': latin hypercube (requieres pyDOE).
         :param model_optimize_interval: number of iterations after which the parameters of the model are optimized (1, Default). 
         :param acquisition: acquisition function ('EI': Expec. Improvement. 'MPI': Maximum Prob. Improvement. 'EL1': Expected Loss. LCB: Lower Confidence Bound). Default, EI.      
         :param acquisition_par: parameter of the acquisition function.    
@@ -38,7 +42,6 @@ class BayesianOptimization(BO):
     
         '''
         # ------- Get default values 
-        self.model_data_init = model_data_init  
         self.num_inducing = num_inducing
         self.sparseGP = sparseGP
         self.input_dim = len(bounds)
@@ -47,6 +50,8 @@ class BayesianOptimization(BO):
         self.model_optimize_interval = model_optimize_interval
         self.model_optimize_restarts = model_optimize_restarts
         self.verbosity = verbosity 
+        self.type_initial_design = type_initial_design
+
         if f==None: 
             print 'Function to optimize is required.'
         else:
@@ -57,12 +62,12 @@ class BayesianOptimization(BO):
             raise 'Box constraints are needed. Please insert box constrains.' 
         else:
             self.bounds = bounds
-        if  model_data_init ==None:
-            self.model_data_init = 3*self.input_dim
+        if  numdata_inital_design ==None:
+            self.numdata_inital_design = 3*self.input_dim
         else:
-            self.model_data_init = model_data_init
+            self.numdata_inital_design = numdata_inital_design
         if X==None or Y == None:
-            self.X = samples_multidimensional_uniform(self.bounds, self.model_data_init)
+            self.X = initial_design(self.type_initial_design,self.bounds, self.numdata_inital_design)
             self.Y = f(self.X)
         else:
             self.X = X
@@ -101,7 +106,7 @@ class BayesianOptimization(BO):
         :param X: input observations.
         :param Y: output values.
 
-        ..Note : X and Y can be None. In this case model_data_init*input_dim data are uniformly generated to initialize the model.
+        ..Note : X and Y can be None. In this case numdata_inital_design*input_dim data are uniformly generated to initialize the model.
         
         '''
         if self.sparseGP == True:

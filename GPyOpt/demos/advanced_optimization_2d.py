@@ -47,12 +47,14 @@ def advanced_optimization_2d(plots=True):
                                             bounds=bounds,                 # box-constrains of the problem
                                             acquisition='LCB',             # Selects the Expected improvement
                                             acquisition_par = 2,           # parameter of the acquisition function
+                                            numdata_inital_design = 15,    # 15 initial points   
+                                            type_initial_design='latin',   # latin desing of the initial points 
                                             model_optimize_interval= 2,    # The model is updated every two points are collected
                                             normalize = True)              # normalized y                       
     
     
     # Run the optimization
-    max_iter = 15                                                          
+    max_iter = 20                                                          
 
     print '-----'
     print '----- Running demo. It may take a few seconds.'
