@@ -18,7 +18,7 @@ Dependencies:
   - numpy
   - scipy
   - DIRECT (optional)
-  
+  - cma (optional)
 
 Funding Acknowledgements
 ========================
