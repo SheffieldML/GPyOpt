@@ -19,6 +19,7 @@ Dependencies:
   - scipy
   - DIRECT (optional)
   - cma (optional)
+  - pyDOE (optional)
 
 Funding Acknowledgements
 ========================
