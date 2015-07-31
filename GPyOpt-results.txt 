@@ -1,8 +1,8 @@
 --------------------------------- Results file --------------------------------------
 GPyOpt Version 1.0.0 
-Date and time:              Mon Jul 20 18:00:48 2015
+Date and time:              Thu Jul 30 17:38:08 2015
 Optimization completed:     YES, 35 samples collected.
-Optimization time:          25.5436210632 seconds.
+Optimization time:          25.8090319633 seconds.
 --------------------------------- Problem set up ------------------------------------
 Problem Dimension:          2
 Problem bounds:             (-2, 2), (-1, 1)

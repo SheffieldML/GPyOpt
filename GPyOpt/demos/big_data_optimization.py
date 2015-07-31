@@ -35,7 +35,7 @@ def big_data_optimization(plots=True):
     # --- Problem definition and optimization
     BO_demo_big_data = GPyOpt.methods.BayesianOptimization(f=objective_noisy.f,  # function to optimize       
                                             bounds=bounds,                 # box-constrains of the problem
-                                            acquisition='LCB',             # Selects the Expected improvement
+                                            acquisition='LCB',             # Selects the Lower Confidence Bound criterion
                                             acquisition_par = 2,           # parameter of the acquisition function
                                             normalize = True,              # normalized acquisition function      
                                             sparseGP = True,               # Use a sparse GP for the sparse GP.
