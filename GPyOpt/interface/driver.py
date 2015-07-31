@@ -60,7 +60,7 @@ class BODriver(object):
                                                  acquisition=a_c['type'], acquisition_par = a_c['parameter'],normalize=m_c['normalized-evaluations'],
                                                  exact_feval=True if self.config['likelihood'].lower()=="noiseless" else False, verbosity=o_c['verbosity'])
         X, Y = bo.get_evaluations()
-        #self.outputEng.append_iter(iters, 0., X, Y)
+        if self.outputEng is not None: self.outputEng.append_iter(iters, 0., X, Y)
                             
         start_time = time.time()
         while True:
@@ -72,7 +72,7 @@ class BODriver(object):
             elapsed_time = time.time() - start_time
 
             X, Y = bo.get_evaluations()
-            #self.outputEng.append_iter(iters, elapsed_time, X, Y)
+            if self.outputEng is not None:  self.outputEng.append_iter(iters, elapsed_time, X, Y)
             
             if self._check_stop(iters, elapsed_time, rt): break
         return bo
