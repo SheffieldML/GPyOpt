@@ -1,0 +1,21 @@
+{
+    "language"        : "PYTHON",
+    "main-file"       : "branin.py",
+    "experiment-name" : "simple-braninhoo-example",
+    "likelihood"      : "gaussian",
+    "resources": {
+        "maximum-iterations" :  100,
+        "max-run-time": "NA"
+    },
+    "variables" : {
+        "x" : {
+            "type" : "FLOAT",
+            "size" : 2,
+            "min"  : 0,
+            "max"  : 5
+        }
+    },
+    "output":{
+        "verbosity": true
+    }
+}

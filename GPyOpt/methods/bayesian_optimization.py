@@ -14,7 +14,7 @@ warnings.filterwarnings("ignore")
 
 class BayesianOptimization(BO):
     def __init__(self, f, bounds=None, kernel=None, X=None, Y=None, numdata_inital_design = None,type_initial_design='random', model_optimize_interval=1, acquisition='EI', 
-        acquisition_par= 0.00, model_optimize_restarts=10, sparseGP=False, num_inducing=None, normalize=False, true_gradients=True, 
+        acquisition_par= 0.00, model_optimize_restarts=10, sparseGP=False, num_inducing=None, normalize=False, 
         exact_feval=False, verbosity=0):
         '''
         Bayesian Optimization using EI, MPI and LCB (or UCB) acquisition functions.
@@ -36,7 +36,6 @@ class BayesianOptimization(BO):
         :param sparseGP: whether to use an sparse GP (False, default).
         :param num_inducing: number of inducing points for a Sparse GP (None, default)
         :param normalize: whether to normalize the Y's for optimization (False, default).
-        :param true_gradients: whether the true gradients of the acquisition function are used for optimization (True, default). 
         :param exact_feval: set the noise variance of the GP if True (False, default).
         :param verbosity: whether to show (1) or not (0, default) the value of the log-likelihood of the model for the optimized parameters.
     

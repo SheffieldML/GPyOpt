@@ -12,26 +12,28 @@ default_config = {
 
     "model": {
         "type" : "GP",
-        "inducing_points": 10,
-        "initial-points": 5,
-        "design-inital-points": "latin",
-        "normalized-evaluations": False,
-        "optimization-restarts": 1,
-        "optimization-interval": 1
+        "inducing-points": 10,
+        "initial-points": 10,
+        "design-initial-points": "random",
+        "normalized-evaluations": True,
+        "optimization-restarts": 5,
+        "optimization-interval": 1,
         },
 
     "resources": {
-        "iterations" :  100,
-        "running_time":  60,
-        "cores": 1  
+        "maximum-iterations" :  20,
+        "max-run-time": 'NA', #minutes
+        "cores": 1,
+        "tolerance": 1e-8,
+        'iterations_per_call': 1,
         },
 
     "acquisition": {
         "type" : 'EI',
         "parameter": 0,
         "true-gradients": True,
-        "optimization-method": "DIRECT",
-        "optimization-restarts": 10
+        "optimization-method": "fast_random",
+        "optimization-restarts": 200
         },
 
     "parallelization":{
@@ -41,7 +43,7 @@ default_config = {
         },
 
     "output":{
-        "vebosity": False,
+        "verbosity": False,
         "file-report": True,
         "convergence-plot": False
         },
@@ -51,15 +53,15 @@ default_config = {
 
 def update_config(config_new, config_default):
 
-	if any([isinstance(v, dict) for v in config_new.values()]):
-		for k,v in config_new.iteritems():
-			if isinstance(v,dict) and k in config_default:
-				update_config(config_new[k],config_default[k])
-			else:
-				config_default[k] = v
-	else:
-		config_default.update(config_new)
-	return config_default
+    if any([isinstance(v, dict) for v in config_new.values()]):
+        for k,v in config_new.iteritems():
+            if isinstance(v,dict) and k in config_default:
+                update_config(config_new[k],config_default[k])
+            else:
+                config_default[k] = v
+    else:
+        config_default.update(config_new)
+    return config_default
 
 
 def parser(input_file_path='config.json'):
@@ -69,6 +71,7 @@ def parser(input_file_path='config.json'):
     try:
         with open(input_file_path, 'r') as config_file:
             config_new = json.load(config_file)
+            config_file.close()
     except:
         raise Exception('File config.json not loaded properly. Please check it an try again.')
 

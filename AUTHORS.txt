@@ -1,2 +1,3 @@
 -Javier Gonzalez
+Zhenwen Dai
 -see also GPy authors

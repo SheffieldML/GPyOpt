@@ -5,6 +5,11 @@
 from ..util.general import samples_multidimensional_uniform
 
 def initial_design(design,bounds,data_init):
+	"""
+	:param design: the choice of designs
+	:param bounds: the boundary of initial points
+	:param data_init: the number of initial points
+	"""
 	if design == 'random':
 		X_design = samples_multidimensional_uniform(bounds, data_init)
 	elif design == 'latin':

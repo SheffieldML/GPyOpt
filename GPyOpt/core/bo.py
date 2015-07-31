@@ -19,7 +19,7 @@ class BO(object):
         pass
         
     def run_optimization(self, max_iter = None, n_inbatch=1, acqu_optimize_method='fast_random', acqu_optimize_restarts=200, batch_method='predictive', 
-        eps = 1e-8, n_procs=1, true_gradients = True, save_interval=5, report_file=None, verbose=True):
+        eps = 1e-8, n_procs=1, true_gradients = True, verbose=True):
         """ 
         Runs Bayesian Optimization for a number 'max_iter' of iterations (after the initial exploration data)
 
@@ -41,7 +41,6 @@ class BO(object):
     	:param n_procs: The number of processes used for evaluating the given function *f* (ideally nprocs=n_inbatch).
         :param true_gradients: If the true gradients (can be slow) of the acquisition ar an approximation is used (True, default).
         :param save_interval: number of iterations after which a file is produced with the current results.
-        :param report_file: name of the file in which the results of the optimization are saved.
     
         """
         # load the parameters of the function into the object.
@@ -62,9 +61,6 @@ class BO(object):
         self.acqu_optimize_restarts = acqu_optimize_restarts
         self.acquisition_func.set_model(self.model)
         self.n_procs = n_procs
-        self.save_interval = save_interval
-        if report_file==None:
-            self.report_file = 'GPyOpt-results.txt ' 
 
         # decide wether we use the true gradients to optimize the acquitision function
         if true_gradients !=True:
@@ -130,22 +126,14 @@ class BO(object):
             k +=1
             distance_lastX = np.sqrt(sum((self.X[self.X.shape[0]-1,:]-self.X[self.X.shape[0]-2,:])**2))     
 
-            # ------- Save results in file
-            if (self.num_acquisitions%self.save_interval)==0:
-                self._save_results()
-
         # ------- Stop messages and execution time          
         self.Y_best = best_value(self.Y)
         self.x_opt = self.X[np.argmin(self.Y),:]
         self.fx_opt = min(self.Y)
         self.time   = time.time() - self.time 
-        
-        
-        self._save_results()
-        
-        
+                
         if verbose: print '*Optimization completed:'
-        if k==self.max_iter:
+        if k==self.max_iter and distance_lastX > self.eps:
             if verbose: print '   -Maximum number of iterations reached.'
             return 1
         else: 
@@ -244,33 +232,37 @@ class BO(object):
         :param filename: name of the file where the plot is saved
         """
         return plot_convergence(self.X,self.Y_best,self.s_in_min,filename)
+    
+    def get_evaluations(self):
+        return self.X.copy(), self.Y.copy()
 
-    def _save_results(self):
+    def save_report(self, report_file= 'GPyOpt-results.txt ' ):
         """
         Save a report with the results of the optimization. A file is produced every 
+        :param report_file: name of the file in which the results of the optimization are saved.
         """
-        file = open(self.report_file,'w')
-        file.write('---------------------------------' + ' Results file ' + '--------------------------------------\n')
-        file.write('GPyOpt Version 1.0.0 \n')
-        file.write('Date and time:              ' + time.strftime("%c")+'\n')
-        if self.num_acquisitions==self.max_iter: 
-            file.write('Optimization completed:     ' +'YES, ' + str(self.X.shape[0]).strip('[]') + ' samples collected.\n')
-        else:
-            file.write('Optimization completed:     ' +'NO,' + str(self.X.shape[0]).strip('[]') + ' samples collected.\n')
-        file.write('Optimization time:          ' + str(self.time).strip('[]') +' seconds.\n') 
-
-        file.write('---------------------------------' + ' Problem set up ' + '------------------------------------\n')
-        file.write('Problem Dimension:          ' + str(self.input_dim).strip('[]') +'\n')    
-        file.write('Problem bounds:             ' + str(self.bounds).strip('[]') +'\n') 
-        file.write('Batch size:                 ' + str(self.n_inbatch).strip('[]') +'\n')    
-        file.write('Acquisition:                ' + self.acqu_name + '\n')  
-        file.write('Acquisition optimizer:      ' + self.acqu_optimize_method+ '\n')  
-        file.write('Sparse GP:                  ' + str(self.sparseGP).strip('[]') + '\n')  
-        file.write('---------------------------------' + ' Summary ' + '------------------------------------------\n')
-        file.write('Best found minimum:         ' + str(min(self.Y)).strip('[]') +'\n') 
-        file.write('Minumum location:           ' + str(self.X[np.argmin(self.Y),:]).strip('[]') +'\n') 
-
-        file.close()
+        with open(report_file,'w') as file:
+            file.write('---------------------------------' + ' Results file ' + '--------------------------------------\n')
+            file.write('GPyOpt Version 1.0.0 \n')
+            file.write('Date and time:              ' + time.strftime("%c")+'\n')
+            if self.num_acquisitions==self.max_iter: 
+                file.write('Optimization completed:     ' +'YES, ' + str(self.X.shape[0]).strip('[]') + ' samples collected.\n')
+            else:
+                file.write('Optimization completed:     ' +'NO,' + str(self.X.shape[0]).strip('[]') + ' samples collected.\n')
+            file.write('Optimization time:          ' + str(self.time).strip('[]') +' seconds.\n') 
+    
+            file.write('---------------------------------' + ' Problem set up ' + '------------------------------------\n')
+            file.write('Problem Dimension:          ' + str(self.input_dim).strip('[]') +'\n')    
+            file.write('Problem bounds:             ' + str(self.bounds).strip('[]') +'\n') 
+            file.write('Batch size:                 ' + str(self.n_inbatch).strip('[]') +'\n')    
+            file.write('Acquisition:                ' + self.acqu_name + '\n')  
+            file.write('Acquisition optimizer:      ' + self.acqu_optimize_method+ '\n')  
+            file.write('Sparse GP:                  ' + str(self.sparseGP).strip('[]') + '\n')  
+            file.write('---------------------------------' + ' Summary ' + '------------------------------------------\n')
+            file.write('Best found minimum:         ' + str(min(self.Y)).strip('[]') +'\n') 
+            file.write('Minumum location:           ' + str(self.X[np.argmin(self.Y),:]).strip('[]') +'\n') 
+    
+            file.close()
 
 
 
