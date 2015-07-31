@@ -5,7 +5,7 @@ import os
 from setuptools import setup
 
 # Version number
-version = '0.0.1'
+version = '0.1.0'
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
@@ -27,7 +27,7 @@ setup(name = 'GPyOpt',
       include_package_data = True,
       py_modules = ['GPyOpt.__init__'],
       long_description=read('README.md'),
-      install_requires=['numpy>=1.7', 'scipy>=0.12', 'GPy=>0.5'],
+      install_requires=['numpy>=1.7', 'scipy>=0.12', 'GPy>=0.5'],
       extras_require = {'docs':['matplotlib >=1.3','Sphinx','IPython']},
       classifiers=['License :: OSI Approved :: BSD License',
                    'Natural Language :: English',
