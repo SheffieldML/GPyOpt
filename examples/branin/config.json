@@ -1,7 +1,7 @@
 {
     "language"        : "PYTHON",
     "main-file"       : "branin.py",
-    "experiment-name" : "simple-braninhoo-example",
+    "experiment-name" : "simple-branin",
     "likelihood"      : "gaussian",
     "resources": {
         "maximum-iterations" :  100,
