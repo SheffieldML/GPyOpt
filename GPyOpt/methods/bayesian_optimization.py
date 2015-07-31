@@ -76,6 +76,7 @@ class BayesianOptimization(BO):
         else:
             self.kernel = kernel
         self._init_model()
+        self.fist_time = True
         
 
         # ------- Initialize acquisition function

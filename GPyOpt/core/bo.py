@@ -43,7 +43,7 @@ class BO(object):
         :param save_interval: number of iterations after which a file is produced with the current results.
     
         """
-        # load the parameters of the function into the object.
+        # --- Load the parameters of the function into the object.
         if max_iter == None:
             self.max_iter = 10*self.input_dim
         else:
@@ -62,39 +62,40 @@ class BO(object):
         self.acquisition_func.set_model(self.model)
         self.n_procs = n_procs
 
-        # decide wether we use the true gradients to optimize the acquitision function
+        # --- Decide wether we use the true gradients to optimize the acquitision function
         if true_gradients !=True:
             self.true_gradients = False  
             self.acquisition_func.d_acquisition_function = None
         else: 
             self.true_gradients = true_gradients
 
-        # Get starting of running time
+        # --- Get starting of running time
         self.time = time.time()
+        self.first_time = True
 
-        # optimize model and acquisition function by first time
-        self._update_model()
-        prediction = self.model.predict(self.X)       
-        self.m_in_min = prediction[0]
-        prediction[1][prediction[1]<0] = 0
-        self.s_in_min = np.sqrt(prediction[1])
+        # --- If this is the first time to optimization is run - update the model and normalize id needed
+        if self.first_time: 
+            self._update_model()
+            prediction = self.model.predict(self.X)       
+            self.s_in_min = np.sqrt(abs(prediction[1]))
+            self.first_time = False
 
-        # Initialization of stop conditions.
+        # --- Initialization of stop conditions.
         k=0
         distance_lastX = np.sqrt(sum((self.X[self.X.shape[0]-1,:]-self.X[self.X.shape[0]-2,:])**2))
         
-        # BO loop: this loop does the hard work.
+        # --- BO loop: this loop does the hard work.
         while k<self.max_iter and distance_lastX > self.eps:
 
-            # ------- Augment X
+            # --- Augment X
             self.X = np.vstack((self.X,self.suggested_sample))
             
-            # ------- Evaluate *f* in X and augment Y
+            # --- Evaluate *f* in X and augment Y
             if self.n_procs==1:
                 self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
             else:
                 try:
-                    # ------- Parallel evaluation of *f* if several cores are available
+                    # --- Parallel evaluation of *f* if several cores are available
                     from multiprocessing import Process, Pipe
                     from itertools import izip          
                     divided_samples = [self.suggested_sample[i::self.n_procs] for i in xrange(self.n_procs)]
@@ -110,28 +111,30 @@ class BO(object):
                         self.parallel_error = True 
                     self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
                 
-            # -------- Update internal elements (needed for plotting)
+            # --- Update internal elements (needed for plotting)
             self.num_acquisitions += 1
-            pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))       
-            self.m_in_min = np.vstack((self.m_in_min,pred_min[0]))
+            pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))      
+
+            # self.m_in_min = np.vstack((self.m_in_min,pred_min[0]))
             self.s_in_min = np.vstack((self.s_in_min,np.sqrt(abs(pred_min[1]))))
-                
-            # -------- Update model
+
+            # --- Update model
             try:
                 self._update_model()                
             except np.linalg.linalg.LinAlgError:
                 break
 
-            # ------- Update stop conditions
+            # --- Update stop conditions
             k +=1
             distance_lastX = np.sqrt(sum((self.X[self.X.shape[0]-1,:]-self.X[self.X.shape[0]-2,:])**2))     
 
-        # ------- Stop messages and execution time          
+        # --- Stop messages and execution time          
         self.Y_best = best_value(self.Y)
         self.x_opt = self.X[np.argmin(self.Y),:]
         self.fx_opt = min(self.Y)
         self.time   = time.time() - self.time 
-                
+             
+        # --- Print stopping reason
         if verbose: print '*Optimization completed:'
         if k==self.max_iter and distance_lastX > self.eps:
             if verbose: print '   -Maximum number of iterations reached.'

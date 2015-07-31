@@ -240,7 +240,7 @@ def wrapper_DIRECT(f,bounds):
             return g
         lB = np.asarray(bounds)[:,0]
         uB = np.asarray(bounds)[:,1]
-        x,_,_ = solve(DIRECT_f_wrapper(f),lB,uB, maxT=2000, maxf=2000)
+        x,_,_ = solve(DIRECT_f_wrapper(f),lB,uB, maxT=750, maxf=2000)
         return reshape(x,len(bounds))
     except:
         print("Cannot find DIRECT library, please install it to use this option.")
