@@ -43,7 +43,6 @@ class BODriver(object):
         return stop
             
     def run(self):
-        #(f_obj, f_bounds, f_inits, num_repeats, method_config, name, outpath='.', time_limit=-1):
         m_c, a_c, r_c, p_c = self.config['model'], self.config['acquisition'], self.config['resources'], self.config['parallelization']
         o_c = self.config['output']
         bounds = self._get_bounds()
@@ -52,7 +51,6 @@ class BODriver(object):
         ys_init = None
         iters = 0
     
-        # Create the Bayesian Optimization Object
         bo = BayesianOptimization(self.obj_func, bounds=bounds, X= xs_init, Y=ys_init, 
                                                  numdata_inital_design = m_c['initial-points'],type_initial_design= m_c['design-initial-points'],
                                                  model_optimize_interval=m_c['optimization-interval'],model_optimize_restarts=m_c['optimization-restarts'],
@@ -61,7 +59,7 @@ class BODriver(object):
                                                  exact_feval=True if self.config['likelihood'].lower()=="noiseless" else False, verbosity=o_c['verbosity'])
         X, Y = bo.get_evaluations()
         if self.outputEng is not None: self.outputEng.append_iter(iters, 0., X, Y)
-                            
+
         start_time = time.time()
         while True:
             rt = bo.run_optimization(max_iter = r_c['iterations_per_call'], n_inbatch= p_c['batch-size'], batch_method = p_c['type'], 
