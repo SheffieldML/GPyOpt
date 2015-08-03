@@ -44,8 +44,12 @@ default_config = {
 
     "output":{
         "verbosity": False,
-        "file-report": True,
-        "convergence-plot": False
+        "file-report": {
+                'type': 'report',
+                'filename': None,
+                'interval': -1,
+        },
+#        "convergence-plot": False
         },
 }
 

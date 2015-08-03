@@ -4,7 +4,7 @@
     "experiment-name" : "simple-branin",
     "likelihood"      : "gaussian",
     "resources": {
-        "maximum-iterations" :  100,
+        "maximum-iterations" :  1,
         "max-run-time": "NA"
     },
     "variables" : {

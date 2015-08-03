@@ -1,7 +1,7 @@
 # Copyright (c) 2014, GPyOpt authors (see AUTHORS.txt).
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
-from GPyOpt.interface import parser, BODriver, ObjectiveFunc
+from GPyOpt.interface import parser, BODriver, ObjectiveFunc, OutputEng
 
 if __name__ == '__main__':
     import sys,os
@@ -15,5 +15,6 @@ if __name__ == '__main__':
     config = parser(configfile)
     config['prjpath'] = curpath
     obj_func = ObjectiveFunc(config)
-    driver = BODriver(config, obj_func)
+    output = OutputEng(config)
+    driver = BODriver(config, obj_func, output)
     driver.run()

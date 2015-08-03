@@ -51,6 +51,7 @@ class BODriver(object):
         xs_init = None
         ys_init = None
         iters = 0
+        offset = 0
     
         bo = BayesianOptimization(obj_func, bounds=bounds, X= xs_init, Y=ys_init, 
                                                  numdata_inital_design = m_c['initial-points'],type_initial_design= m_c['design-initial-points'],
@@ -59,7 +60,8 @@ class BODriver(object):
                                                  acquisition=a_c['type'], acquisition_par = a_c['parameter'],normalize=m_c['normalized-evaluations'],
                                                  exact_feval=True if self.config['likelihood'].lower()=="noiseless" else False, verbosity=o_c['verbosity'])
         X, Y = bo.get_evaluations()
-        if self.outputEng is not None: self.outputEng.append_iter(iters, 0., X, Y)
+        offset = X.shape[0]
+        if self.outputEng is not None: self.outputEng.append_iter(iters, 0., X, Y, bo)
 
         start_time = time.time()
         while True:
@@ -71,7 +73,9 @@ class BODriver(object):
             elapsed_time = time.time() - start_time
 
             X, Y = bo.get_evaluations()
-            if self.outputEng is not None:  self.outputEng.append_iter(iters, elapsed_time, X, Y)
+            if self.outputEng is not None:  self.outputEng.append_iter(iters, elapsed_time, X[offset:], Y[offset:], bo)
+            offset = X.shape[0]
             
             if self._check_stop(iters, elapsed_time, rt): break
+        self.outputEng.append_iter(iters, elapsed_time, X[offset:], Y[offset:], bo, final=True)
         return bo
