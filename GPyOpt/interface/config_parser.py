@@ -7,6 +7,7 @@ import json
 default_config = {
     "language"        : "PYTHON",
     "experiment-name" : "no-named-experiment",
+    'support-multi-eval': False,
     "likelihood"      : "NOISELESS",
 
     "model": {

@@ -46,12 +46,13 @@ class BODriver(object):
         m_c, a_c, r_c, p_c = self.config['model'], self.config['acquisition'], self.config['resources'], self.config['parallelization']
         o_c = self.config['output']
         bounds = self._get_bounds()
+        obj_func = self.obj_func.objective_function()
         
         xs_init = None
         ys_init = None
         iters = 0
     
-        bo = BayesianOptimization(self.obj_func, bounds=bounds, X= xs_init, Y=ys_init, 
+        bo = BayesianOptimization(obj_func, bounds=bounds, X= xs_init, Y=ys_init, 
                                                  numdata_inital_design = m_c['initial-points'],type_initial_design= m_c['design-initial-points'],
                                                  model_optimize_interval=m_c['optimization-interval'],model_optimize_restarts=m_c['optimization-restarts'],
                                                  sparseGP=True if m_c['type'].lower()=='sparsegp' else False, num_inducing=m_c['inducing-points'],

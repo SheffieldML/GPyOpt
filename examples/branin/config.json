@@ -8,9 +8,15 @@
         "max-run-time": "NA"
     },
     "variables" : {
+        "y" : {
+            "type" : "FLOAT",
+            "size" : 1,
+            "min"  : -2,
+            "max"  : 5
+        },
         "x" : {
             "type" : "FLOAT",
-            "size" : 2,
+            "size" : 1,
             "min"  : 0,
             "max"  : 5
         }
