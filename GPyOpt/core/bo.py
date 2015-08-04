@@ -113,8 +113,6 @@ class BO(object):
             # --- Update internal elements (needed for plotting)
             self.num_acquisitions += 1
             pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))      
-
-            # self.m_in_min = np.vstack((self.m_in_min,pred_min[0]))
             self.s_in_min = np.vstack((self.s_in_min,np.sqrt(abs(pred_min[1]))))
 
             # --- Update model

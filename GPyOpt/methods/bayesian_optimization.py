@@ -4,7 +4,7 @@
 
 import GPy
 import numpy as np
-from ..core.acquisition import AcquisitionEI, AcquisitionMPI, AcquisitionLCB, AcquisitionEL1 
+from ..core.acquisition import AcquisitionEI, AcquisitionMPI, AcquisitionLCB
 from ..core.bo import BO
 from ..util.general import samples_multidimensional_uniform, reshape
 from ..util.stats import initial_design
@@ -95,8 +95,8 @@ class BayesianOptimization(BO):
         elif acquisition=='EL':
             acq = AcquisitionEL1(acquisition_par)
         else:   
-            print 'The selected acquisition function is not valid. Please try again with EI, MPI, EL or LCB'
-        if (acquisition=='EI' or acquisition=='MPI' or acquisition =='EL' or acquisition =='LCB'):
+            print 'The selected acquisition function is not valid. Please try again with EI, MPI, or LCB'
+        if (acquisition=='EI' or acquisition=='MPI' or acquisition =='LCB'):
             super(BayesianOptimization ,self).__init__(acquisition_func=acq)
     
     
