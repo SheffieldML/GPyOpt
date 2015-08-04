@@ -49,6 +49,13 @@ default_config = {
                 'filename': None,
                 'interval': -1,
         },
+        "Ybest": {
+                'type': 'logger',
+                'content': 'ybest',
+                'format': 'csv',
+                'filename': None,
+                'interval': 1,
+        },
 #        "convergence-plot": False
         },
 }

@@ -18,3 +18,4 @@ if __name__ == '__main__':
     output = OutputEng(config)
     driver = BODriver(config, obj_func, output)
     driver.run()
+    output.close()
