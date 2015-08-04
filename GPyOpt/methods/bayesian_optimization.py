@@ -30,7 +30,7 @@ class BayesianOptimization(BO):
             - 'random': random (uniform) design.
             - 'latin': latin hypercube (requieres pyDOE).
         :param model_optimize_interval: number of iterations after which the parameters of the model are optimized (1, Default). 
-        :param acquisition: acquisition function ('EI': Expec. Improvement. 'MPI': Maximum Prob. Improvement. 'EL1': Expected Loss. LCB: Lower Confidence Bound). Default, EI.      
+        :param acquisition: acquisition function ('EI': Expec. Improvement. 'MPI': Maximum Prob. Improvement. 'EL': Expected Loss. LCB: Lower Confidence Bound). Default, EI.      
         :param acquisition_par: parameter of the acquisition function.    
         :param model_optimize_restarts: number of initial points for the GP parameters optimization (5, default)
         :param sparseGP: whether to use an sparse GP (False, default).
@@ -76,7 +76,7 @@ class BayesianOptimization(BO):
         else:
             self.kernel = kernel
         self._init_model()
-        self.fist_time = True
+        self.first_time_optimization = True  # control over the optimization of the GP
         
 
         # ------- Initialize acquisition function
@@ -92,11 +92,11 @@ class BayesianOptimization(BO):
             acq = AcquisitionMPI(acquisition_par)
         elif acquisition=='LCB':
             acq = AcquisitionLCB(acquisition_par)
-        elif acquisition=='EL1':
+        elif acquisition=='EL':
             acq = AcquisitionEL1(acquisition_par)
         else:   
-            print 'The selected acquisition function is not valid. Please try again with EI, MPI, EL1 or LCB'
-        if (acquisition=='EI' or acquisition=='MPI' or acquisition =='EL1' or acquisition =='LCB'):
+            print 'The selected acquisition function is not valid. Please try again with EI, MPI, EL or LCB'
+        if (acquisition=='EI' or acquisition=='MPI' or acquisition =='EL' or acquisition =='LCB'):
             super(BayesianOptimization ,self).__init__(acquisition_func=acq)
     
     

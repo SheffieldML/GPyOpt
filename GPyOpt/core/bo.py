@@ -71,14 +71,13 @@ class BO(object):
 
         # --- Get starting of running time
         self.time = time.time()
-        self.first_time = True
 
         # --- If this is the first time to optimization is run - update the model and normalize id needed
-        if self.first_time: 
+        if self.first_time_optimization: 
             self._update_model()
             prediction = self.model.predict(self.X)       
             self.s_in_min = np.sqrt(abs(prediction[1]))
-            self.first_time = False
+            self.first_time_optimization = False
 
         # --- Initialization of stop conditions.
         k=0
