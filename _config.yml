@@ -6,13 +6,15 @@ safe: false
 
 
 ### site serving configuration ###
+source: .
+destination:  ./_site
 exclude: [CNAME, README.md, .gitignore]
-permalink: / ## disables post output
+#permalink: / ## disables post output
 timezone: null
 lsi: false
 markdown: kramdown
 highlighter: pygments
-include: ["docs/_static","docs/_modules","docs/_sources","docs/_templates"]
+include: ["docs/_static/","docs/_modules","docs/_sources","docs/_templates"]
 
 
 ### content configuration ###
