@@ -1,0 +1,264 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>GPyOpt.interface package &mdash; GPyOpt beta documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="GPyOpt beta documentation" href="index.html"/>
+        <link rel="up" title="GPyOpt package" href="GPyOpt.html"/>
+        <link rel="next" title="GPyOpt.methods package" href="GPyOpt.methods.html"/>
+        <link rel="prev" title="GPyOpt.fmodels package" href="GPyOpt.fmodels.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="index.html" class="fa fa-home"> GPyOpt</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="GPyOpt.html">GPyOpt package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="GPyOpt.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GPyOpt.html#module-GPyOpt">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">GPyOpt</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="GPyOpt.html">GPyOpt package</a> &raquo;</li>
+      
+    <li>GPyOpt.interface package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/GPyOpt.interface.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="gpyopt-interface-package">
+<h1>GPyOpt.interface package<a class="headerlink" href="#gpyopt-interface-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-GPyOpt.interface.config_parser">
+<span id="gpyopt-interface-config-parser-module"></span><h2>GPyOpt.interface.config_parser module<a class="headerlink" href="#module-GPyOpt.interface.config_parser" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="GPyOpt.interface.config_parser.parser">
+<tt class="descclassname">GPyOpt.interface.config_parser.</tt><tt class="descname">parser</tt><big>(</big><em>input_file_path='config.json'</em><big>)</big><a class="headerlink" href="#GPyOpt.interface.config_parser.parser" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="GPyOpt.interface.config_parser.update_config">
+<tt class="descclassname">GPyOpt.interface.config_parser.</tt><tt class="descname">update_config</tt><big>(</big><em>config_new</em>, <em>config_default</em><big>)</big><a class="headerlink" href="#GPyOpt.interface.config_parser.update_config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.interface.driver">
+<span id="gpyopt-interface-driver-module"></span><h2>GPyOpt.interface.driver module<a class="headerlink" href="#module-GPyOpt.interface.driver" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.interface.driver.BODriver">
+<em class="property">class </em><tt class="descclassname">GPyOpt.interface.driver.</tt><tt class="descname">BODriver</tt><big>(</big><em>config=None</em>, <em>obj_func=None</em>, <em>outputEng=None</em><big>)</big><a class="headerlink" href="#GPyOpt.interface.driver.BODriver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>The class for driving the Bayesian optimization according to the configuration.</p>
+<dl class="method">
+<dt id="GPyOpt.interface.driver.BODriver.run">
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#GPyOpt.interface.driver.BODriver.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.interface.func_loader">
+<span id="gpyopt-interface-func-loader-module"></span><h2>GPyOpt.interface.func_loader module<a class="headerlink" href="#module-GPyOpt.interface.func_loader" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.interface.func_loader.ObjectiveFunc">
+<em class="property">class </em><tt class="descclassname">GPyOpt.interface.func_loader.</tt><tt class="descname">ObjectiveFunc</tt><big>(</big><em>config</em><big>)</big><a class="headerlink" href="#GPyOpt.interface.func_loader.ObjectiveFunc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="GPyOpt.interface.func_loader.ObjectiveFunc.objective_function">
+<tt class="descname">objective_function</tt><big>(</big><big>)</big><a class="headerlink" href="#GPyOpt.interface.func_loader.ObjectiveFunc.objective_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.interface.output">
+<span id="gpyopt-interface-output-module"></span><h2>GPyOpt.interface.output module<a class="headerlink" href="#module-GPyOpt.interface.output" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.interface.output.DataSaver">
+<em class="property">class </em><tt class="descclassname">GPyOpt.interface.output.</tt><tt class="descname">DataSaver</tt><big>(</big><em>config</em>, <em>outpath=None</em>, <em>prjname=''</em><big>)</big><a class="headerlink" href="#GPyOpt.interface.output.DataSaver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="GPyOpt.interface.output.DataSaver.save_data">
+<tt class="descname">save_data</tt><big>(</big><em>iters</em>, <em>times</em>, <em>offsets</em>, <em>X</em>, <em>Y</em>, <em>bo</em><big>)</big><a class="headerlink" href="#GPyOpt.interface.output.DataSaver.save_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.interface.output.OutputEng">
+<em class="property">class </em><tt class="descclassname">GPyOpt.interface.output.</tt><tt class="descname">OutputEng</tt><big>(</big><em>config</em><big>)</big><a class="headerlink" href="#GPyOpt.interface.output.OutputEng" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="GPyOpt.interface.output.OutputEng.append_iter">
+<tt class="descname">append_iter</tt><big>(</big><em>iters</em>, <em>elapsed_time</em>, <em>X</em>, <em>Y</em>, <em>bo</em>, <em>final=False</em><big>)</big><a class="headerlink" href="#GPyOpt.interface.output.OutputEng.append_iter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.interface.output.Report">
+<em class="property">class </em><tt class="descclassname">GPyOpt.interface.output.</tt><tt class="descname">Report</tt><big>(</big><em>config</em>, <em>outpath</em>, <em>prjname=''</em><big>)</big><a class="headerlink" href="#GPyOpt.interface.output.Report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.interface.output.DataSaver" title="GPyOpt.interface.output.DataSaver"><tt class="xref py py-class docutils literal"><span class="pre">GPyOpt.interface.output.DataSaver</span></tt></a></p>
+<dl class="method">
+<dt id="GPyOpt.interface.output.Report.save_data">
+<tt class="descname">save_data</tt><big>(</big><em>iters</em>, <em>times</em>, <em>offsets</em>, <em>X</em>, <em>Y</em>, <em>bo</em><big>)</big><a class="headerlink" href="#GPyOpt.interface.output.Report.save_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.interface">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-GPyOpt.interface" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="GPyOpt.methods.html" class="btn btn-neutral float-right" title="GPyOpt.methods package">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="GPyOpt.fmodels.html" class="btn btn-neutral" title="GPyOpt.fmodels package"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Javier Gonzalez.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'beta',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

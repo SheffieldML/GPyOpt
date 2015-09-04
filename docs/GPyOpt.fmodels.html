@@ -1,0 +1,471 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>GPyOpt.fmodels package &mdash; GPyOpt beta documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="GPyOpt beta documentation" href="index.html"/>
+        <link rel="up" title="GPyOpt package" href="GPyOpt.html"/>
+        <link rel="next" title="GPyOpt.interface package" href="GPyOpt.interface.html"/>
+        <link rel="prev" title="GPyOpt.demos package" href="GPyOpt.demos.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="index.html" class="fa fa-home"> GPyOpt</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="GPyOpt.html">GPyOpt package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="GPyOpt.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GPyOpt.html#module-GPyOpt">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">GPyOpt</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="GPyOpt.html">GPyOpt package</a> &raquo;</li>
+      
+    <li>GPyOpt.fmodels package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/GPyOpt.fmodels.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="gpyopt-fmodels-package">
+<h1>GPyOpt.fmodels package<a class="headerlink" href="#gpyopt-fmodels-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-GPyOpt.fmodels.experiments1d">
+<span id="gpyopt-fmodels-experiments1d-module"></span><h2>GPyOpt.fmodels.experiments1d module<a class="headerlink" href="#module-GPyOpt.fmodels.experiments1d" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.fmodels.experiments1d.forrester">
+<em class="property">class </em><tt class="descclassname">GPyOpt.fmodels.experiments1d.</tt><tt class="descname">forrester</tt><big>(</big><em>sd=None</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experiments1d.forrester" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.fmodels.experiments1d.function1d" title="GPyOpt.fmodels.experiments1d.function1d"><tt class="xref py py-class docutils literal"><span class="pre">GPyOpt.fmodels.experiments1d.function1d</span></tt></a></p>
+<p>Forrester function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sd</strong> &#8211; standard deviation, to generate noisy evaluations of the function.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="GPyOpt.fmodels.experiments1d.forrester.f">
+<tt class="descname">f</tt><big>(</big><em>X</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experiments1d.forrester.f" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.fmodels.experiments1d.function1d">
+<em class="property">class </em><tt class="descclassname">GPyOpt.fmodels.experiments1d.</tt><tt class="descname">function1d</tt><a class="headerlink" href="#GPyOpt.fmodels.experiments1d.function1d" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a benchmark of unidimensional functions interesting to optimize. 
+:param bounds: the box constraints to define the domain in which the function is optimized.</p>
+<dl class="method">
+<dt id="GPyOpt.fmodels.experiments1d.function1d.plot">
+<tt class="descname">plot</tt><big>(</big><em>bounds=None</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experiments1d.function1d.plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.fmodels.experiments2d">
+<span id="gpyopt-fmodels-experiments2d-module"></span><h2>GPyOpt.fmodels.experiments2d module<a class="headerlink" href="#module-GPyOpt.fmodels.experiments2d" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.fmodels.experiments2d.branin">
+<em class="property">class </em><tt class="descclassname">GPyOpt.fmodels.experiments2d.</tt><tt class="descname">branin</tt><big>(</big><em>bounds=None</em>, <em>a=None</em>, <em>b=None</em>, <em>c=None</em>, <em>r=None</em>, <em>s=None</em>, <em>t=None</em>, <em>sd=None</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experiments2d.branin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.fmodels.experiments2d.function2d" title="GPyOpt.fmodels.experiments2d.function2d"><tt class="xref py py-class docutils literal"><span class="pre">GPyOpt.fmodels.experiments2d.function2d</span></tt></a></p>
+<p>Branin function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>bounds</strong> &#8211; the box constraints to define the domain in which the function is optimized.</li>
+<li><strong>sd</strong> &#8211; standard deviation, to generate noisy evaluations of the function.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="GPyOpt.fmodels.experiments2d.branin.f">
+<tt class="descname">f</tt><big>(</big><em>X</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experiments2d.branin.f" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.fmodels.experiments2d.cosines">
+<em class="property">class </em><tt class="descclassname">GPyOpt.fmodels.experiments2d.</tt><tt class="descname">cosines</tt><big>(</big><em>bounds=None</em>, <em>sd=None</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experiments2d.cosines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.fmodels.experiments2d.function2d" title="GPyOpt.fmodels.experiments2d.function2d"><tt class="xref py py-class docutils literal"><span class="pre">GPyOpt.fmodels.experiments2d.function2d</span></tt></a></p>
+<p>Cosines function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>bounds</strong> &#8211; the box constraints to define the domain in which the function is optimized.</li>
+<li><strong>sd</strong> &#8211; standard deviation, to generate noisy evaluations of the function.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="GPyOpt.fmodels.experiments2d.cosines.f">
+<tt class="descname">f</tt><big>(</big><em>X</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experiments2d.cosines.f" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.fmodels.experiments2d.eggholder">
+<em class="property">class </em><tt class="descclassname">GPyOpt.fmodels.experiments2d.</tt><tt class="descname">eggholder</tt><big>(</big><em>bounds=None</em>, <em>sd=None</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experiments2d.eggholder" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="GPyOpt.fmodels.experiments2d.eggholder.f">
+<tt class="descname">f</tt><big>(</big><em>X</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experiments2d.eggholder.f" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.fmodels.experiments2d.function2d">
+<em class="property">class </em><tt class="descclassname">GPyOpt.fmodels.experiments2d.</tt><tt class="descname">function2d</tt><a class="headerlink" href="#GPyOpt.fmodels.experiments2d.function2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a benchmark of bidimensional functions interesting to optimize.</p>
+<dl class="method">
+<dt id="GPyOpt.fmodels.experiments2d.function2d.plot">
+<tt class="descname">plot</tt><big>(</big><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experiments2d.function2d.plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.fmodels.experiments2d.goldstein">
+<em class="property">class </em><tt class="descclassname">GPyOpt.fmodels.experiments2d.</tt><tt class="descname">goldstein</tt><big>(</big><em>bounds=None</em>, <em>sd=None</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experiments2d.goldstein" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.fmodels.experiments2d.function2d" title="GPyOpt.fmodels.experiments2d.function2d"><tt class="xref py py-class docutils literal"><span class="pre">GPyOpt.fmodels.experiments2d.function2d</span></tt></a></p>
+<p>Goldstein function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>bounds</strong> &#8211; the box constraints to define the domain in which the function is optimized.</li>
+<li><strong>sd</strong> &#8211; standard deviation, to generate noisy evaluations of the function.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="GPyOpt.fmodels.experiments2d.goldstein.f">
+<tt class="descname">f</tt><big>(</big><em>X</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experiments2d.goldstein.f" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.fmodels.experiments2d.mccormick">
+<em class="property">class </em><tt class="descclassname">GPyOpt.fmodels.experiments2d.</tt><tt class="descname">mccormick</tt><big>(</big><em>bounds=None</em>, <em>sd=None</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experiments2d.mccormick" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.fmodels.experiments2d.function2d" title="GPyOpt.fmodels.experiments2d.function2d"><tt class="xref py py-class docutils literal"><span class="pre">GPyOpt.fmodels.experiments2d.function2d</span></tt></a></p>
+<p>Mccormick function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>bounds</strong> &#8211; the box constraints to define the domain in which the function is optimized.</li>
+<li><strong>sd</strong> &#8211; standard deviation, to generate noisy evaluations of the function.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="GPyOpt.fmodels.experiments2d.mccormick.f">
+<tt class="descname">f</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experiments2d.mccormick.f" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.fmodels.experiments2d.powers">
+<em class="property">class </em><tt class="descclassname">GPyOpt.fmodels.experiments2d.</tt><tt class="descname">powers</tt><big>(</big><em>bounds=None</em>, <em>sd=None</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experiments2d.powers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.fmodels.experiments2d.function2d" title="GPyOpt.fmodels.experiments2d.function2d"><tt class="xref py py-class docutils literal"><span class="pre">GPyOpt.fmodels.experiments2d.function2d</span></tt></a></p>
+<p>Powers function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>bounds</strong> &#8211; the box constraints to define the domain in which the function is optimized.</li>
+<li><strong>sd</strong> &#8211; standard deviation, to generate noisy evaluations of the function.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="GPyOpt.fmodels.experiments2d.powers.f">
+<tt class="descname">f</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experiments2d.powers.f" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.fmodels.experiments2d.sixhumpcamel">
+<em class="property">class </em><tt class="descclassname">GPyOpt.fmodels.experiments2d.</tt><tt class="descname">sixhumpcamel</tt><big>(</big><em>bounds=None</em>, <em>sd=None</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experiments2d.sixhumpcamel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.fmodels.experiments2d.function2d" title="GPyOpt.fmodels.experiments2d.function2d"><tt class="xref py py-class docutils literal"><span class="pre">GPyOpt.fmodels.experiments2d.function2d</span></tt></a></p>
+<p>Six hump camel function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>bounds</strong> &#8211; the box constraints to define the domain in which the function is optimized.</li>
+<li><strong>sd</strong> &#8211; standard deviation, to generate noisy evaluations of the function.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="GPyOpt.fmodels.experiments2d.sixhumpcamel.f">
+<tt class="descname">f</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experiments2d.sixhumpcamel.f" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.fmodels.experimentsNd">
+<span id="gpyopt-fmodels-experimentsnd-module"></span><h2>GPyOpt.fmodels.experimentsNd module<a class="headerlink" href="#module-GPyOpt.fmodels.experimentsNd" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.fmodels.experimentsNd.alpine1">
+<em class="property">class </em><tt class="descclassname">GPyOpt.fmodels.experimentsNd.</tt><tt class="descname">alpine1</tt><big>(</big><em>input_dim</em>, <em>bounds=None</em>, <em>sd=None</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experimentsNd.alpine1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alpine1 function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>bounds</strong> &#8211; the box constraints to define the domain in which the function is optimized.</li>
+<li><strong>sd</strong> &#8211; standard deviation, to generate noisy evaluations of the function.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="GPyOpt.fmodels.experimentsNd.alpine1.f">
+<tt class="descname">f</tt><big>(</big><em>X</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experimentsNd.alpine1.f" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.fmodels.experimentsNd.alpine2">
+<em class="property">class </em><tt class="descclassname">GPyOpt.fmodels.experimentsNd.</tt><tt class="descname">alpine2</tt><big>(</big><em>input_dim</em>, <em>bounds=None</em>, <em>sd=None</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experimentsNd.alpine2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alpine2 function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>bounds</strong> &#8211; the box constraints to define the domain in which the function is optimized.</li>
+<li><strong>sd</strong> &#8211; standard deviation, to generate noisy evaluations of the function.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="GPyOpt.fmodels.experimentsNd.alpine2.f">
+<tt class="descname">f</tt><big>(</big><em>X</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experimentsNd.alpine2.f" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.fmodels.experimentsNd.eggholder">
+<em class="property">class </em><tt class="descclassname">GPyOpt.fmodels.experimentsNd.</tt><tt class="descname">eggholder</tt><big>(</big><em>bounds=None</em>, <em>sd=None</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experimentsNd.eggholder" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="GPyOpt.fmodels.experimentsNd.eggholder.f">
+<tt class="descname">f</tt><big>(</big><em>X</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experimentsNd.eggholder.f" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.fmodels.experimentsNd.gSobol">
+<em class="property">class </em><tt class="descclassname">GPyOpt.fmodels.experimentsNd.</tt><tt class="descname">gSobol</tt><big>(</big><em>a</em>, <em>sd=None</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experimentsNd.gSobol" title="Permalink to this definition">¶</a></dt>
+<dd><p>gSolbol function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>a</strong> &#8211; one-dimensional array containing the coefficients of the function.</li>
+<li><strong>sd</strong> &#8211; standard deviation, to generate noisy evaluations of the function.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="GPyOpt.fmodels.experimentsNd.gSobol.f">
+<tt class="descname">f</tt><big>(</big><em>X</em><big>)</big><a class="headerlink" href="#GPyOpt.fmodels.experimentsNd.gSobol.f" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.fmodels">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-GPyOpt.fmodels" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="GPyOpt.interface.html" class="btn btn-neutral float-right" title="GPyOpt.interface package">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="GPyOpt.demos.html" class="btn btn-neutral" title="GPyOpt.demos package"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Javier Gonzalez.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'beta',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
