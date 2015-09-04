@@ -9,6 +9,7 @@ Subpackages
     GPyOpt.core
     GPyOpt.demos
     GPyOpt.fmodels
+    GPyOpt.interface
     GPyOpt.methods
     GPyOpt.plotting
     GPyOpt.util
