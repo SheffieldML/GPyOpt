@@ -12,6 +12,7 @@ timezone: null
 lsi: false
 markdown: kramdown
 highlighter: pygments
+include: ["docs/_static","docs/_modules","docs/_sources","docs/_templates"]
 
 
 ### content configuration ###
@@ -33,3 +34,5 @@ colors:
   purple:    '#c869bf'
   orange:    '#fab125'
   turquoise: '#0fbfcf'
+
+
