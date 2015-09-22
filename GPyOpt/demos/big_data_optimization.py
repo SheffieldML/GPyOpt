@@ -40,7 +40,7 @@ def big_data_optimization(plots=True):
                                             normalize = True,              # normalized acquisition function      
                                             sparseGP = True,               # Use a sparse GP for the sparse GP.
                                             num_inducing = 10,             # Number of inducing points
-                                            numdata_inital_design = 1000)        # Initialize the model with 1000 points                          
+                                            numdata_initial_design = 1000)        # Initialize the model with 1000 points                          
     
     # Run the optimization
     max_iter = 10                                                           
