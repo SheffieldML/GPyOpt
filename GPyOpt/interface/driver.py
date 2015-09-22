@@ -54,7 +54,7 @@ class BODriver(object):
         offset = 0
     
         bo = BayesianOptimization(obj_func, bounds=bounds, X= xs_init, Y=ys_init, 
-                                                 numdata_inital_design = m_c['initial-points'],type_initial_design= m_c['design-initial-points'],
+                                                 numdata_initial_design = m_c['initial-points'],type_initial_design= m_c['design-initial-points'],
                                                  model_optimize_interval=m_c['optimization-interval'],model_optimize_restarts=m_c['optimization-restarts'],
                                                  sparseGP=True if m_c['type'].lower()=='sparsegp' else False, num_inducing=m_c['inducing-points'],
                                                  acquisition=a_c['type'], acquisition_par = a_c['parameter'],normalize=m_c['normalized-evaluations'],
