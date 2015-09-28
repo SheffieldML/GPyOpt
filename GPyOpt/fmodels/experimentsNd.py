@@ -74,9 +74,15 @@ class gSobol:
     :param a: one-dimensional array containing the coefficients of the function.
     :param sd: standard deviation, to generate noisy evaluations of the function.
     '''
-    def __init__(self,a,sd=None):
+    def __init__(self,a,bounds=None,sd=None):
         self.a = a
         self.input_dim = len(self.a)
+
+        if bounds == None: 
+            self.bounds =[(-5,5)]*self.input_dim
+        else: 
+            self.bounds = bounds
+
         if not (self.a>0).all(): return 'Wrong vector of coefficients, they all should be positive'
         self.S_coef = (1/(3*((1+self.a)**2))) / (np.prod(1+1/(3*((1+self.a)**2)))-1)
         if sd==None: self.sd = 0
