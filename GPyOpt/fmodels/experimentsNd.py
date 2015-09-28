@@ -79,7 +79,7 @@ class gSobol:
         self.input_dim = len(self.a)
 
         if bounds == None: 
-            self.bounds =[(-5,5)]*self.input_dim
+            self.bounds =[(-4,6)*self.input_dim]
         else: 
             self.bounds = bounds
 
