@@ -99,32 +99,52 @@ class gSobol:
             noise = np.random.normal(0,self.sd,n).reshape(n,1)
         return fval.reshape(n,1) + noise
 
+#####
+class ackley:
+    '''
+    Ackley function 
 
+    :param sd: standard deviation, to generate noisy evaluations of the function.
+    '''
+    def __init__(self, input_dim, bounds=None,sd=None):
+        self.input_dim = input_dim
 
-class eggholder:
-    def __init__(self,bounds=None,sd=None):
-        self.input_dim = 2
-        if bounds == None: self.bounds = [(-512,512),(-512,512)]
-        else: self.bounds = bounds
-        self.min = [(512,404.2319)]
-        self.fmin = -959.6407
-        if sd==None: self.sd = 0
-        else: self.sd=sd
-        self.name = 'Egg-holder'
+        if bounds == None: 
+            self.bounds =[(-32.768,32.768)*self.input_dim]
+        else: 
+            self.bounds = bounds
+
+        self.min = [(0.)*self.input_dim]
+        self.fmin = 0
+        
+        if sd==None: 
+            self.sd = 0
+        else:
+            self.sd=sd
 
     def f(self,X):
         X = reshape(X,self.input_dim)
+        print X
         n = X.shape[0]
-        if X.shape[1] != self.input_dim:
-            return 'Wrong input dimension'
+        fval = (20+np.exp(1)-20*np.exp(-0.2*np.sqrt(sum(X**2)/n))-np.exp(sum(np.cos(2*np.pi*X)/n)));
+        
+        if self.sd ==0:
+            noise = np.zeros(n).reshape(n,1)
         else:
-            x1 = X[:,0]
-            x2 = X[:,1]
-            fval = -(x2+47) * np.sin(np.sqrt(abs(x2+x1/2+47))) + -x1 * np.sin(np.sqrt(abs(x1-(x2+47))))
-            if self.sd ==0:
-                noise = np.zeros(n).reshape(n,1)
-            else:
-                noise = np.random.normal(0,self.sd,n).reshape(n,1)
-            return fval.reshape(n,1) + noise
+            noise = np.random.normal(0,self.sd,n).reshape(n,1)
+        return fval.reshape(n,1) + noise
+
+
+# function out = ackley(x)
+# ackley test function
+# 
+# constraints:
+# x can be any dimension
+# -32.768 <= x_i <= 32.768
+# global optimum at x1 = x2 = ... = xn = 0, where ackley = 0
+
+#function out = ackley(x)
+
+#out = (20+exp(1)-20*exp(-0.2*sqrt(sum(x.^2)/numel(x)))-exp(sum(cos(2*pi*x)/numel(x))));
 
 
