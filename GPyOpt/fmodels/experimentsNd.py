@@ -79,7 +79,7 @@ class gSobol:
         self.input_dim = len(self.a)
 
         if bounds == None: 
-            self.bounds =[(-4,6)*self.input_dim]
+            self.bounds =[(-4,6)]*self.input_dim
         else: 
             self.bounds = bounds
 
@@ -110,7 +110,7 @@ class ackley:
         self.input_dim = input_dim
 
         if bounds == None: 
-            self.bounds =[(-32.768,32.768)*self.input_dim]
+            self.bounds =[(-32.768,32.768)]*self.input_dim
         else: 
             self.bounds = bounds
 
@@ -126,7 +126,7 @@ class ackley:
         X = reshape(X,self.input_dim)
         print X
         n = X.shape[0]
-        fval = (20+np.exp(1)-20*np.exp(-0.2*np.sqrt(sum(X**2)/n))-np.exp(sum(np.cos(2*np.pi*X)/n)));
+        fval = (20+np.exp(1)-20*np.exp(-0.2*np.sqrt((X**2).sum(1)/self.input_dim))-np.exp(np.cos(2*np.pi*X).sum(1)/self.input_dim))
         
         if self.sd ==0:
             noise = np.zeros(n).reshape(n,1)
