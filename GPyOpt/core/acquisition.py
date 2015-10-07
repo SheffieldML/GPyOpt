@@ -186,7 +186,7 @@ class AcquisitionMP(AcquisitionBase):
         
         d = 1./(s_x0*np.sqrt(2*np.pi)*h_func)*np.exp(-np.square(z)/2)/nm
         d[h_func<1e-50] = 0.
-        d = d[:,:,None]*dx
+        d = d[:,:,None]
         return d.sum(axis=1)
 
     def acquisition_function(self, x):

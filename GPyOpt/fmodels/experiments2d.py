@@ -46,6 +46,98 @@ class function2d:
         plt.show()
 
 
+class rosenbrock(function2d):
+    '''
+    Cosines function
+    
+    :param bounds: the box constraints to define the domain in which the function is optimized.
+    :param sd: standard deviation, to generate noisy evaluations of the function.
+    '''
+    def __init__(self,bounds=None,sd=None):
+        self.input_dim = 2
+        if bounds == None: self.bounds = [(-0.5,3),(-1.5,2)]
+        else: self.bounds = bounds
+        self.min = [(0, 0)]
+        self.fmin = 0
+        if sd==None: self.sd = 0
+        else: self.sd=sd
+        self.name = 'Rosenbrock'
+
+    def f(self,X):
+        X = reshape(X,self.input_dim)
+        n = X.shape[0]
+        if X.shape[1] != self.input_dim:
+            return 'Wrong input dimension'
+        else:
+            fval = 100*(X[:,1]-X[:,0]**2)**2 + (X[:,0]-1)**2
+            if self.sd ==0:
+                noise = np.zeros(n).reshape(n,1)
+            else:
+                noise = np.random.normal(0,self.sd,n).reshape(n,1)
+            return -fval.reshape(n,1) + noise
+
+
+class beale(function2d):
+    '''
+    Cosines function
+    
+    :param bounds: the box constraints to define the domain in which the function is optimized.
+    :param sd: standard deviation, to generate noisy evaluations of the function.
+    '''
+    def __init__(self,bounds=None,sd=None):
+        self.input_dim = 2
+        if bounds == None: self.bounds = [(-1,1),(-1,1)]
+        else: self.bounds = bounds
+        self.min = [(0, 0)]
+        self.fmin = 0
+        if sd==None: self.sd = 0
+        else: self.sd=sd
+        self.name = 'Beale'
+
+    def f(self,X):
+        X = reshape(X,self.input_dim)
+        n = X.shape[0]
+        if X.shape[1] != self.input_dim:
+            return 'Wrong input dimension'
+        else:
+            fval = 100*(X[:,1]-X[:,0]**2)**2 + (X[:,0]-1)**2
+            if self.sd ==0:
+                noise = np.zeros(n).reshape(n,1)
+            else:
+                noise = np.random.normal(0,self.sd,n).reshape(n,1)
+            return -fval.reshape(n,1) + noise
+
+
+class dropwave(function2d):
+    '''
+    Cosines function
+    
+    :param bounds: the box constraints to define the domain in which the function is optimized.
+    :param sd: standard deviation, to generate noisy evaluations of the function.
+    '''
+    def __init__(self,bounds=None,sd=None):
+        self.input_dim = 2
+        if bounds == None: self.bounds = [(-1,1),(-1,1)]
+        else: self.bounds = bounds
+        self.min = [(0, 0)]
+        self.fmin = 0
+        if sd==None: self.sd = 0
+        else: self.sd=sd
+        self.name = 'dropwave'
+
+    def f(self,X):
+        X = reshape(X,self.input_dim)
+        n = X.shape[0]
+        if X.shape[1] != self.input_dim:
+            return 'Wrong input dimension'
+        else:
+            fval = - (1+np.cos(12*np.sqrt(X[:,0]**2+X[:,1]**2))) / (0.5*(X[:,0]**2+X[:,1]**2)+2) 
+            if self.sd ==0:
+                noise = np.zeros(n).reshape(n,1)
+            else:
+                noise = np.random.normal(0,self.sd,n).reshape(n,1)
+            return -fval.reshape(n,1) + noise
+
 
 class cosines(function2d):
     '''

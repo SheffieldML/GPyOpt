@@ -50,7 +50,7 @@ class alpine2:
         else: 
             self.bounds = bounds
         self.min = [(7.917)]*input_dim
-        self.fmin = 2.808**input_dim
+        self.fmin = -2.808**input_dim
         self.input_dim = input_dim
         if sd==None: 
             self.sd = 0
