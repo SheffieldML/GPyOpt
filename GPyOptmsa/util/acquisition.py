@@ -121,7 +121,7 @@ def predict_locations(x_star, bounds, expected_loss, n_ahead, L, Min, model):
         pred_samples = penalized_loss.acquisition_function(samples)
         x0 =  samples[np.argmin(pred_samples)]
         new_sample,_ = wrapper_lbfgsb(f=penalized_loss.acquisition_function,grad_f=None,x0 = np.array(x0),bounds=bounds)
-        new_sample = x0
+        #new_sample = x0
         X_batch = np.vstack((X_batch,new_sample))
         k +=1
     return X_batch
