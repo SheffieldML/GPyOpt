@@ -31,7 +31,7 @@ def predictive_batch_optimization(acqu_name, acquisition_par, acquisition, d_acq
     X = model_copy.X 
     Y = model_copy.Y
     input_dim = X.shape[1] 
-    kernel = model_copy.kern    
+    #kernel = model_copy.kern    
 
     # Optimization of the first element in the batch
     X_new = optimize_acquisition(acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch=None, L=None, Min=None)

@@ -3,6 +3,7 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 import GPy
+import deepgp
 import numpy as np
 from ..core.acquisition import AcquisitionEI, AcquisitionMPI, AcquisitionLCB, AcquisitionEL
 from ..core.bo import BO
@@ -13,14 +14,19 @@ warnings.filterwarnings("ignore")
 
 
 class BayesianOptimization(BO):
-    def __init__(self, f, bounds=None, kernel=None, X=None, Y=None, numdata_initial_design = None,type_initial_design='random', model_optimize_interval=1, acquisition='EI',
-        acquisition_par= 0.00, model_optimize_restarts=10, sparseGP=False, num_inducing=None, normalize=False,
+    def __init__(self, f, bounds=None, model_type=None, kernel=None, X=None, Y=None, numdata_inital_design = None,type_initial_design='random', model_optimize_interval=1, acquisition='EI', 
+        acquisition_par= 0.00, model_optimize_restarts=10, sparseGP=False, num_inducing=None, normalize=False, 
         exact_feval=False, verbosity=0):
         '''
         Bayesian Optimization using EI, MPI and LCB (or UCB) acquisition functions.
 
         This is a thin wrapper around the methods.BO class, with a set of sensible defaults
         :param *f* the function to optimize. Should get a nxp numpy array as imput and return a nx1 numpy array.
+        :param model: model used for the optimization: it can be 
+            - 'GP Regression': used by default 'gp'
+            - 'Sparse GP Regression': 'sparsegp'
+            - 'Deep GP Regression': 'deepgp'
+            - 'Deep GP Regression with back constraint': 'deepgp_back_constraint'
         :param bounds: Tuple containing the box constrains of the function to optimize. Example: for [0,1]x[0,1] insert [(0,1),(0,1)].
         :param kernel: a GPy kernel, defaults to rbf.
         :param X: input observations. If X=None, some  points are evaluated randomly.
@@ -40,8 +46,11 @@ class BayesianOptimization(BO):
         :param verbosity: whether to show (1) or not (0, default) the value of the log-likelihood of the model for the optimized parameters.
 
         '''
-        # ------- Get default values
-        self.num_inducing = num_inducing
+        # ------- Get default values 
+        if num_inducing == None:    
+            self.num_inducing = 30
+        else:
+            self.num_inducing = num_inducing
         self.sparseGP = sparseGP
         self.input_dim = len(bounds)
         self.normalize = normalize
@@ -51,7 +60,12 @@ class BayesianOptimization(BO):
         self.verbosity = verbosity
         self.type_initial_design = type_initial_design
 
-        if f==None:
+        if model_type == None:
+            self.model_type = 'gp'
+        else: 
+            self.model_type = model_type
+            
+        if f==None: 
             print 'Function to optimize is required.'
         else:
             self.f = f
@@ -126,15 +140,54 @@ class BayesianOptimization(BO):
         ..Note : X and Y can be None. In this case numdata_initial_design*input_dim data are uniformly generated to initialize the model.
 
         '''
-        if self.sparseGP == True:
+        # --- the model is a sparse GP
+
+        if self.model_type == 'sparsegp' or self.model_type == 'gp':
+            self._init_gp()
+
+        elif self.model_type == 'deepgp' or  self.model_type == 'deepgp_back_constraint':
+            self._init_deepgp()
+
+            
+    
+    def _init_gp(self):
+
+        if self.model_type == 'gp':
+            self.model = GPy.models.GPRegression(self.X, self.Y, kernel=self.kernel)
+
+        elif self.model_type == 'sparsegp':
             if self.num_inducing ==None:
                 raise 'Sparse model, please insert the number of inducing points'
             else:
                 self.model = GPy.models.SparseGPRegression(self.X, self.Y, kernel=self.kernel, num_inducing=self.num_inducing)
-        else:
-            self.model = GPy.models.GPRegression(self.X,self.Y,kernel=self.kernel)
 
         if self.exact_feval == True:
             self.model.Gaussian_noise.constrain_fixed(1e-6, warning=False) #to avoid numerical problems
         else:
             self.model.Gaussian_noise.constrain_bounded(1e-6,1e6, warning=False) #to avoid numerical problems
+
+
+    def _init_deepgp(self):
+
+        import socket
+        self.useGPU = False
+        if socket.gethostname()[0:4] == 'node':
+            print 'Using GPU!'
+            self.useGPU = True
+
+        self.Ds = 1
+
+        kern = [GPy.kern.Matern32(self.Ds, ARD=False), GPy.kern.Matern32(self.X.shape[1], ARD=False)]
+
+        if self.model_type == 'deepgp_back_constraint':
+            self.model = deepgp.DeepGP([self.Y.shape[1],self.Ds, self.X.shape[1]], self.Y, X=self.X, num_inducing=self.num_inducing, kernels=kern, MLP_dims=[[100,50],[]],repeatX=True)
+        
+        elif self.model_type == 'deepgp':
+            self.model = deepgp.DeepGP([self.Y.shape[1],self.Ds, self.X.shape[1]], self.Y, X=self.X, num_inducing=self.num_inducing, kernels=kern, back_constraint=False,repeatX=True)
+
+        if self.exact_feval == True:
+            self.model.obslayer.Gaussian_noise.constrain_fixed(1e-6, warning=False) #to avoid numerical problems
+        else:
+            self.model.obslayer.Gaussian_noise.constrain_bounded(1e-6,1e6, warning=False) #to avoid numerical problems
+
+    

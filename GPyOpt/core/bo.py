@@ -2,6 +2,8 @@
 # Copyright (c) 2015, the GPy Authors (see GPy AUTHORS.txt)
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
+import GPy
+import deepgp
 import numpy as np
 import time
 from ..util.general import best_value, reshape, spawn
@@ -18,7 +20,7 @@ class BO(object):
     def _init_model(self):
         pass
         
-    def run_optimization(self, max_iter = None, n_inbatch=1, acqu_optimize_method='fast_random', acqu_optimize_restarts=200, batch_method='predictive', 
+    def run_optimization(self, max_iter = None, n_inbatch=1, acqu_optimize_method='DIRECT', acqu_optimize_restarts=200, batch_method='predictive', 
         eps = 1e-8, n_procs=1, true_gradients = True, verbose=True):
         """ 
         Runs Bayesian Optimization for a number 'max_iter' of iterations (after the initial exploration data)
@@ -198,20 +200,82 @@ class BO(object):
         """        
         Updates X and Y in the model and re-optimizes the parameters of the new model
 
-        """              
-        # ------- Normalize acquisition function (if needed)
+        """
+        if (self.num_acquisitions%self.model_optimize_interval)==0:
+            if self.model_type == 'gp':              
+                self.train_gp(sparse=False, normalize = self.normalize)
+
+            elif self.model_type == 'sparsegp':              
+                self.train_gp(sparse=True, normalize = self.normalize)
+
+            elif self.model_type == 'deepgp':              
+                self.train_deepgp(back_constraint=False, normalize = self.normalize)
+
+            elif self.model_type == 'deepgp_back_constraint':              
+                self.train_deepgp(back_constraint=True, normalize = self.normalize)
+        
+        self.acquisition_func.set_model(self.model)
+        
+        # ------- Optimize acquisition function
+        self.suggested_sample = self._optimize_acquisition()
+
+
+    def train_gp(self, sparse=False, normalize = False):
         if self.normalize:      
             self.model.set_XY(self.X,(self.Y-self.Y.mean())/(self.Y.std()))
         else:
             self.model.set_XY(self.X,self.Y)
-        
+
         # ------- Optimize model when required
-        if (self.num_acquisitions%self.model_optimize_interval)==0:
-            self.model.optimization_runs = [] # clear previous optimization runs so they don't get used.
-            self.model.optimize_restarts(num_restarts=self.model_optimize_restarts, verbose=self.verbosity)            
+        self.model.optimization_runs = [] # clear previous optimization runs so they don't get used.
+        self.model.optimize_restarts(num_restarts=self.model_optimize_restarts, verbose=self.verbosity)            
         
-        # ------- Optimize acquisition function
-        self.suggested_sample = self._optimize_acquisition()
+
+    def train_deepgp(self, back_constraint=True, normalize = False):
+
+        if self.normalize:
+            Y_normalized = (self.Y-self.Y.mean())/(self.Y.std())
+        else:
+            Y_normalized = self.Y
+        
+        # kern = [GPy.kern.RBF(self.Ds, ARD=False, useGPU=self.useGPU), GPy.kern.RBF(self.X.shape[1], ARD=False, useGPU=self.useGPU)]
+        kern = [GPy.kern.Matern32(self.Ds + self.X.shape[1], ARD=False), GPy.kern.Matern32(self.X.shape[1], ARD=False)]
+
+        if back_constraint:
+            self.model = deepgp.DeepGP([Y_normalized.shape[1],self.Ds, self.X.shape[1]], Y_normalized, X=self.X, num_inducing=min(self.num_inducing, self.X.shape[0]), kernels=kern, MLP_dims=[[100,50],[]], repeatX=True)
+        else:
+            self.model = deepgp.DeepGP([Y_normalized.shape[1],self.Ds, self.X.shape[1]], Y_normalized, X=self.X, num_inducing=min(self.num_inducing, self.X.shape[0]), kernels=kern, back_constraint=False, repeatX=True)
+
+
+        if self.exact_feval == True:
+            self.model.obslayer.Gaussian_noise.constrain_fixed(1e-4, warning=False) #to avoid numerical problems
+        else:
+            self.model.obslayer.Gaussian_noise.constrain_bounded(1e-6,1e6, warning=False) #to avoid numerical problems
+
+        self.model.obslayer.X.mean[:] = self.model.layer_1.X[:] ### Init with inputs
+        #self.model.obslayer.likelihood.variance[:] = self.Y.var()*0.01
+        self.model.obslayer.kern.lengthscale[:]  = 0.1#*((self.model.obslayer.X.mean.values.max(0)-self.model.obslayer.X.mean.values.min(0)))/2.
+        self.model.obslayer.kern.variance.fix()
+        self.model.layer_1.kern.lengthscale[:]  = 1. #*((self.model.layer_1.X.max(0)-self.model.layer_1.X.values.min(0)))/2.
+        self.model.layer_1.kern.variance.fix()
+        self.model.obslayer.likelihood.fix()
+        self.model.layer_1.likelihood.variance[:] = 0.01 #self.model.layer_1.Y.mean.var()*0.01
+        self.model.layer_1.likelihood.fix()
+        # iNDUCING INPUTS
+        myperm = np.random.permutation(self.model.X.shape[0])
+        self.model.obslayer.Z[:] = self.model.obslayer.X.mean[myperm[:self.model.obslayer.num_inducing]]
+
+        self.model.optimize('bfgs',messages=1, max_iters=100)
+        self.model.obslayer.kern.variance.constrain_positive()
+        self.model.layer_1.kern.variance.constrain_positive()
+        self.model.optimize('bfgs',messages=1,max_iters=100)
+
+        #self.model.layers[0].likelihood.constrain_positive()
+        self.model.layers[1].likelihood.constrain_positive()
+        
+
+
+        self.model.optimize('bfgs',messages=1,max_iters=3000)
 
 
     def plot_acquisition(self,filename=None):
