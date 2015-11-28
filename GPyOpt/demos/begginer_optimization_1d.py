@@ -36,7 +36,7 @@ def begginer_optimization_1d(plots=True):
     # --- Problem definition and optimization
     BO_demo_1d = GPyOpt.methods.BayesianOptimization(f=objective_noisy.f,   # function to optimize       
                                                     bounds=bounds,          # box-constrains of the problem
-                                                    acquisition='EI')       # Selects the Expected improvement
+                                                    acquisition_type='EI')       # Selects the Expected improvement
     # Run the optimization for 15 iterations
     max_iter = 15                                                           
 

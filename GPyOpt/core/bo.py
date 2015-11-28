@@ -20,7 +20,7 @@ class BO(object):
     def _init_model(self):
         pass
         
-    def run_optimization(self, max_iter = None, n_inbatch=1, acqu_optimize_method='DIRECT', acqu_optimize_restarts=200, batch_method='predictive', 
+    def run_optimization(self, max_iter = None, n_inbatch=1, acqu_optimize_method='fast_random', acqu_optimize_restarts=200, batch_method='predictive', 
         eps = 1e-8, n_procs=1, true_gradients = True, verbose=True):
         """ 
         Runs Bayesian Optimization for a number 'max_iter' of iterations (after the initial exploration data)
@@ -92,30 +92,10 @@ class BO(object):
             self.X = np.vstack((self.X,self.suggested_sample))
             
             # --- Evaluate *f* in X and augment Y
-            if self.n_procs==1:
-                self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
-            else:
-                try:
-                    # --- Parallel evaluation of *f* if several cores are available
-                    from multiprocessing import Process, Pipe
-                    from itertools import izip          
-                    divided_samples = [self.suggested_sample[i::self.n_procs] for i in xrange(self.n_procs)]
-                    pipe=[Pipe() for i in xrange(self.n_procs)]
-                    proc=[Process(target=spawn(self.f),args=(c,x)) for x,(p,c) in izip(divided_samples,pipe)]
-                    [p.start() for p in proc]
-                    [p.join() for p in proc]
-                    rs = [p.recv() for (p,c) in pipe]
-                    self.Y = np.vstack([self.Y]+rs)
-                except:
-                    if not hasattr(self, 'parallel_error'):
-                        print 'Error in parallel computation. Fall back to single process!'
-                        self.parallel_error = True 
-                    self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
+            self.evaluate_objective()
                 
             # --- Update internal elements (needed for plotting)
-            self.num_acquisitions += 1
-            pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))      
-            self.s_in_min = np.vstack((self.s_in_min,np.sqrt(abs(pred_min[1]))))
+            self._update_internal_elements()
 
             # --- Update model
             try:
@@ -125,14 +105,11 @@ class BO(object):
 
             # --- Update stop conditions
             k +=1
-            distance_lastX = np.sqrt(sum((self.X[self.X.shape[0]-1,:]-self.X[self.X.shape[0]-2,:])**2))     
+            distance_lastX = self._stop_condition()
+   
+        # --- Stop messages and execution time   
+        self._update_final_values()
 
-        # --- Stop messages and execution time          
-        self.Y_best = best_value(self.Y)
-        self.x_opt = self.X[np.argmin(self.Y),:]
-        self.fx_opt = min(self.Y)
-        self.time   = time.time() - self.time 
-             
         # --- Print stopping reason
         if verbose: print '*Optimization completed:'
         if k==self.max_iter and distance_lastX > self.eps:
@@ -142,7 +119,46 @@ class BO(object):
             if verbose: print '   -Method converged.'
             return 0
 
-    
+
+
+    def evaluate_objective(self):
+        if self.n_procs==1:
+            self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
+        else:
+            try:
+                # --- Parallel evaluation of *f* if several cores are available
+                from multiprocessing import Process, Pipe
+                from itertools import izip          
+                divided_samples = [self.suggested_sample[i::self.n_procs] for i in xrange(self.n_procs)]
+                pipe=[Pipe() for i in xrange(self.n_procs)]
+                proc=[Process(target=spawn(self.f),args=(c,x)) for x,(p,c) in izip(divided_samples,pipe)]
+                [p.start() for p in proc]
+                [p.join() for p in proc]
+                rs = [p.recv() for (p,c) in pipe]
+                self.Y = np.vstack([self.Y]+rs)
+            except:
+                if not hasattr(self, 'parallel_error'):
+                    print 'Error in parallel computation. Fall back to single process!'
+                    self.parallel_error = True 
+                self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
+
+    def _update_internal_elements(self):
+        self.num_acquisitions += 1
+        pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))      
+        self.s_in_min = np.vstack((self.s_in_min,np.sqrt(abs(pred_min[1]))))        
+
+
+    def _update_final_values(self):
+        self.Y_best = best_value(self.Y)
+        self.x_opt = self.X[np.argmin(self.Y),:]
+        self.fx_opt = min(self.Y)
+        self.time   = time.time() - self.time 
+
+
+    def _stop_condition(self):
+        return np.sqrt(sum((self.X[self.X.shape[0]-1,:]-self.X[self.X.shape[0]-2,:])**2))  
+  
+
     def change_to_sparseGP(self, num_inducing):
         """
         Changes standard GP estimation to sparse GP estimation
@@ -214,9 +230,8 @@ class BO(object):
             elif self.model_type == 'deepgp_back_constraint':              
                 self.train_deepgp(back_constraint=True, normalize = self.normalize)
         
+        # --- update model and optmize acquisition
         self.acquisition_func.set_model(self.model)
-        
-        # ------- Optimize acquisition function
         self.suggested_sample = self._optimize_acquisition()
 
 
@@ -253,7 +268,6 @@ class BO(object):
             self.model.obslayer.Gaussian_noise.constrain_bounded(1e-6,1e6, warning=False) #to avoid numerical problems
 
         self.model.obslayer.X.mean[:] = self.model.layer_1.X[:] ### Init with inputs
-        #self.model.obslayer.likelihood.variance[:] = self.Y.var()*0.01
         self.model.obslayer.kern.lengthscale[:]  = 0.1#*((self.model.obslayer.X.mean.values.max(0)-self.model.obslayer.X.mean.values.min(0)))/2.
         self.model.obslayer.kern.variance.fix()
         self.model.layer_1.kern.lengthscale[:]  = 1. #*((self.model.layer_1.X.max(0)-self.model.layer_1.X.values.min(0)))/2.
@@ -270,11 +284,7 @@ class BO(object):
         self.model.layer_1.kern.variance.constrain_positive()
         self.model.optimize('bfgs',messages=1,max_iters=100)
 
-        #self.model.layers[0].likelihood.constrain_positive()
         self.model.layers[1].likelihood.constrain_positive()
-        
-
-
         self.model.optimize('bfgs',messages=1,max_iters=3000)
 
 
