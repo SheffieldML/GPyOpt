@@ -6,7 +6,7 @@ import GPy
 import deepgp
 import numpy as np
 import time
-from ..util.general import best_value, reshape, spawn
+from ..util.general import best_value, reshape, spawn, evaluate_function
 from ..core.optimization import lp_batch_optimization, random_batch_optimization, predictive_batch_optimization
 try:
     from ..plotting.plots_bo import plot_acquisition, plot_convergence
@@ -89,6 +89,7 @@ class BO(object):
         self.time_zero = time.time()
         self.num_acquisitions = 0
 
+        # --- Initialize time cost of the evaluations
 
         while True:
             # --- Update model
@@ -115,6 +116,7 @@ class BO(object):
             
             # --- Evaluate *f* in X and augment Y
             self.evaluate_objective()
+            self.num_acquisitions += 1
                 
    
         # --- Stop messages and execution time   
@@ -135,14 +137,16 @@ class BO(object):
         if (self._distance_last_evaluations() < self.eps): 
             print '   -Method converged.'
             return 1
-        if (self.max_time < self.cum_time)):               
+        if (self.max_time < self.cum_time):               
             print '   -Evaluation time reached.'
             return 0
 
 
     def evaluate_objective(self):
         if self.n_procs==1:
-            self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
+            Y_new, Y_costnew = evaluate_function(self.f,self.suggested_sample)
+            self.Y = np.vstack((self.Y,Y_new))
+            self.Y_cost= np.vstack((self.Y_cost,Y_costnew))
         else:
             try:
                 # --- Parallel evaluation of *f* if several cores are available
@@ -169,8 +173,7 @@ class BO(object):
         else:
             pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))
             self.s_in_min = np.vstack((self.s_in_min,np.sqrt(abs(pred_min[1])))) 
-              
-        self.num_acquisitions += 1     
+                   
 
 
     def _compute_results(self):
@@ -231,7 +234,7 @@ class BO(object):
         
     def _update_acquisition(self):
         self.acquisition_func.set_model_objective(self.model)
-        self.acquisition_func.set_model_cost(self.cost,self.cost_name)
+        #self.acquisition_func.set_model_cost(self.cost,self.cost_name)
 
 
     def train_gp(self, sparse=False, normalize = False):

@@ -21,10 +21,6 @@ class AcquisitionBase(object):
     def set_model_objective(self, model):
         self.model = model
 
-    def set_model_cost(self, cost, cost_name):
-        self.cost = cost
-        self.cost_name = cost_name
-
     def acquisition_function(self, x):
         pass
 

@@ -5,18 +5,19 @@
 import GPy
 import deepgp
 import numpy as np
+import time
 from ..core.acquisition import AcquisitionEI, AcquisitionMPI, AcquisitionLCB, AcquisitionEL
 from ..core.bo import BO
-from ..util.general import samples_multidimensional_uniform, reshape
+from ..util.general import samples_multidimensional_uniform, reshape, evaluate_function
 from ..util.stats import initial_design
 import warnings
 warnings.filterwarnings("ignore")
 
 
 class BayesianOptimization(BO):
-    def __init__(self, f, cost=None, bounds=None, model_type=None, X=None, Y=None, initial_design_numdata = None, 
+    def __init__(self, f, bounds=None, model_type=None, X=None, Y=None, initial_design_numdata = None, 
         initial_design_type='random', model_optimize_interval=1, acquisition_type ='EI', acquisition_par = 0.00, 
-        model_optimize_restarts=10, normalize=False, exact_feval=False, verbosity=0):
+        model_optimize_restarts=3, normalize=False, exact_feval=False, verbosity=0):
         '''
         Bayesian Optimization using EI, MPI and LCB (or UCB) acquisition functions. 
 
@@ -60,14 +61,6 @@ class BayesianOptimization(BO):
         else:
             self.f = f
 
-        # --- Initialize cost function (constant if not specified)
-        if cost==None: 
-            self.cost = lambda x: 1
-            self.cost_name = 'constant'
-        else:
-            self.cost = cost
-            self.cost_name = 'other'
-
         # --- Initialize bounds
         if bounds==None:
             raise 'Box constraints are needed. Please insert box constrains.'
@@ -94,28 +87,22 @@ class BayesianOptimization(BO):
         else:
             self.initial_design_numdata = initial_design_numdata
 
-        # A couple cases might arise when handling initial observations:
-        # (0) neither X nor Y given, (1) X but not Y given, (2) Y but not X given,
-        # (3) X and Y given.
-        # In case 3, display a warning and proceed as in case (0).
-
-        # if X not given, use randomized initial design (case 0 or 2)
+        # Case 1:
         if X==None:
             if Y!=None:
                 warnings.warn("User supplied initial Y without matching X")
-            self.X = initial_design(self.initial_design_type,self.bounds, self.initial_design_numdata)
-            self.Y = self.f(self.X)
+            self.X = initial_design(self.initial_design_type, self.bounds, self.initial_design_numdata)
+            self.Y, self.Y_cost = evaluate_function(self.f,self.X)
 
-        # case 1: X but not Y given
+        # Case 2
         elif Y==None:
             self.X = X
-            self.Y = f(self.X)
+            self.Y, self.Y_cost = evaluate_function(f,self.X)
 
-        # case 3: X and Y given
+        # Case 3
         else:
             self.X = X
             self.Y = Y
-
 
     def _init_acquisition(self, acquisition_type, acquisition_par):
         self.acqu_name = acquisition_type
