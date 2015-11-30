@@ -14,14 +14,15 @@ warnings.filterwarnings("ignore")
 
 
 class BayesianOptimization(BO):
-    def __init__(self, f, bounds=None, model_type=None, X=None, Y=None, initial_design_numdata = None, initial_design_type='random', model_optimize_interval=1, acquisition_type
-        ='EI', 
-        acquisition_par = 0.00, model_optimize_restarts=10, normalize=False, exact_feval=False, verbosity=0):
+    def __init__(self, f, cost=None, bounds=None, model_type=None, X=None, Y=None, initial_design_numdata = None, 
+        initial_design_type='random', model_optimize_interval=1, acquisition_type ='EI', acquisition_par = 0.00, 
+        model_optimize_restarts=10, normalize=False, exact_feval=False, verbosity=0):
         '''
         Bayesian Optimization using EI, MPI and LCB (or UCB) acquisition functions. 
 
         This is a thin wrapper around the methods.BO class, with a set of sensible defaults
         :param *f* the function to optimize. Should get a nxp numpy array as imput and return a nx1 numpy array.
+        :param *cost* is the cost of evaluation. Should get a nxp numpy array as imput and return a nx1 numpy array.
         :param model: model used for the optimization: it can be 
             - 'GP Regression': used by default 'gp'
             - 'Sparse GP Regression': 'sparsegp'
@@ -51,13 +52,21 @@ class BayesianOptimization(BO):
         self.model_optimize_restarts = model_optimize_restarts
         self.verbosity = verbosity
         self.first_time_optimization = True  
-        self.initial_design_type = initial_design_type
         
-         # --- Initialize function
+        
+         # --- Initialize objective function
         if f==None: 
             print 'Function to optimize is required.'
         else:
             self.f = f
+
+        # --- Initialize cost function (constant if not specified)
+        if cost==None: 
+            self.cost = lambda x: 1
+            self.cost_name = 'constant'
+        else:
+            self.cost = cost
+            self.cost_name = 'other'
 
         # --- Initialize bounds
         if bounds==None:
@@ -76,8 +85,9 @@ class BayesianOptimization(BO):
 
 
 
-
     def _init_design(self, X, Y, initial_design_type, initial_design_numdata):
+
+        self.initial_design_type = initial_design_type
 
         if  initial_design_numdata==None:
             self.initial_design_numdata = 3*self.input_dim
@@ -172,7 +182,7 @@ class BayesianOptimization(BO):
 
     def _init_deepgp(self):
         '''
-        Initializes a deeo Gaussian Process with one hidden layer over *f*.
+        Initializes a deep Gaussian Process with one hidden layer over *f*.
         :param X: input observations.
         :param Y: output values.
         '''

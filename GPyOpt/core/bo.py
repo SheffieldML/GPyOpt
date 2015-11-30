@@ -20,12 +20,14 @@ class BO(object):
     def _init_model(self):
         pass
         
-    def run_optimization(self, max_iter = None, n_inbatch=1, acqu_optimize_method='fast_random', acqu_optimize_restarts=200, batch_method='predictive', 
+    def run_optimization(self, max_iter = None, max_time = None, n_inbatch=1, acqu_optimize_method='fast_random', acqu_optimize_restarts=200, batch_method='predictive', 
         eps = 1e-8, n_procs=1, true_gradients = True, verbose=True):
         """ 
         Runs Bayesian Optimization for a number 'max_iter' of iterations (after the initial exploration data)
 
         :param max_iter: exploration horizon, or number of acquisitions. It nothing is provided optimizes the current acquisition.  
+        :param max_time: maximum exploration horizont in seconds.
+
 	    :param n_inbatch: number of samples to collected everytime *f* is evaluated (one by default).
         :param acqu_optimize_method: method to optimize the acquisition function 
             -'DIRECT': uses the DIRECT algorithm of Jones and Stuckmann. 
@@ -45,48 +47,68 @@ class BO(object):
         :param save_interval: number of iterations after which a file is produced with the current results.
     
         """
-        # --- Load the parameters of the function into the object.
-        if max_iter == None:
-            self.max_iter = 10*self.input_dim
-        else:
-            self.max_iter = max_iter 
-
-        self.num_acquisitions = 0
-        self.n_inbatch=n_inbatch
-        self.batch_method = batch_method
-        if batch_method=='lp':
-            from .acquisition import AcquisitionMP
-            if not isinstance(self.acquisition_func, AcquisitionMP):
-                self.acquisition_func = AcquisitionMP(self.acquisition_func, self.acquisition_func.acquisition_par)
+        # --- Setting up stop conditions
         self.eps = eps 
-        self.acqu_optimize_method = acqu_optimize_method
-        self.acqu_optimize_restarts = acqu_optimize_restarts
-        self.acquisition_func.set_model(self.model)
-        self.n_procs = n_procs
+        if  (max_iter == None) and (max_time == None):
+            self.max_iter = 0
+            self.max_time = np.inf
+        elif (max_iter == None) and (max_time != None):
+            self.max_iter = np.inf
+            self.max_time = max_time
+        elif (max_iter != None) and (max_time == None):
+            self.max_iter = max_iter
+            self.max_time = np.inf     
+        else:
+            self.max_iter = max_iter
+            self.max_time = max_time     
 
-        # --- Decide wether we use the true gradients to optimize the acquitision function
+
+        # --- Decide wether we use the true gradients to optimize the acquisition function
         if true_gradients !=True:
             self.true_gradients = False  
             self.acquisition_func.d_acquisition_function = None
         else: 
             self.true_gradients = true_gradients
 
-        # --- Get starting of running time
-        self.time = time.time()
 
-        # --- If this is the first time to optimization is run - update the model and normalize id needed
-        if self.first_time_optimization: 
-            self._update_model()
-            prediction = self.model.predict(self.X)       
-            self.s_in_min = np.sqrt(abs(prediction[1]))
-            self.first_time_optimization = False
-
-        # --- Initialization of stop conditions.
-        k=0
-        distance_lastX = np.sqrt(sum((self.X[self.X.shape[0]-1,:]-self.X[self.X.shape[0]-2,:])**2))
+        # --- Comfiguration of the batch method
+        self.n_inbatch=n_inbatch
+        self.batch_method = batch_method
+        if batch_method=='lp':
+            from .acquisition import AcquisitionMP
+            if not isinstance(self.acquisition_func, AcquisitionMP):
+                self.acquisition_func = AcquisitionMP(self.acquisition_func, self.acquisition_func.acquisition_par)
         
-        # --- BO loop: this loop does the hard work.
-        while k<self.max_iter and distance_lastX > self.eps:
+        
+        # --- Configuration of the acquisition optimization
+        self.acqu_optimize_method = acqu_optimize_method
+        self.acqu_optimize_restarts = acqu_optimize_restarts
+        self.n_procs = n_procs
+
+        # --- Initialize iterations and running time
+        self.time_zero = time.time()
+        self.num_acquisitions = 0
+
+
+        while True:
+            # --- Update model
+            try:
+                self._update_model()                
+            except np.linalg.linalg.LinAlgError:
+                break
+
+            # --- Update and optimize acquisition
+            self._update_acquisition()
+            self.suggested_sample = self._optimize_acquisition()
+
+            # --- Update internal elements (needed for plotting)
+            self._update_internal_elements()
+
+            # --- Current execution time
+            self.cum_time = time.time() - self.time_zero  
+            
+            if not ((self.num_acquisitions < self.max_iter) and (self._distance_last_evaluations() > self.eps) and (self.max_time > self.cum_time)): 
+                break
 
             # --- Augment X
             self.X = np.vstack((self.X,self.suggested_sample))
@@ -94,31 +116,28 @@ class BO(object):
             # --- Evaluate *f* in X and augment Y
             self.evaluate_objective()
                 
-            # --- Update internal elements (needed for plotting)
-            self._update_internal_elements()
-
-            # --- Update model
-            try:
-                self._update_model()                
-            except np.linalg.linalg.LinAlgError:
-                break
-
-            # --- Update stop conditions
-            k +=1
-            distance_lastX = self._stop_condition()
    
         # --- Stop messages and execution time   
-        self._update_final_values()
+        self._compute_results()
 
+        # --- Plot convergence results
+        self._print_convergence(verbose)
+
+
+
+    def _print_convergence(self,verbose):
         # --- Print stopping reason
-        if verbose: print '*Optimization completed:'
-        if k==self.max_iter and distance_lastX > self.eps:
-            if verbose: print '   -Maximum number of iterations reached.'
+        if verbose: 
+            print '*Optimization completed:'
+        if (self.num_acquisitions > self.max_iter):        
+            print '   -Maximum number of iterations reached.' 
             return 1
-        else: 
-            if verbose: print '   -Method converged.'
+        if (self._distance_last_evaluations() < self.eps): 
+            print '   -Method converged.'
+            return 1
+        if (self.max_time < self.cum_time)):               
+            print '   -Evaluation time reached.'
             return 0
-
 
 
     def evaluate_objective(self):
@@ -142,47 +161,27 @@ class BO(object):
                     self.parallel_error = True 
                 self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
 
-    def _update_internal_elements(self):
-        self.num_acquisitions += 1
-        pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))      
-        self.s_in_min = np.vstack((self.s_in_min,np.sqrt(abs(pred_min[1]))))        
+
+    def _update_internal_elements(self):           
+        if self.num_acquisitions == 0:
+            pred_min = self.model.predict(self.X)
+            self.s_in_min = np.sqrt(abs(pred_min[1]))
+        else:
+            pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))
+            self.s_in_min = np.vstack((self.s_in_min,np.sqrt(abs(pred_min[1])))) 
+              
+        self.num_acquisitions += 1     
 
 
-    def _update_final_values(self):
+    def _compute_results(self):
         self.Y_best = best_value(self.Y)
         self.x_opt = self.X[np.argmin(self.Y),:]
         self.fx_opt = min(self.Y)
-        self.time   = time.time() - self.time 
 
 
-    def _stop_condition(self):
+    def _distance_last_evaluations(self):
         return np.sqrt(sum((self.X[self.X.shape[0]-1,:]-self.X[self.X.shape[0]-2,:])**2))  
-  
 
-    def change_to_sparseGP(self, num_inducing):
-        """
-        Changes standard GP estimation to sparse GP estimation
-	       
-	    :param num_inducing: number of inducing points for sparse-GP modeling
-	     """
-        if self.sparse == True:
-            raise 'Sparse GP is already in use'
-        else:
-            self.num_inducing = num_inducing
-            self.sparse = True
-            self._init_model(self.X,self.Y)
-
-    def change_to_standardGP(self):
-        """
-        Changes sparse GP estimation to standard GP estimation
-
-        """
-        if self.sparse == False:
-            raise 'Sparse GP is already in use'
-        else:
-            self.sparse = False
-            self._init_model(self.X,self.Y)
-    
         
     def _optimize_acquisition(self):
         """
@@ -230,9 +229,9 @@ class BO(object):
             elif self.model_type == 'deepgp_back_constraint':              
                 self.train_deepgp(back_constraint=True, normalize = self.normalize)
         
-        # --- update model and optmize acquisition
-        self.acquisition_func.set_model(self.model)
-        self.suggested_sample = self._optimize_acquisition()
+    def _update_acquisition(self):
+        self.acquisition_func.set_model_objective(self.model)
+        self.acquisition_func.set_model_cost(self.cost,self.cost_name)
 
 
     def train_gp(self, sparse=False, normalize = False):
@@ -278,12 +277,10 @@ class BO(object):
         # iNDUCING INPUTS
         myperm = np.random.permutation(self.model.X.shape[0])
         self.model.obslayer.Z[:] = self.model.obslayer.X.mean[myperm[:self.model.obslayer.num_inducing]]
-
         self.model.optimize('bfgs',messages=1, max_iters=100)
         self.model.obslayer.kern.variance.constrain_positive()
         self.model.layer_1.kern.variance.constrain_positive()
         self.model.optimize('bfgs',messages=1,max_iters=100)
-
         self.model.layers[1].likelihood.constrain_positive()
         self.model.optimize('bfgs',messages=1,max_iters=3000)
 

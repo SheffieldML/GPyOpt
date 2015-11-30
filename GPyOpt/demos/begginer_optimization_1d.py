@@ -33,6 +33,7 @@ def begginer_optimization_1d(plots=True):
     objective_noisy = GPyOpt.fmodels.experiments1d.forrester(sd= .25)       # noisy version
     bounds = [(0,1)]                                                        # problem constrains 
 
+
     # --- Problem definition and optimization
     BO_demo_1d = GPyOpt.methods.BayesianOptimization(f=objective_noisy.f,   # function to optimize       
                                                     bounds=bounds,          # box-constrains of the problem

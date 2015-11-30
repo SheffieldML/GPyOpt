@@ -5,6 +5,7 @@
 import numpy as np
 from scipy.stats import norm
 from ..util.general import get_moments, get_d_moments, get_quantiles
+from autograd import grad
 
 class AcquisitionBase(object):
     """
@@ -17,8 +18,12 @@ class AcquisitionBase(object):
         else: 
             self.acquisition_par = acquisition_par
             
-    def set_model(self,model):
+    def set_model_objective(self, model):
         self.model = model
+
+    def set_model_cost(self, cost, cost_name):
+        self.cost = cost
+        self.cost_name = cost_name
 
     def acquisition_function(self, x):
         pass
@@ -49,6 +54,7 @@ class AcquisitionEI(AcquisitionBase):
         phi, Phi, _ = get_quantiles(self.acquisition_par, fmin, m, s)    
         df_acqu = dsdx * phi - Phi * dmdx
         return -df_acqu
+
         
 class AcquisitionEL(AcquisitionBase):
     """
@@ -131,7 +137,7 @@ class AcquisitionMP(AcquisitionBase):
         if isinstance(acq, AcquisitionLCB) and self.transform=='none':
             self.transform='softplus'
             
-    def set_model(self,model):
+    def set_model_objective(self,model):
         self.model = model
         self.acq.model = model
 
