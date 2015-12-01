@@ -117,7 +117,7 @@ def plot_convergence(Xdata,best_Y,s_in_min, filename = None):
 
     # Plot of the proposed v(x) at the proposed sampling points
     plt.subplot(1, 3, 3)
-    plt.errorbar(range(n),[0]*n , yerr=s_in_min[:,0],ecolor='b', capthick=1)
+    plt.errorbar(range(len(s_in_min[:,0])),[0]*n , yerr=s_in_min[:,0],ecolor='b', capthick=1)
     plt.title('Predicted sd. in the next sample')
     plt.xlabel('Iteration')
     plt.ylim(0,max(s_in_min[:,0])+np.sqrt(max(s_in_min[:,0])))

@@ -54,7 +54,6 @@ class BayesianOptimization(BO):
         self.verbosity = verbosity
         self.first_time_optimization = True  
         
-        
          # --- Initialize objective function
         if f==None: 
             print 'Function to optimize is required.'

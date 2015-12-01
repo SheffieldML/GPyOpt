@@ -87,11 +87,12 @@ class BO(object):
 
         # --- Initialize iterations and running time
         self.time_zero = time.time()
+        self.cum_time  = 0
         self.num_acquisitions = 0
 
         # --- Initialize time cost of the evaluations
 
-        while True:
+        while (self.max_time > self.cum_time):
             # --- Update model
             try:
                 self._update_model()                
@@ -104,11 +105,8 @@ class BO(object):
 
             # --- Update internal elements (needed for plotting)
             self._update_internal_elements()
-
-            # --- Current execution time
-            self.cum_time = time.time() - self.time_zero  
             
-            if not ((self.num_acquisitions < self.max_iter) and (self._distance_last_evaluations() > self.eps) and (self.max_time > self.cum_time)): 
+            if not ((self.num_acquisitions < self.max_iter) and (self._distance_last_evaluations() > self.eps)): 
                 break
 
             # --- Augment X
@@ -116,6 +114,9 @@ class BO(object):
             
             # --- Evaluate *f* in X and augment Y
             self.evaluate_objective()
+
+            # --- Update current evaluation time and function evaluations
+            self.cum_time = time.time() - self.time_zero  
             self.num_acquisitions += 1
                 
    
