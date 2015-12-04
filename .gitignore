@@ -44,3 +44,5 @@ iterate.dat
 # git merge files #
 ###################
 *.orig
+
+.DS_Store
