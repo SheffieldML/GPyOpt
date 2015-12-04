@@ -5,7 +5,6 @@
 import numpy as np
 from scipy.stats import norm
 from ..util.general import get_moments, get_d_moments, get_quantiles
-from autograd import grad
 
 class AcquisitionBase(object):
     """
