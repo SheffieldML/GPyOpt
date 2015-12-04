@@ -4,6 +4,7 @@
 
 import numpy as np
 from scipy.special import erfc
+import time
 
 def best_gess(f,X):
     '''
@@ -122,7 +123,18 @@ def spawn(f):
     return fun
 
 
-
+def evaluate_function(f,X):
+    '''
+    Returs the evaluation of a function *f* and the time per evaluation
+    '''
+    num_data, dim_data = X.shape
+    Y_eval = np.zeros((num_data, dim_data))
+    Y_time = np.zeros((num_data, 1))
+    for i in range(num_data):
+        time_zero = time.time()
+        Y_eval[i,:] = f(X[i,:])
+        Y_time[i,:] = time.time() - time_zero 
+    return Y_eval, Y_time
 
 
 

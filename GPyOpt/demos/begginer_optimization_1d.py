@@ -33,19 +33,20 @@ def begginer_optimization_1d(plots=True):
     objective_noisy = GPyOpt.fmodels.experiments1d.forrester(sd= .25)       # noisy version
     bounds = [(0,1)]                                                        # problem constrains 
 
+
     # --- Problem definition and optimization
     BO_demo_1d = GPyOpt.methods.BayesianOptimization(f=objective_noisy.f,   # function to optimize       
                                                     bounds=bounds,          # box-constrains of the problem
-                                                    acquisition='EI')       # Selects the Expected improvement
-    # Run the optimization for 15 iterations
-    max_iter = 15                                                           
+                                                    acquisition_type='EI')       # Selects the Expected improvement
+    # Run the optimization for 10 seconds
+    max_time = 10                                                         
 
     print '-----'
     print '----- Running demo. It may take a few seconds.'
     print '-----'
     
     # Run the optimization                                                  
-    BO_demo_1d.run_optimization(max_iter,                                   # evaluation budget
+    BO_demo_1d.run_optimization(max_time=max_time,                                   # evaluation budget
                                     eps=10e-6)                              # stop criterion
                             
 
