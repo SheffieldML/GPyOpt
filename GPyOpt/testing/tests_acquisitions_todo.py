@@ -3,8 +3,12 @@ import numpy as np
 import GPyOpt
 from numpy.random import seed
 
-class TestEI(unittest.TestCase):
-    
+class TestAcquisitions(unittest.TestCase):
+    '''
+    Unit test of the availabble acquisition functions and their gradients: EI, UCB, MPI.
+
+    '''
+
     def setUp(self):
         #initialize model
         seed(1234)
@@ -19,6 +23,10 @@ class TestEI(unittest.TestCase):
     def test_bo(self):
         # Run bo optimization
         self.assertEqual(self.bo.suggested_sample[0][0],0.66656362406227299)
+
+
+
+
 
 
 if __name__ == '__main__':
