@@ -132,7 +132,10 @@ def optimize_acquisition(acquisition, d_acquisition, bounds, acqu_optimize_resta
     '''
     Optimization of the acquisition function
     '''
-    if acqu_optimize_method=='brute':
+    
+    if acqu_optimize_method == 'grid':
+        res = grid_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimize_restarts, model, 'brute', X_batch, L, Min)
+    elif acqu_optimize_method=='brute':
         res = full_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimize_restarts, model, 'brute', X_batch, L, Min)
     elif acqu_optimize_method=='random':
         res =  full_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimize_restarts, model, 'random', X_batch, L, Min)
@@ -174,6 +177,15 @@ def full_acquisition_optimization(acquisition, d_acquisition, bounds, acqu_optim
         mins[k],fmins[k] = wrapper_lbfgsb(acquisition,d_acquisition,x0 = samples[k,:],bounds=bounds)
     return mins[np.argmin(fmins)]
 
+def grid_acquisition_optimization(acquisition, d_acquisition, bounds, acqu_optimize_restarts, model, method_type, X_batch=None, L=None, Min=None):
+    '''
+    Optimizes the acquisition in a grid op points by taking the argmin
+    '''
+    if acqu_optimize_restarts == None:
+        acqu_optimize_restarts = 3
+    samples = multigrid(bounds, acqu_optimize_restarts)
+    pred_samples = acquisition(samples)
+    return samples[np.argmin(pred_samples)]
 
 def estimate_L(model,bounds,storehistory=True):
     '''
@@ -240,7 +252,8 @@ def wrapper_DIRECT(f,bounds):
             return g
         lB = np.asarray(bounds)[:,0]
         uB = np.asarray(bounds)[:,1]
-        x,_,_ = solve(DIRECT_f_wrapper(f),lB,uB, maxT=750, maxf=2000,volper=0.005)
+        #x,_,_ = solve(DIRECT_f_wrapper(f),lB,uB, maxT=750, maxf=2000,volper=0.005) # this can be used to speed up DIRECT (losses precission)
+        x,_,_ = solve(DIRECT_f_wrapper(f),lB,uB)
         return reshape(x,len(bounds))
     except:
         print("Cannot find DIRECT library, please install it to use this option.")

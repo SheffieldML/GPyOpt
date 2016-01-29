@@ -26,6 +26,7 @@ class BO(object):
         :param max_iter: exploration horizon, or number of acquisitions. It nothing is provided optimizes the current acquisition.  
 	    :param n_inbatch: number of samples to collected everytime *f* is evaluated (one by default).
         :param acqu_optimize_method: method to optimize the acquisition function 
+            -'grid': optimizes the acquisition in fixed grid of points.
             -'DIRECT': uses the DIRECT algorithm of Jones and Stuckmann. 
             -'CMA': uses the Covariance Matrix Adaptation Algorithm.
 	        -'brute': Run local optimizers in a grid of points.
