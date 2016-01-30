@@ -5,7 +5,7 @@ import os
 import numpy as np
 
 
-def run_eval(f_obj, f_bounds, f_inits, method_config, name, outpath='.', time_limit=-1):
+def run_eval(f_obj, f_bounds, f_inits, method_config, name, outpath='.', time_limit=-1, unittest = False):
     m_c = method_config
 
     # Inital values
@@ -20,13 +20,8 @@ def run_eval(f_obj, f_bounds, f_inits, method_config, name, outpath='.', time_li
 
     # Save value of X in a file
     results = bo.X
-    np.savetxt(os.path.join(outpath,name+'.txt'),results)
+    
+    if unittest==False:
+        np.savetxt(os.path.join(outpath,name+'.txt'),results)
 
-
-def draw_random_inits(bounds, num):
-    d = len(bounds)
-    samples = np.random.rand(num,d)
-    for i in xrange(d):
-        bmin,bmax = bounds[i]
-        samples[:,i] = samples[:,i]*(bmax-bmin)+bmin
-    return samples
+    return results
