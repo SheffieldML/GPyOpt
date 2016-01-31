@@ -16,57 +16,133 @@ class TestBatchMethods(unittest.TestCase):
 		self.outpath = './test_files'
 		self.is_unittest = True    # test files were generated with this line =True
 
+		##
 		# -- methods configuration
-		n_inbatch = 2                         # Number of data per batch
-		acquisition_name = 'EI'
-		acqu_optimize_method = 'grid'
-		acqu_optimize_restarts = 10
-		max_iter = 2
-		
+		##
+		max_iter 				= 2
+
+		# acquisition type
+		acquisition_name 		= 'EI'
+		acquisition_par			= 0
+
+		# acquisition optimization type
+		acqu_optimize_method 	= 'grid'
+		acqu_optimize_restarts 	= 10
+		true_gradients			= True
+
+		# batch type
+		n_inbatch 				= 2
+		# batch_method			= 'predictive
+		# n_procs				= 1,
+
+		# type of inital design
+		numdata_initial_design 	= None
+		type_initial_design		= 'random' 
+
+		# model type
+		kernel 					= None
+		model_optimize_interval	= 1 
+		model_optimize_restarts = 2 
+		sparseGP				= False 	
+		num_inducing			= None 
+
+		# likelihood type
+		normalize				= False
+		exact_feval				= False 
+		eps 					= 1e-8
+		verbosity				= False 
+
+
 		self.methods_configs = [
             		{ 'name': 'MP',
+            		'max_iter':max_iter,
             		'acquisition_name':acquisition_name,
-                    'acquisition_par': 0,
+                    'acquisition_par': acquisition_par,
+                    'true_gradients': true_gradients,
                     'acqu_optimize_method':acqu_optimize_method,
-                    'acqu_optimize_restarts':acqu_optimize_restarts,
+                    'acqu_optimize_restarts':acqu_optimize_restarts,         
                     'batch_method': 'lp',
                     'n_inbatch':n_inbatch,
-                    'max_iter':max_iter,
                     'n_procs':n_inbatch,
-                    'X-result': 0,
+                    'numdata_initial_design': numdata_initial_design,
+                    'type_initial_design': type_initial_design,
+                    'kernel': kernel,
+                    'model_optimize_interval': model_optimize_interval,
+                    'model_optimize_restarts': model_optimize_restarts,
+                    'sparseGP': sparseGP,
+                    'num_inducing': num_inducing,
+                    'normalize': normalize,
+                    'exact_feval': exact_feval,
+                    'eps': eps,
+                    'verbosity':verbosity,
                   },
-                  { 'name': 'sequential',
+                  { 'name': 'Sequential',
+                    'max_iter':n_inbatch,
                     'acquisition_name':acquisition_name,
-                    'acquisition_par': 0,
+                    'acquisition_par': acquisition_par,
+                    'true_gradients': true_gradients,
                     'acqu_optimize_method':acqu_optimize_method,
                     'acqu_optimize_restarts':acqu_optimize_restarts,
                     'batch_method': 'predictive',
                     'n_inbatch':1,
-                    'max_iter':n_inbatch,
-                    'n_procs':1,
-                    'X-result': 0,
+                    'n_procs':1,                
+                    'numdata_initial_design': numdata_initial_design,
+                    'type_initial_design': type_initial_design,
+                    'kernel': kernel,
+                    'model_optimize_interval': model_optimize_interval,
+                    'model_optimize_restarts': model_optimize_restarts,
+                    'sparseGP': sparseGP,
+                    'num_inducing': num_inducing,
+                    'normalize': normalize,
+                    'exact_feval': exact_feval,
+                    'eps': eps,
+                    'verbosity':verbosity,
+                    
                   },
-                 { 'name': 'random',
-                   'acquisition_name':acquisition_name,
-                    'acquisition_par': 0,
+                 { 'name': 'Random',
+                    'max_iter':max_iter,
+                    'acquisition_name':acquisition_name,
+                    'acquisition_par': acquisition_par,
+                    'true_gradients': true_gradients,
                     'acqu_optimize_method':acqu_optimize_method,
                     'acqu_optimize_restarts':acqu_optimize_restarts,
                     'batch_method': 'random',
                     'n_inbatch':n_inbatch,
-                    'max_iter':max_iter,
-                    'n_procs':1,
-                    'X-result': 0,
+                    'n_procs':1,                  
+                    'numdata_initial_design': numdata_initial_design,
+                    'type_initial_design': type_initial_design,
+                    'kernel': kernel,
+                    'model_optimize_interval': model_optimize_interval,
+                    'model_optimize_restarts': model_optimize_restarts,
+                    'sparseGP': sparseGP,
+                    'num_inducing': num_inducing,
+                    'normalize': normalize,
+                    'exact_feval': exact_feval,
+                    'eps': eps,
+                    'verbosity':verbosity,
+                    
                   },
                   { 'name': 'GP-prediction',
+                    'max_iter':max_iter,
                     'acquisition_name':acquisition_name,
-                    'acquisition_par': 0,
+                    'acquisition_par': acquisition_par,
+                    'true_gradients': true_gradients,
                     'acqu_optimize_method':acqu_optimize_method,
                     'acqu_optimize_restarts':acqu_optimize_restarts,
                     'batch_method': 'predictive',
                     'n_inbatch':n_inbatch,
-                    'max_iter':max_iter,
-                    'n_procs':n_inbatch,
-                    'X-result': 0,
+                    'n_procs':n_inbatch,                 
+                    'numdata_initial_design': numdata_initial_design,
+                    'type_initial_design': type_initial_design,
+                    'kernel': kernel,
+                    'model_optimize_interval': model_optimize_interval,
+                    'model_optimize_restarts': model_optimize_restarts,
+                    'sparseGP': sparseGP,
+                    'num_inducing': num_inducing,
+                    'normalize': normalize,
+                    'exact_feval': exact_feval,
+                    'eps': eps, 
+                    'verbosity':verbosity,
                   },
 				]
 
@@ -83,7 +159,6 @@ class TestBatchMethods(unittest.TestCase):
 
 	def test_run(self):
 		np.random.seed(1)
-
 		for m_c in self.methods_configs:
 			print 'Testing batch method: ' + m_c['name']
 			name = m_c['name']+'_'+'batch_testfile'
@@ -93,6 +168,7 @@ class TestBatchMethods(unittest.TestCase):
 
 if __name__=='main':
 	unittest.main()
+
 
 
 
