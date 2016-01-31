@@ -1,13 +1,9 @@
-#!/usr/bin/env python
-
 import numpy as np
 import os
 import GPyOpt
 from GPyOpt.util.general import samples_multidimensional_uniform
 from utils_test import run_eval
-import random
 np.random.seed(1)
-
 outpath = './test_files'
 
 n_inbatch = 2                         # Number of data per batch
@@ -68,17 +64,11 @@ methods_configs = [
 
 if __name__ == '__main__':
      
-
     f_obj = GPyOpt.fmodels.experimentsNd.gSobol(np.ones(f_dim)).f
-        
-    # Define bounds
     f_bounds = [f_bound_dim]*f_dim
-        
-    # Define initial points
     f_inits = samples_multidimensional_uniform(f_bounds,n_inital_design)
-        
     f_inits = f_inits.reshape(1, f_dim, f_inits.shape[-1])
-
     for m_c in methods_configs:
+        np.random.seed(1)
         name = m_c['name']+'_'+'batch_testfile'
         run_eval(f_obj, f_bounds, f_inits, method_config=m_c, name=name, outpath=outpath, time_limit=None)
