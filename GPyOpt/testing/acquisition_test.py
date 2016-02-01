@@ -160,10 +160,10 @@ class TestAcquisitions(unittest.TestCase):
 		np.random.seed(1)
 		for m_c in self.methods_configs:		
 			print 'Testing acquisition ' + m_c['name']
-			name = m_c['name']+'_'+'acquisition_testfile'
+			name = m_c['name']+'_'+'acquisition_gradient_testfile'
 			unittest_result = run_eval(self.f_obj, self.f_bounds, self.f_inits, method_config=m_c, name=name, outpath=self.outpath, time_limit=None, unittest = self.is_unittest)			
 			original_result = np.loadtxt(self.outpath +'/'+ name+'.txt')
-			self.assertTrue((original_result == unittest_result).all())
+			self.assertTrue((abs(original_result - unittest_result)<1e-8).all())
 
 if __name__=='main':
 	unittest.main()
