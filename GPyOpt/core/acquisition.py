@@ -63,7 +63,7 @@ class AcquisitionEL(AcquisitionBase):
         loss =  fmin + (m-fmin)*Phi - s*phi                                # same as EI excepting the first term fmin
         return loss
     
-    def d_acquisition(self,x):
+    def d_acquisition_function(self,x):
         """
         Derivative of the 1-step ahead expected loss
         """    
