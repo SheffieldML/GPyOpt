@@ -19,6 +19,9 @@ class TestBatchMethods(unittest.TestCase):
 		##
 		# -- methods configuration
 		##
+
+        # stop conditions
+        eps                     = 1e-8
 		max_iter 				= 2
 
 		# acquisition type

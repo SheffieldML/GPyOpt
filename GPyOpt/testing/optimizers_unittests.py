@@ -19,7 +19,10 @@ class TestAcquisitions(unittest.TestCase):
 		##
 		# -- methods configuration
 		##
+
+		# stop conditions
 		max_iter 				= 5
+		eps 					= 1e-8
 
 		# acquisition type (testing here)
 		acquisition_name 		= 'EI'
@@ -49,7 +52,7 @@ class TestAcquisitions(unittest.TestCase):
 		# likelihood type
 		normalize				= False
 		exact_feval				= False 
-		eps 					= 1e-8
+		
 		verbosity				= False 
 
 

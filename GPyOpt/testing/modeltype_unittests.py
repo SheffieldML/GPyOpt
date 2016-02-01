@@ -7,7 +7,7 @@ import unittest
 
 class TestAcquisitions(unittest.TestCase):
 	'''
-	Unittest for the available aquisition functions
+	Unittest for the different types of models supported by this version of GPyOpt
 	'''
 
 	def setUp(self):
@@ -19,18 +19,16 @@ class TestAcquisitions(unittest.TestCase):
 		##
 		# -- methods configuration
 		##
-
-		# stop conditions
-		max_iter 				= 5
+		max_iter 				= 10
 		eps 					= 1e-8
 
 		# acquisition type (testing here)
-		#acquisition_name 		= 'EI'
-		#acquisition_par		= 0
+		acquisition_name 		= 'EI'
+		acquisition_par			= 0.0
 
 		# acquisition optimization type
-		acqu_optimize_method 	= 'grid'
-		acqu_optimize_restarts 	= 10
+		acqu_optimize_method 	= 'fast_random'
+		acqu_optimize_restarts 	= 25
 		true_gradients			= True
 
 		# batch type
@@ -39,28 +37,27 @@ class TestAcquisitions(unittest.TestCase):
 		n_procs					= 1
 
 		# type of inital design
-		numdata_initial_design 	= None
+		numdata_initial_design 	= 3
 		type_initial_design		= 'random' 
 
 		# model type
 		kernel 					= None
-		model_optimize_interval	= 1 
+		#model_optimize_interval	= 1 
 		model_optimize_restarts = 2 
-		sparseGP				= False 	
-		num_inducing			= None 
+		#sparseGP				= False 	
+		#num_inducing			= None 
 
 		# likelihood type
 		normalize				= False
 		exact_feval				= False 
-		eps 					= 1e-8
 		verbosity				= False 
 
 
 		self.methods_configs = [
-					{ 'name': 'EI-0',
+					{ 'name': 'GP_1_optrestarts_1_optinterval',
 					'max_iter':max_iter,
-					'acquisition_name':'EI',
-					'acquisition_par': 0,
+					'acquisition_name':acquisition_name,
+					'acquisition_par': acquisition_par,
 					'true_gradients': true_gradients,
 					'acqu_optimize_method':acqu_optimize_method,
 					'acqu_optimize_restarts':acqu_optimize_restarts,		 
@@ -70,19 +67,19 @@ class TestAcquisitions(unittest.TestCase):
 					'numdata_initial_design': numdata_initial_design,
 					'type_initial_design': type_initial_design,
 					'kernel': kernel,
-					'model_optimize_interval': model_optimize_interval,
+					'model_optimize_interval': 1,
 					'model_optimize_restarts': model_optimize_restarts,
-					'sparseGP': sparseGP,
-					'num_inducing': num_inducing,
+					'sparseGP': False,
+					'num_inducing': None,
 					'normalize': normalize,
 					'exact_feval': exact_feval,
 					'eps': eps,
 					'verbosity':verbosity,
 				  },
-					{ 'name': 'EI-.1',
+					{ 'name': 'GP_2_optrestarts_2_optinterval',
 					'max_iter':max_iter,
-					'acquisition_name':'EI',
-					'acquisition_par': .1,
+					'acquisition_name':acquisition_name,
+					'acquisition_par': acquisition_par,
 					'true_gradients': true_gradients,
 					'acqu_optimize_method':acqu_optimize_method,
 					'acqu_optimize_restarts':acqu_optimize_restarts,		 
@@ -92,19 +89,19 @@ class TestAcquisitions(unittest.TestCase):
 					'numdata_initial_design': numdata_initial_design,
 					'type_initial_design': type_initial_design,
 					'kernel': kernel,
-					'model_optimize_interval': model_optimize_interval,
+					'model_optimize_interval': 2,
 					'model_optimize_restarts': model_optimize_restarts,
-					'sparseGP': sparseGP,
-					'num_inducing': num_inducing,
+					'sparseGP': False,
+					'num_inducing': None,
 					'normalize': normalize,
 					'exact_feval': exact_feval,
 					'eps': eps,
 					'verbosity':verbosity,
 				  },
-					{ 'name': 'MPI',
+				  	{ 'name': 'sparseGP_5ip',
 					'max_iter':max_iter,
-					'acquisition_name':'MPI',
-					'acquisition_par': 0,
+					'acquisition_name':acquisition_name,
+					'acquisition_par': acquisition_par,
 					'true_gradients': true_gradients,
 					'acqu_optimize_method':acqu_optimize_method,
 					'acqu_optimize_restarts':acqu_optimize_restarts,		 
@@ -114,32 +111,10 @@ class TestAcquisitions(unittest.TestCase):
 					'numdata_initial_design': numdata_initial_design,
 					'type_initial_design': type_initial_design,
 					'kernel': kernel,
-					'model_optimize_interval': model_optimize_interval,
+					'model_optimize_interval': 1,
 					'model_optimize_restarts': model_optimize_restarts,
-					'sparseGP': sparseGP,
-					'num_inducing': num_inducing,
-					'normalize': normalize,
-					'exact_feval': exact_feval,
-					'eps': eps,
-					'verbosity':verbosity,
-				  },
-					{ 'name': 'LCB-0.5',
-					'max_iter':max_iter,
-					'acquisition_name':'LCB',
-					'acquisition_par': 0.5,
-					'true_gradients': true_gradients,
-					'acqu_optimize_method':acqu_optimize_method,
-					'acqu_optimize_restarts':acqu_optimize_restarts,		 
-					'batch_method': batch_method,
-					'n_inbatch':n_inbatch,
-					'n_procs':n_inbatch,
-					'numdata_initial_design': numdata_initial_design,
-					'type_initial_design': type_initial_design,
-					'kernel': kernel,
-					'model_optimize_interval': model_optimize_interval,
-					'model_optimize_restarts': model_optimize_restarts,
-					'sparseGP': sparseGP,
-					'num_inducing': num_inducing,
+					'sparseGP': True,
+					'num_inducing': 5,
 					'normalize': normalize,
 					'exact_feval': exact_feval,
 					'eps': eps,
@@ -158,10 +133,10 @@ class TestAcquisitions(unittest.TestCase):
 		self.f_inits = self.f_inits.reshape(1, f_dim, self.f_inits.shape[-1])
 
 	def test_run(self):
-		np.random.seed(1)
-		for m_c in self.methods_configs:		
-			print 'Testing acquisition ' + m_c['name']
-			name = m_c['name']+'_'+'acquisition_testfile'
+		for m_c in self.methods_configs:	
+			np.random.seed(1)	
+			print 'Testing acquisition optimizer: ' + m_c['name']
+			name = m_c['name']+'_'+'modeltype_testfile'
 			unittest_result = run_eval(self.f_obj, self.f_bounds, self.f_inits, method_config=m_c, name=name, outpath=self.outpath, time_limit=None, unittest = self.is_unittest)			
 			original_result = np.loadtxt(self.outpath +'/'+ name+'.txt')
 			self.assertTrue((original_result == unittest_result).all())
