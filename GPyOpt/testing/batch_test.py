@@ -2,12 +2,12 @@ import numpy as np
 import os
 import GPyOpt
 from GPyOpt.util.general import samples_multidimensional_uniform
-from utils_test import run_eval
+from utils import run_eval
 import unittest
 
-class TestAcquisitions(unittest.TestCase):
+class TestBatchMethods(unittest.TestCase):
 	'''
-	Unittest for the available aquisition functions
+	Unittest for the available batch methods
 	'''
 
 	def setUp(self):
@@ -21,12 +21,12 @@ class TestAcquisitions(unittest.TestCase):
 		##
 
 		# stop conditions
-		max_iter 				= 5
-		eps 					= 1e-8
+		eps					 = 1e-8
+		max_iter 				= 2
 
-		# acquisition type (testing here)
-		#acquisition_name 		= 'EI'
-		#acquisition_par		= 0
+		# acquisition type
+		acquisition_name 		= 'EI'
+		acquisition_par			= 0
 
 		# acquisition optimization type
 		acqu_optimize_method 	= 'grid'
@@ -34,9 +34,9 @@ class TestAcquisitions(unittest.TestCase):
 		true_gradients			= True
 
 		# batch type
-		n_inbatch 				= 1
-		batch_method			= 'predictive'
-		n_procs					= 1
+		n_inbatch 				= 2
+		# batch_method			= 'predictive
+		# n_procs				= 1,
 
 		# type of inital design
 		numdata_initial_design 	= None
@@ -57,14 +57,14 @@ class TestAcquisitions(unittest.TestCase):
 
 
 		self.methods_configs = [
-					{ 'name': 'EI-0',
+					{ 'name': 'MP',
 					'max_iter':max_iter,
-					'acquisition_name':'EI',
-					'acquisition_par': 0,
+					'acquisition_name':acquisition_name,
+					'acquisition_par': acquisition_par,
 					'true_gradients': true_gradients,
 					'acqu_optimize_method':acqu_optimize_method,
 					'acqu_optimize_restarts':acqu_optimize_restarts,		 
-					'batch_method': batch_method,
+					'batch_method': 'lp',
 					'n_inbatch':n_inbatch,
 					'n_procs':n_inbatch,
 					'numdata_initial_design': numdata_initial_design,
@@ -79,16 +79,16 @@ class TestAcquisitions(unittest.TestCase):
 					'eps': eps,
 					'verbosity':verbosity,
 				  },
-					{ 'name': 'EI-.1',
-					'max_iter':max_iter,
-					'acquisition_name':'EI',
-					'acquisition_par': .1,
+				  { 'name': 'Sequential',
+					'max_iter':n_inbatch,
+					'acquisition_name':acquisition_name,
+					'acquisition_par': acquisition_par,
 					'true_gradients': true_gradients,
 					'acqu_optimize_method':acqu_optimize_method,
-					'acqu_optimize_restarts':acqu_optimize_restarts,		 
-					'batch_method': batch_method,
-					'n_inbatch':n_inbatch,
-					'n_procs':n_inbatch,
+					'acqu_optimize_restarts':acqu_optimize_restarts,
+					'batch_method': 'predictive',
+					'n_inbatch':1,
+					'n_procs':1,				
 					'numdata_initial_design': numdata_initial_design,
 					'type_initial_design': type_initial_design,
 					'kernel': kernel,
@@ -100,17 +100,18 @@ class TestAcquisitions(unittest.TestCase):
 					'exact_feval': exact_feval,
 					'eps': eps,
 					'verbosity':verbosity,
+					
 				  },
-					{ 'name': 'MPI',
+				 { 'name': 'Random',
 					'max_iter':max_iter,
-					'acquisition_name':'MPI',
-					'acquisition_par': 0,
+					'acquisition_name':acquisition_name,
+					'acquisition_par': acquisition_par,
 					'true_gradients': true_gradients,
 					'acqu_optimize_method':acqu_optimize_method,
-					'acqu_optimize_restarts':acqu_optimize_restarts,		 
-					'batch_method': batch_method,
+					'acqu_optimize_restarts':acqu_optimize_restarts,
+					'batch_method': 'random',
 					'n_inbatch':n_inbatch,
-					'n_procs':n_inbatch,
+					'n_procs':1,				  
 					'numdata_initial_design': numdata_initial_design,
 					'type_initial_design': type_initial_design,
 					'kernel': kernel,
@@ -122,17 +123,18 @@ class TestAcquisitions(unittest.TestCase):
 					'exact_feval': exact_feval,
 					'eps': eps,
 					'verbosity':verbosity,
+					
 				  },
-					{ 'name': 'LCB-0.5',
+				  { 'name': 'GP-prediction',
 					'max_iter':max_iter,
-					'acquisition_name':'LCB',
-					'acquisition_par': 0.5,
+					'acquisition_name':acquisition_name,
+					'acquisition_par': acquisition_par,
 					'true_gradients': true_gradients,
 					'acqu_optimize_method':acqu_optimize_method,
-					'acqu_optimize_restarts':acqu_optimize_restarts,		 
-					'batch_method': batch_method,
+					'acqu_optimize_restarts':acqu_optimize_restarts,
+					'batch_method': 'predictive',
 					'n_inbatch':n_inbatch,
-					'n_procs':n_inbatch,
+					'n_procs':n_inbatch,				 
 					'numdata_initial_design': numdata_initial_design,
 					'type_initial_design': type_initial_design,
 					'kernel': kernel,
@@ -142,13 +144,14 @@ class TestAcquisitions(unittest.TestCase):
 					'num_inducing': num_inducing,
 					'normalize': normalize,
 					'exact_feval': exact_feval,
-					'eps': eps,
+					'eps': eps, 
 					'verbosity':verbosity,
 				  },
 				]
 
 		# -- Problem setup
 		np.random.seed(1)
+
 		f_bound_dim = (-5.,5.)
 		f_dim = 5
 		n_inital_design = 5
@@ -159,9 +162,9 @@ class TestAcquisitions(unittest.TestCase):
 
 	def test_run(self):
 		np.random.seed(1)
-		for m_c in self.methods_configs:		
-			print 'Testing acquisition ' + m_c['name']
-			name = m_c['name']+'_'+'acquisition_testfile'
+		for m_c in self.methods_configs:
+			print 'Testing batch method: ' + m_c['name']
+			name = m_c['name']+'_'+'batch_testfile'
 			unittest_result = run_eval(self.f_obj, self.f_bounds, self.f_inits, method_config=m_c, name=name, outpath=self.outpath, time_limit=None, unittest = self.is_unittest)			
 			original_result = np.loadtxt(self.outpath +'/'+ name+'.txt')
 			self.assertTrue((original_result == unittest_result).all())

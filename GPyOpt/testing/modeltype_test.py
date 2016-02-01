@@ -2,7 +2,7 @@ import numpy as np
 import os
 import GPyOpt
 from GPyOpt.util.general import samples_multidimensional_uniform
-from utils_test import run_eval
+from utils import run_eval
 import unittest
 
 class TestAcquisitions(unittest.TestCase):
