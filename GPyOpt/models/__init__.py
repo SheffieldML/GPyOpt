@@ -1,1 +1,2 @@
-from .models import GPModel
+from .base import BOModel
+from .gpmodel import GPModel

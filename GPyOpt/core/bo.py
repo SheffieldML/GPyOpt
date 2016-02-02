@@ -14,7 +14,7 @@ except:
     pass
 
 class BO(object):
-    def __init__(self, func, model, space, acquisition_func, acq_optimizer, normalize_Y=True, model_optimize_interval=1):
+    def __init__(self, func, model, space, acquisition_func, acq_optimizer, normalize_Y = True, model_optimize_interval = 1):
         self.f = func
         self.model = model
         self.space = space
@@ -29,26 +29,9 @@ class BO(object):
 
         :param max_iter: exploration horizon, or number of acquisitions. It nothing is provided optimizes the current acquisition.  
         :param max_time: maximum exploration horizont in seconds.
-
-	    :param n_inbatch: number of samples to collected everytime *f* is evaluated (one by default).
-        :param acqu_optimize_method: method to optimize the acquisition function 
-            -'DIRECT': uses the DIRECT algorithm of Jones and Stuckmann. 
-            -'CMA': uses the Covariance Matrix Adaptation Algorithm.
-	        -'brute': Run local optimizers in a grid of points.
-	        -'random': Run local optimizers started at random locations.
-            -'fast_brute': the same as brute but runs only one optimizer in the best location. It is used by default.
-            -'fast_random': the same as random but runs only one optimizer in the best location.
-        :param acqu_optimize_restarts: numbers of random restarts in the optimization of the acquisition function, default = 20.
-	    :param batch_method: method to collect samples in batches
-            -'predictive': uses the predicted mean in the selected sample to update the acquisition function.
-            -'lp': used a penalization of the acquisition function to based on exclusion zones.
-            -'random': collects the element of the batch randomly
-    	:param eps: minimum distance between two consecutive x's to keep running the model
-    	:param n_procs: The number of processes used for evaluating the given function *f* (ideally nprocs=n_inbatch).
-        :param true_gradients: If the true gradients (can be slow) of the acquisition ar an approximation is used (True, default).
-        :param save_interval: number of iterations after which a file is produced with the current results.
-    
+        :param eps: minimum distance between two consecutive x's to keep running the model
         """
+
         # --- Setting up stop conditions
         self.eps = eps 
         if  (max_iter == None) and (max_time == None):

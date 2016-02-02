@@ -1,3 +1,5 @@
+import numpy as np
+import itertools
 
 class Design_space(object):
     """
@@ -21,7 +23,7 @@ class Design_space(object):
         for i in range(len(space)):
             d_out = deepcopy(space[i])
             if 'name' not in d_out:
-                d_out['name'] = 'var_'+str(i)
+                d_out['name'] = 'var_'+str(i+1)
             if 'type' not in d_out:
                 d_out['type'] = 'continuous'
             if 'domain' not in d_out:
@@ -39,4 +41,11 @@ class Design_space(object):
                 bounds.extend([d['domain']]*d['dimensionality'])
         return bounds
     
+    def get_discrete_grid(self):
+        sets_grid = []
+        for d in self.space:
+            if d['type']=='discrete':
+                sets_grid.extend([d['domain']]*d['dimensionality'])
+        return np.array(list(itertools.product(*sets_grid)))
+
     
