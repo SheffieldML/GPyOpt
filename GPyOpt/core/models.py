@@ -1,0 +1,96 @@
+# Copyright (c) 2015, Javier Gonzalez
+# Copyright (c) 2015, the GPy Authors (see GPy AUTHORS.txt)
+# Licensed under the BSD 3-clause license (see LICENSE.txt)
+
+import abc
+import numpy as np
+from astropy.convolution.core import Kernel
+
+class BOModel(object):
+    __metaclass__ = abc.ABCMeta
+    """
+    The abstract Model for Bayesian Optimization
+    """
+    
+    @abc.abstractmethod
+    def updateModel(self, X_all, Y_all, X_new, Y_new):
+        return
+    
+    @abc.abstractmethod
+    def predict(self, X):
+        "Get the predicted mean and std at X."
+        return
+
+    @abc.abstractmethod
+    def predict_withGradients(self, X):
+        "Get the gradients of the predicted mean and variance at X."
+        return
+
+    @abc.abstractmethod
+    def predict_quantiles(self, X):
+        "Get the predicted quantiles at X."
+        return
+    
+    @abc.abstractmethod
+    def get_fmin(self, X):
+        "Get the minimum of the current model."
+        return
+
+
+class GPModel(BOModel):
+    
+    def __init__(self, kernel=None, noise_var=None, exact_feval=False, normalize_Y=True, optimizer='bfgs', max_iters=1000, optimize_restarts=1, verbose=False):
+        self.kernel = Kernel
+        self.noise_var = noise_var
+        self.exact_feval = exact_feval
+        self.normalize_Y = normalize_Y
+        self.optimize_restarts = optimize_restarts
+        self.optimizer = optimizer
+        self.max_iters = max_iters
+        self.verbose = verbose
+        self.model = None
+        
+    def _create_model(self, X, Y):
+        import GPy
+        
+        if self.kernel is None: kern = GPy.kern.RBF(self.input_dim, variance=1., lengthscale=np.max(self.bounds)/5.)+GPy.kern.Bias(self.input_dim)
+        else:
+            kern = self.kernel
+            self.kernel = None
+            
+        noise_var = Y.var()*0.01 if self.noise_var is None else self.noise_var
+
+        self.model = GPy.models.GPRegression(self.X, self.Y, kernel=kern, noise_var=noise_var)
+
+        if self.exact_feval:
+            self.model.Gaussian_noise.constrain_fixed(1e-6, warning=False)
+            
+    def updateModel(self, X_all, Y_all, X_new, Y_new):
+        if self.normalize_Y:
+            Y_all = (Y_all - Y_all.mean())/(Y_all.std())
+        if self.model is None: self._create_model(X_all, Y_all)
+        else: 
+            self.model.set_XY(X_all, Y_all)
+            
+        if self.optimize_restarts==1:
+            self.model.optimize(optimizer=self.optimizer, max_iters = self.max_iters, messages=self.verbose)
+        else:
+            self.model.optimize_restarts(num_restarts=self.optimize_restarts, optimizer=self.optimizer, max_iters = self.max_iters, messages=self.verbose)
+
+    def predict(self, X):
+        if X.ndim==1: X = X[None,:]
+        m, v = self.model.predict(X)
+        v = np.clip(v, 1e-10, np.inf)
+        return m, np.sqrt(v)
+
+    def get_fmin(self, X):
+        return self.model.predict(self.model.X)[0].min()
+    
+    def predict_withGradients(self, X):
+        if X.ndim==1: X = X[None,:]
+        _, v = self.model.predict(X)
+        dmdx, dvdx = self.model.predictive_gradients(X)
+        dmdx = dmdx[:,:,0]
+        dsdx = dvdx / (2*np.sqrt(v))
+        return (dmdx, dsdx)
+    
