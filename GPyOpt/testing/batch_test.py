@@ -51,7 +51,7 @@ class TestBatchMethods(unittest.TestCase):
 
 		# likelihood type
 		normalize				= False
-		exact_feval				= False 
+		exact_feval				= True 
 		eps 					= 1e-8
 		verbosity				= False 
 
@@ -79,7 +79,7 @@ class TestBatchMethods(unittest.TestCase):
 					'eps': eps,
 					'verbosity':verbosity,
 				  },
-				  { 'name': 'Sequential',
+				  { 'name': 'sequential',
 					'max_iter':n_inbatch,
 					'acquisition_name':acquisition_name,
 					'acquisition_par': acquisition_par,
@@ -102,7 +102,7 @@ class TestBatchMethods(unittest.TestCase):
 					'verbosity':verbosity,
 					
 				  },
-				 { 'name': 'Random',
+				 { 'name': 'random',
 					'max_iter':max_iter,
 					'acquisition_name':acquisition_name,
 					'acquisition_par': acquisition_par,
@@ -166,8 +166,9 @@ class TestBatchMethods(unittest.TestCase):
 			print 'Testing batch method: ' + m_c['name']
 			name = m_c['name']+'_'+'batch_testfile'
 			unittest_result = run_eval(self.f_obj, self.f_bounds, self.f_inits, method_config=m_c, name=name, outpath=self.outpath, time_limit=None, unittest = self.is_unittest)			
+			#print unittest_result
 			original_result = np.loadtxt(self.outpath +'/'+ name+'.txt')
-			self.assertTrue((abs(original_result - unittest_result)<1e-8).all())
+			self.assertTrue((abs(original_result - unittest_result)<1e-4).all())
 
 if __name__=='main':
 	unittest.main()

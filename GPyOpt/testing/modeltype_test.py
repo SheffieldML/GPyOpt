@@ -127,7 +127,7 @@ class TestAcquisitions(unittest.TestCase):
 		f_bound_dim = (-5.,5.)
 		f_dim = 5
 		n_inital_design = 5
-		self.f_obj = GPyOpt.fmodels.experimentsNd.gSobol(np.ones(f_dim)).f
+		self.f_obj = GPyOpt.fmodels.experimentsNd.gSobol(np.ones(f_dim),sd=0.1).f
 		self.f_bounds = [f_bound_dim]*f_dim
 		self.f_inits = samples_multidimensional_uniform(self.f_bounds,n_inital_design)
 		self.f_inits = self.f_inits.reshape(1, f_dim, self.f_inits.shape[-1])
@@ -138,8 +138,9 @@ class TestAcquisitions(unittest.TestCase):
 			print 'Testing acquisition optimizer: ' + m_c['name']
 			name = m_c['name']+'_'+'modeltype_testfile'
 			unittest_result = run_eval(self.f_obj, self.f_bounds, self.f_inits, method_config=m_c, name=name, outpath=self.outpath, time_limit=None, unittest = self.is_unittest)			
+			print unittest_result
 			original_result = np.loadtxt(self.outpath +'/'+ name+'.txt')
-			self.assertTrue((abs(original_result - unittest_result)<1e-8).all())
+			self.assertTrue((abs(original_result - unittest_result)<1e-4).all())
 
 if __name__=='main':
 	unittest.main()

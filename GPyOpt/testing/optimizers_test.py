@@ -22,7 +22,7 @@ class TestAcquisitions(unittest.TestCase):
 		##
 
 		# stop conditions
-		max_iter 				= 5
+		max_iter 				= 2
 		eps 					= 1e-8
 
 		# acquisition type (testing here)
@@ -31,7 +31,7 @@ class TestAcquisitions(unittest.TestCase):
 
 		# acquisition optimization type
 		#acqu_optimize_method 	= 'grid'
-		acqu_optimize_restarts 	= 10
+		acqu_optimize_restarts 	= 5
 		true_gradients			= True
 
 		# batch type
@@ -40,7 +40,7 @@ class TestAcquisitions(unittest.TestCase):
 		n_procs					= 1
 
 		# type of inital design
-		numdata_initial_design 	= None
+		numdata_initial_design 	= 10
 		type_initial_design		= 'random' 
 
 		# model type
@@ -52,8 +52,7 @@ class TestAcquisitions(unittest.TestCase):
 
 		# likelihood type
 		normalize				= False
-		exact_feval				= False 
-		
+		exact_feval				= True 
 		verbosity				= False 
 
 
@@ -168,28 +167,28 @@ class TestAcquisitions(unittest.TestCase):
 					'eps': eps,
 					'verbosity':verbosity,
 				  },
-				 #  	{'name': 'DIRECT',
-					# 'max_iter':max_iter,
-					# 'acquisition_name':acquisition_name,
-					# 'acquisition_par': acquisition_par,
-					# 'true_gradients': true_gradients,
-					# 'acqu_optimize_method':'DIRECT',
-					# 'acqu_optimize_restarts':acqu_optimize_restarts,		 
-					# 'batch_method': batch_method,
-					# 'n_inbatch':n_inbatch,
-					# 'n_procs':n_inbatch,
-					# 'numdata_initial_design': numdata_initial_design,
-					# 'type_initial_design': type_initial_design,
-					# 'kernel': kernel,
-					# 'model_optimize_interval': model_optimize_interval,
-					# 'model_optimize_restarts': model_optimize_restarts,
-					# 'sparseGP': sparseGP,
-					# 'num_inducing': num_inducing,
-					# 'normalize': normalize,
-					# 'exact_feval': exact_feval,
-					# 'eps': eps,
-					# 'verbosity':verbosity,
-				 #  },
+					{'name': 'DIRECT',
+					'max_iter':max_iter,
+					'acquisition_name':acquisition_name,
+					'acquisition_par': acquisition_par,
+					'true_gradients': true_gradients,
+					'acqu_optimize_method':'DIRECT',
+					'acqu_optimize_restarts':acqu_optimize_restarts,		 
+					'batch_method': batch_method,
+					'n_inbatch':n_inbatch,
+					'n_procs':n_inbatch,
+					'numdata_initial_design': numdata_initial_design,
+					'type_initial_design': type_initial_design,
+					'kernel': kernel,
+					'model_optimize_interval': model_optimize_interval,
+					'model_optimize_restarts': model_optimize_restarts,
+					'sparseGP': sparseGP,
+					'num_inducing': num_inducing,
+					'normalize': normalize,
+					'exact_feval': exact_feval,
+					'eps': eps,
+					'verbosity':verbosity,
+				  },
 				 #  	{'name': 'CMA-ES',
 					# 'max_iter':max_iter,
 					# 'acquisition_name':acquisition_name,
@@ -212,8 +211,6 @@ class TestAcquisitions(unittest.TestCase):
 					# 'eps': eps,
 					# 'verbosity':verbosity,
 				 #  },
-
-
 				]
 
 		# -- Problem setup
@@ -233,7 +230,7 @@ class TestAcquisitions(unittest.TestCase):
 			name = m_c['name']+'_'+'acquisition_optimizer_testfile'
 			unittest_result = run_eval(self.f_obj, self.f_bounds, self.f_inits, method_config=m_c, name=name, outpath=self.outpath, time_limit=None, unittest = self.is_unittest)			
 			original_result = np.loadtxt(self.outpath +'/'+ name+'.txt')
-			self.assertTrue((abs(original_result - unittest_result)<1e-8).all())
+			self.assertTrue((abs(original_result - unittest_result)<1e-4).all())
 
 if __name__=='main':
 	unittest.main()

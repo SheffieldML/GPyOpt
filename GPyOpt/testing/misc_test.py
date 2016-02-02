@@ -49,7 +49,7 @@ class TestAcquisitions(unittest.TestCase):
 
 		# likelihood type
 		normalize				= False
-		exact_feval				= False 
+		exact_feval				= True 
 		verbosity				= False 
 
 
@@ -160,8 +160,9 @@ class TestAcquisitions(unittest.TestCase):
 			print 'Testing other GPyOpt options: ' + m_c['name']
 			name = m_c['name']+'_'+'_testfile'
 			unittest_result = run_eval(self.f_obj, self.f_bounds, self.f_inits, method_config=m_c, name=name, outpath=self.outpath, time_limit=None, unittest = self.is_unittest)			
+			print unittest_result
 			original_result = np.loadtxt(self.outpath +'/'+ name+'.txt')
-			self.assertTrue((abs(original_result - unittest_result)<1e-8).all())
+			self.assertTrue((abs(original_result - unittest_result)<1e-4).all())
 
 if __name__=='main':
 	unittest.main()

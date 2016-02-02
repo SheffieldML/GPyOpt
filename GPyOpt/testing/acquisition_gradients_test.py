@@ -4,7 +4,7 @@ import GPyOpt
 import GPy
 from GPyOpt.util.general import samples_multidimensional_uniform
 from GPyOpt.core.acquisition import AcquisitionEI, AcquisitionEL, AcquisitionMPI, AcquisitionLCB, AcquisitionMP
-from utils_test import run_eval
+from utils import run_eval
 from GPy.models.gradient_checker import GradientChecker
 import unittest
 
