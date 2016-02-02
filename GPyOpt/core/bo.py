@@ -14,14 +14,16 @@ except:
     pass
 
 class BO(object):
-    def __init__(self, acquisition_func):      
+    def __init__(self, func, model, space, acquisition_func, acq_optimizer, normalize_Y=True, model_optimize_interval=1):
+        self.f = func
+        self.model = model
+        self.space = space
         self.acquisition_func = acquisition_func
-
-    def _init_model(self):
-        pass
+        self.acq_optimizer = acq_optimizer 
+        self.normalize_Y = normalize_Y
+        self.model_optimize_interval = model_optimize_interval
         
-    def run_optimization(self, max_iter = None, max_time = None, n_inbatch=1, acqu_optimize_method='fast_random', acqu_optimize_restarts=200, batch_method='predictive', 
-        eps = 1e-8, n_procs=1, true_gradients = True, verbose=True):
+    def run_optimization(self, max_iter = None, max_time = None,  eps = 1e-8, verbose=True):
         """ 
         Runs Bayesian Optimization for a number 'max_iter' of iterations (after the initial exploration data)
 
@@ -61,46 +63,21 @@ class BO(object):
         else:
             self.max_iter = max_iter
             self.max_time = max_time     
-
-
-        # --- Decide wether we use the true gradients to optimize the acquisition function
-        if true_gradients !=True:
-            self.true_gradients = False  
-            self.acquisition_func.d_acquisition_function = None
-        else: 
-            self.true_gradients = true_gradients
-
-
-        # --- Comfiguration of the batch method
-        self.n_inbatch=n_inbatch
-        self.batch_method = batch_method
-        if batch_method=='lp':
-            from .acquisition import AcquisitionMP
-            if not isinstance(self.acquisition_func, AcquisitionMP):
-                self.acquisition_func = AcquisitionMP(self.acquisition_func, self.acquisition_func.acquisition_par)
         
-        
-        # --- Configuration of the acquisition optimization
-        self.acqu_optimize_method = acqu_optimize_method
-        self.acqu_optimize_restarts = acqu_optimize_restarts
-        self.n_procs = n_procs
-
         # --- Initialize iterations and running time
         self.time_zero = time.time()
         self.cum_time  = 0
         self.num_acquisitions = 0
 
         # --- Initialize time cost of the evaluations
-
         while (self.max_time > self.cum_time):
             # --- Update model
             try:
-                self._update_model()                
+                self._update_model()
             except np.linalg.linalg.LinAlgError:
                 break
 
             # --- Update and optimize acquisition
-            self._update_acquisition()
             self.suggested_sample = self._optimize_acquisition()
 
             # --- Update internal elements (needed for plotting)
@@ -174,46 +151,22 @@ class BO(object):
         else:
             pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))
             self.s_in_min = np.vstack((self.s_in_min,np.sqrt(abs(pred_min[1])))) 
-                   
-
 
     def _compute_results(self):
         self.Y_best = best_value(self.Y)
         self.x_opt = self.X[np.argmin(self.Y),:]
         self.fx_opt = min(self.Y)
 
-
     def _distance_last_evaluations(self):
         return np.sqrt(sum((self.X[self.X.shape[0]-1,:]-self.X[self.X.shape[0]-2,:])**2))  
 
-        
     def _optimize_acquisition(self):
         """
         Optimizes the acquisition function. This function selects the type of batch method and passes the arguments for the rest of the optimization.
 
         """
-        # ------ Elements of the acquisition function
-        acqu_name = self.acqu_name
-        acquisition = self.acquisition_func.acquisition_function
-        d_acquisition = self.acquisition_func.d_acquisition_function
-        acquisition_par = self.acquisition_par
-        model = self.model
+        return self.acquisition_func.optimize()
         
-        # ------  Parameters to optimize the acquisition
-        acqu_optimize_restarts = self.acqu_optimize_restarts
-        acqu_optimize_method = self.acqu_optimize_method
-        n_inbatch = self.n_inbatch
-        bounds = self.bounds
-
-        # ------ Selection of the batch method (if any, predictive used when n_inbathc=1)
-        if self.batch_method == 'predictive':
-            X_batch = predictive_batch_optimization(acqu_name, acquisition_par, acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch)            
-        elif self.batch_method == 'lp':
-            X_batch = lp_batch_optimization(self.acquisition_func, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch)
-        elif self.batch_method == 'random':
-            X_batch = random_batch_optimization(acquisition, d_acquisition, bounds, acqu_optimize_restarts,acqu_optimize_method, model, n_inbatch)        
-        return X_batch
-
 
     def _update_model(self):
         """        
@@ -221,73 +174,10 @@ class BO(object):
 
         """
         if (self.num_acquisitions%self.model_optimize_interval)==0:
-            if self.model_type == 'gp':              
-                self.train_gp(sparse=False, normalize = self.normalize)
-
-            elif self.model_type == 'sparsegp':              
-                self.train_gp(sparse=True, normalize = self.normalize)
-
-            elif self.model_type == 'deepgp':              
-                self.train_deepgp(back_constraint=False, normalize = self.normalize)
-
-            elif self.model_type == 'deepgp_back_constraint':              
-                self.train_deepgp(back_constraint=True, normalize = self.normalize)
-        
-    def _update_acquisition(self):
-        self.acquisition_func.set_model_objective(self.model)
-        #self.acquisition_func.set_model_cost(self.cost,self.cost_name)
-
-
-    def train_gp(self, sparse=False, normalize = False):
-        if self.normalize:      
-            self.model.set_XY(self.X,(self.Y-self.Y.mean())/(self.Y.std()))
-        else:
-            self.model.set_XY(self.X,self.Y)
-
-        # ------- Optimize model when required
-        self.model.optimization_runs = [] # clear previous optimization runs so they don't get used.
-        self.model.optimize_restarts(num_restarts=self.model_optimize_restarts, verbose=self.verbosity)            
-        
-
-    def train_deepgp(self, back_constraint=True, normalize = False):
-
-        if self.normalize:
-            Y_normalized = (self.Y-self.Y.mean())/(self.Y.std())
-        else:
-            Y_normalized = self.Y
-        
-        # kern = [GPy.kern.RBF(self.Ds, ARD=False, useGPU=self.useGPU), GPy.kern.RBF(self.X.shape[1], ARD=False, useGPU=self.useGPU)]
-        kern = [GPy.kern.Matern32(self.Ds + self.X.shape[1], ARD=False), GPy.kern.Matern32(self.X.shape[1], ARD=False)]
-
-        if back_constraint:
-            self.model = deepgp.DeepGP([Y_normalized.shape[1],self.Ds, self.X.shape[1]], Y_normalized, X=self.X, num_inducing=min(self.num_inducing, self.X.shape[0]), kernels=kern, MLP_dims=[[100,50],[]], repeatX=True)
-        else:
-            self.model = deepgp.DeepGP([Y_normalized.shape[1],self.Ds, self.X.shape[1]], Y_normalized, X=self.X, num_inducing=min(self.num_inducing, self.X.shape[0]), kernels=kern, back_constraint=False, repeatX=True)
-
-
-        if self.exact_feval == True:
-            self.model.obslayer.Gaussian_noise.constrain_fixed(1e-4, warning=False) #to avoid numerical problems
-        else:
-            self.model.obslayer.Gaussian_noise.constrain_bounded(1e-6,1e6, warning=False) #to avoid numerical problems
-
-        self.model.obslayer.X.mean[:] = self.model.layer_1.X[:] ### Init with inputs
-        self.model.obslayer.kern.lengthscale[:]  = 0.1#*((self.model.obslayer.X.mean.values.max(0)-self.model.obslayer.X.mean.values.min(0)))/2.
-        self.model.obslayer.kern.variance.fix()
-        self.model.layer_1.kern.lengthscale[:]  = 1. #*((self.model.layer_1.X.max(0)-self.model.layer_1.X.values.min(0)))/2.
-        self.model.layer_1.kern.variance.fix()
-        self.model.obslayer.likelihood.fix()
-        self.model.layer_1.likelihood.variance[:] = 0.01 #self.model.layer_1.Y.mean.var()*0.01
-        self.model.layer_1.likelihood.fix()
-        # iNDUCING INPUTS
-        myperm = np.random.permutation(self.model.X.shape[0])
-        self.model.obslayer.Z[:] = self.model.obslayer.X.mean[myperm[:self.model.obslayer.num_inducing]]
-        self.model.optimize('bfgs',messages=1, max_iters=100)
-        self.model.obslayer.kern.variance.constrain_positive()
-        self.model.layer_1.kern.variance.constrain_positive()
-        self.model.optimize('bfgs',messages=1,max_iters=100)
-        self.model.layers[1].likelihood.constrain_positive()
-        self.model.optimize('bfgs',messages=1,max_iters=3000)
-
+            if self.normalize_Y:
+                self.model.updateModel(self.X,(self.Y-self.Y.mean())/(self.Y.std()), None, None)
+            else:
+                self.model.updateModel(self.X, self.Y, None, None)
 
     def plot_acquisition(self,filename=None):
         """        

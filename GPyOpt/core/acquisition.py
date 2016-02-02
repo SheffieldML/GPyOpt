@@ -94,7 +94,7 @@ class AcquisitionMPI(AcquisitionBase):
         m, s, fmin = get_moments(self.model, x) 
         dmdx, dsdx = get_d_moments(self.model, x)
         phi, _, u = get_quantiles(self.acquisition_par, fmin, m, s)    
-        df_acqu = -(phi/s)* (dmdx + dsdx + u)
+        df_acqu = -(phi/s)* (dmdx + dsdx * u)
         return -df_acqu
 
 

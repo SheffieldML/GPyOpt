@@ -25,14 +25,9 @@ class BOModel(object):
     def predict_withGradients(self, X):
         "Get the gradients of the predicted mean and variance at X."
         return
-
-    @abc.abstractmethod
-    def predict_quantiles(self, X):
-        "Get the predicted quantiles at X."
-        return
     
     @abc.abstractmethod
-    def get_fmin(self, X):
+    def get_fmin(self):
         "Get the minimum of the current model."
         return
 
@@ -40,7 +35,7 @@ class BOModel(object):
 class GPModel(BOModel):
     
     def __init__(self, kernel=None, noise_var=None, exact_feval=False, normalize_Y=True, optimizer='bfgs', max_iters=1000, optimize_restarts=1, verbose=False):
-        self.kernel = Kernel
+        self.kernel = kernel
         self.noise_var = noise_var
         self.exact_feval = exact_feval
         self.normalize_Y = normalize_Y
@@ -53,14 +48,16 @@ class GPModel(BOModel):
     def _create_model(self, X, Y):
         import GPy
         
-        if self.kernel is None: kern = GPy.kern.RBF(self.input_dim, variance=1., lengthscale=np.max(self.bounds)/5.)+GPy.kern.Bias(self.input_dim)
+        self.input_dim = X.shape[1]
+        if self.kernel is None: 
+            kern = GPy.kern.RBF(self.input_dim, variance=1.)+GPy.kern.Bias(self.input_dim)
         else:
             kern = self.kernel
             self.kernel = None
             
         noise_var = Y.var()*0.01 if self.noise_var is None else self.noise_var
 
-        self.model = GPy.models.GPRegression(self.X, self.Y, kernel=kern, noise_var=noise_var)
+        self.model = GPy.models.GPRegression(X, Y, kernel=kern, noise_var=noise_var)
 
         if self.exact_feval:
             self.model.Gaussian_noise.constrain_fixed(1e-6, warning=False)
@@ -83,14 +80,15 @@ class GPModel(BOModel):
         v = np.clip(v, 1e-10, np.inf)
         return m, np.sqrt(v)
 
-    def get_fmin(self, X):
+    def get_fmin(self):
         return self.model.predict(self.model.X)[0].min()
     
     def predict_withGradients(self, X):
         if X.ndim==1: X = X[None,:]
-        _, v = self.model.predict(X)
+        m, v = self.model.predict(X)
+        v = np.clip(v, 1e-10, np.inf)
         dmdx, dvdx = self.model.predictive_gradients(X)
         dmdx = dmdx[:,:,0]
         dsdx = dvdx / (2*np.sqrt(v))
-        return (dmdx, dsdx)
+        return m, np.sqrt(v), dmdx, dsdx
     
