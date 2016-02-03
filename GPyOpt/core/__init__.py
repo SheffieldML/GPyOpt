@@ -2,5 +2,6 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 import acquisition
-import bo
+from .bo import BO
 import optimization
+import task

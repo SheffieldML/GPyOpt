@@ -3,8 +3,6 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 import abc
-import numpy as np
-from astropy.convolution.core import Kernel
 
 class BOModel(object):
     __metaclass__ = abc.ABCMeta

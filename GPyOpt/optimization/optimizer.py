@@ -65,20 +65,20 @@ class Opt_CMA(Optimizer):
         super(Opt_CMA, self).__init__(space)
         self.maxiter = maxiter
         assert self.space.has_types['continuous']
-    try:
-        import cma 
-        import numpy as np
-        def CMA_f_wrapper(f):
-            def g(x):
-                return f(np.array([x]))[0][0]
-            return g
-        lB = np.asarray(self.space.get_continuous_bounds())[:,0]
-        uB = np.asarray(self.space.get_continuous_bounds())[:,1]
-        x = cma.fmin(CMA_f_wrapper(f), (uB + lB) * 0.5, 0.6, options={"bounds":[lB, uB], "verbose":-1})[0]
-        print x
-        return np.atleast_2d(x), f(np.atleast_2d(x))
-    except:
-        print("Cannot find cma library, please install it to use this option.")
+        try:
+            import cma 
+            import numpy as np
+            def CMA_f_wrapper(f):
+                def g(x):
+                    return f(np.array([x]))[0][0]
+                return g
+            lB = np.asarray(self.space.get_continuous_bounds())[:,0]
+            uB = np.asarray(self.space.get_continuous_bounds())[:,1]
+            x = cma.fmin(CMA_f_wrapper(f), (uB + lB) * 0.5, 0.6, options={"bounds":[lB, uB], "verbose":-1})[0]
+            print x
+            return np.atleast_2d(x), f(np.atleast_2d(x))
+        except:
+            print("Cannot find cma library, please install it to use this option.")
 
 
 def select_optimizer(name):
@@ -89,7 +89,7 @@ def select_optimizer(name):
     elif name == 'CMA':
         return Opt_CMA
     else:
-        'Invalid optimizer selected.'
+        raise Exception('Invalid optimizer selected.')
 
 
 

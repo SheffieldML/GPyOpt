@@ -57,3 +57,44 @@ def begginer_optimization_1d(plots=True):
         BO_demo_1d.plot_convergence()
         
     return BO_demo_1d 
+
+def simple_optimization_1d(plots=True):
+    import GPyOpt
+    from numpy.random import seed
+    seed(1234)
+        
+    # --- Objective function
+    objective_true  = GPyOpt.objective_examples.experiments1d.forrester()              # true function
+    objective_noisy = GPyOpt.objective_examples.experiments1d.forrester(sd= .25)       # noisy version
+    bounds = [(0,1)]                                                        # problem constrains 
+
+    model = GPyOpt.models.GPModel(exact_feval=True, optimize_restarts=10)
+    space = GPyOpt.Design_space([{'domain':(0,1)}])
+    obj = GPyOpt.core.task.SingleObjective(objective_true.f, space)
+
+    opt = GPyOpt.optimization.ContAcqOptimizer(space, 50)
+    acq = GPyOpt.acquisitions.AcquisitionEI(model, space, optimizer=opt)
+    
+    X_init = GPyOpt.util.stats.initial_design('random', space.get_continuous_bounds(), 2)
+    
+    bo = GPyOpt.core.BO(model, space, obj, acq, X_init)
+
+    # --- Problem definition and optimization
+    max_time = 10                                                         
+
+    print '-----'
+    print '----- Running demo. It may take a few seconds.'
+    print '-----'
+    
+    # Run the optimization                                                  
+    bo.run_optimization(max_time=max_time,                                   # evaluation budget
+                                    eps=1e-8)                              # stop criterion
+                            
+
+    # --- Plots
+    if plots:
+        objective_true.plot()
+        bo.plot_acquisition()
+        bo.plot_convergence()
+        
+    return bo 

@@ -1,28 +1,6 @@
 import numpy as np
 import itertools
 
-# class Objective(object):
-#     """
-#     This is a class to handle the objective function, its associated cost and the way it should be evaluated.
-
-#     - func: is a list of functions to be optimized. It has only one element in the most general case.
-#     - cost: is a lisy of costs of evaluating the functions to optimize. In principle it will be a deterministic function but 
-#     we can extend this and handle it with the log of a GP.
-#     - evaluation_type: determine how the function is going to be evaluated ['sequentiely','syncr_batch','async_batch']
-
-#     """
-#     def __init__(self, func, cost = None, evaluation_type = None):
-#         if len(func)==1:
-#             self.type = 'standard' 
-#             self.f = {'f1': func}
-            
-#         else: 
-#             self.type = 'multi-task'
-#             self.f = {}
-#             for i in len(func):
-#                 self.f['f'+str(i+1)] = func[i]
-
-
 class Design_space(object):
     """
     The format of a input domain:
@@ -71,7 +49,9 @@ class Design_space(object):
         return np.array(list(itertools.product(*sets_grid)))
 
     def get_bandit(self):
-        bandit = self.space['domain'][sef.space['type'==bandit]]
+        pass
+#        TODO:
+#        bandit = self.space['domain'][self.space['type'==bandit]]
         return np.array(bandit)
 
 

@@ -2,26 +2,23 @@
 # Copyright (c) 2015, the GPy Authors (see GPy AUTHORS.txt)
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
-import GPy
-import deepgp
 import numpy as np
 import time
-from ..util.general import best_value, reshape, spawn, evaluate_function
-from ..core.optimization import lp_batch_optimization, random_batch_optimization, predictive_batch_optimization
+from ..util.general import best_value, reshape
 try:
     from ..plotting.plots_bo import plot_acquisition, plot_convergence
 except:
     pass
 
 class BO(object):
-    def __init__(self, func, model, space, acquisition_func, acq_optimizer, normalize_Y = True, model_optimize_interval = 1):
-        self.f = func
+    def __init__(self, model, space, objective, acquisition_func, X_init, normalize_Y = True, model_optimize_interval = 1):
         self.model = model
         self.space = space
+        self.objective = objective
         self.acquisition_func = acquisition_func
-        self.acq_optimizer = acq_optimizer 
         self.normalize_Y = normalize_Y
         self.model_optimize_interval = model_optimize_interval
+        self.X_init = X_init
         
     def run_optimization(self, max_iter = None, max_time = None,  eps = 1e-8, verbose=True):
         """ 
@@ -46,6 +43,12 @@ class BO(object):
         else:
             self.max_iter = max_iter
             self.max_time = max_time     
+            
+        # --- Initial function evaluation and model fitting
+        if self.X_init is not None:
+            self.X = self.X_init
+            self.X_init = None
+            self.Y, self.Y_cost = self.objective.evaluate(self.X)
         
         # --- Initialize iterations and running time
         self.time_zero = time.time()
@@ -104,35 +107,16 @@ class BO(object):
 
 
     def evaluate_objective(self):
-        if self.n_procs==1:
-            Y_new, Y_costnew = evaluate_function(self.f,self.suggested_sample)
-            self.Y = np.vstack((self.Y,Y_new))
-            self.Y_cost= np.vstack((self.Y_cost,Y_costnew))
-        else:
-            try:
-                # --- Parallel evaluation of *f* if several cores are available
-                from multiprocessing import Process, Pipe
-                from itertools import izip          
-                divided_samples = [self.suggested_sample[i::self.n_procs] for i in xrange(self.n_procs)]
-                pipe=[Pipe() for i in xrange(self.n_procs)]
-                proc=[Process(target=spawn(self.f),args=(c,x)) for x,(p,c) in izip(divided_samples,pipe)]
-                [p.start() for p in proc]
-                [p.join() for p in proc]
-                rs = [p.recv() for (p,c) in pipe]
-                self.Y = np.vstack([self.Y]+rs)
-            except:
-                if not hasattr(self, 'parallel_error'):
-                    print 'Error in parallel computation. Fall back to single process!'
-                    self.parallel_error = True 
-                self.Y = np.vstack((self.Y,self.f(np.array(self.suggested_sample))))
-
+        Y_new, Y_costnew = self.objective.evaluate(self.suggested_sample)
+        self.Y = np.vstack((self.Y,Y_new))
+        self.Y_cost= np.vstack((self.Y_cost,Y_costnew))
 
     def _update_internal_elements(self):           
         if self.num_acquisitions == 0:
             pred_min = self.model.predict(self.X)
             self.s_in_min = np.sqrt(abs(pred_min[1]))
         else:
-            pred_min = self.model.predict(reshape(self.suggested_sample,self.input_dim))
+            pred_min = self.model.predict(reshape(self.suggested_sample,self.space.dimensionality))
             self.s_in_min = np.vstack((self.s_in_min,np.sqrt(abs(pred_min[1])))) 
 
     def _compute_results(self):

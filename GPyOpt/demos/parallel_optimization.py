@@ -30,7 +30,7 @@ def parallel_optimization(plots=True):
     
     # --- Objective function
     objective_true  = GPyOpt.fmodels.experiments2d.branin()                 # true function
-#     objective_noisy = GPyOpt.objectives.experiments2d.branin(sd = 0.1)         # noisy version
+#     objective_noisy = GPyOpt.objective_examples.experiments2d.branin(sd = 0.1)         # noisy version
     objective_noisy = GPyOpt.fmodels.experimentsNd.alpine2(5)         # noisy version
     bounds = objective_noisy.bounds                                         # problem constrains 
 

@@ -1,17 +1,17 @@
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-from GPyOpt.core.space import Design_space
+from GPyOpt.core.task.space import Design_space
 import core
 import methods
 import util
-#from GPyOpt import objectives
+#from GPyOpt import objective_examples
 import plotting
 import demos
 import interface
 import models
 import acquisitions
 import optimization
-import objectives
+from GPyOpt import objective_examples
 
 

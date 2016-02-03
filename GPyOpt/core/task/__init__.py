@@ -1,0 +1,1 @@
+from .objective import SingleObjective

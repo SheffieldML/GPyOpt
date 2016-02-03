@@ -14,7 +14,7 @@ class AcquisitionOptimizer(object):
 
 class ContAcqOptimizer(AcquisitionOptimizer):
     
-    def __init__(self, space, n_samples, fast=True, random=True, search=True, optimizer='lbfgs', **kw):
+    def __init__(self, space, n_samples=5, fast=True, random=True, search=True, optimizer='lbfgs', **kw):
         super(ContAcqOptimizer, self).__init__(space)
         self.n_samples = n_samples
         self.fast= fast
@@ -53,11 +53,11 @@ class ContAcqOptimizer(AcquisitionOptimizer):
 class BanditAcqOptimizer(AcquisitionOptimizer):
 
     def __init__(self, space, **kw):
-        super(DiscreteAcqOptimizer, self).__init__(space)
+        super(BanditAcqOptimizer, self).__init__(space)
 
     def optimize(self, f=None, df=None, f_df=None):
-        pref_f = f(space.get_bandit())
-        x_min = space.get_bandits()[np.argmin(pref_f)]
+        pref_f = f(self.space.get_bandit())
+        x_min = self.space.get_bandits()[np.argmin(pref_f)]
         f_min = f(x_min)
         return x_min, f_min
 
@@ -65,7 +65,7 @@ class BanditAcqOptimizer(AcquisitionOptimizer):
 class MixedAcqOptimizer(AcquisitionOptimizer):
 
     def __init__(self, space, n_samples, fast=True, random=True, search=True, optimizer='lbfgs', **kw):
-        super(ContAcqOptimizer, self).__init__(space)
+        super(MixedAcqOptimizer, self).__init__(space)
         self.n_samples = n_samples
         self.fast= fast
         self.random = random
@@ -87,8 +87,4 @@ class MixedAcqOptimizer(AcquisitionOptimizer):
         # 3.- for each combination of the values of the discrete variables optimize the continous (parallelize?, search?)
         # 4.- compute the argmin of all the combinations
         # 5.- map the variables back and show the minimum
-
-
-
-
-
+        pass
