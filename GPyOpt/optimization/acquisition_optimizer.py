@@ -62,5 +62,33 @@ class BanditAcqOptimizer(AcquisitionOptimizer):
         return x_min, f_min
 
 
+class MixedAcqOptimizer(AcquisitionOptimizer):
+
+    def __init__(self, space, n_samples, fast=True, random=True, search=True, optimizer='lbfgs', **kw):
+        super(ContAcqOptimizer, self).__init__(space)
+        self.n_samples = n_samples
+        self.fast= fast
+        self.random = random
+        self.search = search
+        self.optimizer = select_optimizer(optimizer)(space, **kw)
+        
+        # draw_samples
+        if self.random:
+            self.samples = samples_multidimensional_uniform(self.space.get_continuous_bounds(),self.n_samples)
+        else:
+            self.samples = multigrid(self.space.get_continuous_bounds(), self.n_samples)
+
+
+    def optimize(self, f=None, df=None, f_df=None):
+        ## TODO
+        #
+        # 1.- get continous space ()
+        # 2.- get discrete space
+        # 3.- for each combination of the values of the discrete variables optimize the continous (parallelize?, search?)
+        # 4.- compute the argmin of all the combinations
+        # 5.- map the variables back and show the minimum
+
+
+
 
 
