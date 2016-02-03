@@ -50,3 +50,17 @@ class ContAcqOptimizer(AcquisitionOptimizer):
             return x_min, f_min
         
 
+class BanditAcqOptimizer(AcquisitionOptimizer):
+
+    def __init__(self, space, **kw):
+        super(DiscreteAcqOptimizer, self).__init__(space)
+
+    def optimize(self, f=None, df=None, f_df=None):
+        pref_f = f(space.get_bandit())
+        x_min = space.get_bandits()[np.argmin(pref_f)]
+        f_min = f(x_min)
+        return x_min, f_min
+
+
+
+

@@ -7,7 +7,7 @@ class Design_space(object):
     a list of dictionaries, one for each dimension, contains a list of attributes, e.g.:
     [   {'name': 'var_1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality':1},
         {'name': 'var_2', 'type': 'discrete', 'domain': (0,1,2,3)},
-        {'name': 'var_3', 'type': 'bandit', 'domain': [[-1,1],[1,0],[0,1]], 'dimensionality':2} ]
+        {'name': 'var_3', 'type': 'bandit', 'domain': [(-1,1),(1,0),(0,1)], 'dimensionality':2} ]
     """
     
     supported_types = ['continuous', 'discrete', 'bandit']
@@ -47,5 +47,12 @@ class Design_space(object):
             if d['type']=='discrete':
                 sets_grid.extend([d['domain']]*d['dimensionality'])
         return np.array(list(itertools.product(*sets_grid)))
+
+    def get_bandit(self):
+        bandit = self.space['domain'][sef.space['type'==bandit]]
+        return np.array(bandit)
+
+
+
 
     
