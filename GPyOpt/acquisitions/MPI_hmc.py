@@ -1,14 +1,14 @@
 from .base import AcquisitionBase
-from .EI import AcquisitionEI
+from .MPI import AcquisitionMPI
 from ..util.general import get_quantiles, compute_integrated_acquisition, compute_integrated_acquisition_withGradients
 
-class AcquisitionEI_hmc(AcquisitionBase):
+class AcquisitionMPI_hmc(AcquisitionBase):
     """
     Class for Expected improvement acquisition functions.
     """
     def __init__(self, model, space, optimizer=None, cost = None, jitter=0.01):
         optimizer = optimizer
-        super(AcquisitionEI_hmc, self).__init__(model, space, optimizer)
+        super(AcquisitionMPI_hmc, self).__init__(model, space, optimizer)
         self.jitter = jitter
         if cost == None: 
             self.cost = lambda x: 1
@@ -23,7 +23,7 @@ class AcquisitionEI_hmc(AcquisitionBase):
         """
         Expected Improvement
         """
-        acquisition = AcquisitionEI(self.model,self.space,self.optimizer)
+        acquisition = AcquisitionMPI(self.model,self.space,self.optimizer)
  
         return compute_integrated_acquisition(acquisition,x)
 
@@ -32,14 +32,6 @@ class AcquisitionEI_hmc(AcquisitionBase):
         """
         Derivative of the Expected Improvement (has a very easy derivative!)
         """
-        acquisition = AcquisitionEI(self.model,self.space,self.optimizer)
+        acquisition = AcquisitionMPI(self.model,self.space,self.optimizer)
         
         return compute_integrated_acquisition_withGradients(acquisition,x)
-
-
-
-
-
-
-
-

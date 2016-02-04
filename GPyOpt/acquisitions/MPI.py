@@ -5,17 +5,22 @@ class AcquisitionMPI(AcquisitionBase):
     """
     Class for Expected improvement acquisition functions.
     """
-    def __init__(self, model, space, jitter=0.01, optimizer=None):
+    def __init__(self, model, space, optimizer=None, cost = None, jitter=0.01):
         optimizer = optimizer
         super(AcquisitionMPI, self).__init__(model, space, optimizer)
         self.jitter = jitter
+        if cost == None: 
+            self.cost = lambda x: 1
+        else:
+            self.cost = cost
     
     def acquisition_function(self,x):
         """
         Expected Improvement
         """
-        m, s, fmin = get_moments(self.model, x)     
-        _, Phi,_ = get_quantiles(self.acquisition_par, fmin, m, s)    
+        m, s = self.model.predict(x)
+        fmin = self.model.get_fmin()   
+        _, Phi,_ = get_quantiles(self.jitter, fmin, m, s)    
         f_acqu =  Phi
         return -f_acqu  # note: returns negative value for posterior minimization 
 

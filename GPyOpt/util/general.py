@@ -6,6 +6,34 @@ import numpy as np
 from scipy.special import erfc
 import time
 
+
+
+def compute_integrated_acquisition(acquisition,x):
+    acqu_x = 0 
+
+    for i in range(acquisition.model.num_hmc_samples): 
+        acquisition.model.model.kern[:] = acquisition.model.hmc_samples[i,:]
+        acqu_x += acquisition.acquisition_function(x)
+
+    acqu_x = acqu_x/acquisition.model.num_hmc_samples   
+    return -acqu_x/acquisition.cost(x)
+
+
+def compute_integrated_acquisition_withGradients(acquisition,x):
+    acqu_x = 0 
+    d_acqu_x = 0 
+
+    for i in range(acquisition.model.num_hmc_samples):
+        acquisition.model.model.kern[:] = acquisition.model.hmc_samples[i,:]
+        acqu_x += acquisition.acquisition_function(x)
+        d_acqu_x += acquisition.acquisition_function(x)
+
+    acqu_x = acqu_x/acquisition.model.num_hmc_samples  
+    d_acqu_x = acqu_x/acquisition.model.num_hmc_samples 
+
+    return -acqu_x/acquisition.cost(x), -d_acqu_x/acquisition.cost(x)
+
+
 def best_gess(f,X):
     '''
     Gets the best current guess from a vector.
