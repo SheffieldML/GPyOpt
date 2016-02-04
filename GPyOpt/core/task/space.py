@@ -5,9 +5,12 @@ class Design_space(object):
     """
     The format of a input domain:
     a list of dictionaries, one for each dimension, contains a list of attributes, e.g.:
-    [   {'name': 'var_1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality':1},
-        {'name': 'var_2', 'type': 'discrete', 'domain': (0,1,2,3)},
-        {'name': 'var_3', 'type': 'bandit', 'domain': [(-1,1),(1,0),(0,1)], 'dimensionality':2} ]
+     space =[{'name': 'var_1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality':1},
+             {'name': 'var_2', 'type': 'discrete', 'domain': (0,1,2,3)},
+             {'name': 'var_4', 'type': 'continuous', 'domain':(-3,1), 'dimensionality':2},
+             {'name': 'var_5', 'type': 'bandit', 'domain': [(-1,1),(1,0),(0,1)], 'dimensionality':2},
+             {'name': 'var_6', 'type': 'bandit', 'domain': [(-1,4),(0,0),(1,2)]},
+             {'name': 'var_3', 'type': 'discrete', 'domain': (0,1,2,3)}  ]
     """
     
     supported_types = ['continuous', 'discrete', 'bandit']
@@ -29,7 +32,11 @@ class Design_space(object):
             if 'domain' not in d_out:
                 raise Exception('Domain attribute cannot be missing!')
             if 'dimensionality' not in d_out:
-                d_out['dimensionality'] = 1
+                if d_out['domain'] == 'bandit': 
+                    d_out['dimensionality'] = len(d_out['domain'][0])
+                else:
+                    d_out['dimensionality'] = 1
+
             self.dimensionality += d_out['dimensionality']
             self.space.append(d_out)
             self.has_types[d_out['type']] = True
@@ -49,10 +56,11 @@ class Design_space(object):
         return np.array(list(itertools.product(*sets_grid)))
 
     def get_bandit(self):
-        pass
-#        TODO:
-#        bandit = self.space['domain'][self.space['type'==bandit]]
-        return np.array(bandit)
+        arms_bandit = []
+        for d in self.space:
+            if d['type']=='bandit':
+                arms_bandit += d['domain']
+        return np.asarray(arms_bandit)
 
 
 

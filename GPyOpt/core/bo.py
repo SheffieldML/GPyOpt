@@ -48,7 +48,7 @@ class BO(object):
         if self.X_init is not None:
             self.X = self.X_init
             self.X_init = None
-            self.Y, self.Y_cost = self.objective.evaluate(self.X)
+            self.Y, _ = self.objective.evaluate(self.X)
         
         # --- Initialize iterations and running time
         self.time_zero = time.time()
@@ -105,11 +105,9 @@ class BO(object):
             print '   -Evaluation time reached.'
             return 0
 
-
     def evaluate_objective(self):
         Y_new, Y_costnew = self.objective.evaluate(self.suggested_sample)
         self.Y = np.vstack((self.Y,Y_new))
-        self.Y_cost= np.vstack((self.Y_cost,Y_costnew))
 
     def _update_internal_elements(self):           
         if self.num_acquisitions == 0:
