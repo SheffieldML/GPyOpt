@@ -5,10 +5,14 @@ class AcquisitionLCB(AcquisitionBase):
     """
     Class for Expected improvement acquisition functions.
     """
-    def __init__(self, model, space, exploration_weight= 2, optimizer=None):
+    def __init__(self, model, space, optimizer=None, cost = None, exploration_weight=2):
         optimizer = optimizer
         super(AcquisitionLCB, self).__init__(model, space, optimizer)
         self.exploration_weight = exploration_weight
+        if cost == None: 
+            self.cost = lambda x: 1
+        else:
+            self.cost = cost
     
     def acquisition_function(self,x):
         """

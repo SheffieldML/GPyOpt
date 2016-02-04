@@ -4,3 +4,4 @@ from .EI_hmc import AcquisitionEI_hmc
 from .MPI import AcquisitionMPI
 from .MPI_hmc import AcquisitionMPI_hmc
 from .LCB import AcquisitionLCB
+from .LCB_hmc import AcquisitionLCB_hmc

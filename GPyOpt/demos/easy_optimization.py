@@ -14,13 +14,13 @@ def simple_optimization_1d(plots=True):
     objective = GPyOpt.core.task.SingleObjective(func.f, space, cost)
 
     # --- CHOOSE the model type
-    model = GPyOpt.models.GPModel(exact_feval=True, num_hmc_samples = 500)
+    model = GPyOpt.models.GPModel(exact_feval=True, num_hmc_samples = 100)
     
     # --- CHOOSE the acquisition optimizer
     aquisition_optimizer = GPyOpt.optimization.ContAcqOptimizer(space, 50)
     
     # --- CHOOSE the type of acquisition
-    acquisition = GPyOpt.acquisitions.AcquisitionMPI(model, space, optimizer=aquisition_optimizer)
+    acquisition = GPyOpt.acquisitions.AcquisitionLCB_hmc(model, space, optimizer=aquisition_optimizer)
     
     # --- CHOOSE the type of acquisition
     initial_design = GPyOpt.util.stats.initial_design('random', space.get_continuous_bounds(), 5)
