@@ -11,13 +11,13 @@ except:
     pass
 
 class BO(object):
-    def __init__(self, model, space, objective, acquisition_func, X_init, normalize_Y = True, model_optimize_interval = 1):
+    def __init__(self, model, space, objective, acquisition_func, X_init, normalize_Y = True, model_update_interval = 1):
         self.model = model
         self.space = space
         self.objective = objective
         self.acquisition_func = acquisition_func
         self.normalize_Y = normalize_Y
-        self.model_optimize_interval = model_optimize_interval
+        self.model_update_interval = model_update_interval
         self.X_init = X_init
         
     def run_optimization(self, max_iter = None, max_time = None,  eps = 1e-8, verbose=True):
@@ -128,19 +128,11 @@ class BO(object):
         return np.sqrt(sum((self.X[self.X.shape[0]-1,:]-self.X[self.X.shape[0]-2,:])**2))  
 
     def _optimize_acquisition(self):
-        """
-        Optimizes the acquisition function. This function selects the type of batch method and passes the arguments for the rest of the optimization.
-
-        """
         return self.acquisition_func.optimize()
         
 
     def _update_model(self):
-        """        
-        Updates X and Y in the model and re-optimizes the parameters of the new model
-
-        """
-        if (self.num_acquisitions%self.model_optimize_interval)==0:
+        if (self.num_acquisitions%self.model_update_interval)==0:
             if self.normalize_Y:
                 self.model.updateModel(self.X,(self.Y-self.Y.mean())/(self.Y.std()), None, None)
             else:

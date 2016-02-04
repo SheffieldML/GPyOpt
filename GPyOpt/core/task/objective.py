@@ -2,12 +2,12 @@
 import time
 import numpy as np
 from ...util.general import spawn
+import GPy
 
 class Objective(object):
     
     def evaluate(self, x):
         pass
-    
 
 class SingleObjective(Objective):
     
@@ -24,6 +24,7 @@ class SingleObjective(Objective):
             res = np.hstack([self.func(x[i]) for i in range(x.shape[0])])[:,None]
         return res, time.time()-st_time
     
+
 class SingleObjectiveMultiProcess(SingleObjective):
 
     def __init__(self, func, space, n_procs=2, batch_eval=True):
@@ -48,24 +49,3 @@ class SingleObjectiveMultiProcess(SingleObjective):
                 self.parallel_error = True 
             res = self.func(x)
         return res, time.time()-st_time
-
-# class Objective(object):
-#     """
-#     This is a class to handle the objective function, its associated cost and the way it should be evaluated.
-
-#     - func: is a list of functions to be optimized. It has only one element in the most general case.
-#     - cost: is a lisy of costs of evaluating the functions to optimize. In principle it will be a deterministic function but 
-#     we can extend this and handle it with the log of a GP.
-#     - evaluation_type: determine how the function is going to be evaluated ['sequentiely','syncr_batch','async_batch']
-
-#     """
-#     def __init__(self, func, cost = None, evaluation_type = None):
-#         if len(func)==1:
-#             self.type = 'standard' 
-#             self.f = {'f1': func}
-            
-#         else: 
-#             self.type = 'multi-task'
-#             self.f = {}
-#             for i in len(func):
-#                 self.f['f'+str(i+1)] = func[i]
