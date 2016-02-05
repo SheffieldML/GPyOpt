@@ -2,6 +2,8 @@
 class AcquisitionBase(object):
     """
     Base class for acquisition functions in Bayesian Optimization
+    
+    TODO for models that do not have gradients
     """
     def __init__(self, model, space, optimizer):
         self.model = model

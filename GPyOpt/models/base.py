@@ -10,6 +10,8 @@ class BOModel(object):
     The abstract Model for Bayesian Optimization
     """
     
+    MCMC_sampler = False
+    
     @abc.abstractmethod
     def updateModel(self, X_all, Y_all, X_new, Y_new):
         "Augment the dataset of the model"

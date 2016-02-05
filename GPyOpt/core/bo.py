@@ -110,12 +110,13 @@ class BO(object):
         self.Y = np.vstack((self.Y,Y_new))
 
     def _update_internal_elements(self):           
-        if self.num_acquisitions == 0:
-            pred_min = self.model.predict(self.X)
-            self.s_in_min = np.sqrt(abs(pred_min[1]))
-        else:
-            pred_min = self.model.predict(reshape(self.suggested_sample,self.space.dimensionality))
-            self.s_in_min = np.vstack((self.s_in_min,np.sqrt(abs(pred_min[1])))) 
+        pass
+#         if self.num_acquisitions == 0:
+#             pred_min = self.model.predict(self.X)
+#             self.s_in_min = np.sqrt(abs(pred_min[1]))
+#         else:
+#             pred_min = self.model.predict(reshape(self.suggested_sample,self.space.dimensionality))
+#             self.s_in_min = np.vstack((self.s_in_min,np.sqrt(abs(pred_min[1])))) 
 
     def _compute_results(self):
         self.Y_best = best_value(self.Y)
