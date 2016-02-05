@@ -18,6 +18,8 @@ class GPModel(BOModel):
         self.max_iters = max_iters
         self.verbose = verbose
         self.model = None
+        self.hmc_burnin_samples = 100
+        self.hmc_subsample_interval = 10
         self.num_hmc_samples = num_hmc_samples
         
     def _create_model(self, X, Y):
@@ -60,9 +62,10 @@ class GPModel(BOModel):
                 self.model.optimize_restarts(num_restarts=self.optimize_restarts, optimizer=self.optimizer, max_iters = self.max_iters, messages=self.verbose)
         else:
             # update the model generating hmc samples  (?? need the first optimization?)
-            self.model.optimize(optimizer=self.optimizer, max_iters = self.max_iters, messages=self.verbose)
-            self.hmc = GPy.inference.mcmc.HMC(self.model,stepsize=5e-2)
-            self.hmc_samples = self.hmc.sample(num_samples=self.num_hmc_samples)
+            #self.model.optimize(optimizer=self.optimizer, max_iters = self.max_iters, messages=self.verbose)
+            self.hmc = GPy.inference.mcmc.HMC(self.model,stepsize=1e-2)
+            ss = self.hmc.sample(num_samples=self.hmc_burnin_samples + self.num_hmc_samples* self.hmc_subsample_interval)
+            self.hmc_samples = ss[self.hmc_burnin_samples::self.hmc_subsample_interval]
 
 
     def predict(self, X):

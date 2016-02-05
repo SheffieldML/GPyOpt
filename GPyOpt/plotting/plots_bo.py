@@ -55,7 +55,7 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
         m, v = model.predict(x_grid)
 
 
-        model.plot_density(bounds[0])
+        model.plot_density(bounds[0], alpha=.5)
         
         plt.plot(x_grid, m, 'k-',lw=1,alpha = 0.6)
         plt.plot(x_grid, m-1.96*np.sqrt(v), 'k-', alpha = 0.2)

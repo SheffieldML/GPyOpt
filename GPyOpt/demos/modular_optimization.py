@@ -23,7 +23,7 @@ def modular_optimization(plots=True):
     acquisition = GPyOpt.acquisitions.AcquisitionEI_hmc(model, space, optimizer=aquisition_optimizer)
     
     # --- CHOOSE the intial design
-    initial_design = GPyOpt.util.stats.initial_design('random', space.get_continuous_bounds(), 10)
+    initial_design = GPyOpt.util.stats.initial_design('random', space.get_continuous_bounds(), 5)
     
     # BO object
     bo = GPyOpt.core.BO(model, space, objective, acquisition, initial_design)
