@@ -36,11 +36,14 @@ class GPModel(BOModel):
         self.model = GPy.models.GPRegression(X, Y, kernel=kern, noise_var=noise_var)
         
         # --- Define priors on the hyperparameters for the kernel (for integrated acquisitions)
-        self.model.kern.set_prior(GPy.priors.Gamma.from_EV(1.,10.))
+        if self.num_hmc_samples != None:
+            self.model.kern.set_prior(GPy.priors.Gamma.from_EV(1.,10.))
 
         # --- restrict variance if exact evaluations of the objective
         if self.exact_feval:
             self.model.Gaussian_noise.constrain_fixed(1e-6, warning=False)
+        else: 
+            self.model.Gaussian_noise.constrain_bounded(1e-6,1e6, warning=False)
             
     def updateModel(self, X_all, Y_all, X_new, Y_new):
         if self.normalize_Y:

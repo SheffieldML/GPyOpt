@@ -6,6 +6,7 @@ import numpy as np
 from pylab import grid
 import matplotlib.pyplot as plt
 from pylab import savefig
+import pylab
 
 
 def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,suggested_sample, filename = None):
@@ -15,37 +16,63 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
       
     # Plots in dimension 1
     if input_dim ==1:
-        X = np.arange(bounds[0][0], bounds[0][1], 0.001)
-        X = X.reshape(len(X),1)
-        acqu = acquisition_function(X)
-        acqu_normalized = (-acqu - min(-acqu))/(max(-acqu - min(-acqu))) # normalize acquisition 
-        m, v = model.predict(X.reshape(len(X),1))
-        plt.ioff()        
-        plt.figure(figsize=(10,5)) 
-        plt.subplot(2, 1, 1)
-        plt.plot(X, m, 'b-', label=u'Posterior mean',lw=2)
-        plt.fill(np.concatenate([X, X[::-1]]), \
-                np.concatenate([m - 1.9600 * np.sqrt(v),
-                            (m + 1.9600 * np.sqrt(v))[::-1]]), \
-                alpha=.5, fc='b', ec='None', label='95% C. I.') 
-        plt.plot(X, m-1.96*np.sqrt(v), 'b-', alpha = 0.5)
-        plt.plot(X, m+1.96*np.sqrt(v), 'b-', alpha=0.5)     
-        plt.plot(Xdata, Ydata, 'r.', markersize=10, label=u'Observations')
+        # X = np.arange(bounds[0][0], bounds[0][1], 0.001)
+        # X = X.reshape(len(X),1)
+        # acqu = acquisition_function(X)
+        # acqu_normalized = (-acqu - min(-acqu))/(max(-acqu - min(-acqu))) # normalize acquisition 
+        # m, v = model.predict(X.reshape(len(X),1))
+        # plt.ioff()        
+        # plt.figure(figsize=(10,5)) 
+        # plt.subplot(2, 1, 1)
+        # plt.plot(X, m, 'b-', label=u'Posterior mean',lw=2)
+        # plt.fill(np.concatenate([X, X[::-1]]), \
+        #         np.concatenate([m - 1.9600 * np.sqrt(v),
+        #                     (m + 1.9600 * np.sqrt(v))[::-1]]), \
+        #         alpha=.5, fc='b', ec='None', label='95% C. I.') 
+        # plt.plot(X, m-1.96*np.sqrt(v), 'b-', alpha = 0.5)
+        # plt.plot(X, m+1.96*np.sqrt(v), 'b-', alpha=0.5)     
+        # plt.plot(Xdata, Ydata, 'r.', markersize=10, label=u'Observations')
+        # plt.axvline(x=suggested_sample[len(suggested_sample)-1],color='r')
+        # plt.title('Model and observations')
+        # plt.ylabel('Y')
+        # plt.xlabel('X')
+        # plt.legend(loc='upper left')
+        # plt.xlim(*bounds)
+        # grid(True)  
+        # plt.subplot(2, 1, 2)
+        # plt.axvline(x=suggested_sample[len(suggested_sample)-1],color='r')
+        # plt.plot(X,acqu_normalized, 'r-',lw=2) 
+        # plt.xlabel('X')
+        # plt.ylabel('Acquisition value')
+        # plt.title('Acquisition function')
+        # grid(True)
+        # plt.xlim(*bounds)
+
+        x_grid = np.arange(bounds[0][0], bounds[0][1], 0.001)
+        x_grid = x_grid.reshape(len(x_grid),1)
+        acqu = acquisition_function(x_grid)
+        acqu_normalized = (-acqu - min(-acqu))/(max(-acqu - min(-acqu)))
+        m, v = model.predict(x_grid)
+
+
+        model.plot_density(bounds[0])
+        
+        plt.plot(x_grid, m, 'k-',lw=1,alpha = 0.6)
+        plt.plot(x_grid, m-1.96*np.sqrt(v), 'k-', alpha = 0.2)
+        plt.plot(x_grid, m+1.96*np.sqrt(v), 'k-', alpha=0.2)
+
+        plt.plot(Xdata, Ydata, 'r.', markersize=10)
         plt.axvline(x=suggested_sample[len(suggested_sample)-1],color='r')
-        plt.title('Model and observations')
-        plt.ylabel('Y')
-        plt.xlabel('X')
+        factor = max(m+1.96*np.sqrt(v))-min(m-1.96*np.sqrt(v))
+
+        plt.plot(x_grid,0.2*factor*acqu_normalized-abs(min(m-1.96*np.sqrt(v)))-0.25*factor, 'r-',lw=2,label ='Acquisition (arbitrary units)') 
+        plt.xlabel('x')
+        plt.ylabel('f(x)')
+        plt.ylim(min(m-1.96*np.sqrt(v))-0.25*factor,  max(m+1.96*np.sqrt(v))+0.05*factor) 
+        plt.axvline(x=suggested_sample[len(suggested_sample)-1],color='r')
         plt.legend(loc='upper left')
-        plt.xlim(*bounds)
-        grid(True)  
-        plt.subplot(2, 1, 2)
-        plt.axvline(x=suggested_sample[len(suggested_sample)-1],color='r')
-        plt.plot(X,acqu_normalized, 'r-',lw=2) 
-        plt.xlabel('X')
-        plt.ylabel('Acquisition value')
-        plt.title('Acquisition function')
-        grid(True)
-        plt.xlim(*bounds)
+
+
         if filename!=None:
             savefig(filename)
         else:
