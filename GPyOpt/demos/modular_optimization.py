@@ -14,7 +14,7 @@ def modular_optimization(plots=True):
     objective = GPyOpt.core.task.SingleObjective(func.f, space)
 
     # --- CHOOSE the model type
-    model = GPyOpt.models.GPModel_MCMC(exact_feval=True)
+    model = GPyOpt.models.GPModel_MCMC(exact_feval=False)
     
     # --- CHOOSE the acquisition optimizer
     aquisition_optimizer = GPyOpt.optimization.ContAcqOptimizer(space, 500)
