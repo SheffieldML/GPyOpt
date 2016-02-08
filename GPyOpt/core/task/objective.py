@@ -1,8 +1,8 @@
-
 import time
 import numpy as np
 from ...util.general import spawn
 import GPy
+import GPyOpt
 
 class Objective(object):
     
@@ -18,16 +18,14 @@ class SingleObjective(Objective):
         
         if self.cost_type == None:
             self.cost = lambda x: 1  
-        # elif self.cost_type = 'time':
-        #     cost_model = GPyOpt.models.GPModel(exact_feval=True,normalize_Y=True)
-        #     self.cost = model.predict
-        # else: 
+        elif self.cost_type == 'computing_time':
+             self.cost_model = GPyOpt.models.GPModel(exact_feval=False,normalize_Y=False,optimize_restarts=5)
+             self.cost = self.cost_model.predict
+        else: 
             self.cost = cost
-            
+        self.n_evals = 0
         
-    def evaluate(self, x):
-        st_time = time.time()
-        
+    def evaluate(self, x):        
         cost_evals = []
         f_evals     = np.empty(shape=[0, 1])
         
@@ -35,15 +33,22 @@ class SingleObjective(Objective):
             st_time    = time.time()
             f_evals     = np.vstack([f_evals,self.func(np.atleast_2d(x[i]))])
             cost_evals += [time.time()-st_time]     
-        cost_evals = np.asarray(cost_evals)
-        # if self.cost_type == 'time'
-        #     X_all = np.vstack((self.model.X,x))
-        #     costs_all = np.vstack((self.model.Y,cost_evals))
-        #     self.model.updateModel(X_all, costs_all, None, None)
+        
+        if self.cost_type == 'computing_time':
+            cost_evals = np.log(np.atleast_2d(np.asarray(cost_evals)).T)
+
+            if self.n_evals == 0:
+                X_all = x
+                costs_all = cost_evals
+                self.n_evals = 1
+            else:
+                X_all = np.vstack((self.cost_model.model.X,x))
+                costs_all = np.vstack((self.cost_model.model.Y,cost_evals))
+            self.cost_model.updateModel(X_all, costs_all, None, None)
         return f_evals, cost_evals 
     
-    # def evalute_cost(self,x):
-    #     return self.model.predict(x)[0]
+    def evalute_cost(self,x):
+        return np.exp(self.cost_model.model.predict(x)[0])
 
 
 class SingleObjectiveMultiProcess(SingleObjective):

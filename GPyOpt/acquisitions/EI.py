@@ -18,7 +18,6 @@ class AcquisitionEI(AcquisitionBase):
         phi, Phi, _ = get_quantiles(self.jitter, fmin, m, s)    
         f_acqu = (fmin - m + self.jitter) * Phi + s * phi
         return -(f_acqu*self.space.indicator_constrains(x))/self.cost(x)
-        #return -(f_acqu)/self.cost(x)
 
 
     def acquisition_function(self,x):
@@ -34,7 +33,6 @@ class AcquisitionEI(AcquisitionBase):
         f_acqu = (fmin - m + self.jitter) * Phi + s * phi        
         df_acqu = dsdx * phi - Phi * dmdx
         return -(f_acqu*self.space.indicator_constrains(x))/self.cost(x), -(df_acqu*self.space.indicator_constrains(x))/self.cost(x)
-        #return -(f_acqu)/self.cost(x), -(df_acqu)/self.cost(x)
 
 
     def acquisition_function_withGradients(self, x):

@@ -106,7 +106,7 @@ class BO(object):
             return 0
 
     def evaluate_objective(self):
-        Y_new, Y_costnew = self.objective.evaluate(self.suggested_sample)
+        Y_new, _ = self.objective.evaluate(self.suggested_sample)
         self.Y = np.vstack((self.Y,Y_new))
 
     def _update_internal_elements(self):           

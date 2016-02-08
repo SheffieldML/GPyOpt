@@ -47,6 +47,6 @@ def modular_optimization(plots=True):
     if plots:
         func.plot()
         bo.plot_acquisition()
-#         bo.plot_convergence()
+        bo.plot_convergence()
     return bo
 
