@@ -78,15 +78,20 @@ class MixedAcqOptimizer(AcquisitionOptimizer):
         else:
             self.samples = multigrid(self.space.get_continuous_bounds(), self.n_samples)
 
+        self.continuous_space_optimizer = ContAcqOptimizer(self.get_continuous_space(),n_samples, fast, random, search, optimizer, kw)
 
     def optimize(self, f=None, df=None, f_df=None):
-        ## TODO
-        #
-        # 1.- get continous space ()
-        # 2.- get discrete space
-        # 3.- for each combination of the values of the discrete variables optimize the continous (parallelize?, search?)
-        # 4.- compute the argmin of all the combinations
-        # 5.- map the variables back and show the minimum
+        
+        # discrete_points = self.space.get_discrete_grid()
+        # n_points = discrete_points.shape[0]
+        # discrete_optima = np.zeros((n_points,1))
+        # index = self.space.get_continuous_index():
+
+        # for i in range(n_points):
+        #     partial = partial_evaluator(f,df,f_df,index,discrete_points[i,:])
+        #     discrete_optima[i,:],_ =  self.continuous_space_optimizer.optimize(partial.f,partial.df,partial.f_df)
+
+        # # take the min
         pass
 
 class partial_evaluator(object):
@@ -100,17 +105,20 @@ class partial_evaluator(object):
         self.index = index
         self.values_index = values_index
     
-    def evaluate_f(self,x):
-        x[:,np.array(self.index)] = np.dot(np.ones((x.shape[0],1)),self.values_index)
-        return self.f(x).reshape((x.shape[0],1))
+    def f(self,x):
+        return self.f(self._fix_entries(x)).reshape((x.shape[0],1))
     
-    def evaluate_df(self,x):
-        x[:,np.array(self.index)] = np.dot(np.ones((x.shape[0],1)),self.values_index)
-        return self.df(x)
+    def df(self,x):
+        return self.df(self._fix_entries(x))
     
-    def evaluate_f_df(self,x):
+    def f_df(self,x):
+        return self.f_df(self._fix_entries(x))
+
+    def _fix_entries(self,x):
         x[:,np.array(self.index)] = np.dot(np.ones((x.shape[0],1)),self.values_index)
-        return self.f_df(x)
+        return x
+
+
 
 
 

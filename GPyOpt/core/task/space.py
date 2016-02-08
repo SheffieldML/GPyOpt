@@ -74,6 +74,13 @@ class Design_space(object):
                 bounds.extend([d['domain']]*d['dimensionality'])
         return bounds
     
+    def get_continuous_space(self):
+        space = []
+        for d in self.space:
+            if d['type']=='continuous':
+                space += [d]
+        return space
+
     def get_discrete_grid(self):
         sets_grid = []
         for d in self.space:
@@ -87,6 +94,12 @@ class Design_space(object):
             if d['type']=='bandit':
                 arms_bandit += d['domain']
         return np.asarray(arms_bandit)
+
+    def get_continuous_index(self):
+        ## TODO
+        index = []
+        pass
+
 
     def indicator_constrains(self,x):
         x = np.atleast_2d(x)
