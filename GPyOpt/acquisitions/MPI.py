@@ -3,7 +3,7 @@ from ..util.general import get_quantiles
 
 class AcquisitionMPI(AcquisitionBase):
     """
-    Class for Expected improvement acquisition functions.
+    Class for Maximum probability of improvement acquisition functions.
     """
     def __init__(self, model, space, optimizer=None, cost = None, jitter=0.01):
         optimizer = optimizer
@@ -14,15 +14,21 @@ class AcquisitionMPI(AcquisitionBase):
         else:
             self.cost = cost
     
-    def acquisition_function(self,x):
-        """
-        Expected Improvement
-        """
-        m, s = self.model.predict(x)
-        fmin = self.model.get_fmin()   
+    def _compute_acq(self, m, s, fmin, x):
         _, Phi,_ = get_quantiles(self.jitter, fmin, m, s)    
         f_acqu =  Phi
-        return -f_acqu  # note: returns negative value for posterior minimization 
+        return -(f_acqu*self.space.indicator_constrains(x))/self.cost(x)
+
+    def acquisition_function(self,x):
+        m, s = self.model.predict(x)
+        fmin = self.model.get_fmin()   
+        return self._compute_acq(m, s, fmin, x)  # note: returns negative value for posterior minimization 
+
+    def _compute_acq_withGradients(self, m, s, fmin, dmdx, dsdx, x):
+        phi, Phi, u = get_quantiles(self.jitter, fmin, m, s)    
+        f_acqu =  Phi        
+        df_acqu = -(phi/s)* (dmdx + dsdx * u)
+        return -(f_acqu*self.space.indicator_constrains(x))/self.cost(x), -(df_acqu*self.space.indicator_constrains(x))/self.cost(x)
 
     def acquisition_function_withGradients(self, x):
         """
@@ -30,9 +36,6 @@ class AcquisitionMPI(AcquisitionBase):
         """
         m, s, dmdx, dsdx = self.model.predict_withGradients(x)
         fmin = self.model.get_fmin()
-        phi, Phi, u = get_quantiles(self.jitter, fmin, m, s)    
-        f_acqu =  Phi        
-        df_acqu = -(phi/s)* (dmdx + dsdx * u)
-        return -f_acqu, -df_acqu
+        return self._compute_acq_withGradients(m, s, fmin, dmdx, dsdx, x)
     
     

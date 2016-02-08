@@ -14,20 +14,21 @@ class AcquisitionLCB(AcquisitionBase):
         else:
             self.cost = cost
     
-    def acquisition_function(self,x):
-        """
-        Expected Improvement
-        """
-        m, s = self.model.predict(x)
+    def _compute_acq(self, m, s, x):
         f_acqu = -m + self.exploration_weight * s
-        return -f_acqu  # note: returns negative value for posterior minimization
+        return -(f_acqu*self.space.indicator_constrains(x))/self.cost(x)
+
+    def acquisition_function(self,x):
+        m, s = self.model.predict(x)
+        return self._compute_acq(m, s, x) # note: returns negative value for posterior minimization
 
     def acquisition_function_withGradients(self, x):
-        """
-        Derivative of the Expected Improvement (has a very easy derivative!)
-        """
         m, s, dmdx, dsdx = self.model.predict_withGradients(x)
+        return self._compute_acq_withGradients(m, s, dmdx, dsdx, x)
+
+    def _compute_acq_withGradients(self, m, s, dmdx, dsdx, x):
         f_acqu = -m + self.exploration_weight * s
-        df_acqu = -dmdx + self.acquisition_par * dsdx
-        return -f_acqu, -df_acqu
+        df_acqu = -dmdx + self.exploration_weight * dsdx
+        return -(f_acqu*self.space.indicator_constrains(x))/self.cost(x), -(df_acqu*self.space.indicator_constrains(x))/self.cost(x)
+
 
