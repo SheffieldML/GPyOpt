@@ -26,12 +26,12 @@ class function2d:
         X = np.hstack((X1.reshape(100*100,1),X2.reshape(100*100,1)))
         Y = self.f(X)
         
-        fig = plt.figure()
-        ax = fig.gca(projection='3d')
-        ax.plot_surface(X1, X2, Y.reshape((100,100)), rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
-        ax.zaxis.set_major_locator(LinearLocator(10))
-        ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
-        ax.set_title(self.name)    
+        #fig = plt.figure()
+        #ax = fig.gca(projection='3d')
+        #ax.plot_surface(X1, X2, Y.reshape((100,100)), rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+        #ax.zaxis.set_major_locator(LinearLocator(10))
+        #ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+        #ax.set_title(self.name)    
             
         plt.figure()    
         plt.contourf(X1, X2, Y.reshape((100,100)),100)
