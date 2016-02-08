@@ -166,7 +166,7 @@ class BO(object):
     def get_evaluations(self):
         return self.X.copy(), self.Y.copy()
 
-    def save_report(self, report_file= 'GPyOpt-results.txt ' ):
+    def save_report(self, report_file= 'GPyOpt-results.txt' ):
         """
         Save a report with the results of the optimization. A file is produced every 
         :param report_file: name of the file in which the results of the optimization are saved.

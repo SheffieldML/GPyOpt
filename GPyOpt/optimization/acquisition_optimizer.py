@@ -88,3 +88,29 @@ class MixedAcqOptimizer(AcquisitionOptimizer):
         # 4.- compute the argmin of all the combinations
         # 5.- map the variables back and show the minimum
         pass
+
+class partial_evaluator(object):
+    '''
+    Class that wraps a function and its derivative and enables to fix some components
+    '''
+    def __init__(self,f,df,f_df,index,values_index):
+        self.f = f
+        self.df = df
+        self.f_df = f_df
+        self.index = index
+        self.values_index = values_index
+    
+    def evaluate_f(self,x):
+        x[:,np.array(self.index)] = np.dot(np.ones((x.shape[0],1)),self.values_index)
+        return self.f(x).reshape((x.shape[0],1))
+    
+    def evaluate_df(self,x):
+        x[:,np.array(self.index)] = np.dot(np.ones((x.shape[0],1)),self.values_index)
+        return self.df(x)
+    
+    def evaluate_f_df(self,x):
+        x[:,np.array(self.index)] = np.dot(np.ones((x.shape[0],1)),self.values_index)
+        return self.f_df(x)
+
+
+
