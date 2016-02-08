@@ -3,20 +3,46 @@ import itertools
 
 class Design_space(object):
     """
-    The format of a input domain:
-    a list of dictionaries, one for each dimension, contains a list of attributes, e.g.:
-     space =[{'name': 'var_1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality':1},
-             {'name': 'var_2', 'type': 'discrete', 'domain': (0,1,2,3)},
-             {'name': 'var_4', 'type': 'continuous', 'domain':(-3,1), 'dimensionality':2},
-             {'name': 'var_5', 'type': 'bandit', 'domain': [(-1,1),(1,0),(0,1)], 'dimensionality':2},
-             {'name': 'var_6', 'type': 'bandit', 'domain': [(-1,4),(0,0),(1,2)]},
-             {'name': 'var_3', 'type': 'discrete', 'domain': (0,1,2,3)}  ]
+    The format of a input domain, possibly with restrictions:
+    The domain is defined as a list of dictionaries contains a list of attributes, e.g.:
+
+    - Arm bandit
+    space  =[{'name': 'var_1', 'type': 'bandit', 'domain': [(-1,1),(1,0),(0,1)], 'dimensionality':2},
+             {'name': 'var_2', 'type': 'bandit', 'domain': [(-1,4),(0,0),(1,2)]},
+
+    - Continous domain
+    space =[ {'name': 'var_1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality':1},
+             {'name': 'var_2', 'type': 'continuous', 'domain':(-3,1), 'dimensionality':2},
+             {'name': 'var_3', 'type': 'bandit', 'domain': [(-1,1),(1,0),(0,1)], 'dimensionality':2},
+             {'name': 'var_4', 'type': 'bandit', 'domain': [(-1,4),(0,0),(1,2)]},
+             {'name': 'var_5', 'type': 'discrete', 'domain': (0,1,2,3)}]
+
+    - Discrete domain
+    space =[ {'name': 'var_3', 'type': 'discrete', 'domain': (0,1,2,3)}]
+             {'name': 'var_3', 'type': 'discrete', 'domain': (-10,10)}]
+
+
+    - Mixed domain 
+    space =[{'name': 'var_1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality':1},
+            {'name': 'var_4', 'type': 'continuous', 'domain':(-3,1), 'dimensionality':2},
+            {'name': 'var_3', 'type': 'discrete', 'domain': (0,1,2,3)}]
+
+    Restrictions can be added to the problem. Each restriction is of the form c(x) <= 0 where c(x) is a function of 
+    the input variables previously defined in the space. Restrictions should be written as a list
+    of dictionaries. For instance, this would be an example of and space coupled with a constrain
+
+    space =[ {'name': 'var_1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality':2}]
+    constrains = [ {'name': 'const_1', 'constrain': 'x[:,0]**2 + x[:,1]**2 - 1'}]
+
+    If no constrains are provided the hypercube determined by the bounds constrains are used.
+
     """
     
     supported_types = ['continuous', 'discrete', 'bandit']
     
-    def __init__(self, space):
+    def __init__(self, space, constrains=None):
         self._complete_attributes(space)
+        self.constrains = constrains
         
     def _complete_attributes(self, space):
         from copy import deepcopy
@@ -62,7 +88,15 @@ class Design_space(object):
                 arms_bandit += d['domain']
         return np.asarray(arms_bandit)
 
-
+    def indicator_constrains(self,x):
+        x = np.atleast_2d(x)
+        I_x = np.ones((x.shape[0],1))
+        if self.constrains != None:
+            for d in self.constrains:
+                exec 'constrain =  lambda x:' + d['constrain']
+                exec 'ind_x = (constrain(x)<0)*1'
+                I_x *= ind_x.reshape(x.shape[0],1)
+        return I_x
 
 
     

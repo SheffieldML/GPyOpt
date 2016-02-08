@@ -4,26 +4,28 @@ def modular_optimization(plots=True):
     seed(1234)
         
     # --- Fucntion to optimize
-    func  = GPyOpt.objective_examples.experiments1d.forrester(sd=0.05)  
-    #cost = lambda x: 2*x
+    func  = GPyOpt.objective_examples.experiments2d.sixhumpcamel() 
+    #func  = GPyOpt.objective_examples.experiments1d.forrester() 
 
     # --- Space design
-    space = GPyOpt.Design_space([{'domain':(0,1)}])
+    space = GPyOpt.Design_space(space =[{'name': 'var_1', 'type': 'continuous', 'domain': (-1,1)},
+                                        {'name': 'var_2', 'type': 'continuous', 'domain': (-1.3,1.3)}])
+    #space = GPyOpt.Design_space([{'type': 'continuous','domain':func.bounds[0]}])
 
     # --- Objective
     objective = GPyOpt.core.task.SingleObjective(func.f, space)
 
     # --- CHOOSE the model type
-    model = GPyOpt.models.GPModel_MCMC(exact_feval=False)
+    model = GPyOpt.models.GPModel(exact_feval=True)
     
     # --- CHOOSE the acquisition optimizer
-    aquisition_optimizer = GPyOpt.optimization.ContAcqOptimizer(space, 500)
+    aquisition_optimizer = GPyOpt.optimization.ContAcqOptimizer(space, 1000, search=True)
     
     # --- CHOOSE the type of acquisition
-    acquisition = GPyOpt.acquisitions.AcquisitionEI_MCMC(model, space, optimizer=aquisition_optimizer)
+    acquisition = GPyOpt.acquisitions.AcquisitionEI(model, space, optimizer=aquisition_optimizer)
     
     # --- CHOOSE the intial design
-    initial_design = GPyOpt.util.stats.initial_design('random', space.get_continuous_bounds(), 5)
+    initial_design = GPyOpt.util.stats.initial_design('random', space.get_continuous_bounds(), 10)
     
     # BO object
     bo = GPyOpt.core.BO(model, space, objective, acquisition, initial_design)

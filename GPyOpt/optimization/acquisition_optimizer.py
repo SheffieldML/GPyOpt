@@ -35,7 +35,7 @@ class ContAcqOptimizer(AcquisitionOptimizer):
             if self.search:
                 return self.optimizer.optimize(x0, f, df, f_df)
             else:
-                return x0, pred_f
+                return np.atleast_2d(x0), pred_f
         else:
             x_min = None
             f_min = np.Inf

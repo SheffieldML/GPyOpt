@@ -18,13 +18,18 @@ class Opt_lbfgs(Optimizer):
         assert self.space.has_types['continuous']
         
     def optimize(self, x0, f=None, df=None, f_df=None):
+
         import scipy.optimize
-        if f_df is None: f_df = lambda x: (float(f(x)), df(x))
+        import numpy as np
+        if f_df is None and df is not None: f_df = lambda x: float(f(x)), df(x)
+        if f_df is not None:
+            def _f_df(x):
+                return f(x), f_df(x)[1][0]
         if f_df is None and df is None:
             res = scipy.optimize.fmin_l_bfgs_b(f, x0=x0, bounds=self.space.get_continuous_bounds(),approx_grad=True, maxiter=self.maxiter)
         else:
-            res = scipy.optimize.fmin_l_bfgs_b(f_df, x0=x0, bounds=self.space.get_continuous_bounds(), maxiter=self.maxiter)
-        return res[0],res[1]
+            res = scipy.optimize.fmin_l_bfgs_b(_f_df, x0=x0, bounds=self.space.get_continuous_bounds(), maxiter=self.maxiter)
+        return np.atleast_2d(res[0]),np.atleast_2d(res[1])
 
 
 
