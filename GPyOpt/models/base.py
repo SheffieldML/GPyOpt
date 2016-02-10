@@ -11,6 +11,7 @@ class BOModel(object):
     """
     
     MCMC_sampler = False
+    analytical_gradient_prediction = False
     
     @abc.abstractmethod
     def updateModel(self, X_all, Y_all, X_new, Y_new):
@@ -22,10 +23,10 @@ class BOModel(object):
         "Get the predicted mean and std at X."
         return
 
-    # @abc.abstractmethod
-    # def predict_withGradients(self, X):
-    #     "Get the gradients of the predicted mean and variance at X."
-    #     return
+#    @abc.abstractmethod
+    def predict_withGradients(self, X):
+        "Get the gradients of the predicted mean and variance at X."
+        return
     
     @abc.abstractmethod
     def get_fmin(self):

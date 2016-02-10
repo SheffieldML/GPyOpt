@@ -133,9 +133,9 @@ class BO(object):
     def _update_model(self):
         if (self.num_acquisitions%self.model_update_interval)==0:
             if self.normalize_Y:
-                self.model.updateModel(self.X,(self.Y-self.Y.mean())/(self.Y.std()))
+                self.model.updateModel(self.X,(self.Y-self.Y.mean())/(self.Y.std()),None,None)
             else:
-                self.model.updateModel(self.X, self.Y)
+                self.model.updateModel(self.X, self.Y,None,None)
 
     def plot_acquisition(self,filename=None):
         """        

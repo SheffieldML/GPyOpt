@@ -7,6 +7,8 @@ import numpy as np
 import GPy
 
 class GPModel(BOModel):
+
+    analytical_gradient_prediction = True
     
     def __init__(self, kernel=None, noise_var=None, exact_feval=False, normalize_Y=True, optimizer='bfgs', max_iters=1000, optimize_restarts=1, verbose=False):
         self.kernel = kernel
@@ -39,7 +41,7 @@ class GPModel(BOModel):
         else: 
             self.model.Gaussian_noise.constrain_positive(warning=False)
             
-    def updateModel(self, X_all, Y_all):
+    def updateModel(self, X_all, Y_all, X_new, Y_new):
         if self.normalize_Y:
             Y_all = (Y_all - Y_all.mean())/(Y_all.std())
         if self.model is None: self._create_model(X_all, Y_all)
@@ -73,6 +75,7 @@ class GPModel(BOModel):
 class GPModel_MCMC(BOModel):
     
     MCMC_sampler = True
+    analytical_gradient_prediction = True
     
     def __init__(self, kernel=None, noise_var=None, exact_feval=False, normalize_Y=True, n_samples = 10, n_burnin = 100, subsample_interval = 10, step_size = 1e-1, leapfrog_steps=20, verbose=False):
         self.kernel = kernel

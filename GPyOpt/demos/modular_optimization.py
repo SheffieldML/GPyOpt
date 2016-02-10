@@ -16,13 +16,13 @@ def modular_optimization(plots=True):
     objective = GPyOpt.core.task.SingleObjective(func.f, space)
 
     # --- CHOOSE the model type
-    model = GPyOpt.models.RFModel()
+    model = GPyOpt.models.GPModel_MCMC()
     
     # --- CHOOSE the acquisition optimizer
     aquisition_optimizer = GPyOpt.optimization.ContAcqOptimizer(space, 1000, search=True)
     
     # --- CHOOSE the type of acquisition
-    acquisition = GPyOpt.acquisitions.AcquisitionEI(model, space, optimizer=aquisition_optimizer)
+    acquisition = GPyOpt.acquisitions.AcquisitionEI_MCMC(model, space, optimizer=aquisition_optimizer)
     
     # --- CHOOSE the intial design
     initial_design = GPyOpt.util.stats.initial_design('random', space.get_continuous_bounds(), 10)
@@ -36,7 +36,7 @@ def modular_optimization(plots=True):
     
     # --- Stop conditions
     max_time  = None 
-    max_iter  = 3
+    max_iter  = 0
     tolerance = 1e-8     # distance between two consecutive observations  
 
     # Run the optimization                                                  
