@@ -39,7 +39,7 @@ class GPModel(BOModel):
         else: 
             self.model.Gaussian_noise.constrain_positive(warning=False)
             
-    def updateModel(self, X_all, Y_all, X_new, Y_new):
+    def updateModel(self, X_all, Y_all):
         if self.normalize_Y:
             Y_all = (Y_all - Y_all.mean())/(Y_all.std())
         if self.model is None: self._create_model(X_all, Y_all)

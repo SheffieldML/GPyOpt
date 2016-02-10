@@ -17,6 +17,10 @@ class AcquisitionBase(object):
         pass
     
     def optimize(self):
-        return self.optimizer.optimize(f=self.acquisition_function, f_df=self.acquisition_function_withGradients)[0]
+        if not hasattr(self.model, 'predict_withGradients'):
+            out = self.optimizer.optimize(f=self.acquisition_function, f_df=None)[0]
+        else:
+            out = self.optimizer.optimize(f=self.acquisition_function, f_df=self.acquisition_function_withGradients)[0]
+        return out
     
     

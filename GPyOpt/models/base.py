@@ -22,10 +22,10 @@ class BOModel(object):
         "Get the predicted mean and std at X."
         return
 
-    @abc.abstractmethod
-    def predict_withGradients(self, X):
-        "Get the gradients of the predicted mean and variance at X."
-        return
+    # @abc.abstractmethod
+    # def predict_withGradients(self, X):
+    #     "Get the gradients of the predicted mean and variance at X."
+    #     return
     
     @abc.abstractmethod
     def get_fmin(self):
