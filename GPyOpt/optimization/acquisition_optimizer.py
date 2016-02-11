@@ -116,6 +116,7 @@ class ContAcqOptimizer(AcquOptimizer):
             x0 =  self.samples[np.argmin(pred_fp)]
             if self.search:
                 x_min, f_min = self.optimizer.optimize(x0, f =fp, df=None, f_df=fp_dfp)
+                print self._expand_vector(x_min), f_min
                 return self._expand_vector(x_min), f_min
             else:
                 return self._expand_vector(np.atleast_2d(x0)), pred_fp
@@ -137,12 +138,18 @@ class BanditAcqOptimizer(AcquOptimizer):
 
     def __init__(self, space, **kwars):
         super(BanditAcqOptimizer, self).__init__(space)
+        self.space = space
 
     def optimize(self, f=None, df=None, f_df=None):
-        pref_f = f(self.space.get_bandit())
-        x_min = self.space.get_bandits()[np.argmin(pref_f)]
+        if self.space.has_types['discrete']:
+            arms = self.space.get_discrete_grid()
+        else:
+           arms = self.space.get_bandit()
+
+        pref_f = f(arms)
+        x_min = arms[np.argmin(pref_f)]
         f_min = f(x_min)
-        return x_min, f_min
+        return np.atleast_2d(x_min), f_min
 
 
 class MixedAcqOptimizer(AcquOptimizer):

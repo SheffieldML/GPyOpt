@@ -123,8 +123,9 @@ class Design_space(object):
         arms_bandit = []
         for d in self.space:
             if d['type']=='bandit':
-                arms_bandit += d['domain']
+                arms_bandit += tuple(map(tuple, d['domain']))
         return np.asarray(arms_bandit)
+
 
     def get_continuous_dims(self):
         continuous_dims = []
