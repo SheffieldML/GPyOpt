@@ -54,7 +54,7 @@ class RFModel(BOModel):
         self.model.fit(X,Y.flatten())
         
         
-    def updateModel(self, X_all, Y_all):
+    def updateModel(self, X_all, Y_all, X_new, Y_new):
         self.X = X_all
         self.Y = Y_all
         if self.normalize_Y:

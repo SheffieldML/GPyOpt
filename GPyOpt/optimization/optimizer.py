@@ -26,9 +26,9 @@ class Opt_lbfgs(Optimizer):
             def _f_df(x):
                 return f(x), f_df(x)[1][0]
         if f_df is None and df is None:
-            res = scipy.optimize.fmin_l_bfgs_b(f, x0=x0, bounds=self.space.get_continuous_bounds(),approx_grad=True, maxiter=self.maxiter)
+            res = scipy.optimize.fmin_l_bfgs_b(f, x0=x0, bounds=self.space.get_bounds(),approx_grad=True, maxiter=self.maxiter)
         else:
-            res = scipy.optimize.fmin_l_bfgs_b(_f_df, x0=x0, bounds=self.space.get_continuous_bounds(), maxiter=self.maxiter)
+            res = scipy.optimize.fmin_l_bfgs_b(_f_df, x0=x0, bounds=self.space.get_bounds(), maxiter=self.maxiter)
         return np.atleast_2d(res[0]),np.atleast_2d(res[1])
 
 
@@ -52,8 +52,8 @@ class Opt_DIRECT(Optimizer):
                 def g(x, user_data):
                     return f(np.array([x])), 0
                 return g
-            lB = np.asarray(self.space.get_continuous_bounds())[:,0]
-            uB = np.asarray(self.space.get_continuous_bounds())[:,1]
+            lB = np.asarray(self.space.get_bounds())[:,0]
+            uB = np.asarray(self.space.get_bounds())[:,1]
             x,_,_ = solve(DIRECT_f_wrapper(f),lB,uB, maxT=self.maxiter)
             return np.atleast_2d(x), f(np.atleast_2d(x))
         except:
@@ -77,8 +77,8 @@ class Opt_CMA(Optimizer):
                 def g(x):
                     return f(np.array([x]))[0][0]
                 return g
-            lB = np.asarray(self.space.get_continuous_bounds())[:,0]
-            uB = np.asarray(self.space.get_continuous_bounds())[:,1]
+            lB = np.asarray(self.space.get_bounds())[:,0]
+            uB = np.asarray(self.space.get_bounds())[:,1]
             x = cma.fmin(CMA_f_wrapper(f), (uB + lB) * 0.5, 0.6, options={"bounds":[lB, uB], "verbose":-1})[0]
             print x
             return np.atleast_2d(x), f(np.atleast_2d(x))

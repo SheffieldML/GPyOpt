@@ -144,7 +144,7 @@ class BO(object):
             if self.input_dim = 2: as before but it separates the mean and variance of the model in two different plots
         :param filename: name of the file where the plot is saved
         """  
-        return plot_acquisition(self.acquisition_func.space.get_continuous_bounds(),
+        return plot_acquisition(self.acquisition_func.space.get_bounds(),
                                 self.model.model.X.shape[1],
                                 self.model.model,
                                 self.model.model.X,

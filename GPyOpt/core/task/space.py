@@ -42,6 +42,7 @@ class Design_space(object):
     
     def __init__(self, space, constrains=None):
         self._complete_attributes(space)
+        self.space_expanded = self._expand_attributes(self.space)
         self.constrains = constrains
         
     def _complete_attributes(self, space):
@@ -67,6 +68,18 @@ class Design_space(object):
             self.space.append(d_out)
             self.has_types[d_out['type']] = True
 
+    def _expand_attributes(self, space):
+        space_expanded = []
+        for d in space:
+            d_new = []
+            for i in range(d['dimensionality']):
+                dd = d.copy()
+                dd['dimensionality'] = 1
+                dd['name'] = dd['name']+'_'+str(i+1)
+                d_new += [dd] 
+            space_expanded += d_new
+        return space_expanded
+
     def get_continuous_bounds(self):
         bounds = []
         for d in self.space:
@@ -74,6 +87,24 @@ class Design_space(object):
                 bounds.extend([d['domain']]*d['dimensionality'])
         return bounds
     
+    def get_bounds(self):
+        bounds = []
+        for d in self.space:
+            if d['type']=='continuous':
+                bounds.extend([d['domain']]*d['dimensionality'])
+            elif d['type']=='discrete':
+                bounds.extend([(min(d['domain'])-.1, max(d['domain'])+.1) ] *d['dimensionality'])
+        return bounds
+
+    def get_subspace(self,dims):
+        '''
+        Extracts a the subspace according to a list of dimension
+        '''
+        subspace = []
+        for i in dims:
+            subspace += [self.space_expanded[i]]
+        return subspace
+
     def get_continuous_space(self):
         space = []
         for d in self.space:
@@ -95,11 +126,19 @@ class Design_space(object):
                 arms_bandit += d['domain']
         return np.asarray(arms_bandit)
 
-    def get_continuous_index(self):
-        ## TODO
-        index = []
-        pass
+    def get_continuous_dims(self):
+        continuous_dims = []
+        for i in range(self.dimensionality):
+            if self.space_expanded[i]['type']=='continuous':
+                continuous_dims += [i]
+        return continuous_dims
 
+    def get_discrete_dims(self):
+        discrete_dims = []
+        for i in range(self.dimensionality):
+            if self.space_expanded[i]['type']=='discrete':
+                discrete_dims += [i]
+        return discrete_dims
 
     def indicator_constrains(self,x):
         x = np.atleast_2d(x)
