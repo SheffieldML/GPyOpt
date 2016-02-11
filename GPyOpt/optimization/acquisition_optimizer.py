@@ -4,19 +4,38 @@ from ..util.general import multigrid, samples_multidimensional_uniform
 import numpy as np
 from ..core.task.space import Design_space
 
-class AcquisitionOptimizer(object):
+
+def AcquisitionOptimizer(space, n_samples=2000, fast=True, random=True, search=True, optimizer='lbfgs', **kwargs):
+    
+    if space.has_types['bandit'] and (space.has_types['continuous'] or space.has_types['discrete']):
+        raise Exception('Not possible to combine bandits with other variable types.)')
+
+    elif space.has_types['bandit']:
+        return BanditAcqOptimizer(space, **kwargs)
+
+    elif space.has_types['continuous'] and not space.has_types['discrete']:
+        return ContAcqOptimizer(space, n_samples=n_samples, fast=fast, random=random, search=search, optimizer=optimizer, **kwargs)
+
+    elif space.has_types['continuous'] and  space.has_types['discrete']:
+        return MixedAcqOptimizer(space, n_samples=n_samples, fast=fast, random=random, search=search, optimizer=optimizer, **kwargs)
+
+    elif not space.has_types['continuous'] and space.has_types['discrete']:
+        return BanditAcqOptimizer(space, **kwargs)
+
+
+class AcquOptimizer(object):
     
     def __init__(self, space):
         self.space = space
         
     def optimize(self, f=None, df=None, f_df=None):
-        return None, None
+         return None, None
 
-
-class ContAcqOptimizer(AcquisitionOptimizer):
+class ContAcqOptimizer(AcquOptimizer):
     
     def __init__(self, space, n_samples=5, fast=True, random=True, search=True, optimizer='lbfgs', **kwargs):
         super(ContAcqOptimizer, self).__init__(space)
+        
         self.n_samples = n_samples
         self.fast= fast
         self.random = random
@@ -114,9 +133,9 @@ class ContAcqOptimizer(AcquisitionOptimizer):
             return self._expand_vector(x_min), f_min
         
 
-class BanditAcqOptimizer(AcquisitionOptimizer):
+class BanditAcqOptimizer(AcquOptimizer):
 
-    def __init__(self, space, **kw):
+    def __init__(self, space, **kwars):
         super(BanditAcqOptimizer, self).__init__(space)
 
     def optimize(self, f=None, df=None, f_df=None):
@@ -126,7 +145,7 @@ class BanditAcqOptimizer(AcquisitionOptimizer):
         return x_min, f_min
 
 
-class MixedAcqOptimizer(AcquisitionOptimizer):
+class MixedAcqOptimizer(AcquOptimizer):
 
     def __init__(self, space, n_samples, fast=True, random=True, search=True, optimizer='lbfgs', **kwargs):
         super(MixedAcqOptimizer, self).__init__(space)
@@ -135,7 +154,6 @@ class MixedAcqOptimizer(AcquisitionOptimizer):
         self.mixed_optimizer = ContAcqOptimizer(space, n_samples=n_samples, fast=fast, random=random, search=search, optimizer=optimizer, **kwargs)
         self.discrete_dims = self.space.get_discrete_dims()
         self.discrete_values = self.space.get_discrete_grid()
-
 
     def optimize(self, f=None, df=None, f_df=None):
         num_discrete = self.discrete_values.shape[0]
@@ -147,40 +165,6 @@ class MixedAcqOptimizer(AcquisitionOptimizer):
             partial_x_min[i,:] , partial_f_min[i,:] = self.mixed_optimizer.optimize(f, df, f_df)
 
         return np.atleast_2d(partial_x_min[np.argmin(partial_f_min)]), np.atleast_2d(min(partial_f_min))
-
-
-# class partial_evaluator(object):
-#     '''
-#     Class that wraps a function and its derivative and enables to fix some components
-#     '''
-#     def __init__(self,index,values_at_index,f,df=None,f_df=None):
-#         self.f = f
-#         self.df = df
-#         self.f_df = f_df
-#         self.index = index
-#         self.values_at_index = values_at_index
-    
-#     def partial_f(self,x):
-#         return self.f(self._fix_entries(x)).reshape((x.shape[0],1))
-    
-#     def partial_df(self,x):
-#         if self.df == None: out = None
-#         else: out = self.df(self._fix_entries(x))
-#         return out
-    
-#     def partial_f_df(self,x):
-#         if self.f_df == None: out = None
-#         else: out = self.f_df(self._fix_entries(x))
-#         return out
-
-#     def _fix_entries(self,x):
-#         x = np.atleast_2d(x)
-#         print x
-#         print np.dot(np.ones((x.shape[0],1)),self.values_at_index)
-#         print x[:,np.array(self.index)]
-
-#         x[:,np.array(self.index)] = np.dot(np.ones((x.shape[0],1)),self.values_at_index)
-#         return x
 
 
 

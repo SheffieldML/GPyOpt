@@ -1,1 +1,1 @@
-from .acquisition_optimizer import ContAcqOptimizer, BanditAcqOptimizer, MixedAcqOptimizer
+from .acquisition_optimizer import ContAcqOptimizer, BanditAcqOptimizer, MixedAcqOptimizer, AcquisitionOptimizer
