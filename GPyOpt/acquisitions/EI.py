@@ -28,7 +28,7 @@ class AcquisitionEI(AcquisitionBase):
         fmin = self.model.get_fmin()
         return self._compute_acq(m, s, fmin, x)
     
-    def _compute_acq_withGradients(self, m, s, fmin, dmdx, dsdx, x):
+    def _compute_acq_withGradients(self, m, s, fmin, dmdx, dsdx, x): ## TODO: gradiends of a(x)/c(x) are wrong 
         phi, Phi, _ = get_quantiles(self.jitter, fmin, m, s)    
         f_acqu = (fmin - m + self.jitter) * Phi + s * phi        
         df_acqu = dsdx * phi - Phi * dmdx

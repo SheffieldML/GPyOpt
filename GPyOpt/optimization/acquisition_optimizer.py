@@ -116,7 +116,6 @@ class ContAcqOptimizer(AcquOptimizer):
             x0 =  self.samples[np.argmin(pred_fp)]
             if self.search:
                 x_min, f_min = self.optimizer.optimize(x0, f =fp, df=None, f_df=fp_dfp)
-                print self._expand_vector(x_min), f_min
                 return self._expand_vector(x_min), f_min
             else:
                 return self._expand_vector(np.atleast_2d(x0)), pred_fp
