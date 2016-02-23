@@ -79,67 +79,67 @@ class BayesianOptimization(BO):
                 									model_update_interval = model_update_interval)
 
 
-	def model_chooser(self):
+	# def model_chooser(self):
 
-        # Extra arguments to define the model, all in kargs
-        kernel=None, 
-        noise_var=None, 
-        optimizer='bfgs', 
-        max_iters      = 1000, 
-        optimize_restarts=1
-        num_inducing     = 10
-        model_optimize_interval=1 
-
-
-		if self.model_type == 'gp':
-
-            return 
-
-        elif self.model_type == 'sparse_gp':
-            return 
-
-        elif self.model_type == 'deep_gp':
-            return 
-
-        elif self.model_type == 'rf':
+ #        # Extra arguments to define the model, all in kargs
+ #        kernel=None, 
+ #        noise_var=None, 
+ #        optimizer='bfgs', 
+ #        max_iters      = 1000, 
+ #        optimize_restarts=1
+ #        num_inducing     = 10
+ #        model_optimize_interval=1 
 
 
+	# 	if self.model_type == 'gp':
 
-    def acquisition_chooser(self):
+ #            return 
 
-        # --- Extract relevant parameters from the ***kargs
-        if self.kargs.has_key('acquisition_jitter'):
-            self.acquisition_jitter = kargs['acquisition_jitter']
-        else:
-            self.acquisition_jitter = 0.01
+ #        elif self.model_type == 'sparse_gp':
+ #            return 
 
-        if self.kargs.has_key('acquisition_weight'):
-            self.acquisition_weight = kargs['acquisition_weight']
-        else:
-            self.acquisition_weight = 2  ## TODO: implement the optimal rate (only for bandits)
+ #        elif self.model_type == 'deep_gp':
+ #            return 
+
+ #        elif self.model_type == 'rf':
 
 
-        # --- Choose the acquisition
-        elif self.acquisition_type == None or acquisition_type =='EI':
-            return AcquisitionEI(self.model, self.space, self.optimizer, self.cost, self.acquisition_jitter)
+
+    # def acquisition_chooser(self):
+
+    #     # --- Extract relevant parameters from the ***kargs
+    #     if self.kargs.has_key('acquisition_jitter'):
+    #         self.acquisition_jitter = kargs['acquisition_jitter']
+    #     else:
+    #         self.acquisition_jitter = 0.01
+
+    #     if self.kargs.has_key('acquisition_weight'):
+    #         self.acquisition_weight = kargs['acquisition_weight']
+    #     else:
+    #         self.acquisition_weight = 2  ## TODO: implement the optimal rate (only for bandits)
+
+
+    #     # --- Choose the acquisition
+    #     elif self.acquisition_type == None or acquisition_type =='EI':
+    #         return AcquisitionEI(self.model, self.space, self.optimizer, self.cost, self.acquisition_jitter)
         
-        elif self.acquisition_type =='EI_MCMC':
-            return AcquisitionEI_MCMC(self.model, self.space, self.optimizer, self.cost, self.acquisition_jitter)        
+    #     elif self.acquisition_type =='EI_MCMC':
+    #         return AcquisitionEI_MCMC(self.model, self.space, self.optimizer, self.cost, self.acquisition_jitter)        
         
-        elif self.acquisition_type =='MPI':
-            return AcquisitionMPI(self.model, self.space, self.optimizer, self.cost, self.acquisition_jitter)
+    #     elif self.acquisition_type =='MPI':
+    #         return AcquisitionMPI(self.model, self.space, self.optimizer, self.cost, self.acquisition_jitter)
          
-        elif self.acquisition_type =='MPI_MCMC':
-            return AcquisitionMPI_MCMC(self.model, self.space, self.optimizer, self.cost, self.acquisition_jitter)
+    #     elif self.acquisition_type =='MPI_MCMC':
+    #         return AcquisitionMPI_MCMC(self.model, self.space, self.optimizer, self.cost, self.acquisition_jitter)
 
-        elif self.acquisition_type =='LCB':
-            return AcquisitionLCB(self.model, self.space, self.optimizer, cself.cost, self.acquisition_weight)
+    #     elif self.acquisition_type =='LCB':
+    #         return AcquisitionLCB(self.model, self.space, self.optimizer, cself.cost, self.acquisition_weight)
         
-        elif self.acquisition_type =='LCB_MCMC':
-            return AcquisitionLCB_MCMC(self.model, self.space, self.optimizer, self.cost, self.acquisition_weight) 
+    #     elif self.acquisition_type =='LCB_MCMC':
+    #         return AcquisitionLCB_MCMC(self.model, self.space, self.optimizer, self.cost, self.acquisition_weight) 
         
-        else:
-            raise Exception('Invalid acquisition selected.')
+    #     else:
+    #         raise Exception('Invalid acquisition selected.')
 
 
 
