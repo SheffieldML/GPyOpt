@@ -26,12 +26,12 @@ def autoML_tuner():
     import numpy as np
     import matplotlib.pyplot as plt
     from numpy.random import seed
-    seed(123)   
-    
+    seed(123)
+
     # --- Regression problem
     n = 150
-    b0 = 1 
-    b1 = 2.5 
+    b0 = 1
+    b1 = 2.5
     X = np.random.uniform(1,10,n).reshape(n,1)
     Y = b0+b1*X +np.random.normal(0,1.5,n).reshape(n,1)
 
@@ -39,23 +39,23 @@ def autoML_tuner():
     class objective:
         def __init__(self,X,Y):
             self.X = X
-            self.Y = Y             
+            self.Y = Y
         def f(self,beta):
             return  sum((beta[:,0]+beta[:,1]*self.X-self.Y)**2).reshape(beta.shape[0],1)
 
-                                   
+
     # --- Problem definition and optimization
     myobj = objective(X,Y)
-    bounds = [(0,5),(0,5)]  
-    
+    bounds = [(0,5),(0,5)]
+
     # --- Tuning the parameters
-    tuner = GPyOpt.methods.autoTune(myobj.f, bounds)   
-    beta_tuner = tuner.x_opt             
+    tuner = GPyOpt.methods.autoTune(myobj.f, bounds)
+    beta_tuner = tuner.x_opt
 
     # --- OLS solution
     X1 = np.c_[np.ones(n),X ]
     beta_ols   = np.dot(np.dot(np.linalg.inv(np.dot(X1.T,X1)),X1.T),Y)
-    
+
     # --- Plot
     plt.plot(X,Y,'.')
     plt.plot([0,10],[beta_tuner[0],beta_tuner[0]+beta_tuner[1]*10],'k.-',label='GPyOpt')

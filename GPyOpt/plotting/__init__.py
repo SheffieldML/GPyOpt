@@ -2,6 +2,7 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 try:
-    import plots_bo
+    from . import plots_bo
+
 except:
     pass

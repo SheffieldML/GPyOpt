@@ -2,20 +2,24 @@
 # Copyright (c) 2015, the GPy Authors (see GPy AUTHORS.txt)
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
+from __future__ import print_function
+
+import GPyOpt
 import numpy as np
 import scipy
-import GPyOpt
-from ..util.general import multigrid, samples_multidimensional_uniform, reshape
 from scipy.stats import norm
-import numpy as np
+
+from ..util.general import multigrid
+from ..util.general import samples_multidimensional_uniform
+from ..util.general import reshape
 
 # Note this file includes all functions for the optimization of the aquisition functions. This include different batch methods. When data are not
-# collected in batches the code goes to predictive_batch_optimization, and runs the first optimization but does not enter in the loop. This 
+# collected in batches the code goes to predictive_batch_optimization, and runs the first optimization but does not enter in the loop. This
 # should be the same in case of selecting n_inbatch=1 in the rest of the batch methods.
 
 
 ## ---- Predictive batch optimization
-def predictive_batch_optimization(acqu_name, acquisition_par, acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch):   
+def predictive_batch_optimization(acqu_name, acquisition_par, acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch):
     '''
     Computes batch optimization using the predictive mean to obtain new batch elements
 
@@ -28,10 +32,10 @@ def predictive_batch_optimization(acqu_name, acquisition_par, acquisition, d_acq
     :param n_inbatch: the number of samples to collect
     '''
     model_copy = model.copy()
-    X = model_copy.X 
+    X = model_copy.X
     Y = model_copy.Y
-    input_dim = X.shape[1] 
-    kernel = model_copy.kern    
+    input_dim = X.shape[1]
+    kernel = model_copy.kern
 
     # Optimization of the first element in the batch
     X_new = optimize_acquisition(acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch=None, L=None, Min=None)
@@ -40,28 +44,28 @@ def predictive_batch_optimization(acqu_name, acquisition_par, acquisition, d_acq
     while k<n_inbatch:
         X = np.vstack((X,reshape(X_new,input_dim)))       # update the sample within the batch
         Y = np.vstack((Y,model.predict(reshape(X_new, input_dim))[0]))
-       
+
         try: # this exception is included in case two equal points are selected in a batch, in this case the method stops
-            batchBO = GPyOpt.methods.BayesianOptimization(f=0, 
-                                        bounds= bounds, 
-                                        X=X, 
-                                        Y=Y, 
+            batchBO = GPyOpt.methods.BayesianOptimization(f=0,
+                                        bounds= bounds,
+                                        X=X,
+                                        Y=Y,
                                         kernel = kernel,
-                                        acquisition = acqu_name, 
+                                        acquisition = acqu_name,
                                         acquisition_par = acquisition_par)
         except np.linalg.linalg.LinAlgError:
-            print 'Optimization stopped. Two equal points selected.'
-            break        
+            print('Optimization stopped. Two equal points selected.')
+            break
 
-        batchBO.run_optimization(max_iter = 0, 
-                                    n_inbatch=1, 
-                                    acqu_optimize_method = acqu_optimize_method,  
-                                    acqu_optimize_restarts = acqu_optimize_restarts, 
+        batchBO.run_optimization(max_iter = 0,
+                                    n_inbatch=1,
+                                    acqu_optimize_method = acqu_optimize_method,
+                                    acqu_optimize_restarts = acqu_optimize_restarts,
                                     eps = 1e-6,verbose = False)
-        
+
         X_new = batchBO.suggested_sample
         X_batch = np.vstack((X_batch,X_new))
-        k+=1    
+        k+=1
     return X_batch
 
 
@@ -82,10 +86,10 @@ def random_batch_optimization(acquisition, d_acquisition, bounds, acqu_optimize_
     # Optimization of the first element in the batch
     X_batch = optimize_acquisition(acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model)
 
-    k=1 
+    k=1
     while k<n_inbatch:
         new_sample = samples_multidimensional_uniform(bounds,1)
-        X_batch = np.vstack((X_batch,new_sample))  
+        X_batch = np.vstack((X_batch,new_sample))
         k +=1
     return X_batch
 
@@ -108,12 +112,12 @@ def lp_batch_optimization(acquisition, bounds, acqu_optimize_restarts, acqu_opti
     acq_func = acquisition.acquisition_function
     d_acq_func = acquisition.d_acquisition_function
 
-    acquisition.update_batches(None,None,None)    
+    acquisition.update_batches(None,None,None)
     # Optimize the first element in the batch
     X_batch = optimize_acquisition(acq_func, d_acq_func, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch=None, L=None, Min=None)
     k=1
-    #d_acq_func = None  # gradients are approximated  with the batch. 
-    
+    #d_acq_func = None  # gradients are approximated  with the batch.
+
     if n_inbatch>1:
         # ---------- Approximate the constants of the the method
         L = estimate_L(model,bounds)
@@ -132,7 +136,7 @@ def optimize_acquisition(acquisition, d_acquisition, bounds, acqu_optimize_resta
     '''
     Optimization of the acquisition function
     '''
-    
+
     if acqu_optimize_method == 'grid':
         res = grid_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimize_restarts, model, 'brute', X_batch, L, Min)
     elif acqu_optimize_method=='brute':
@@ -143,9 +147,9 @@ def optimize_acquisition(acquisition, d_acquisition, bounds, acqu_optimize_resta
         res =  fast_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimize_restarts, model, 'brute', X_batch, L, Min)
     elif acqu_optimize_method=='fast_random':
         res =  fast_acquisition_optimization(acquisition, d_acquisition, bounds,acqu_optimize_restarts, model, 'random', X_batch, L, Min)
-    elif acqu_optimize_method=='DIRECT': 
+    elif acqu_optimize_method=='DIRECT':
         res = wrapper_DIRECT(acquisition,bounds)
-    elif acqu_optimize_method=='CMA': 
+    elif acqu_optimize_method=='CMA':
         res = wrapper_CMA(acquisition,bounds)
     return res
 
@@ -196,7 +200,7 @@ def estimate_L(model,bounds,storehistory=True):
         dmdx,_ = model.predictive_gradients(x)
         res = np.sqrt((dmdx*dmdx).sum(1)) # simply take the norm of the expectation of the gradient
         return -res
-   
+
     samples = samples_multidimensional_uniform(bounds,500)
     samples = np.vstack([samples,model.X])
     pred_samples = df(samples,model,0)
@@ -211,14 +215,14 @@ def estimate_L(model,bounds,storehistory=True):
 def estimate_Min(model,bounds):
     '''
     Takes the estimated minimum as the minimum value in the sample. (this function is now nonsense but we will used in further generalizations)
-    
+
     '''
     return model.Y.min()
 
 
 def wrapper_lbfgsb(f,grad_f,x0,bounds):
     '''
-    Wrapper for l-bfgs-b to use the true or the approximate gradients. 
+    Wrapper for l-bfgs-b to use the true or the approximate gradients.
     :param f: function to optimize, acquisition.
     :param grad_f: gradients of f.
     :param x0: initial value for optimization.
@@ -237,7 +241,7 @@ def wrapper_lbfgsb(f,grad_f,x0,bounds):
 
 def wrapper_DIRECT(f,bounds):
     '''
-    Wrapper for DIRECT optimization method. It works partitioning iteratively the domain 
+    Wrapper for DIRECT optimization method. It works partitioning iteratively the domain
     of the function. Only requieres f and the box constrains to work
     :param f: function to optimize, acquisition.
     :param bounds: tuple determining the limits of the optimizer.
@@ -261,14 +265,14 @@ def wrapper_DIRECT(f,bounds):
 
 def wrapper_CMA(f,bounds):
     '''
-    Wrapper the Covariance Matrix Adaptation Evolutionary strategy (CMA-ES) optimization method. It works generating 
+    Wrapper the Covariance Matrix Adaptation Evolutionary strategy (CMA-ES) optimization method. It works generating
     an stochastic seach based on mutivariate Gaussian samples. Only requieres f and the box constrains to work
     :param f: function to optimize, acquisition.
     :param bounds: tuple determining the limits of the optimizer.
 
     '''
     try:
-        import cma 
+        import cma
         import numpy as np
         def CMA_f_wrapper(f):
             def g(x):
@@ -277,8 +281,7 @@ def wrapper_CMA(f,bounds):
         lB = np.asarray(bounds)[:,0]
         uB = np.asarray(bounds)[:,1]
         x = cma.fmin(CMA_f_wrapper(f), (uB + lB) * 0.5, 0.6, options={"bounds":[lB, uB], "verbose":-1})[0]
-        print x
+        print(x)
         return reshape(x,len(bounds))
     except:
         print("Cannot find cma library, please install it to use this option.")
-

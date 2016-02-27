@@ -2,13 +2,21 @@
 # Copyright (c) 2015, the GPy Authors (see GPy AUTHORS.txt)
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
+from __future__ import print_function
+
 import GPy
 import numpy as np
-from ..core.acquisition import AcquisitionEI, AcquisitionMPI, AcquisitionLCB, AcquisitionEL
-from ..core.bo import BO
-from ..util.general import samples_multidimensional_uniform, reshape
-from ..util.stats import initial_design
 import warnings
+
+from ..core.acquisition import AcquisitionEI
+from ..core.acquisition import AcquisitionMPI
+from ..core.acquisition import AcquisitionLCB
+from ..core.acquisition import AcquisitionEL
+from ..core.bo import BO
+from ..util.general import samples_multidimensional_uniform
+from ..util.general import reshape
+from ..util.stats import initial_design
+
 warnings.filterwarnings("ignore")
 
 
@@ -52,7 +60,7 @@ class BayesianOptimization(BO):
         self.type_initial_design = type_initial_design
 
         if f==None:
-            print 'Function to optimize is required.'
+            print('Function to optimize is required.')
         else:
             self.f = f
 
@@ -112,7 +120,7 @@ class BayesianOptimization(BO):
         elif acquisition=='EL':
             acq = AcquisitionEL(acquisition_par)
         else:
-            print 'The selected acquisition function is not valid. Please try again with EI, MPI, or LCB'
+            print('The selected acquisition function is not valid. Please try again with EI, MPI, or LCB')
         if (acquisition=='EI' or acquisition=='MPI' or acquisition =='LCB' or acquisition =='EL' ):
             super(BayesianOptimization ,self).__init__(acquisition_func=acq)
 
