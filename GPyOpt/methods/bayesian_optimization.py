@@ -66,7 +66,7 @@ class BayesianOptimization(BO):
 
         # ------- Initialize model
         if bounds==None:
-            raise 'Box constraints are needed. Please insert box constrains.'
+            raise Exception('Box constraints are needed. Please insert box constrains.')
         else:
             self.bounds = bounds
         if  numdata_initial_design==None:
@@ -136,7 +136,7 @@ class BayesianOptimization(BO):
         '''
         if self.sparseGP == True:
             if self.num_inducing ==None:
-                raise 'Sparse model, please insert the number of inducing points'
+                raise Exception('Sparse model, please insert the number of inducing points')
             else:
                 self.model = GPy.models.SparseGPRegression(self.X, self.Y, kernel=self.kernel, num_inducing=self.num_inducing)
         else:

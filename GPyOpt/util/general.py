@@ -5,7 +5,7 @@
 import numpy as np
 from scipy.special import erfc
 
-def best_gess(f, X):
+def best_gess(f,X):
     '''
     Gets the best current guess from a vector.
     :param f: function to evaluate.
@@ -19,7 +19,7 @@ def best_gess(f, X):
     return xbest
 
 
-def samples_multidimensional_uniform(bounds, num_data):
+def samples_multidimensional_uniform(bounds,num_data):
     '''
     Generates a multidimensional grid uniformly distributed.
     :param bounds: tuple defining the box constrains.
@@ -40,7 +40,7 @@ def multigrid(bounds, Ngrid):
     '''
     if len(bounds)==1:
         return np.linspace(bounds[0][0], bounds[0][1], Ngrid).reshape(Ngrid, 1)
-    xx = np.meshgrid(*[np.linspace(b[0], b[1], Ngrid) for b in bounds])
+    xx = np.meshgrid(*[np.linspace(b[0], b[1], Ngrid) for b in bounds]) 
     return np.vstack([x.flatten(order='F') for x in xx]).T
 
 
@@ -87,7 +87,7 @@ def get_quantiles(acquisition_par, fmin, m, s):
     :param acquisition_par: parameter of the acquisition function
     :param fmin: current minimum.
     :param m: vector of means.
-    :param s: vector of standard deviations.
+    :param s: vector of standard deviations. 
     '''
     if isinstance(s, np.ndarray):
         s[s<1e-10] = 1e-10
@@ -120,3 +120,10 @@ def spawn(f):
         pipe.send(f(x))
         pipe.close()
     return fun
+
+
+
+
+
+
+

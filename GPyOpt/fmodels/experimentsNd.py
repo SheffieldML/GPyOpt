@@ -7,7 +7,6 @@ from __future__ import print_function
 import numpy as np
 from ..util.general import reshape
 
-
 class alpine1:
     '''
     Alpine1 function
@@ -16,18 +15,18 @@ class alpine1:
     :param sd: standard deviation, to generate noisy evaluations of the function.
     '''
 
-    def __init__(self, input_dim, bounds=None, sd=None):
-        if bounds is None:
+    def __init__(self,input_dim, bounds=None, sd=None):
+        if bounds == None:
             self.bounds = bounds  =[(-10,10)]*input_dim
         else:
             self.bounds = bounds
         self.min = [(0)]*input_dim
         self.fmin = 0
         self.input_dim = input_dim
-        if sd is None:
+        if sd==None:
             self.sd = 0
         else:
-            self.sd = sd
+            self.sd=sd
 
     def f(self,X):
         X = reshape(X,self.input_dim)

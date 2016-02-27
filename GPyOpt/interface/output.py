@@ -11,8 +11,8 @@ class DataSaver(object):
 
     def __init__(self, config, outpath=None, prjname='', name=''):
         interval = config['interval']
-        assert interval > 0 or interval == -1
-        self.interval = interval
+        assert interval>0 or interval==-1
+        self.interval=interval
         self.outpath = outpath
         self.prjname = prjname
         self.name = name
@@ -103,7 +103,7 @@ class OutputEng(object):
         self.Ys = []
 
         # create all the data savers
-        self.data_savers = [self._support_savers[ds['type']](ds, config['prjpath'], config['experiment-name'],name) for name, ds in config['output'].iteritems() if isinstance(ds, dict)]
+        self.data_savers = [self._support_savers[ds['type']](ds, config['prjpath'], config['experiment-name'],name) for name, ds in config['output'].items() if isinstance(ds, dict)]
 
         self.clock = [ds.interval for ds in self.data_savers]
 

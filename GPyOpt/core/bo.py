@@ -28,11 +28,8 @@ class BO(object):
     def _init_model(self):
         pass
 
-    def run_optimization(self, max_iter=None, n_inbatch=1,
-                         acqu_optimize_method='fast_random',
-                         acqu_optimize_restarts=200, batch_method='predictive',
-                         eps=1e-8, n_procs=1, true_gradients=True,
-                         verbose=True):
+    def run_optimization(self, max_iter = None, n_inbatch=1, acqu_optimize_method='fast_random', acqu_optimize_restarts=200, batch_method='predictive',
+        eps = 1e-8, n_procs=1, true_gradients = True, verbose=True):
         """
         Runs Bayesian Optimization for a number 'max_iter' of iterations (after the initial exploration data)
 
@@ -58,13 +55,13 @@ class BO(object):
 
         """
         # --- Load the parameters of the function into the object.
-        if max_iter is None:
+        if max_iter == None:
             self.max_iter = 10*self.input_dim
         else:
             self.max_iter = max_iter
 
         self.num_acquisitions = 0
-        self.n_inbatch = n_inbatch
+        self.n_inbatch=n_inbatch
         self.batch_method = batch_method
         if batch_method=='lp':
             from .acquisition import AcquisitionMP
@@ -147,7 +144,7 @@ class BO(object):
 
         # --- Print stopping reason
         if verbose: print('*Optimization completed:')
-        if k == self.max_iter and distance_lastX > self.eps:
+        if k==self.max_iter and distance_lastX > self.eps:
             if verbose: print('   -Maximum number of iterations reached.')
             return 1
         else:
@@ -161,8 +158,8 @@ class BO(object):
 
 	    :param num_inducing: number of inducing points for sparse-GP modeling
 	     """
-        if self.sparse:
-            raise 'Sparse GP is already in use'
+        if self.sparse == True:
+            raise Exception('Sparse GP is already in use')
         else:
             self.num_inducing = num_inducing
             self.sparse = True
@@ -174,7 +171,7 @@ class BO(object):
 
         """
         if self.sparse == False:
-            raise 'Sparse GP is already in use'
+            raise Exception('Sparse GP is already in use')
         else:
             self.sparse = False
             self._init_model(self.X,self.Y)

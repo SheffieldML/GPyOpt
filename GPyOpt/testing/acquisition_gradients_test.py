@@ -1,12 +1,17 @@
 import numpy as np
 import os
-import GPyOpt
-import GPy
-from GPyOpt.util.general import samples_multidimensional_uniform
-from GPyOpt.core.acquisition import AcquisitionEI, AcquisitionEL, AcquisitionMPI, AcquisitionLCB, AcquisitionMP
-from utils import run_eval
-from GPy.models.gradient_checker import GradientChecker
 import unittest
+
+import GPy
+import GPyOpt
+from GPyOpt.util.general import samples_multidimensional_uniform
+from GPyOpt.core.acquisition import AcquisitionEI
+from GPyOpt.core.acquisition import AcquisitionEL
+from GPyOpt.core.acquisition import AcquisitionMPI
+from GPyOpt.core.acquisition import AcquisitionLCB
+from GPyOpt.core.acquisition import AcquisitionMP
+from GPyOpt.testing.utils import run_eval
+from GPy.models.gradient_checker import GradientChecker
 
 
 class TestAcquisitionsGradients(unittest.TestCase):
@@ -17,14 +22,14 @@ class TestAcquisitionsGradients(unittest.TestCase):
 	def setUp(self):
 		np.random.seed(1)
 		self.tolerance 	= 0.01  #Tolerance for difference between true and approximated gradients
-		objective 		= GPyOpt.fmodels.experiments1d.forrester()   
-		bounds    		= objective.bounds 
+		objective 		= GPyOpt.fmodels.experiments1d.forrester()
+		bounds    		= objective.bounds
 		input_dim 		= len(bounds)
 		n_inital_design = 8
 		X 				= samples_multidimensional_uniform(bounds,n_inital_design)
 		Y 				= objective.f(X)
 		self.X_test 	= samples_multidimensional_uniform(bounds,n_inital_design)
-		
+
 		self.model = GPy.models.GPRegression(X,Y)
 		self.model.optimize_restarts(10,verbose=False)
 		self.model.Gaussian_noise.constrain_fixed(1e-6, warning=False)
@@ -52,7 +57,3 @@ class TestAcquisitionsGradients(unittest.TestCase):
 
 if __name__=='main':
 	unittest.main()
-
-
-
-
