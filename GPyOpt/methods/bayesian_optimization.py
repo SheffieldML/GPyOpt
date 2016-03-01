@@ -16,33 +16,37 @@ warnings.filterwarnings("ignore")
 
 class BayesianOptimization(BO):
 
-    def __init__(self, f, domain = None, constrains = None, cost = None, model_type=None, X=None, Y=None, 
-    	initial_design_numdata = None, initial_design_type='random', model_optimize_interval=1, acquisition_type ='EI', 
-    	acquisition_par = 0.00, model_optimize_restarts=3, normalize=False, exact_feval=False, verbosity=0):
+    def __init__(self, f, domain = None, constrains = None, cost_withGradients = None, model_type = None, X = None, Y = None, 
+    	initial_design_numdata = None, initial_design_type='random', acquisition_type ='EI', 
+    	acquisition_par = 0.00, normalize_Y = False, exact_feval = False, verbosity=0, **kargs):
 
-        # --- minimal options for defining the problem
-        self.f      = f
-        self.cost   = cost
-        self.domain = domain
-        constrains  = constrains
-        self.cost   = cost
+        # --- Problem definition
+        self.f                  = f
+
+        if self.domain == None:
+            
+        self.domain             = domain
+
+        self.cost_withGradients = cost_withGradients
+
+        constrains              = constrains
+        self.cost               = cost
 
         # --- minimal options to define the model 
-        self.model_type  = model_type  # None
-        self.exact_feval = exact_feval # False 
-        self.normalize_Y = normalize_Y # True  
+        self.model_type         = model_type  # None
+        self.exact_feval        = exact_feval # False 
+        self.normalize_Y        = normalize_Y # True  
 
         # --- minimal options to define the acquisition
         acquisition_type ='EI'
 
-        # --- Initial values for Xs and Ys
-        X = None 
-        Y = None 
+        # --- Initial design
+        self.X = X 
+        self.Y = Y 
         initial_design_numdata = None, 
         initial_design_type='random', 
 
 
-        
         acquisition_type ='EI', 
         acquisition_par = 0.00, 
         model_optimize_restarts=3, 
