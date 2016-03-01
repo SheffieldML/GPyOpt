@@ -11,7 +11,7 @@ except:
     pass
 
 class BO(object):
-    def __init__(self, model, space, objective, acquisition_func, X_init, normalize_Y = True, model_update_interval = 1):
+    def __init__(self, model, space, objective, acquisition_func, X_init, Y_init=None, normalize_Y = True, model_update_interval = 1):
         self.model = model
         self.space = space
         self.objective = objective
@@ -19,6 +19,7 @@ class BO(object):
         self.normalize_Y = normalize_Y
         self.model_update_interval = model_update_interval
         self.X_init = X_init
+        self.Y_init = Y_init
         
     def run_optimization(self, max_iter = None, max_time = None,  eps = 1e-8, verbose=True):
         """ 
@@ -45,7 +46,7 @@ class BO(object):
             self.max_time = max_time     
             
         # --- Initial function evaluation and model fitting
-        if self.X_init is not None:
+        if self.X_init is not None and self.Y_init is None:
             self.X = self.X_init
             self.X_init = None
             self.Y, _ = self.objective.evaluate(self.X)

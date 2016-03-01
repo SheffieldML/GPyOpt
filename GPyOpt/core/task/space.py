@@ -8,8 +8,8 @@ class Design_space(object):
     The domain is defined as a list of dictionaries contains a list of attributes, e.g.:
 
     - Arm bandit
-    space  =[{'name': 'var_1', 'type': 'bandit', 'domain': [(-1,1),(1,0),(0,1)], 'dimensionality':2},
-             {'name': 'var_2', 'type': 'bandit', 'domain': [(-1,4),(0,0),(1,2)]},
+    space  =[{'name': 'var_1', 'type': 'bandit', 'domain': [(-1,1),(1,0),(0,1)]},
+             {'name': 'var_2', 'type': 'bandit', 'domain': [(-1,4),(0,0),(1,2)]}]
 
     - Continous domain
     space =[ {'name': 'var_1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality':1},
@@ -127,7 +127,6 @@ class Design_space(object):
                 arms_bandit += tuple(map(tuple, d['domain']))
         return np.asarray(arms_bandit)
 
-
     def get_continuous_dims(self):
         continuous_dims = []
         for i in range(self.dimensionality):
@@ -151,6 +150,11 @@ class Design_space(object):
                 exec 'ind_x = (constrain(x)<0)*1'
                 I_x *= ind_x.reshape(x.shape[0],1)
         return I_x
+
+    def input_dim(self):
+        n_cont = len(self.get_continuous_dims())
+        n_disc = len(self.get_discrete_dims())
+        return n_cont + n_disc
 
 
 def bounds_to_space(bounds):
