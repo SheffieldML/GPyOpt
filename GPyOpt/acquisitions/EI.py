@@ -1,30 +1,24 @@
 from .base import AcquisitionBase
-from ..util.general import get_quantiles
+from ..util.general import get_quantiles, constant_cost_withGradients
+
 
 class AcquisitionEI(AcquisitionBase):
     """
     Class for Expected improvement acquisition functions.
     """
-    def __init__(self, model, space, optimizer=None, cost = None, cost_grad = None, jitter=0.01):
+    def __init__(self, model, space, optimizer=None, cost_withGradients=None, jitter=0.01):
         optimizer = optimizer
         super(AcquisitionEI, self).__init__(model, space, optimizer)
         self.jitter = jitter
-        if cost == None: 
-            self.cost = lambda x: 1
-        else:
-            self.cost = cost
 
-        if cost_grad == None: 
-            self.cost_grad = lambda x: 0
-        else:
-            self.cost_grad = cost_grad
-
+        if cost_withGradients == None:
+            self.cost_withGradients = constant_cost_withGradients
 
     def _compute_acq(self, m, s, fmin, x):
         phi, Phi, _ = get_quantiles(self.jitter, fmin, m, s)    
         f_acqu = (fmin - m + self.jitter) * Phi + s * phi
-        return -(f_acqu*self.space.indicator_constrains(x))/self.cost(x)
-
+        cost_x, _ = self.cost_withGradients(x)
+        return -(f_acqu*self.space.indicator_constrains(x))/cost_x
 
     def acquisition_function(self,x):
         """
@@ -38,10 +32,11 @@ class AcquisitionEI(AcquisitionBase):
         phi, Phi, _ = get_quantiles(self.jitter, fmin, m, s)    
         f_acqu = (fmin - m + self.jitter) * Phi + s * phi        
         df_acqu = dsdx * phi - Phi * dmdx
+        cost_x, cost_grad_x = self.cost_withGradients(x)
         
         # Value of the acquisition relative to the cost 
-        f_acq_cost = f_acqu/self.cost(x)
-        df_acq_cost = (df_acqu*self.cost(x) - f_acqu*self.cost_grad(x))/(self.cost(x)**2)
+        f_acq_cost = f_acqu/cost_x
+        df_acq_cost = (df_acqu*cost_x - f_acqu*cost_grad_x)/(cost_x**2)
         return -f_acq_cost*self.space.indicator_constrains(x), -df_acq_cost*self.space.indicator_constrains(x)
 
 

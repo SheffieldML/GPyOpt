@@ -1,7 +1,7 @@
 import time
 import numpy as np
 from ...util.general import spawn
-from ...util.general import get_d_moments
+from ...util.general import get_d_moments, constant_cost_withGradients
 import GPy
 import GPyOpt
 
@@ -12,35 +12,37 @@ class Objective(object):
 
 class SingleObjective(Objective):
     
-    def __init__(self, func, space, cost = None, cost_grad=None):
+    def __init__(self, func, space, cost_withGradients = None):
         self.func  = func
         self.space = space
-        self.cost_type = cost
+        self.cost_type = cost_withGradients
         
         # No cost used
         if self.cost_type == None:
-            cost = lambda x: np.ones(x.shape[0])[:,None]   
-            self.cost_grad = lambda x: np.zeros(x.shape)
+            self.cost_withGradients = constant_cost_withGradients
         
         # Function evaluation time used as cost
         elif self.cost_type == 'computing_time':
-             self.cost_model = GPyOpt.models.GPModel(exact_feval=False,normalize_Y=False,optimize_restarts=5)
-             self.cost = self._cost_gp
-             self.cost_grad = self._cost_gp_grad
+             self.cost_model = GPyOpt.models.GPModel(exact_feval=False,normalize_Y=False,optimize_restarts=5)                                 
+             self.cost_withGradients  = self._cost_gp_withGradients   
 
         # Explicit cost defined by the user
         else: 
-            self.cost      = cost
-            self.cost_grad = cost_grad
+            self.cost_withGradients      = cost_withGradients
 
         self.n_evals = 0
-        
-    def _cost_gp(self,x):
-        return self.cost_model.model.predict(x)[0]
+    
 
-    def _cost_gp_grad(self,x):
+    def _cost_gp(self,x):
+        m       = self.cost_model.model.predict(x)[0]
+        return np.exp(m)
+
+
+    def _cost_gp_withGradients(self,x):
+        m       = self.cost_model.model.predict(x)[0]
         dmdx, _ = self.cost_model.model.predictive_gradients(x)
-        return dmdx[:,:,0] 
+        m_grad  = dmdx[:,:,0] 
+        return m, m_grad
 
     def evaluate(self, x):        
         cost_evals = []
