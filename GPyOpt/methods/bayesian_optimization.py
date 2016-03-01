@@ -22,22 +22,20 @@ class BayesianOptimization(BO):
 
     def __init__(self, f, domain = None, constrains = None, cost_withGradients = None, model_type = 'gp', X = None, Y = None, 
     	initial_design_numdata = None, initial_design_type='random', acquisition_type ='EI', normalize_Y = True, 
-        exact_feval = False, verbosity=0, **kargs):
+        exact_feval = False, optimizer = 'lbfgs', verbosity=0, **kargs):
 
         self.verbosity              = verbosity
         self.model_update_interval  = model_update_interval
 
         # --- CHOOSE design space
-        if self.domain == None and self.kargs.has_key('bounds'):
-            self.domain             = bounds_to_space(kargs['bounds'])
-        else:
-            self.domain = domain 
+        if self.domain == None and self.kargs.has_key('bounds'): self.domain = bounds_to_space(kargs['bounds'])
+        else: self.domain = domain 
 
         self.constrains = constrains
         self.space = Design_space(self.space, self.constrains)
 
         # --- CHOOSE objective function
-        self.f                   = f
+        self.f                  = f
         self.cost_withGradients = cost_withGradients
         self.objective          = SingleObjective(self.f, self.space, self.cost_withGradients)
 
@@ -55,7 +53,8 @@ class BayesianOptimization(BO):
         self.model              = self._model_chooser()
 
         # --- CHOOSE the acquisition optimizer
-        self.aquisition_optimizer = GPyOpt.optimization.ContAcqOptimizer(space, 1000, search=True)
+        self.optimizer = optimizer
+        self.aquisition_optimizer = GPyOpt.optimization.ContAcqOptimizer(self.space, self.optimizer, *args)
 
         # --- CHOOSE acquistion function
         self.acquisition_type       = acquisition_type

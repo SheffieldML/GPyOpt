@@ -5,7 +5,7 @@ import numpy as np
 from ..core.task.space import Design_space
 
 
-def AcquisitionOptimizer(space, n_samples=2000, fast=True, random=True, search=True, optimizer='lbfgs', **kwargs):
+def AcquisitionOptimizer(space, optimizer='lbfgs', **kwargs):
     
     if space.has_types['bandit'] and (space.has_types['continuous'] or space.has_types['discrete']):
         raise Exception('Not possible to combine bandits with other variable types.)')
@@ -14,10 +14,10 @@ def AcquisitionOptimizer(space, n_samples=2000, fast=True, random=True, search=T
         return BanditAcqOptimizer(space, **kwargs)
 
     elif space.has_types['continuous'] and not space.has_types['discrete']:
-        return ContAcqOptimizer(space, n_samples=n_samples, fast=fast, random=random, search=search, optimizer=optimizer, **kwargs)
+        return ContAcqOptimizer(space, optimizer=optimizer, **kwargs)
 
     elif space.has_types['continuous'] and  space.has_types['discrete']:
-        return MixedAcqOptimizer(space, n_samples=n_samples, fast=fast, random=random, search=search, optimizer=optimizer, **kwargs)
+        return MixedAcqOptimizer(space, optimizer=optimizer, **kwargs)
 
     elif not space.has_types['continuous'] and space.has_types['discrete']:
         return BanditAcqOptimizer(space, **kwargs)
@@ -33,7 +33,7 @@ class AcquOptimizer(object):
 
 class ContAcqOptimizer(AcquOptimizer):
     
-    def __init__(self, space, n_samples=5, fast=True, random=True, search=True, optimizer='lbfgs', **kwargs):
+    def __init__(self, space, optimizer='lbfgs', n_samples=1000, fast=True, random=True, search=True, **kwargs):
         super(ContAcqOptimizer, self).__init__(space)
         
         self.n_samples = n_samples
@@ -153,7 +153,7 @@ class BanditAcqOptimizer(AcquOptimizer):
 
 class MixedAcqOptimizer(AcquOptimizer):
 
-    def __init__(self, space, n_samples, fast=True, random=True, search=True, optimizer='lbfgs', **kwargs):
+    def __init__(self, space, optimizer='lbfgs', n_samples=1000, fast=True, random=True, search=True, **kwargs):
         super(MixedAcqOptimizer, self).__init__(space)
 
         self.space = space
