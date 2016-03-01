@@ -153,15 +153,15 @@ class Design_space(object):
         return I_x
 
 
-def bounds_to_space(bouds):
+def bounds_to_space(bounds):
     """
     Takes as input a list of tuples with bounds, and create a dictionary to be processed by the class Design_space. This function
     us used to keep the compatibility with previous versions of GPyOpt in which only bounded contunous optimization was possible
     (and the optimization domain passed as a list of tuples).
     """
     space = []
-    for k in len(bounds):
-        space += {'name': 'var_'+str(k+1), 'type': 'continuous', 'domain':bounds[k], 'dimensionality':1}
+    for k in range(len(bounds)):
+        space += [{'name': 'var_'+str(k+1), 'type': 'continuous', 'domain':bounds[k], 'dimensionality':1}]
     return space
 
     

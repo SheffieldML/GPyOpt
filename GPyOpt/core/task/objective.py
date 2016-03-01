@@ -1,7 +1,7 @@
 import time
 import numpy as np
 from ...util.general import spawn
-from ..util.general import get_d_moments
+from ...util.general import get_d_moments
 import GPy
 import GPyOpt
 
@@ -19,14 +19,14 @@ class SingleObjective(Objective):
         
         # No cost used
         if self.cost_type == None:
-            self.cost = lambda x: 1  
-            self.cost_grad = lambda x: 0 
+            cost = lambda x: np.ones(x.shape[0])[:,None]   
+            self.cost_grad = lambda x: np.zeros(x.shape)
         
         # Function evaluation time used as cost
         elif self.cost_type == 'computing_time':
              self.cost_model = GPyOpt.models.GPModel(exact_feval=False,normalize_Y=False,optimize_restarts=5)
-             self.cost = self.cost_model.predict
-             self.cost_grad = lambda x: get_d_moments(self.model)[0]
+             self.cost = self._cost_gp
+             self.cost_grad = self._cost_gp_grad
 
         # Explicit cost defined by the user
         else: 
@@ -35,6 +35,13 @@ class SingleObjective(Objective):
 
         self.n_evals = 0
         
+    def _cost_gp(self,x):
+        return self.cost_model.model.predict(x)[0]
+
+    def _cost_gp_grad(self,x):
+        dmdx, _ = self.cost_model.model.predictive_gradients(x)
+        return dmdx[:,:,0] 
+
     def evaluate(self, x):        
         cost_evals = []
         f_evals     = np.empty(shape=[0, 1])

@@ -41,7 +41,7 @@ class AcquisitionEI(AcquisitionBase):
         
         # Value of the acquisition relative to the cost 
         f_acq_cost = f_acqu/self.cost(x)
-        df_acq_cost = (df_acqu(x)*self.cost(x) - f_acqu*self.cost_grad(x))/(self.cost(x)**2)
+        df_acq_cost = (df_acqu*self.cost(x) - f_acqu*self.cost_grad(x))/(self.cost(x)**2)
         return -f_acq_cost*self.space.indicator_constrains(x), -df_acq_cost*self.space.indicator_constrains(x)
 
 
