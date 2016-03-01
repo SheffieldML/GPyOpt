@@ -3,6 +3,7 @@ import itertools
 
 class Design_space(object):
     """
+    Class to handle the input domain of the function. 
     The format of a input domain, possibly with restrictions:
     The domain is defined as a list of dictionaries contains a list of attributes, e.g.:
 
@@ -29,7 +30,7 @@ class Design_space(object):
 
     Restrictions can be added to the problem. Each restriction is of the form c(x) <= 0 where c(x) is a function of 
     the input variables previously defined in the space. Restrictions should be written as a list
-    of dictionaries. For instance, this would be an example of and space coupled with a constrain
+    of dictionaries. For instance, this is an example of an space coupled with a constrain
 
     space =[ {'name': 'var_1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality':2}]
     constrains = [ {'name': 'const_1', 'constrain': 'x[:,0]**2 + x[:,1]**2 - 1'}]
@@ -150,6 +151,22 @@ class Design_space(object):
                 exec 'ind_x = (constrain(x)<0)*1'
                 I_x *= ind_x.reshape(x.shape[0],1)
         return I_x
+
+
+def bounds_to_space(bouds):
+    """
+    Takes as input a list of tuples with bounds, and create a dictionary to be processed by the class Design_space. This function
+    us used to keep the compatibility with previous versions of GPyOpt in which only bounded contunous optimization was possible
+    (and the optimization domain passed as a list of tuples).
+    """
+    space = []
+    for k in len(bounds):
+        space += {'name': 'var_'+str(k+1), 'type': 'continuous', 'domain':bounds[k], 'dimensionality':1}
+    return space
+
+    
+
+
 
 
     
