@@ -1,4 +1,14 @@
 
+def select_optimizer(name):
+    if name == 'lbfgs':
+        return Opt_lbfgs
+    elif name == 'DIRECT':
+        return Opt_DIRECT
+    elif name == 'CMA':
+        return Opt_CMA
+    else:
+        raise Exception('Invalid optimizer selected.')
+
 class Optimizer(object):
     
     def __init__(self, space):
@@ -86,15 +96,7 @@ class Opt_CMA(Optimizer):
             print("Cannot find cma library, please install it to use this option.")
 
 
-def select_optimizer(name):
-    if name == 'lbfgs':
-        return Opt_lbfgs
-    elif name == 'DIRECT':
-        return Opt_DIRECT
-    elif name == 'CMA':
-        return Opt_CMA
-    else:
-        raise Exception('Invalid optimizer selected.')
+
 
 
 

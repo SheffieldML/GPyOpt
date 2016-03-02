@@ -45,6 +45,9 @@ class Design_space(object):
         self._complete_attributes(space)
         self.space_expanded = self._expand_attributes(self.space)
         self.constrains = constrains
+
+        if self.has_types['bandit'] and (self.has_types['continuous'] or self.has_types['discrete']):
+            print 'Conbinations of bandits with other variables are not supported.'
         
     def _complete_attributes(self, space):
         from copy import deepcopy
@@ -90,11 +93,16 @@ class Design_space(object):
     
     def get_bounds(self):
         bounds = []
-        for d in self.space:
-            if d['type']=='continuous':
-                bounds.extend([d['domain']]*d['dimensionality'])
-            elif d['type']=='discrete':
-                bounds.extend([(min(d['domain'])-.1, max(d['domain'])+.1) ] *d['dimensionality'])
+        if self.has_types['bandit']:
+            bandit = self.get_bandit()
+            mins, maxs = bandit.min(axis=0).tolist(), bandit.max(axis=0).tolist()
+            for i in range(len(bandit.min(axis=0).tolist())): bounds += [(mins[i],maxs[i])] 
+        else:
+            for d in self.space:
+                if d['type']=='continuous':
+                    bounds.extend([d['domain']]*d['dimensionality'])
+                elif d['type']=='discrete':
+                    bounds.extend([(min(d['domain'])-.1, max(d['domain'])+.1) ] *d['dimensionality'])
         return bounds
 
     def get_subspace(self,dims):
