@@ -10,7 +10,7 @@ class GPModel(BOModel):
 
     analytical_gradient_prediction = True
     
-    def __init__(self, kernel=None, noise_var=None, exact_feval=False, normalize_Y=True, optimizer='bfgs', max_iters=1000, optimize_restarts=5, verbose=False):
+    def __init__(self, kernel=None, noise_var=None, exact_feval=False, normalize_Y=True, optimizer='bfgs', max_iters=1000, optimize_restarts=3, verbose=False):
         self.kernel = kernel
         self.noise_var = noise_var
         self.exact_feval = exact_feval
@@ -50,9 +50,9 @@ class GPModel(BOModel):
             
         # --- update the model maximixing the marginal likelihood.
         if self.optimize_restarts==1:
-            self.model.optimize(optimizer=self.optimizer, max_iters = self.max_iters, messages=self.verbose)
+            self.model.optimize(optimizer=self.optimizer, max_iters = self.max_iters, verbose=self.verbose)
         else:
-            self.model.optimize_restarts(num_restarts=self.optimize_restarts, optimizer=self.optimizer, max_iters = self.max_iters, messages=self.verbose)
+            self.model.optimize_restarts(num_restarts=self.optimize_restarts, optimizer=self.optimizer, max_iters = self.max_iters, verbose=self.verbose)
 
     def predict(self, X):
         if X.ndim==1: X = X[None,:]

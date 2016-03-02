@@ -10,7 +10,7 @@ class AcquisitionBase(object):
         self.model = model
         self.space = space
         self.optimizer = optimizer
-        self.analytical_gradient_acq = self.model.analytical_gradient_prediction
+        self.analytical_gradient_acq = self.model.analytical_gradient_prediction # flag from the model to test if gradients are available
 
     def acquisition_function(self, x):
         pass

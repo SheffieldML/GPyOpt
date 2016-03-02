@@ -4,8 +4,8 @@ class AcquisitionEI_MCMC(AcquisitionEI):
     """
     Class for Expected improvement acquisition functions.
     """
-    def __init__(self, model, space, optimizer=None, cost = None, jitter=0.01):
-        super(AcquisitionEI_MCMC, self).__init__(model, space, optimizer, cost, jitter)
+    def __init__(self, model, space, optimizer=None, cost_withGradients=None, jitter=0.01):
+        super(AcquisitionEI_MCMC, self).__init__(model, space, optimizer)
         
         assert self.model.MCMC_sampler, 'Samples from the hyperparameters are needed to compute the integrated EI'
 
