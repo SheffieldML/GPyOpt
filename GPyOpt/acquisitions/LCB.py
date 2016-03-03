@@ -1,22 +1,25 @@
 from .base import AcquisitionBase
-from ..util.general import get_quantiles
+from ..util.general import get_quantiles, constant_cost_withGradients
 
 class AcquisitionLCB(AcquisitionBase):
     """
     Class for Expected improvement acquisition functions.
     """
-    def __init__(self, model, space, optimizer=None, cost = None, exploration_weight=2):
+    def __init__(self, model, space, optimizer=None, cost_withGradients=None, exploration_weight=2):
         optimizer = optimizer
         super(AcquisitionLCB, self).__init__(model, space, optimizer)
         self.exploration_weight = exploration_weight
-        if cost == None: 
-            self.cost = lambda x: 1
+
+        if cost_withGradients == None:
+            self.cost_withGradients = constant_cost_withGradients
         else:
-            self.cost = cost
+            print 'LBC acquisition does now make sense with cost. Cost set to constant'.  
+            self.cost_withGradients = constant_cost_withGradients
     
     def _compute_acq(self, m, s, x):
         f_acqu = -m + self.exploration_weight * s
-        return -(f_acqu*self.space.indicator_constrains(x))/self.cost(x)
+        cost_x, _ = self.cost_withGradients(x)
+        return -(f_acqu*self.space.indicator_constrains(x))/cost_x
 
     def acquisition_function(self,x):
         m, s = self.model.predict(x)
@@ -29,6 +32,7 @@ class AcquisitionLCB(AcquisitionBase):
     def _compute_acq_withGradients(self, m, s, dmdx, dsdx, x):
         f_acqu = -m + self.exploration_weight * s
         df_acqu = -dmdx + self.exploration_weight * dsdx
-        return -(f_acqu*self.space.indicator_constrains(x))/self.cost(x), -(df_acqu*self.space.indicator_constrains(x))/self.cost(x)
-
-
+        cost_x, cost_grad_x = self.cost_withGradients(x)
+        f_acq_cost = f_acqu/cost_x
+        df_acq_cost = (df_acqu*cost_x - f_acqu*cost_grad_x)/(cost_x**2)
+        return -f_acq_cost*self.space.indicator_constrains(x), -df_acq_cost*self.space.indicator_constrains(x)

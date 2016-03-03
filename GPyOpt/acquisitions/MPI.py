@@ -5,19 +5,19 @@ class AcquisitionMPI(AcquisitionBase):
     """
     Class for Maximum probability of improvement acquisition functions.
     """
-    def __init__(self, model, space, optimizer=None, cost = None, jitter=0.01):
+    def __init__(self, model, space, optimizer=None, cost_withGradients=None, jitter=0.01):
         optimizer = optimizer
         super(AcquisitionMPI, self).__init__(model, space, optimizer)
         self.jitter = jitter
-        if cost == None: 
-            self.cost = lambda x: 1
-        else:
-            self.cost = cost
+
+        if cost_withGradients == None:
+            self.cost_withGradients = constant_cost_withGradients
     
     def _compute_acq(self, m, s, fmin, x):
         _, Phi,_ = get_quantiles(self.jitter, fmin, m, s)    
         f_acqu =  Phi
-        return -(f_acqu*self.space.indicator_constrains(x))/self.cost(x)
+        cost_x, _ = self.cost_withGradients(x)
+        return -(f_acqu*self.space.indicator_constrains(x))/cost_x
 
     def acquisition_function(self,x):
         m, s = self.model.predict(x)
@@ -28,7 +28,10 @@ class AcquisitionMPI(AcquisitionBase):
         phi, Phi, u = get_quantiles(self.jitter, fmin, m, s)    
         f_acqu =  Phi        
         df_acqu = -(phi/s)* (dmdx + dsdx * u)
-        return -(f_acqu*self.space.indicator_constrains(x))/self.cost(x), -(df_acqu*self.space.indicator_constrains(x))/self.cost(x)
+        cost_x, cost_grad_x = self.cost_withGradients(x)
+        f_acq_cost = f_acqu/cost_x
+        df_acq_cost = (df_acqu*cost_x - f_acqu*cost_grad_x)/(cost_x**2)
+        return -f_acq_cost*self.space.indicator_constrains(x), -df_acq_cost*self.space.indicator_constrains(x)
 
     def acquisition_function_withGradients(self, x):
         """

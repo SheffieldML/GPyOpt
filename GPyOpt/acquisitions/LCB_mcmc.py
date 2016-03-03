@@ -4,8 +4,8 @@ class AcquisitionLCB_MCMC(AcquisitionLCB):
     """
     Class for Expected improvement acquisition functions.
     """
-    def __init__(self, model, space, optimizer=None, cost = None, exploration_weight=2):
-        super(AcquisitionLCB_MCMC, self).__init__(model, space, optimizer, cost, exploration_weight)
+    def __init__(self, model, space, optimizer=None, cost_withGradients=None, exploration_weight=2):
+        super(AcquisitionLCB_MCMC, self).__init__(model, space, optimizer)
         
         assert self.model.MCMC_sampler, 'Samples from the hyperparameters are needed to compute the integrated EI'
 

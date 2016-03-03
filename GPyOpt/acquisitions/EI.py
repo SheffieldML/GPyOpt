@@ -1,7 +1,6 @@
 from .base import AcquisitionBase
 from ..util.general import get_quantiles, constant_cost_withGradients
 
-
 class AcquisitionEI(AcquisitionBase):
     """
     Class for Expected improvement acquisition functions.
@@ -33,8 +32,6 @@ class AcquisitionEI(AcquisitionBase):
         f_acqu = (fmin - m + self.jitter) * Phi + s * phi        
         df_acqu = dsdx * phi - Phi * dmdx
         cost_x, cost_grad_x = self.cost_withGradients(x)
-        
-        # Value of the acquisition relative to the cost 
         f_acq_cost = f_acqu/cost_x
         df_acq_cost = (df_acqu*cost_x - f_acqu*cost_grad_x)/(cost_x**2)
         return -f_acq_cost*self.space.indicator_constrains(x), -df_acq_cost*self.space.indicator_constrains(x)
