@@ -12,10 +12,12 @@ class Objective(object):
 
 class SingleObjective(Objective):
     
-    def __init__(self, func, space, cost_withGradients = None):
+    def __init__(self, func, space, cost_withGradients = None, objective_name ='no name'):
         self.func  = func
         self.space = space
+        self.objective_name = objective_name
         self.cost_type = cost_withGradients
+        self.num_evaluations = 0
         
         # No cost used
         if self.cost_type == None:
@@ -28,10 +30,8 @@ class SingleObjective(Objective):
 
         # Explicit cost defined by the user
         else: 
-            self.cost_withGradients      = cost_withGradients
+            self.cost_withGradients  = cost_withGradients
 
-        self.n_evals = 0
-    
 
     def _cost_gp(self,x):
         m       = self.cost_model.model.predict(x)[0]
@@ -42,7 +42,7 @@ class SingleObjective(Objective):
         m       = self.cost_model.model.predict(x)[0]
         dmdx, _ = self.cost_model.model.predictive_gradients(x)
         m_grad  = dmdx[:,:,0] 
-        return m, m_grad
+        return np.exp(m), np.exp(m)*m_grad
 
     def evaluate(self, x):        
         cost_evals = []
@@ -56,18 +56,15 @@ class SingleObjective(Objective):
         if self.cost_type == 'computing_time':
             cost_evals = np.log(np.atleast_2d(np.asarray(cost_evals)).T)
 
-            if self.n_evals == 0:
+            if self.num_evaluations == 0:
                 X_all = x
                 costs_all = cost_evals
-                self.n_evals = 1
+                self.num_evaluations = 1
             else:
                 X_all = np.vstack((self.cost_model.model.X,x))
                 costs_all = np.vstack((self.cost_model.model.Y,cost_evals))
             self.cost_model.updateModel(X_all, costs_all, None, None)
         return f_evals, cost_evals 
-    
-    def evalute_cost(self,x):
-        return np.exp(self.cost_model.model.predict(x)[0])
 
 
 class SingleObjectiveMultiProcess(SingleObjective):

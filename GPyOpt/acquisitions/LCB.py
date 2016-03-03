@@ -16,7 +16,7 @@ class AcquisitionLCB(AcquisitionBase):
         if cost_withGradients == None:
             self.cost_withGradients = constant_cost_withGradients
         else:
-            print 'LBC acquisition does now make sense with cost. Cost set to constant'.  
+            print 'LBC acquisition does now make sense with cost. Cost set to constant.'  
             self.cost_withGradients = constant_cost_withGradients
     
     def _compute_acq(self, m, s, x):

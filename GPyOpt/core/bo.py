@@ -20,11 +20,12 @@ class BO(object):
         self.X_init = X_init
         self.Y_init = Y_init
         
+
     def run_optimization(self, max_iter = None, max_time = None,  eps = 1e-8, verbosity=True, report_file = None, **kargs):
         """ 
         Runs Bayesian Optimization for a number 'max_iter' of iterations (after the initial exploration data)
 
-        :param max_iter: exploration horizon, or number of acquisitions. It nothing is provided optimizes the current acquisition.  
+        :param max_iter: exploration horizon, or number of acquisitions. If nothing is provided optimizes the current acquisition.  
         :param max_time: maximum exploration horizont in seconds.
         :param eps: minimum distance between two consecutive x's to keep running the model
         """
@@ -63,11 +64,9 @@ class BO(object):
             except np.linalg.linalg.LinAlgError:
                 break
 
-            # --- Update and optimize acquisition
+            # --- Update and optimize acquisition and compute the exploration level in the next evaluation
             self.suggested_sample = self._optimize_acquisition()
-
-            # --- Update internal elements (needed for plotting)
-            self._update_internal_elements()
+            self._compute_exploration_next_evaluation()
             
             if not ((self.num_acquisitions < self.max_iter) and (self._distance_last_evaluations() > self.eps)): 
                 break
@@ -91,7 +90,6 @@ class BO(object):
         if report_file != None:  self.save_report(report_file)
 
 
-
     def _print_convergence(self,verbose):
         # --- Print stopping reason
         if verbose: 
@@ -110,33 +108,34 @@ class BO(object):
         Y_new, _ = self.objective.evaluate(self.suggested_sample)
         self.Y = np.vstack((self.Y,Y_new))
 
-    def _update_internal_elements(self):           
-        pass
-#         if self.num_acquisitions == 0:
-#             pred_min = self.model.predict(self.X)
-#             self.s_in_min = np.sqrt(abs(pred_min[1]))
-#         else:
-#             pred_min = self.model.predict(reshape(self.suggested_sample,self.space.dimensionality))
-#             self.s_in_min = np.vstack((self.s_in_min,np.sqrt(abs(pred_min[1])))) 
+    def _compute_exploration_next_evaluation(self):           
+        if self.num_acquisitions == 0:
+            self.exploration_in_samples = self.model.predict(self.X)[1]
+        else:
+            self.exploration_in_samples = np.vstack((self.exploration_in_samples,
+                                                    self.model.predict(self.suggested_sample)[1]))
 
     def _compute_results(self):
         self.Y_best = best_value(self.Y)
         self.x_opt = self.X[np.argmin(self.Y),:]
         self.fx_opt = min(self.Y)
 
+
     def _distance_last_evaluations(self):
         return np.sqrt(sum((self.X[self.X.shape[0]-1,:]-self.X[self.X.shape[0]-2,:])**2))  
 
+
     def _optimize_acquisition(self):
         return self.acquisition_func.optimize()
-        
 
+        
     def _update_model(self):
         if (self.num_acquisitions%self.model_update_interval)==0:
             if self.normalize_Y:
                 self.model.updateModel(self.X,(self.Y-self.Y.mean())/(self.Y.std()),None,None)
             else:
                 self.model.updateModel(self.X, self.Y,None,None)
+
 
     def plot_acquisition(self,filename=None):
         """        
@@ -154,6 +153,7 @@ class BO(object):
                                 self.suggested_sample,
                                 filename)
 
+
     def plot_convergence(self,filename=None):
         """
         Makes three plots to evaluate the convergence of the model
@@ -162,7 +162,7 @@ class BO(object):
             plot 3: Iterations vs. the variance of the current model in the selected sample.
         :param filename: name of the file where the plot is saved
         """
-        return plot_convergence(self.X,self.Y_best,self.s_in_min,filename)
+        return plot_convergence(self.X,self.Y_best,self.exploration_in_samples,filename)
     
     def get_evaluations(self):
         return self.X.copy(), self.Y.copy()
