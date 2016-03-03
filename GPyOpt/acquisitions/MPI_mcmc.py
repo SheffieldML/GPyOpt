@@ -1,3 +1,6 @@
+# Copyright (c) 2016, the GPyOpt Authors
+# Licensed under the BSD 3-clause license (see LICENSE.txt)
+
 from .MPI import AcquisitionMPI
 
 class AcquisitionMPI_MCMC(AcquisitionMPI):

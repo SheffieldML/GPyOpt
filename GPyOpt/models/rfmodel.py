@@ -9,7 +9,7 @@ from sklearn.ensemble import RandomForestRegressor
 
 class RFModel(BOModel):
 
-    analytical_gradient_prediction = True
+    analytical_gradient_prediction = False
 
     def __init__(self, bootstrap=True, criterion='mse', max_depth=None,
            max_features='auto', max_leaf_nodes=None, min_samples_leaf=1,
@@ -74,8 +74,7 @@ class RFModel(BOModel):
         for k in range(X.shape[0]):
             preds = []
             for pred in self.model.estimators_:
-                preds.append(pred.predict(X[k,:])[0])           
-        
+                preds.append(pred.predict(X[k,:])[0])               
             m = np.vstack((m ,np.array(preds).mean()))
             s = np.vstack((s ,np.array(preds).std()))   
         return m, s
