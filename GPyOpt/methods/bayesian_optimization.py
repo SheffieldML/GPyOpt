@@ -9,6 +9,7 @@ from ..acquisitions import AcquisitionEI, AcquisitionMPI, AcquisitionLCB, Acquis
 from ..core.bo import BO
 from ..core.task.space import Design_space, bounds_to_space
 from ..core.task.objective import SingleObjective
+from ..core.task.cost import CostModel
 from ..util.general import samples_multidimensional_uniform, reshape, evaluate_function
 from ..util.stats import initial_design
 from ..models.gpmodel import GPModel, GPModel_MCMC
@@ -21,7 +22,8 @@ class BayesianOptimization(BO):
 
     def __init__(self, f, domain = None, constrains = None, cost_withGradients = None, model_type = 'GP', X = None, Y = None, 
     	initial_design_numdata = None, initial_design_type='random', acquisition_type ='EI', normalize_Y = True, 
-        exact_feval = False, optimizer_type = 'lbfgs', model_update_interval=1, verbosity=0, **kwargs):
+        exact_feval = False, acquisition_optimizer_type = 'lbfgs', model_update_interval=1, verbosity=0, bath_method_type = 'LP', 
+        batch_size = 1, num_cores = 1, **kwargs):
 
         self.verbosity              = verbosity
         self.model_update_interval  = model_update_interval
@@ -32,37 +34,43 @@ class BayesianOptimization(BO):
             self.domain = bounds_to_space(kwargs['bounds'])
         else: 
             self.domain = domain 
-
         self.constrains = constrains
         self.space = Design_space(self.domain, self.constrains)
 
         # --- CHOOSE objective function
-        self.f                  = f
-        self.cost_withGradients = cost_withGradients
-        self.objective          = SingleObjective(self.f, self.space, self.cost_withGradients)
+        self.f = f
+        self.batch_size = batch_size
+        self.num_cores = num_cores
+        self.objective = SingleObjective(self.f, self.batch_size, self.num_cores, **kwargs)
+
+        # --- CHOOSE the cost model
+        self.cost = CostModel(cost_withGradients)
 
         # --- CHOOSE initial design
         self.X = X
         self.Y = Y
-        self.initial_design_type    = initial_design_type
+        self.initial_design_type  = initial_design_type
         self.initial_design_numdata = initial_design_numdata
         self._init_design_chooser()
 
         # --- CHOOSE the model type
-        self.model_type         = model_type  
-        self.exact_feval        = exact_feval 
-        self.normalize_Y        = normalize_Y      
-        self.model              = self._model_chooser()
-
+        self.model_type = model_type  
+        self.exact_feval = exact_feval 
+        self.normalize_Y = normalize_Y      
+        self.model = self._model_chooser()
 
         # --- CHOOSE the acquisition optimizer_type
-        self.optimizer_type = optimizer_type
-        self.acquisition_optimizer = AcquisitionOptimizer(self.space, self.optimizer_type)  ## morre arguments may come here
+        self.acquisition_optimizer_type = acquisition_optimizer_type
+        self.acquisition_optimizer = AcquisitionOptimizer(self.space, self.acquisition_optimizer_type)  ## morre arguments may come here
 
+        # --- CHOOSE batch method
+        self.bath_method_type = bath_method_type
+        self.batch_size = batch_size
+        self.num_cores = num_cores
 
         # --- CHOOSE acquistion function
-        self.acquisition_type       = acquisition_type
-        self.acquisition            = self._acquisition_chooser()
+        self.acquisition_type = acquisition_type
+        self.acquisition = self._acquisition_chooser()
 
         # -- Create optimization space
         super(BayesianOptimization ,self).__init__(	model                  = self.model, 
@@ -71,6 +79,7 @@ class BayesianOptimization(BO):
                 									acquisition_func       = self.acquisition, 
                 									X_init                 = self.X, 
                                                     Y_init                 = self.Y,
+                                                    cost                   = self.cost,
                 									normalize_Y            = self.normalize_Y, 
                 									model_update_interval  = self.model_update_interval)
 
@@ -134,22 +143,22 @@ class BayesianOptimization(BO):
 
         # --- Choose the acquisition
         if self.acquisition_type == None or self.acquisition_type =='EI':
-            return AcquisitionEI(self.model, self.space, self.acquisition_optimizer, self.cost_withGradients, self.acquisition_jitter)
+            return AcquisitionEI(self.model, self.space, self.acquisition_optimizer, self.cost.cost_withGradients, self.acquisition_jitter)
         
         elif self.acquisition_type =='EI_MCMC':
-            return AcquisitionEI_MCMC(self.model, self.space, self.acquisition_optimizer, self.cost_withGradients, self.acquisition_jitter)        
+            return AcquisitionEI_MCMC(self.model, self.space, self.acquisition_optimizer, self.cost.cost_withGradients, self.acquisition_jitter)        
         
         elif self.acquisition_type =='MPI':
-            return AcquisitionMPI(self.model, self.space, self.acquisition_optimizer, self.cost_withGradients, self.acquisition_jitter)
+            return AcquisitionMPI(self.model, self.space, self.acquisition_optimizer, self.cost.cost_withGradients, self.acquisition_jitter)
          
         elif self.acquisition_type =='MPI_MCMC':
-            return AcquisitionMPI_MCMC(self.model, self.space, self.acquisition_optimizer, self.cost_withGradients, self.acquisition_jitter)
+            return AcquisitionMPI_MCMC(self.model, self.space, self.acquisition_optimizer, self.cost.cost_withGradients, self.acquisition_jitter)
 
         elif self.acquisition_type =='LCB':
-            return AcquisitionLCB(self.model, self.space, self.acquisition_optimizer, cself.cost_withGradients, self.acquisition_weight)
+            return AcquisitionLCB(self.model, self.space, self.acquisition_optimizer, self.cost.cost_withGradients, self.acquisition_weight)
         
         elif self.acquisition_type =='LCB_MCMC':
-            return AcquisitionLCB_MCMC(self.model, self.space, self.acquisition_optimizer, self.cost_withGradients, self.acquisition_weight)        
+            return AcquisitionLCB_MCMC(self.model, self.space, self.acquisition_optimizer, self.cost.cost_withGradients, self.acquisition_weight)        
         
         else:
             raise Exception('Invalid acquisition selected.')

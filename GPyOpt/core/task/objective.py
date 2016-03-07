@@ -1,7 +1,7 @@
 import time
 import numpy as np
 from ...util.general import spawn
-from ...util.general import get_d_moments, constant_cost_withGradients
+from ...util.general import get_d_moments
 import GPy
 import GPyOpt
 
@@ -10,84 +10,71 @@ class Objective(object):
     def evaluate(self, x):
         pass
 
+
+### ===========
+### New class to handle the objective function
+### ===========
+
 class SingleObjective(Objective):
     
-    def __init__(self, func, space, cost_withGradients = None, objective_name ='no name'):
+    def __init__(self, func, batch_size = 1, num_cores = 1, batch_type = 'syncronous', space = None, objective_name = 'no_name'):
         self.func  = func
+        self.batch_size = batch_size
+        self.n_procs = num_cores
+        self.num_evaluations = 0
         self.space = space
         self.objective_name = objective_name
-        self.cost_type = cost_withGradients
-        self.num_evaluations = 0
-        
-        # No cost used
-        if self.cost_type == None:
-            self.cost_withGradients = constant_cost_withGradients
-        
-        # Function evaluation time used as cost
-        elif self.cost_type == 'computing_time':
-             self.cost_model = GPyOpt.models.GPModel(exact_feval=False,normalize_Y=False,optimize_restarts=5)                                 
-             self.cost_withGradients  = self._cost_gp_withGradients   
 
-        # Explicit cost defined by the user
-        else: 
-            self.cost_withGradients  = cost_withGradients
-
-
-    def _cost_gp(self,x):
-        m       = self.cost_model.model.predict(x)[0]
-        return np.exp(m)
-
-
-    def _cost_gp_withGradients(self,x):
-        m       = self.cost_model.model.predict(x)[0]
-        dmdx, _ = self.cost_model.model.predictive_gradients(x)
-        m_grad  = dmdx[:,:,0] 
-        return np.exp(m), np.exp(m)*m_grad
 
     def evaluate(self, x):        
+
+        if self.batch_size == 1:
+            f_evals, cost_evals = self._single_evaluation(x)
+        else:
+            try:
+                f_evals, cost_evals = self._syncronous_batch_evaluation(x)
+            except:
+                if not hasattr(self, 'parallel_error'):
+                    print 'Error in parallel computation. Fall back to single process!'
+                    f_evals, cost_evals = self._single_evaluation(x)        
+        return f_evals, cost_evals 
+
+
+    def _single_evaluation(self,x):
         cost_evals = []
         f_evals     = np.empty(shape=[0, 1])
         
         for i in range(x.shape[0]): 
             st_time    = time.time()
             f_evals     = np.vstack([f_evals,self.func(np.atleast_2d(x[i]))])
-            cost_evals += [time.time()-st_time]     
-        
-        if self.cost_type == 'computing_time':
-            cost_evals = np.log(np.atleast_2d(np.asarray(cost_evals)).T)
-
-            if self.num_evaluations == 0:
-                X_all = x
-                costs_all = cost_evals
-                self.num_evaluations = 1
-            else:
-                X_all = np.vstack((self.cost_model.model.X,x))
-                costs_all = np.vstack((self.cost_model.model.Y,cost_evals))
-            self.cost_model.updateModel(X_all, costs_all, None, None)
+            cost_evals += [time.time()-st_time]  
         return f_evals, cost_evals 
 
 
-class SingleObjectiveMultiProcess(SingleObjective):
-
-    def __init__(self, func, space, n_procs=2, batch_eval=True):
-        super(SingleObjectiveMultiProcess, self).__init__(func, space, batch_eval)
-        self.n_procs = n_procs
+    def _syncronous_batch_evaluation(self,x):   
+        from multiprocessing import Process, Pipe
+        from itertools import izip          
         
-    def evaluate(self, x):
-        st_time = time.time()
-        try:
-            # --- Parallel evaluation of *f* if several cores are available
-            from multiprocessing import Process, Pipe
-            from itertools import izip          
-            divided_samples = [x[i::self.n_procs] for i in xrange(self.n_procs)]
-            pipe=[Pipe() for i in xrange(self.n_procs)]
-            proc=[Process(target=spawn(self.func),args=(c,x)) for x,(p,c) in izip(divided_samples,pipe)]
-            [p.start() for p in proc]
-            [p.join() for p in proc]
-            res = np.vstack([p.recv() for (p,c) in pipe])
-        except:
-            if not hasattr(self, 'parallel_error'):
-                print 'Error in parallel computation. Fall back to single process!'
-                self.parallel_error = True 
-            res = self.func(x)
-        return res, time.time()-st_time
+        # --- parallel evaluation of the function
+        divided_samples = [x[i::self.n_procs] for i in xrange(self.n_procs)]
+        pipe = [Pipe() for i in xrange(self.n_procs)]
+        proc = [Process(target=spawn(self.func),args=(c,x)) for x,(p,c) in izip(divided_samples,pipe)]
+        [p.start() for p in proc]
+        [p.join() for p in proc] 
+        f_evals = np.vstack([p.recv() for (p,c) in pipe])
+        
+        # --- time of evalation is set to constant (=1). This is one of the hypothesis of syncronous batch methods.
+        cost_evals = np.ones((x.shape[0],1))
+        return f_evals, cost_evals 
+
+    def _asyncronous_batch_evaluation(self,x):   
+        ### --- TODO
+        pass
+
+
+ 
+
+
+
+
+

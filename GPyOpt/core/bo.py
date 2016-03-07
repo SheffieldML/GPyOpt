@@ -10,11 +10,12 @@ except:
     pass
 
 class BO(object):
-    def __init__(self, model, space, objective, acquisition_func, X_init, Y_init=None, normalize_Y = True, model_update_interval = 1):
+    def __init__(self, model, space, objective, acquisition_func, X_init, Y_init=None, cost = None, normalize_Y = True, model_update_interval = 1):
         self.model = model
         self.space = space
         self.objective = objective
         self.acquisition_func = acquisition_func
+        self.cost = cost
         self.normalize_Y = normalize_Y
         self.model_update_interval = model_update_interval
         self.X_init = X_init
@@ -49,7 +50,12 @@ class BO(object):
         if self.X_init is not None and self.Y_init is None:
             self.X = self.X_init
             self.X_init = None
-            self.Y, _ = self.objective.evaluate(self.X)
+            self.Y, cost_values = self.objective.evaluate(self.X)
+            self.cost.update_cost_model(self.X, cost_values)
+        
+        elif self.cost.cost_type == 'evaluation_time':
+            self.Y, cost_values = self.objective.evaluate(self.X)
+            self.cost.update_cost_model(self.X, cost_values)
         
         # --- Initialize iterations and running time
         self.time_zero = time.time()
@@ -74,7 +80,7 @@ class BO(object):
             # --- Augment X
             self.X = np.vstack((self.X,self.suggested_sample))
             
-            # --- Evaluate *f* in X and augment Y
+            # --- Evaluate *f* in X, augment Y and update cost function (if needed)
             self.evaluate_objective()
 
             # --- Update current evaluation time and function evaluations
@@ -105,8 +111,10 @@ class BO(object):
             return 0
 
     def evaluate_objective(self):
-        Y_new, _ = self.objective.evaluate(self.suggested_sample)
+        Y_new, cost_new = self.objective.evaluate(self.suggested_sample)
+        self.cost.update_cost_model(self.suggested_sample, cost_new)
         self.Y = np.vstack((self.Y,Y_new))
+
 
     def _compute_exploration_next_evaluation(self):           
         if self.num_acquisitions == 0:

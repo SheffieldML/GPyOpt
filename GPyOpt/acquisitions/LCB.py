@@ -2,7 +2,8 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 from .base import AcquisitionBase
-from ..util.general import get_quantiles, constant_cost_withGradients
+from ..util.general import get_quantiles
+from ..core.task.cost import constant_cost_withGradients
 
 class AcquisitionLCB(AcquisitionBase):
     """

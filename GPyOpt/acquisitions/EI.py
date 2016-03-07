@@ -2,7 +2,8 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 from .base import AcquisitionBase
-from ..util.general import get_quantiles, constant_cost_withGradients
+from ..util.general import get_quantiles
+from ..core.task.cost import constant_cost_withGradients
 
 class AcquisitionEI(AcquisitionBase):
     """
@@ -15,6 +16,8 @@ class AcquisitionEI(AcquisitionBase):
 
         if cost_withGradients == None:
             self.cost_withGradients = constant_cost_withGradients
+        else:
+            self.cost_withGradients = cost_withGradients 
 
     def _compute_acq(self, m, s, fmin, x):
         phi, Phi, _ = get_quantiles(self.jitter, fmin, m, s)    

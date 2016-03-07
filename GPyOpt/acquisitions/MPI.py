@@ -3,6 +3,7 @@
 
 from .base import AcquisitionBase
 from ..util.general import get_quantiles
+from ..core.task.cost import constant_cost_withGradients
 
 class AcquisitionMPI(AcquisitionBase):
     """
@@ -15,6 +16,9 @@ class AcquisitionMPI(AcquisitionBase):
 
         if cost_withGradients == None:
             self.cost_withGradients = constant_cost_withGradients
+        else:
+            self.cost_withGradients = cost_withGradients
+
     
     def _compute_acq(self, m, s, fmin, x):
         _, Phi,_ = get_quantiles(self.jitter, fmin, m, s)    

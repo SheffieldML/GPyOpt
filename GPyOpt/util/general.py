@@ -6,9 +6,6 @@ import numpy as np
 from scipy.special import erfc
 import time
 
-def constant_cost_withGradients(x):
-    return np.ones(x.shape[0])[:,None], np.zeros(x.shape)
-
 
 def compute_integrated_acquisition(acquisition,x):
     acqu_x = 0 
