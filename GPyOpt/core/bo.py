@@ -10,11 +10,11 @@ except:
     pass
 
 class BO(object):
-    def __init__(self, model, space, objective, acquisition_func, X_init, Y_init=None, cost = None, normalize_Y = True, model_update_interval = 1):
+    def __init__(self, model, space, objective, acquisition, batch_method, X_init, Y_init=None, cost = None, normalize_Y = True, model_update_interval = 1):
         self.model = model
         self.space = space
         self.objective = objective
-        self.acquisition_func = acquisition_func
+        self.acquisition = acquisition
         self.cost = cost
         self.normalize_Y = normalize_Y
         self.model_update_interval = model_update_interval
@@ -71,8 +71,8 @@ class BO(object):
                 break
 
             # --- Update and optimize acquisition and compute the exploration level in the next evaluation
-            self.suggested_sample = self._optimize_acquisition()
-            self._compute_exploration_next_evaluation()
+            self.suggested_sample = self._compute_next_evaluations()
+            self._compute_exploration_next_evaluations()
             
             if not ((self.num_acquisitions < self.max_iter) and (self._distance_last_evaluations() > self.eps)): 
                 break
@@ -116,7 +116,7 @@ class BO(object):
         self.Y = np.vstack((self.Y,Y_new))
 
 
-    def _compute_exploration_next_evaluation(self):           
+    def _compute_exploration_next_evaluations(self):           
         if self.num_acquisitions == 0:
             self.exploration_in_samples = self.model.predict(self.X)[1]
         else:
@@ -133,8 +133,8 @@ class BO(object):
         return np.sqrt(sum((self.X[self.X.shape[0]-1,:]-self.X[self.X.shape[0]-2,:])**2))  
 
 
-    def _optimize_acquisition(self):
-        return self.acquisition_func.optimize()
+    def _compute_next_evaluations(self):
+        return self.batch_method.compute_batch() # in the sequential case this simpy optimzes the acquisition 
 
         
     def _update_model(self):
@@ -152,12 +152,12 @@ class BO(object):
             if self.input_dim = 2: as before but it separates the mean and variance of the model in two different plots
         :param filename: name of the file where the plot is saved
         """  
-        return plot_acquisition(self.acquisition_func.space.get_bounds(),
+        return plot_acquisition(self.acquisition.space.get_bounds(),
                                 self.model.model.X.shape[1],
                                 self.model.model,
                                 self.model.model.X,
                                 self.model.model.Y,
-                                self.acquisition_func.acquisition_function,
+                                self.acquisition.acquisition_function,
                                 self.suggested_sample,
                                 filename)
 

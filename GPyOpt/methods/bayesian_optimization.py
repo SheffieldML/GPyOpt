@@ -11,9 +11,11 @@ from ..core.task.space import Design_space, bounds_to_space
 from ..core.task.objective import SingleObjective
 from ..core.task.cost import CostModel
 from ..util.general import samples_multidimensional_uniform, reshape, evaluate_function
+from ..core.batch_designs import Sequential, RandomBatch
 from ..util.stats import initial_design
 from ..models.gpmodel import GPModel, GPModel_MCMC
 from ..optimization.acquisition_optimizer import AcquisitionOptimizer
+
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -22,7 +24,7 @@ class BayesianOptimization(BO):
 
     def __init__(self, f, domain = None, constrains = None, cost_withGradients = None, model_type = 'GP', X = None, Y = None, 
     	initial_design_numdata = None, initial_design_type='random', acquisition_type ='EI', normalize_Y = True, 
-        exact_feval = False, acquisition_optimizer_type = 'lbfgs', model_update_interval=1, verbosity=0, bath_method_type = 'LP', 
+        exact_feval = False, acquisition_optimizer_type = 'lbfgs', model_update_interval=1, verbosity=0, batch_method_type = 'random', 
         batch_size = 1, num_cores = 1, **kwargs):
 
         self.verbosity              = verbosity
@@ -32,16 +34,20 @@ class BayesianOptimization(BO):
         # --- CHOOSE design space
         if domain == None and self.kwargs.has_key('bounds'): 
             self.domain = bounds_to_space(kwargs['bounds'])
+            print 'I am here'
         else: 
             self.domain = domain 
+            
         self.constrains = constrains
         self.space = Design_space(self.domain, self.constrains)
 
         # --- CHOOSE objective function
         self.f = f
+        if self.kwargs.has_key('objective_name'): self.objective_name = kwargs['objective_name']
+        else: self.objective_name = 'no_name'  
         self.batch_size = batch_size
         self.num_cores = num_cores
-        self.objective = SingleObjective(self.f, self.batch_size, self.num_cores, **kwargs)
+        self.objective = SingleObjective(self.f, self.batch_size, self.num_cores,self.objective_name)
 
         # --- CHOOSE the cost model
         self.cost = CostModel(cost_withGradients)
@@ -63,20 +69,20 @@ class BayesianOptimization(BO):
         self.acquisition_optimizer_type = acquisition_optimizer_type
         self.acquisition_optimizer = AcquisitionOptimizer(self.space, self.acquisition_optimizer_type)  ## morre arguments may come here
 
-        # --- CHOOSE batch method
-        self.bath_method_type = bath_method_type
-        self.batch_size = batch_size
-        self.num_cores = num_cores
-
         # --- CHOOSE acquistion function
         self.acquisition_type = acquisition_type
         self.acquisition = self._acquisition_chooser()
+
+        # --- CHOOSE batch method
+        self.batch_method_type = batch_method_type
+        self.batch_method = self._batch_method_chooser()
 
         # -- Create optimization space
         super(BayesianOptimization ,self).__init__(	model                  = self.model, 
                 									space                  = self.space, 
                 									objective              = self.objective, 
-                									acquisition_func       = self.acquisition, 
+                									acquisition            = self.acquisition, 
+                                                    batch_method           = self.batch_method,
                 									X_init                 = self.X, 
                                                     Y_init                 = self.Y,
                                                     cost                   = self.cost,
@@ -177,6 +183,15 @@ class BayesianOptimization(BO):
         # Case 2
         elif self.X is not None and self.Y is None:
             self.Y, _ = self.objective.evaluate(self.X)
+
+
+    def _batch_method_chooser(self):
+        if self.batch_size == 1:
+            return Sequential(self.acquisition,self.batch_size)
+
+        elif self.batch_method_type == 'random' or self.batch_method_type == None:
+            return RandomBatch(self.acquisition, self.batch_size)
+
 
 
 

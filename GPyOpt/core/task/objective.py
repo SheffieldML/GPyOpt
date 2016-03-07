@@ -11,13 +11,9 @@ class Objective(object):
         pass
 
 
-### ===========
-### New class to handle the objective function
-### ===========
-
 class SingleObjective(Objective):
     
-    def __init__(self, func, batch_size = 1, num_cores = 1, batch_type = 'syncronous', space = None, objective_name = 'no_name'):
+    def __init__(self, func, batch_size = 1, num_cores = 1, objective_name = 'no_name', batch_type = 'syncronous', space = None):
         self.func  = func
         self.batch_size = batch_size
         self.n_procs = num_cores
