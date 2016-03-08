@@ -8,7 +8,7 @@ from ..batch_designs import Sequential
 from copy import deepcopy
 
 #### 
-#### TODO! : runs but it does not work well yet!!!
+#### TODO! : runs but it does not work well yet!!! THERE IS SOMETHING WRONG
 ####
 
 
@@ -38,7 +38,6 @@ class Predictive(BatchMethodBase):
         X_batch = X_new
         k = 1
 
-        print model_local.model
         # --- Colect the rest of the elements in the batch by 
         while k<self.batch_size:
             X = np.vstack((X,X_new))       # update the sample within the batch
@@ -59,7 +58,6 @@ class Predictive(BatchMethodBase):
             X_batch = np.vstack((X_batch,X_new))
             k+=1    
 
-        print X_batch
         return X_batch
 
 
