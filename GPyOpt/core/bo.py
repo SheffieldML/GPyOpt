@@ -4,6 +4,7 @@
 import numpy as np
 import time
 from ..util.general import best_value, reshape
+from ..core.task.cost import CostModel
 try:
     from ..plotting.plots_bo import plot_acquisition, plot_convergence
 except:
@@ -15,11 +16,12 @@ class BO(object):
         self.space = space
         self.objective = objective
         self.acquisition = acquisition
-        self.cost = cost
+        self.batch_method = batch_method
         self.normalize_Y = normalize_Y
         self.model_update_interval = model_update_interval
-        self.X_init = X_init
-        self.Y_init = Y_init
+        self.X = X_init
+        self.Y = Y_init
+        self.cost = CostModel(cost)
         
 
     def run_optimization(self, max_iter = None, max_time = None,  eps = 1e-8, verbosity=True, report_file = None, **kargs):
@@ -47,15 +49,10 @@ class BO(object):
             self.max_time = max_time     
             
         # --- Initial function evaluation and model fitting
-        if self.X_init is not None and self.Y_init is None:
-            self.X = self.X_init
-            self.X_init = None
+        if self.X is not None and self.Y is None:
             self.Y, cost_values = self.objective.evaluate(self.X)
-            self.cost.update_cost_model(self.X, cost_values)
-        
-        elif self.cost.cost_type == 'evaluation_time':
-            self.Y, cost_values = self.objective.evaluate(self.X)
-            self.cost.update_cost_model(self.X, cost_values)
+            if self.cost.cost_type == 'evaluation_time':
+                self.cost.update_cost_model(self.X, cost_values)
         
         # --- Initialize iterations and running time
         self.time_zero = time.time()

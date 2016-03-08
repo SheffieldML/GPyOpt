@@ -71,7 +71,22 @@ class GPModel(BOModel):
         dmdx = dmdx[:,:,0]
         dsdx = dvdx / (2*np.sqrt(v))
         return m, np.sqrt(v), dmdx, dsdx
-    
+
+    def copy(self):
+        copied_model = GPModel(kernel = self.model.kern.copy(), 
+                            noise_var=self.noise_var, 
+                            exact_feval=self.exact_feval, 
+                            normalize_Y=self.normalize_Y, 
+                            optimizer=self.optimizer, 
+                            max_iters=self.max_iters, 
+                            optimize_restarts=self.optimize_restarts, 
+                            verbose=self.verbose) 
+
+        copied_model._create_model(self.model.X,self.model.Y)
+        copied_model.updateModel(self.model.X,self.model.Y, None, None)
+        return copied_model
+
+
 class GPModel_MCMC(BOModel):
     
     MCMC_sampler = True
@@ -174,4 +189,25 @@ class GPModel_MCMC(BOModel):
         self.model.param_array[:] = ps
         self.model._trigger_params_changed()
         return means, stds, dmdxs, dsdxs
+
+    def copy(self):
+        copied_model = GPModel( kernel = self.model.kern.copy(), 
+                                noise_var= self.noise_var , 
+                                exact_feval= self.exact_feval, 
+                                normalize_Y= self.normalize_Y, 
+                                n_samples = self.n_samples, 
+                                n_burnin = self.n_burnin, 
+                                subsample_interval = self.subsample_interval, 
+                                step_size = self.step_size, 
+                                leapfrog_steps= self.leapfrog_steps, 
+                                verbose= self.verbose) 
+
+        copied_model._create_model(self.model.X,self.model.Y)
+        copied_model.updateModel(self.model.X,self.model.Y, None, None)
+        return copied_model
+
+
+
+
+
     

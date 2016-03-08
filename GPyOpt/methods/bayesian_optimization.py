@@ -11,7 +11,7 @@ from ..core.task.space import Design_space, bounds_to_space
 from ..core.task.objective import SingleObjective
 from ..core.task.cost import CostModel
 from ..util.general import samples_multidimensional_uniform, reshape, evaluate_function
-from ..core.batch_designs import Sequential, RandomBatch
+from ..core.batch_designs import Sequential, RandomBatch, Predictive
 from ..util.stats import initial_design
 from ..models.gpmodel import GPModel, GPModel_MCMC
 from ..optimization.acquisition_optimizer import AcquisitionOptimizer
@@ -191,6 +191,10 @@ class BayesianOptimization(BO):
 
         elif self.batch_method_type == 'random' or self.batch_method_type == None:
             return RandomBatch(self.acquisition, self.batch_size)
+
+        elif self.batch_method_type == 'predictive':
+            return Predictive(self.acquisition, self.batch_size,self.normalize_Y)
+
 
 
 
