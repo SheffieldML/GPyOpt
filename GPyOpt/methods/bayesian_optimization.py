@@ -11,7 +11,7 @@ from ..core.task.space import Design_space, bounds_to_space
 from ..core.task.objective import SingleObjective
 from ..core.task.cost import CostModel
 from ..util.general import samples_multidimensional_uniform, reshape, evaluate_function
-from ..core.batch_designs import Sequential, RandomBatch, Predictive
+from ..core.evaluators import Sequential, RandomBatch, Predictive, LocalPenalization
 from ..util.stats import initial_design
 from ..models.gpmodel import GPModel, GPModel_MCMC
 from ..optimization.acquisition_optimizer import AcquisitionOptimizer
@@ -24,7 +24,7 @@ class BayesianOptimization(BO):
 
     def __init__(self, f, domain = None, constrains = None, cost_withGradients = None, model_type = 'GP', X = None, Y = None, 
     	initial_design_numdata = None, initial_design_type='random', acquisition_type ='EI', normalize_Y = True, 
-        exact_feval = False, acquisition_optimizer_type = 'lbfgs', model_update_interval=1, verbosity=0, batch_method_type = 'random', 
+        exact_feval = False, acquisition_optimizer_type = 'lbfgs', model_update_interval=1, verbosity=0, evaluator_type = 'sequential', 
         batch_size = 1, num_cores = 1, **kwargs):
 
         self.verbosity              = verbosity
@@ -73,16 +73,16 @@ class BayesianOptimization(BO):
         self.acquisition_type = acquisition_type
         self.acquisition = self._acquisition_chooser()
 
-        # --- CHOOSE batch method
-        self.batch_method_type = batch_method_type
-        self.batch_method = self._batch_method_chooser()
+        # --- CHOOSE evaluator method
+        self.evaluator_type = evaluator_type
+        self.evaluator = self._evaluator_chooser()
 
         # -- Create optimization space
         super(BayesianOptimization ,self).__init__(	model                  = self.model, 
                 									space                  = self.space, 
                 									objective              = self.objective, 
                 									acquisition            = self.acquisition, 
-                                                    batch_method           = self.batch_method,
+                                                    evaluator              = self.evaluator,
                 									X_init                 = self.X, 
                                                     Y_init                 = self.Y,
                                                     cost                   = self.cost,
@@ -185,14 +185,17 @@ class BayesianOptimization(BO):
             self.Y, _ = self.objective.evaluate(self.X)
 
 
-    def _batch_method_chooser(self):
-        if self.batch_size == 1:
-            return Sequential(self.acquisition,self.batch_size)
+    def _evaluator_chooser(self):
+        if self.batch_size == 1 or self.evaluator_type == 'sequential':
+            return Sequential(self.acquisition)
 
-        elif self.batch_method_type == 'random' or self.batch_method_type == None:
+        elif self.batch_size >1 and (self.evaluator_type == 'random' or self.evaluator_type == None):
             return RandomBatch(self.acquisition, self.batch_size)
 
-        elif self.batch_method_type == 'predictive':
+        elif self.evaluator_type == 'predictive':
+            return Predictive(self.acquisition, self.batch_size,self.normalize_Y)
+
+        elif self.evaluator_type == 'local_penalization':
             return Predictive(self.acquisition, self.batch_size,self.normalize_Y)
 
 

@@ -11,12 +11,12 @@ except:
     pass
 
 class BO(object):
-    def __init__(self, model, space, objective, acquisition, batch_method, X_init, Y_init=None, cost = None, normalize_Y = True, model_update_interval = 1):
+    def __init__(self, model, space, objective, acquisition, evaluator, X_init, Y_init=None, cost = None, normalize_Y = True, model_update_interval = 1):
         self.model = model
         self.space = space
         self.objective = objective
         self.acquisition = acquisition
-        self.batch_method = batch_method
+        self.evaluator = evaluator
         self.normalize_Y = normalize_Y
         self.model_update_interval = model_update_interval
         self.X = X_init
@@ -69,7 +69,7 @@ class BO(object):
 
             # --- Update and optimize acquisition and compute the exploration level in the next evaluation
             self.suggested_sample = self._compute_next_evaluations()
-            self._compute_exploration_next_evaluations()
+            #self._compute_exploration_next_evaluations()
             
             if not ((self.num_acquisitions < self.max_iter) and (self._distance_last_evaluations() > self.eps)): 
                 break
@@ -112,13 +112,12 @@ class BO(object):
         self.cost.update_cost_model(self.suggested_sample, cost_new)
         self.Y = np.vstack((self.Y,Y_new))
 
-
-    def _compute_exploration_next_evaluations(self):           
-        if self.num_acquisitions == 0:
-            self.exploration_in_samples = self.model.predict(self.X)[1]
-        else:
-            self.exploration_in_samples = np.vstack((self.exploration_in_samples,
-                                                    self.model.predict(self.suggested_sample)[1]))
+    # def _compute_exploration_next_evaluations(self):           
+    #     if self.num_acquisitions == 0:
+    #         self.exploration_in_samples = self.model.predict(self.X)[1]
+    #     else:
+    #         self.exploration_in_samples = np.vstack((self.exploration_in_samples,
+    #                                                 self.model.predict(self.suggested_sample)[1]))
 
     def _compute_results(self):
         self.Y_best = best_value(self.Y)
@@ -131,7 +130,7 @@ class BO(object):
 
 
     def _compute_next_evaluations(self):
-        return self.batch_method.compute_batch() # in the sequential case this simpy optimzes the acquisition 
+        return self.evaluator.compute_batch() # in the sequential case this simpy optimzes the acquisition 
 
         
     def _update_model(self):
