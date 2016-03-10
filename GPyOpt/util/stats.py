@@ -18,7 +18,6 @@ def initial_design(design,space,data_init):
         X_design = arms[np.random.randint(arms.shape[0],size=data_init),:]
 
     else:
-
         bounds = space.get_bounds()
         if design == 'random':
             X_design = samples_multidimensional_uniform(bounds, data_init)

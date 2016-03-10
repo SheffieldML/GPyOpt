@@ -69,7 +69,6 @@ class BO(object):
 
             # --- Update and optimize acquisition and compute the exploration level in the next evaluation
             self.suggested_sample = self._compute_next_evaluations()
-            #self._compute_exploration_next_evaluations()
             
             if not ((self.num_acquisitions < self.max_iter) and (self._distance_last_evaluations() > self.eps)): 
                 break
@@ -111,13 +110,6 @@ class BO(object):
         Y_new, cost_new = self.objective.evaluate(self.suggested_sample)
         self.cost.update_cost_model(self.suggested_sample, cost_new)
         self.Y = np.vstack((self.Y,Y_new))
-
-    # def _compute_exploration_next_evaluations(self):           
-    #     if self.num_acquisitions == 0:
-    #         self.exploration_in_samples = self.model.predict(self.X)[1]
-    #     else:
-    #         self.exploration_in_samples = np.vstack((self.exploration_in_samples,
-    #                                                 self.model.predict(self.suggested_sample)[1]))
 
     def _compute_results(self):
         self.Y_best = best_value(self.Y)
@@ -166,7 +158,7 @@ class BO(object):
             plot 3: Iterations vs. the variance of the current model in the selected sample.
         :param filename: name of the file where the plot is saved
         """
-        return plot_convergence(self.X,self.Y_best,self.exploration_in_samples,filename)
+        return plot_convergence(self.X,self.Y_best,filename)
     
     def get_evaluations(self):
         return self.X.copy(), self.Y.copy()

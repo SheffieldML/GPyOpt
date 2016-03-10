@@ -117,7 +117,7 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
         if filename!=None:savefig(filename)
 
 
-def plot_convergence(Xdata,best_Y,s_in_min, filename = None):
+def plot_convergence(Xdata,best_Y, filename = None):
     '''
     Plots to evaluate the convergence of standard Bayesian optimization algorithms
     '''
@@ -126,8 +126,8 @@ def plot_convergence(Xdata,best_Y,s_in_min, filename = None):
     distances = np.sqrt(aux.sum(axis=1))
 
     ## Distances between consecutive x's
-    plt.figure(figsize=(15,5))
-    plt.subplot(1, 3, 1)
+    plt.figure(figsize=(10,5))
+    plt.subplot(1, 2, 1)
     plt.plot(range(n-1), distances, '-ro')
     plt.xlabel('Iteration')
     plt.ylabel('d(x[n], x[n-1])')
@@ -135,7 +135,7 @@ def plot_convergence(Xdata,best_Y,s_in_min, filename = None):
     grid(True)
 
     # Estimated m(x) at the proposed sampling points
-    plt.subplot(1, 3, 2)
+    plt.subplot(1, 2, 2)
     plt.plot(range(n),best_Y,'-o')
     plt.title('Value of the best selected sample')
     plt.xlabel('Iteration')
@@ -143,13 +143,13 @@ def plot_convergence(Xdata,best_Y,s_in_min, filename = None):
     grid(True)
 
     # Plot of the proposed v(x) at the proposed sampling points
-    plt.subplot(1, 3, 3)
-    plt.errorbar(range(len(s_in_min[:,0])),[0]*n , yerr=s_in_min[:,0],ecolor='b', capthick=1)
-    plt.title('Predicted sd. in the next sample')
-    plt.xlabel('Iteration')
-    plt.ylim(0,max(s_in_min[:,0])+np.sqrt(max(s_in_min[:,0])))
-    plt.ylabel('CI (centered at zero)')
-    grid(True)
+    # plt.subplot(1, 3, 3)
+    # plt.errorbar(range(len(s_in_min[:,0])),[0]*n , yerr=s_in_min[:,0],ecolor='b', capthick=1)
+    # plt.title('Predicted sd. in the next sample')
+    # plt.xlabel('Iteration')
+    # plt.ylim(0,max(s_in_min[:,0])+np.sqrt(max(s_in_min[:,0])))
+    # plt.ylabel('CI (centered at zero)')
+    # grid(True)
     if filename!=None:
         savefig(filename)
     else:
