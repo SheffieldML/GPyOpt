@@ -5,7 +5,30 @@
 from ..util.general import samples_multidimensional_uniform
 import numpy as np
 
+
 def initial_design(design,space,data_init):
+
+    if design == 'latin':
+        samples = sample_initial_design(design,space,data_init)
+        if space.has_constrains() == True:
+            print 'Sampling with constrains is now allowed with latin designs.'
+    
+    elif space.has_constrains() == False:
+        samples = sample_initial_design(design,space,data_init)
+    
+    elif design == 'random'  and space.has_constrains() == True:
+        samples = np.empty((0,space.dimensionality))
+        while samples.shape[0] < data_init:
+            domain_samples = sample_initial_design(design, space, data_init)
+            valid_indices = (space.indicator_constrains(domain_samples)==1).flatten()
+            if sum(valid_indices)>0: 
+                valid_samples = domain_samples[valid_indices,:]
+                samples = np.vstack((samples,valid_samples))
+    return samples[0:data_init,:]
+
+
+
+def sample_initial_design(design,space,data_init):
     """
     :param design: the choice of designs
     :param bounds: the boundary of initial points

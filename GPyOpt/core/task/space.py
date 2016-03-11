@@ -72,6 +72,9 @@ class Design_space(object):
             self.space.append(d_out)
             self.has_types[d_out['type']] = True
 
+    def has_constrains(self):
+        return self.constrains != None
+
     def _expand_attributes(self, space):
         space_expanded = []
         for d in space:
