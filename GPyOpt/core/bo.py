@@ -95,7 +95,7 @@ class BO(object):
     def _print_convergence(self,verbose):
         # --- Print stopping reason
         if verbose: 
-            print '*Optimization completed:'
+            print '*Optimization completed.'
         if (self.num_acquisitions > self.max_iter):        
             print '   -Maximum number of iterations reached.' 
             return 1

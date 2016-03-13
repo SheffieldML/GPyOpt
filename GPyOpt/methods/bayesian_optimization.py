@@ -27,6 +27,7 @@ class BayesianOptimization(BO):
         exact_feval = False, acquisition_optimizer_type = 'lbfgs', model_update_interval=1, verbosity=0, evaluator_type = 'sequential', 
         batch_size = 1, num_cores = 1, **kwargs):
 
+
         self.verbosity              = verbosity
         self.model_update_interval  = model_update_interval
         self.kwargs = kwargs
@@ -34,7 +35,6 @@ class BayesianOptimization(BO):
         # --- CHOOSE design space
         if domain == None and self.kwargs.has_key('bounds'): 
             self.domain = bounds_to_space(kwargs['bounds'])
-            print 'I am here'
         else: 
             self.domain = domain 
             
@@ -77,7 +77,7 @@ class BayesianOptimization(BO):
         self.evaluator_type = evaluator_type
         self.evaluator = self._evaluator_chooser()
 
-        # -- Create optimization space
+        # --- Create optimization space
         super(BayesianOptimization ,self).__init__(	model                  = self.model, 
                 									space                  = self.space, 
                 									objective              = self.objective, 
@@ -89,6 +89,8 @@ class BayesianOptimization(BO):
                 									normalize_Y            = self.normalize_Y, 
                 									model_update_interval  = self.model_update_interval)
 
+        # --- Initilize everyting
+        self.run_optimization(0)
 
     def _model_chooser(self):
         
@@ -138,12 +140,12 @@ class BayesianOptimization(BO):
 
         # --- Extract relevant parameters from the ***kwargs
         if self.kwargs.has_key('acquisition_jitter'):
-            self.acquisition_jitter = kwargs['acquisition_jitter']
+            self.acquisition_jitter = self.kwargs['acquisition_jitter']
         else:
             self.acquisition_jitter = 0.01
 
         if self.kwargs.has_key('acquisition_weight'):
-            self.acquisition_weight = kwargs['acquisition_weight']
+            self.acquisition_weight = self.kwargs['acquisition_weight']
         else:
             self.acquisition_weight = 2  ## TODO: implement the optimal rate (only for bandits)
 

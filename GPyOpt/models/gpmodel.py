@@ -10,7 +10,7 @@ class GPModel(BOModel):
 
     analytical_gradient_prediction = True
     
-    def __init__(self, kernel=None, noise_var=None, exact_feval=False, normalize_Y=True, optimizer='bfgs', max_iters=1000, optimize_restarts=3, verbose=False):
+    def __init__(self, kernel=None, noise_var=None, exact_feval=False, normalize_Y=True, optimizer='bfgs', max_iters=1000, optimize_restarts=5, verbose=False):
         self.kernel = kernel
         self.noise_var = noise_var
         self.exact_feval = exact_feval
@@ -26,7 +26,7 @@ class GPModel(BOModel):
         # --- define kernel
         self.input_dim = X.shape[1]
         if self.kernel is None: 
-            kern = GPy.kern.RBF(self.input_dim, variance=1.) + GPy.kern.Bias(self.input_dim)
+            kern = GPy.kern.RBF(self.input_dim, variance=1.) #+ GPy.kern.Bias(self.input_dim)
         else:
             kern = self.kernel
             self.kernel = None
