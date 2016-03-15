@@ -28,6 +28,7 @@ class BayesianOptimization(BO):
         batch_size = 1, num_cores = 1, **kwargs):
 
 
+        self.initial_iter = True
         self.verbosity              = verbosity
         self.model_update_interval  = model_update_interval
         self.kwargs = kwargs
@@ -56,7 +57,10 @@ class BayesianOptimization(BO):
         self.X = X
         self.Y = Y
         self.initial_design_type  = initial_design_type
-        self.initial_design_numdata = initial_design_numdata
+        if initial_design_numdata==None: 
+            self.initial_design_numdata = 5
+        else: 
+            self.initial_design_numdata = initial_design_numdata
         self._init_design_chooser()
 
         # --- CHOOSE the model type
@@ -104,32 +108,32 @@ class BayesianOptimization(BO):
             
         # --- Initilize GP model with MLE on the parameters
         if self.model_type == 'GP':
-            if self.kwargs.has_key('model_optimizer_type'): self.model_optimizer_type = kwargs['model_optimizer_type'] 
+            if self.kwargs.has_key('model_optimizer_type'): self.model_optimizer_type = self.kwargs['model_optimizer_type'] 
             else: self.model_optimizer_type = 'lbfgs' 
 
-            if self.kwargs.has_key('optimize_restarts'): self.optimize_restarts = kwargs['optimize_restarts']
+            if self.kwargs.has_key('optimize_restarts'): self.optimize_restarts = self.kwargs['optimize_restarts']
             else: self.optimize_restarts = 5
 
-            if self.kwargs.has_key('max_iters'): self.max_iters = kwargs['max_iters']
+            if self.kwargs.has_key('max_iters'): self.max_iters = self.kwargs['max_iters']
             else: self.max_iters = 1000 
 
             return GPModel(self.kernel, self.noise_var, self.exact_feval, self.normalize_Y, self.model_optimizer_type, self.max_iters, self.optimize_restarts, self.verbosity)
 
         # --- Initilize GP model with MCMC on the parameters
         elif self.model_type == 'GP_MCMC':
-            if self.kwargs.has_key('n_samples'): kwargs['n_samples']
+            if self.kwargs.has_key('n_samples'): self.kwargs['n_samples']
             else: self.n_samples = 10 
 
-            if self.kwargs.has_key('n_burnin'): kwargs['n_burnin']
+            if self.kwargs.has_key('n_burnin'): self.kwargs['n_burnin']
             else: self.n_burnin = 100
             
-            if self.kwargs.has_key('subsample_interval'): kwargs['subsample_interval']
+            if self.kwargs.has_key('subsample_interval'): self.kwargs['subsample_interval']
             else: self.subsample_interval =10
             
-            if self.kwargs.has_key('step_size'): kwargs['step_size']
+            if self.kwargs.has_key('step_size'): self.kwargs['step_size']
             else: self.step_size = 1e-1
             
-            if self.kwargs.has_key('leapfrog_steps'): kwargs['leapfrog_steps']
+            if self.kwargs.has_key('leapfrog_steps'): self.kwargs['leapfrog_steps']
             else: self.leapfrog_steps = 20
 
             return  GPModel_MCMC(self.kernel, self.noise_var, self.exact_feval, self.normalize_Y, self.n_samples, self.n_burnin, self.subsample_interval, self.step_size, self.leapfrog_steps, self.verbosity)
@@ -173,10 +177,6 @@ class BayesianOptimization(BO):
 
 
     def _init_design_chooser(self):
-        if self.initial_design_numdata==None: 
-            self.initial_design_numdata = 5
-        else: self.initial_design_numdata = initial_design_numdata
-
         # Case 1:
         if self.X is None:
             self.X = initial_design(self.initial_design_type, self.space, self.initial_design_numdata)

@@ -32,6 +32,7 @@ class BO(object):
         :param max_time: maximum exploration horizont in seconds.
         :param eps: minimum distance between two consecutive x's to keep running the model
         """
+        self.verbosity = verbosity
 
         # --- Setting up stop conditions
         self.eps = eps 
@@ -88,23 +89,28 @@ class BO(object):
         self._compute_results()
 
         # --- Plot convergence results and print report
-        self._print_convergence(verbosity)
+        self._print_convergence()
         if report_file != None:  self.save_report(report_file)
 
 
-    def _print_convergence(self,verbose):
+    def _print_convergence(self):
         # --- Print stopping reason
-        if verbose: 
-            print '*Optimization completed.'
-        if (self.num_acquisitions > self.max_iter):        
-            print '   -Maximum number of iterations reached.' 
-            return 1
-        if (self._distance_last_evaluations() < self.eps): 
-            print '   -Method converged.'
-            return 1
-        if (self.max_time < self.cum_time):               
-            print '   -Evaluation time reached.'
-            return 0
+        if self.verbosity: 
+            if (self.num_acquisitions == self.max_iter) and (not self.initial_iter):        
+                print '   Maximum number of iterations reached.' 
+                return 1
+            elif (self._distance_last_evaluations() < self.eps) and (not self.initial_iter): 
+                print '   Method converged.'
+                return 1
+            elif (self.max_time < self.cum_time) and not (self.initial_iter):               
+                print '   Evaluation time reached.'
+                return 0
+
+            if self.initial_iter:
+                print 'GPyOpt Bayesian Optimization class succesfuly initialized.'
+                self.initial_iter = False  
+
+
 
     def evaluate_objective(self):
         Y_new, cost_new = self.objective.evaluate(self.suggested_sample)

@@ -65,7 +65,7 @@ class ContAcqOptimizer(AcquOptimizer):
         self.bounds = self.space.get_bounds()
 
         # -- change free dimensions and remove bounds from fixed dimensions
-        for idx in self.fixed_dims: 
+        for idx in self.fixed_dims[::-1]: # need to reverse the order to start removing from the back, otherwise dimensions dont' maach
             self.free_dims.remove(idx)
             del self.bounds[idx]
 
