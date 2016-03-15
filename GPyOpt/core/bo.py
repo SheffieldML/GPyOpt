@@ -97,17 +97,17 @@ class BO(object):
         # --- Print stopping reason
         if self.verbosity: 
             if (self.num_acquisitions == self.max_iter) and (not self.initial_iter):        
-                print '   Maximum number of iterations reached.' 
+                print '   ** Maximum number of iterations reached **' 
                 return 1
             elif (self._distance_last_evaluations() < self.eps) and (not self.initial_iter): 
-                print '   Method converged.'
+                print '   ** Two equal location selected **'
                 return 1
             elif (self.max_time < self.cum_time) and not (self.initial_iter):               
-                print '   Evaluation time reached.'
+                print '   ** Evaluation time reached **'
                 return 0
 
             if self.initial_iter:
-                print 'GPyOpt Bayesian Optimization class succesfuly initialized.'
+                print '** GPyOpt Bayesian Optimization class initialized succesfuly **'
                 self.initial_iter = False  
 
 
