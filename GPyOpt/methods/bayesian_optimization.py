@@ -107,7 +107,7 @@ class BayesianOptimization(BO):
         else: self.noise_var = None
             
         # --- Initilize GP model with MLE on the parameters
-        if self.model_type == 'GP':
+        if self.model_type == 'GP' or self.model_type == 'sparseGP':
             if self.kwargs.has_key('model_optimizer_type'): self.model_optimizer_type = self.kwargs['model_optimizer_type'] 
             else: self.model_optimizer_type = 'lbfgs' 
 
@@ -115,9 +115,15 @@ class BayesianOptimization(BO):
             else: self.optimize_restarts = 5
 
             if self.kwargs.has_key('max_iters'): self.max_iters = self.kwargs['max_iters']
-            else: self.max_iters = 1000 
+            else: self.max_iters = 1000
 
-            return GPModel(self.kernel, self.noise_var, self.exact_feval, self.normalize_Y, self.model_optimizer_type, self.max_iters, self.optimize_restarts, self.verbosity)
+            if self.kwargs.has_key('num_inducing'): self.num_inducing = self.kwargs['num_inducing']
+            else: self.num_inducing = 10
+
+            if self.model_type == 'GP': self.sparse = False
+            if self.model_type == 'sparseGP': self.sparse = True
+
+            return GPModel(self.kernel, self.noise_var, self.exact_feval, self.normalize_Y, self.model_optimizer_type, self.max_iters, self.optimize_restarts, self.sparse, self.num_inducing, self.verbosity)
 
         # --- Initilize GP model with MCMC on the parameters
         elif self.model_type == 'GP_MCMC':

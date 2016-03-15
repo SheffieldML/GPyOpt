@@ -7,6 +7,7 @@
 # from .base import BOModel
 # import numpy as np
 # import GPy
+#import deepgp
 
 # #
 # # ------- TODO
@@ -38,7 +39,7 @@
 #         kern = [GPy.kern.Matern32(self.Ds, ARD=False), GPy.kern.Matern32(self.X.shape[1], ARD=False)]
 
 #         if self.model_type == 'deepgp_back_constraint':
-#             self.model = deepgp.DeepGP([self.Y.shape[1],self.Ds, self.X.shape[1]], self.Y, X=X, num_inducing=self.num_inducing, kernels=kern, MLP_dims=[[100,50],[]],repeatX=True)
+#             self.model = deepgp.DeepGP([self.Y.shape[1],seßlf.Ds, self.X.shape[1]], self.Y, X=X, num_inducing=self.num_inducing, kernels=kern, MLP_dims=[[100,50],[]],repeatX=True)
         
 #         elif self.model_type == 'deepgp':
 #             self.model = deepgp.DeepGP([self.Y.shape[1],self.Ds, self.X.shape[1]], self.Y, X=X, num_inducing=self.num_inducing, kernels=kern, back_constraint=False,repeatX=True)
@@ -50,6 +51,7 @@
 
 
 #     def updateModel(self, X_all, Y_all, X_new, Y_new):
+#			self._create_model()
 
 
 #     def predict(self, X):
@@ -70,4 +72,34 @@
 #         dmdx = dmdx[:,:,0]
 #         dsdx = dvdx / (2*np.sqrt(v))
 #         return m, np.sqrt(v), dmdx, dsdx
+
+
+#     def _init_deepgp(self):
+#         '''
+#         Initializes a deep Gaussian Process with one hidden layer over *f*.
+#         :param X: input observations.
+#         :param Y: output values.
+#         '''
+
+#         import socket
+#         self.useGPU = False
+#         if socket.gethostname()[0:4] == 'node':
+#             print 'Using GPU!'
+#             self.useGPU = True
+
+#         # --- kernel and dimension of the hidden layer
+#         self.Ds = 1
+#         kern = [GPy.kern.Matern32(self.Ds, ARD=False), GPy.kern.Matern32(self.X.shape[1], ARD=False)]
+
+#         if self.model_type == 'deepgp_back_constraint':
+#             self.model = deepgp.DeepGP([self.Y.shape[1],self.Ds, self.X.shape[1]], self.Y, X=self.X, num_inducing=self.num_inducing, kernels=kern, MLP_dims=[[100,50],[]],repeatX=True)
+        
+#         elif self.model_type == 'deepgp':
+#             self.model = deepgp.DeepGP([self.Y.shape[1],self.Ds, self.X.shape[1]], self.Y, X=self.X, num_inducing=self.num_inducing, kernels=kern, back_constraint=False,repeatX=True)
+
+#         if self.exact_feval == True:
+#             self.model.obslayer.Gaussian_noise.constrain_fixed(1e-6, warning=False) #to avoid numerical problems
+#         else:
+#             self.model.obslayer.Gaussian_noise.constrain_bounded(1e-6,1e6, warning=False) #to avoid numerical problems
+
     

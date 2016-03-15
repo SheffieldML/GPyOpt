@@ -10,7 +10,7 @@ class GPModel(BOModel):
 
     analytical_gradient_prediction = True
     
-    def __init__(self, kernel=None, noise_var=None, exact_feval=False, normalize_Y=True, optimizer='bfgs', max_iters=1000, optimize_restarts=5, verbose=False):
+    def __init__(self, kernel=None, noise_var=None, exact_feval=False, normalize_Y=True, optimizer='bfgs', max_iters=1000, optimize_restarts=5, sparse = False, num_inducing = 10,  verbose=False):
         self.kernel = kernel
         self.noise_var = noise_var
         self.exact_feval = exact_feval
@@ -19,6 +19,8 @@ class GPModel(BOModel):
         self.optimizer = optimizer
         self.max_iters = max_iters
         self.verbose = verbose
+        self.sparse = sparse
+        self.num_inducing = num_inducing
         self.model = None
         
     def _create_model(self, X, Y):
@@ -33,7 +35,12 @@ class GPModel(BOModel):
         
         # --- define model
         noise_var = Y.var()*0.01 if self.noise_var is None else self.noise_var
-        self.model = GPy.models.GPRegression(X, Y, kernel=kern, noise_var=noise_var)
+
+        if not self.sparse:
+            self.model = GPy.models.GPRegression(X, Y, kernel=kern, noise_var=noise_var)
+        else:
+            self.model = GPy.models.SparseGPRegression(X, Y, kernel=kern, num_inducing=self.num_inducing)
+
 
         # --- restrict variance if exact evaluations of the objective
         if self.exact_feval:
