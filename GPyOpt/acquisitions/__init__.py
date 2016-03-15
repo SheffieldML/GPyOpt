@@ -8,3 +8,4 @@ from .MPI import AcquisitionMPI
 from .MPI_mcmc import AcquisitionMPI_MCMC
 from .LCB import AcquisitionLCB
 from .LCB_mcmc import AcquisitionLCB_MCMC
+from .LP import AcquisitionLP

@@ -2,17 +2,23 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 from .base import AcquisitionBase
+from .LCB import AcquisitionLCB
+from .LCB_mcmc import AcquisitionLCB_MCMC
+import numpy as np
+from scipy.stats import norm
 
 class AcquisitionLP(AcquisitionBase):
     """
     Class for Local Penalization acquisition. Used for batches design.
     """
     def __init__(self, model, space, optimizer, acquisition, transform='none'):
-        super(AcquisitionMP, self).__init__(model, space, optimizer)
+        super(AcquisitionLP, self).__init__(model, space, optimizer)
         
         self.acq = acquisition
         self.transform=transform.lower()
-        if isinstance(acq, AcquisitionLCB) and self.transform=='none':
+        if isinstance(acquisition, AcquisitionLCB) and self.transform=='none':
+            self.transform='softplus'
+        if isinstance(acquisition, AcquisitionLCB_MCMC) and self.transform=='none':
             self.transform='softplus'
 
         self.X_batch = None
@@ -89,13 +95,15 @@ class AcquisitionLP(AcquisitionBase):
             scale = 1.
         
         if self.X_batch is None:
-            return scale*self.acq.d_acquisition_function(x)
+            _, grad_acq_x = self.acq.acquisition_function_withGradients(x) 
+            return scale*grad_acq_x
         else:
-            return scale*self.acq.d_acquisition_function(x) - self._d_hammer_function(x, self.X_batch, self.r_x0, self.s_x0)
+            _, grad_acq_x = self.acq.acquisition_function_withGradients(x) 
+            return scale*grad_acq_x  - self._d_hammer_function(x, self.X_batch, self.r_x0, self.s_x0)
 
     def acquisition_function_withGradients(self, x):
-        aqu_x      = self.acquisition_function(self, x)
-        aqu_x_grad = self.d_acquisition_function(self, x)
+        aqu_x      = self.acquisition_function(x)
+        aqu_x_grad = self.d_acquisition_function(x)
         return aqu_x, aqu_x_grad
 
 

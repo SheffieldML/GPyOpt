@@ -136,7 +136,7 @@ class GPModel_MCMC(BOModel):
         else: 
             self.model.set_XY(X_all, Y_all)
             
-        # update the model generating hmc samples  (?? need the first optimization?)
+        # update the model generating hmc samples
         self.model.optimize(max_iters = 200)
         self.model.param_array[:] = self.model.param_array * (1.+np.random.randn(self.model.param_array.size)*0.01)
         self.hmc = GPy.inference.mcmc.HMC(self.model, stepsize=self.step_size)

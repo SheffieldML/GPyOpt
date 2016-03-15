@@ -5,7 +5,7 @@ import GPy
 import deepgp
 import numpy as np
 import time
-from ..acquisitions import AcquisitionEI, AcquisitionMPI, AcquisitionLCB, AcquisitionEI_MCMC, AcquisitionMPI_MCMC, AcquisitionLCB_MCMC  
+from ..acquisitions import AcquisitionEI, AcquisitionMPI, AcquisitionLCB, AcquisitionEI_MCMC, AcquisitionMPI_MCMC, AcquisitionLCB_MCMC, AcquisitionLP  
 from ..core.bo import BO
 from ..core.task.space import Design_space, bounds_to_space
 from ..core.task.objective import SingleObjective
@@ -121,19 +121,19 @@ class BayesianOptimization(BO):
 
         # --- Initilize GP model with MCMC on the parameters
         elif self.model_type == 'GP_MCMC':
-            if self.kwargs.has_key('n_samples'): self.kwargs['n_samples']
+            if self.kwargs.has_key('n_samples'): self.n_samples = self.kwargs['n_samples']
             else: self.n_samples = 10 
 
-            if self.kwargs.has_key('n_burnin'): self.kwargs['n_burnin']
+            if self.kwargs.has_key('n_burnin'): self.n_burnin = self.kwargs['n_burnin']
             else: self.n_burnin = 100
             
-            if self.kwargs.has_key('subsample_interval'): self.kwargs['subsample_interval']
+            if self.kwargs.has_key('subsample_interval'): self.subsample_interval = self.kwargs['subsample_interval']
             else: self.subsample_interval =10
             
-            if self.kwargs.has_key('step_size'): self.kwargs['step_size']
+            if self.kwargs.has_key('step_size'): self.step_size  = self.kwargs['step_size']
             else: self.step_size = 1e-1
             
-            if self.kwargs.has_key('leapfrog_steps'): self.kwargs['leapfrog_steps']
+            if self.kwargs.has_key('leapfrog_steps'): self.leapfrog_steps = self.kwargs['leapfrog_steps']
             else: self.leapfrog_steps = 20
 
             return  GPModel_MCMC(self.kernel, self.noise_var, self.exact_feval, self.normalize_Y, self.n_samples, self.n_burnin, self.subsample_interval, self.step_size, self.leapfrog_steps, self.verbosity)
@@ -188,6 +188,12 @@ class BayesianOptimization(BO):
 
 
     def _evaluator_chooser(self):
+
+        if self.kwargs.has_key('acquisition_transformation'):
+            self.acquisition_transformation = self.kwargs['acquisition_transformation']
+        else:
+            self.acquisition_transformation = 'none'
+
         if self.batch_size == 1 or self.evaluator_type == 'sequential':
             return Sequential(self.acquisition)
 
@@ -198,7 +204,9 @@ class BayesianOptimization(BO):
             return Predictive(self.acquisition, self.batch_size,self.normalize_Y)
 
         elif self.evaluator_type == 'local_penalization':
-            return Predictive(self.acquisition, self.batch_size,self.normalize_Y)
+            if not isinstance(self.acquisition, AcquisitionLP):
+                self.acquisition = AcquisitionLP(self.model, self.space, self.acquisition_optimizer, self.acquisition, self.acquisition_transformation)
+            return LocalPenalization(self.acquisition, self.batch_size, self.normalize_Y)
 
 
 
