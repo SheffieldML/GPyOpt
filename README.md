@@ -4,7 +4,7 @@ GPyOpt
 Gaussian process optimization using [GPy](http://sheffieldml.github.io/GPy/). Performs global optimization with different acquisition functions. Among other functionalities, it is possible to use GPyOpt to optimize physical experiments (sequentially or in batches) and tune the parameters of Machine Learning algorithms. It is able to handle large data sets via sparse Gaussian process models. 
 
 * [GPyOpt homepage](http://sheffieldml.github.io/GPyOpt/)
-* [Tutorial Notebooks](http://nbviewer.ipython.org/github/SheffieldML/GPyOpt/blob/master/manual/index.ipynb)
+* [Tutorial Notebooks](http://nbviewer.jupyter.org/github/SheffieldML/GPyOpt/blob/master/manual/GPyOpt_reference_manual.ipynb)
 * [Users Mailing list](https://lists.shef.ac.uk/sympa/info/gpyopt-users)
 * [Online documentation](http://pythonhosted.org/GPyOpt)
 
