@@ -1,0 +1,27 @@
+{
+    "language"        : "PYTHON",
+    "main-file"       : "branin.py",
+    "experiment-name" : "simple-branin",
+    "likelihood"      : "gaussian",
+    "resources": {
+        "maximum-iterations" :  1,
+        "max-run-time": "NA"
+    },
+    "variables" : {
+        "y" : {
+            "type" : "FLOAT",
+            "size" : 1,
+            "min"  : -2,
+            "max"  : 5
+        },
+        "x" : {
+            "type" : "FLOAT",
+            "size" : 1,
+            "min"  : 0,
+            "max"  : 5
+        }
+    },
+    "output":{
+        "verbosity": true
+    }
+}
