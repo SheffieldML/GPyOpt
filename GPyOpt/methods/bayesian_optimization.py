@@ -13,7 +13,9 @@ from ..core.task.cost import CostModel
 from ..util.general import samples_multidimensional_uniform, reshape, evaluate_function
 from ..core.evaluators import Sequential, RandomBatch, Predictive, LocalPenalization
 from ..util.stats import initial_design
-from ..models.gpmodel import GPModel, GPModel_MCMC
+from ..models.gpmodel import GPModel, GPModel_MCMC 
+from ..models.rfmodel import RFModel
+from ..models.deepgpmodel import DeepGPModel
 from ..optimization.acquisition_optimizer import AcquisitionOptimizer
 
 
@@ -143,6 +145,13 @@ class BayesianOptimization(BO):
             else: self.leapfrog_steps = 20
 
             return  GPModel_MCMC(self.kernel, self.noise_var, self.exact_feval, self.normalize_Y, self.n_samples, self.n_burnin, self.subsample_interval, self.step_size, self.leapfrog_steps, self.verbosity)
+
+        elif self.model_type =='RF':
+            # TODO: add options via kwargs
+            return RFModel(verbose=self.verbosity,  normalize_Y=self.normalize_Y)
+
+        elif self.model_type =='deepGP':
+            return DeepGPModel()
 
 
 

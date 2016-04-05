@@ -115,6 +115,7 @@ class ContAcqOptimizer(AcquOptimizer):
             pred_fp = fp(self.samples)
             x0 =  self.samples[np.argmin(pred_fp)]
             if self.search:
+                if self.f_df == None: fp_dfp = None  # -- In case no gradients are available 
                 x_min, f_min = self.optimizer.optimize(x0, f =fp, df=None, f_df=fp_dfp)
                 return self._expand_vector(x_min), f_min
             else:
@@ -124,6 +125,7 @@ class ContAcqOptimizer(AcquOptimizer):
             f_min = np.Inf
             for i in self.samples.shape[0]:
                 if self.search:
+                    if self.f_df == None: fp_dfp = None # -- In case no gradients are available 
                     x1, f1 = self.optimizer.optimize(self.samples[i], f =fp, df=None, f_df=fp_dfp)
                 else:
                     x1, f1 = self.samples[i], fp(self.samples[i])
