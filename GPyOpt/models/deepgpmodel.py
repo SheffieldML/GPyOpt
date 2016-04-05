@@ -2,21 +2,17 @@
 # Copyright (c) 2015, the GPy Authors (see GPy AUTHORS.txt)
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
-## TODO
-
 from .base import BOModel
 import numpy as np
 import GPy
 import deepgp
 
-
 class DeepGPModel(BOModel):
 
     analytical_gradient_prediction = False
     
-
     def __init__(self, kernel=None, noise_var=None, exact_feval=False, normalize_Y=True, optimizer='bfgs', max_iters=1000, 
-    			optimize_restarts=5, num_inducing = 10, back_constraint=True, repeatX=True, Ds = 1, verbose=False):          
+    			optimize_restarts=5, num_inducing = 10, back_constraint=True, repeatX=True, verbose=False):          
 
         self.noise_var = noise_var
         self.exact_feval = exact_feval
@@ -29,8 +25,7 @@ class DeepGPModel(BOModel):
         self.repeatX =repeatX
         self.num_inducing = num_inducing
         self.kernel = kernel
-        self.Ds = Ds
-
+        self.Ds = 1
 
 
     def _create_model(self, X, Y):
@@ -57,7 +52,7 @@ class DeepGPModel(BOModel):
 
         # Type of deepGPs
         if self.back_constraint:
-            self.model = deepgp.DeepGP([self.Y.shape[1],self.Ds, self.X.shape[1]], Y=self.Y, X=self.X, num_inducing=self.num_inducing, kernels=self.kernel, MLP_dims=[[100,50],[]]) #, repeatX=self.repeatX)
+            self.model = deepgp.DeepGP([self.Y.shape[1],self.Ds, self.X.shape[1]], Y=self.Y, X=self.X, num_inducing=self.num_inducing, kernels=self.kernel, MLP_dims=[[100,50],[]])#, repeatX=self.repeatX)
         
         else:
             self.model = deepgp.DeepGP([self.Y.shape[1],self.Ds, self.X.shape[1]], Y=self.Y, X=self.X, num_inducing=self.num_inducing, kernels=self.kernel, back_constraint=False) #, repeatX=self.repeatX)
@@ -75,8 +70,8 @@ class DeepGPModel(BOModel):
 
 		self._create_model(X_all, Y_all)
 
-		# Optimization
-		# self.m_init = self.model.copy()
+		# TOD Optimization: we can still imrpve this part
+		self.m_init = self.model.copy()
 		# self.model.obslayer['Gaussian_noise.variance'].fix()
 		# self.model.layer_1['Gaussian_noise.variance'].fix()
 		# self.model.optimize(optimizer = self.optimizer, messages=self.verbose, max_iters=self.max_iters)
@@ -94,14 +89,9 @@ class DeepGPModel(BOModel):
 
     def get_fmin(self):
     	return self.model.predict(self.model.X)[0].min()
-    
+
+    ## TODO: no predictive gradients so far in the deepGP models    
     # def predict_withGradients(self, X):
-    #     if X.ndim==1: X = X[None,:]
-    #     m, v = self.model.predict(X)
-    #     v = np.clip(v, 1e-10, np.inf)
-    #     dmdx, dvdx = self.model.predictive_gradients(X)
-    #     dmdx = dmdx[:,:,0]
-    #     dsdx = dvdx / (2*np.sqrt(v))
-    #     return m, np.sqrt(v), dmdx, dsdx
+
 
     

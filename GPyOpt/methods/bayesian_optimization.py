@@ -16,6 +16,7 @@ from ..util.stats import initial_design
 from ..models.gpmodel import GPModel, GPModel_MCMC 
 from ..models.rfmodel import RFModel
 from ..models.deepgpmodel import DeepGPModel
+from ..models.warpedgpmodel import WarpedGPModel
 from ..optimization.acquisition_optimizer import AcquisitionOptimizer
 
 
@@ -152,6 +153,9 @@ class BayesianOptimization(BO):
 
         elif self.model_type =='deepGP':
             return DeepGPModel()
+
+        elif self.model_type =='warpedGP':
+            return WarpedGPModel()
 
 
 
