@@ -74,7 +74,7 @@ class BayesianOptimization(BO):
 
         # --- CHOOSE the acquisition optimizer_type
         self.acquisition_optimizer_type = acquisition_optimizer_type
-        self.acquisition_optimizer = AcquisitionOptimizer(self.space, self.acquisition_optimizer_type)  ## morre arguments may come here
+        self.acquisition_optimizer = AcquisitionOptimizer(self.space, self.acquisition_optimizer_type, current_X = self.X)  ## morre arguments may come here
 
         # --- CHOOSE acquistion function
         self.acquisition_type = acquisition_type
@@ -85,7 +85,7 @@ class BayesianOptimization(BO):
         self.evaluator = self._evaluator_chooser()
 
         # --- Create optimization space
-        super(BayesianOptimization ,self).__init__(	model                  = self.model, 
+        super(BayesianOptimization,self).__init__(	model                  = self.model, 
                 									space                  = self.space, 
                 									objective              = self.objective, 
                 									acquisition            = self.acquisition, 

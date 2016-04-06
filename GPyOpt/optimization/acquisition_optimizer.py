@@ -137,19 +137,41 @@ class ContAcqOptimizer(AcquOptimizer):
 
 class BanditAcqOptimizer(AcquOptimizer):
 
-    def __init__(self, space, **kwars):
+    def __init__(self, space, **kwargs):
         super(BanditAcqOptimizer, self).__init__(space)
         self.space = space
+        self.pulled_arms = kwargs['current_X']
 
     def optimize(self, f=None, df=None, f_df=None):
+
+        # --- Get all potential arms
         if self.space.has_types['discrete']:
             arms = self.space.get_discrete_grid()
         else:
-           arms = self.space.get_bandit()
+            arms = self.space.get_bandit()
 
-        pref_f = f(arms)
-        x_min = arms[np.argmin(pref_f)]
-        f_min = f(x_min)
+        if arms.shape[0] > self.pulled_arms.shape[0]:
+            # --- remove select best arm not yet sampled
+            pref_f = f(arms)
+            index = np.argsort(pref_f.flatten())
+
+            k=0
+            while arms[index[k],:].flatten() in self.pulled_arms:
+                k +=1 
+            x_min = arms[index[k],:]
+            f_min = f(x_min)
+
+            ## -- Update sampled arms, so we can later remove these arms
+            self.pulled_arms = np.vstack((self.pulled_arms, x_min))
+        else:
+            print 'All locations of the design space have been sampled.'
+            #break
+
+        # --- Previus approach: do not remove those oalready sampled
+        # pref_f = f(arms)
+        # x_min = arms[np.argmin(pref_f)]
+        # f_min = f(x_min)
+
         return np.atleast_2d(x_min), f_min
 
 
@@ -175,6 +197,22 @@ class MixedAcqOptimizer(AcquOptimizer):
         return np.atleast_2d(partial_x_min[np.argmin(partial_f_min)]), np.atleast_2d(min(partial_f_min))
 
 
+
+array1= np.random.randint(0,100,(100000,5))
+array2 = np.random.randint(0,100,(50,5))
+
+def Intersection(array1, array2):
+    Intersection = np.empty([ array1.shape[0]  , array2.shape[0] ])
+    for i in range(0, array1.shape[0]):
+        for j in range(0, array2.shape[0]):
+            Intersection[i,j] = len( set(array1[i,]).intersection(array2[j,]) )
+    return Intersection
+
+import time
+start = time.time()
+Intersection(array1,array2)
+end = time.time()
+print end - start
 
 
 
