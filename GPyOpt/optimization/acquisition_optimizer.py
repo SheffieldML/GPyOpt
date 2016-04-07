@@ -5,13 +5,13 @@ import numpy as np
 from ..core.task.space import Design_space
 
 
-def AcquisitionOptimizer(space, optimizer='lbfgs', **kwargs):
+def AcquisitionOptimizer(space, optimizer='lbfgs', current_X = None, **kwargs):
     
     if space.has_types['bandit'] and (space.has_types['continuous'] or space.has_types['discrete']):
         raise Exception('Not possible to combine bandits with other variable types.)')
 
     elif space.has_types['bandit']:
-        return BanditAcqOptimizer(space, **kwargs)
+        return BanditAcqOptimizer(space, current_X, **kwargs)
 
     elif space.has_types['continuous'] and not space.has_types['discrete']:
         return ContAcqOptimizer(space, optimizer=optimizer, **kwargs)
@@ -20,7 +20,7 @@ def AcquisitionOptimizer(space, optimizer='lbfgs', **kwargs):
         return MixedAcqOptimizer(space, optimizer=optimizer, **kwargs)
 
     elif not space.has_types['continuous'] and space.has_types['discrete']:
-        return BanditAcqOptimizer(space, **kwargs)
+        return BanditAcqOptimizer(space, current_X, **kwargs)
 
 
 class AcquOptimizer(object):
@@ -33,7 +33,7 @@ class AcquOptimizer(object):
 
 class ContAcqOptimizer(AcquOptimizer):
     
-    def __init__(self, space, optimizer='lbfgs', n_samples=1000, fast=True, random=True, search=True, **kwargs):
+    def __init__(self, space, optimizer='lbfgs', n_samples=5000, fast=True, random=True, search=True, **kwargs):
         super(ContAcqOptimizer, self).__init__(space)
         
         self.n_samples = n_samples
@@ -137,10 +137,10 @@ class ContAcqOptimizer(AcquOptimizer):
 
 class BanditAcqOptimizer(AcquOptimizer):
 
-    def __init__(self, space, **kwargs):
+    def __init__(self, space, current_X, **kwargs):
         super(BanditAcqOptimizer, self).__init__(space)
         self.space = space
-        self.pulled_arms = kwargs['current_X']
+        self.pulled_arms = current_X
 
     def optimize(self, f=None, df=None, f_df=None):
 
@@ -154,19 +154,20 @@ class BanditAcqOptimizer(AcquOptimizer):
             # --- remove select best arm not yet sampled
             pref_f = f(arms)
             index = np.argsort(pref_f.flatten())
-
             k=0
-            while arms[index[k],:].flatten() in self.pulled_arms:
+            while any((self.pulled_arms[:]==arms[index[k],:].flatten()).all(1)):
                 k +=1 
+                
             x_min = arms[index[k],:]
             f_min = f(x_min)
 
             ## -- Update sampled arms, so we can later remove these arms
-            self.pulled_arms = np.vstack((self.pulled_arms, x_min))
+            
         else:
             print 'All locations of the design space have been sampled.'
             #break
-
+        
+        self.pulled_arms = np.vstack((self.pulled_arms, x_min))
         # --- Previus approach: do not remove those oalready sampled
         # pref_f = f(arms)
         # x_min = arms[np.argmin(pref_f)]
