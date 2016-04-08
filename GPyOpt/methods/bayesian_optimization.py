@@ -109,7 +109,9 @@ class BayesianOptimization(BO):
         if self.kwargs.has_key('noise_var'): self.noise_var = kwargs['noise_var']
         else: self.noise_var = None
             
+        # --------    
         # --- Initilize GP model with MLE on the parameters
+        # --------
         if self.model_type == 'GP' or self.model_type == 'sparseGP':
             if self.kwargs.has_key('model_optimizer_type'): self.model_optimizer_type = self.kwargs['model_optimizer_type'] 
             else: self.model_optimizer_type = 'lbfgs' 
@@ -128,7 +130,9 @@ class BayesianOptimization(BO):
 
             return GPModel(self.kernel, self.noise_var, self.exact_feval, self.normalize_Y, self.model_optimizer_type, self.max_iters, self.optimize_restarts, self.sparse, self.num_inducing, self.verbosity)
 
+        # --------
         # --- Initilize GP model with MCMC on the parameters
+        # --------
         elif self.model_type == 'GP_MCMC':
             if self.kwargs.has_key('n_samples'): self.n_samples = self.kwargs['n_samples']
             else: self.n_samples = 10 
@@ -147,13 +151,45 @@ class BayesianOptimization(BO):
 
             return  GPModel_MCMC(self.kernel, self.noise_var, self.exact_feval, self.normalize_Y, self.n_samples, self.n_burnin, self.subsample_interval, self.step_size, self.leapfrog_steps, self.verbosity)
 
+        # --------
+        # --- Initilize RF: values taken from default in scikit-learn
+        # --------
         elif self.model_type =='RF':
             # TODO: add options via kwargs
             return RFModel(verbose=self.verbosity,  normalize_Y=self.normalize_Y)
 
+        # --------
+        # --- Initilize deepGP model
+        # --------
         elif self.model_type =='deepGP':
-            return DeepGPModel()
 
+            if self.kwargs.has_key('model_optimizer_type'): self.model_optimizer_type = self.kwargs['model_optimizer_type'] 
+            else: self.model_optimizer_type = 'lbfgs' 
+
+            if self.kwargs.has_key('optimize_restarts'): self.optimize_restarts  = self.kwargs['optimize_restarts'] 
+            else: self.optimize_restarts=5
+        
+            if self.kwargs.has_key('max_iters'): self.max_iters  = self.kwargs['max_iters'] 
+            else: self.max_iters=1000
+            
+            if self.kwargs.has_key('max_init_iters'): self.max_init_iters  = self.kwargs['max_init_iters']  
+            else: self.max_init_iters = 1000
+
+            if self.kwargs.has_key('back_constraint'): self.back_constraint  = self.kwargs['back_constraint']  
+            else: self.back_constraint=False 
+            
+            if self.kwargs.has_key('repeatX'): self.repeatX  = self.kwargs['repeatX']  
+            else: self.repeatX=False 
+            
+            if self.kwargs.has_key('num_inducing'): self.num_inducing  = self.kwargs['num_inducing']  
+            else: self.num_inducing = 8
+
+            return DeepGPModel(self.kernel, self.noise_var, self.exact_feval, self.normalize_Y, self.model_optimizer_type , self.max_iters, 
+                self.optimize_restarts,self.num_inducing, self.back_constraint, self.repeatX, self.verbosity, self.max_init_iters)
+
+        # --------
+        # --- Initilize warped GP model (paramenter so far taken by default)
+        # --------
         elif self.model_type =='warpedGP':
             return WarpedGPModel()
 

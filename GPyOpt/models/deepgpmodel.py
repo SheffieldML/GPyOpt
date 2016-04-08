@@ -70,10 +70,9 @@ class DeepGPModel(BOModel):
 
         # Do not use more inducing than data
         self.num_inducing = np.min((self.model_num_inducing, Y_all.shape[0]))
+        self._create_model(X_all, Y_all)  # we re-create the model because set_XY is not available.
 
-        self._create_model(X_all, Y_all)
-
-		# TOD Optimization: we can still imrpve this part
+		# Model optimization
         for i in range(len(self.model.layers)):
             if isinstance(self.model.layers[i].Y, NormalPosterior) or isinstance(self.model.layers[i].Y, VariationalPosterior):
                 cur_var = self.model.layers[i].Y.mean.var()
@@ -88,15 +87,8 @@ class DeepGPModel(BOModel):
         for i in range(len(self.model.layers)):
             self.model.layers[i].Gaussian_noise.variance.constrain_positive(warning=False)
 
-
-		# self.model.obslayer['Gaussian_noise.variance'].fix()
-		# self.model.layer_1['Gaussian_noise.variance'].fix()
-		# self.model.optimize(optimizer = self.optimizer, messages=self.verbose, max_iters=self.max_iters)
-		# self.model_init2 = self.modelcopy()
-		# self.model.obslayer['Gaussian_noise.variance'].constrain_positive()
-		# self.model.layer_1['Gaussian_noise.variance'].constrain_positive()
         self.model.optimize(optimizer = self.optimizer, messages=self.verbose, max_iters=self.max_iters)
-        deepgp.util.check_snr(self.model) 
+        #deepgp.util.check_snr(self.model) 
 
 
 
