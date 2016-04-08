@@ -199,21 +199,4 @@ class MixedAcqOptimizer(AcquOptimizer):
 
 
 
-array1= np.random.randint(0,100,(100000,5))
-array2 = np.random.randint(0,100,(50,5))
-
-def Intersection(array1, array2):
-    Intersection = np.empty([ array1.shape[0]  , array2.shape[0] ])
-    for i in range(0, array1.shape[0]):
-        for j in range(0, array2.shape[0]):
-            Intersection[i,j] = len( set(array1[i,]).intersection(array2[j,]) )
-    return Intersection
-
-import time
-start = time.time()
-Intersection(array1,array2)
-end = time.time()
-print end - start
-
-
 
