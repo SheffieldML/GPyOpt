@@ -14,7 +14,7 @@ class DeepGPModel(BOModel):
     analytical_gradient_prediction = False
     
     def __init__(self, kernel=None, noise_var=None, exact_feval=False, normalize_Y=True, optimizer='bfgs', max_iters=1000, 
-    			optimize_restarts=5, num_inducing = 10, back_constraint=True, repeatX=True, verbose=False, max_init_iters=100):          
+    			optimize_restarts=0, num_inducing = 15, back_constraint=False, repeatX=True, verbose=False, max_init_iters=200, Ds=1):          
 
         self.noise_var = noise_var
         self.exact_feval = exact_feval
@@ -28,7 +28,9 @@ class DeepGPModel(BOModel):
         self.repeatX =repeatX
         self.model_num_inducing = num_inducing
         self.model_kernel = kernel
-        self.Ds = 1
+        self.Ds = Ds
+        # How many points to collect before you unfix the noise variances in optimization
+        self.init_threshold = 3
 
 
     def _create_model(self, X, Y):
@@ -42,11 +44,15 @@ class DeepGPModel(BOModel):
         self.Y = Y
 
         self.useGPU = False
+        if self.repeatX:
+            Ds = self.Ds + X.shape[1]
+        else:
+            Ds = self.Ds
 
         # --- kernel and dimension of the hidden layer
         if self.model_kernel == None:
         	# self.kernel = [GPy.kern.Matern32(self.Ds, ARD=False), GPy.kern.Matern32(self.X.shape[1], ARD=False)]
-            self.kernel = [GPy.kern.RBF(self.Ds, ARD=True), GPy.kern.RBF(self.X.shape[1], ARD=True)]
+            self.kernel = [GPy.kern.RBF(Ds, ARD=True), GPy.kern.RBF(self.X.shape[1], ARD=True)]
         else:
         	self.kernel = [k.copy() for k in self.model_kernel]  # this need to be one kernel per layer
 
@@ -84,11 +90,12 @@ class DeepGPModel(BOModel):
 
         self.model.optimize(optimizer = self.optimizer, messages=self.verbose, max_iters=self.max_init_iters)
 
-        for i in range(len(self.model.layers)):
-            self.model.layers[i].Gaussian_noise.variance.constrain_positive(warning=False)
+        if Y_all.shape[0] > self.init_threshold:
+            for i in range(len(self.model.layers)):
+                self.model.layers[i].Gaussian_noise.variance.constrain_positive(warning=False)
 
         self.model.optimize(optimizer = self.optimizer, messages=self.verbose, max_iters=self.max_iters)
-        #deepgp.util.check_snr(self.model) 
+        deepgp.util.check_snr(self.model) 
 
 
 

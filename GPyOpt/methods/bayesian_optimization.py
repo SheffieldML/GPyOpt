@@ -167,7 +167,7 @@ class BayesianOptimization(BO):
             else: self.model_optimizer_type = 'lbfgs' 
 
             if self.kwargs.has_key('optimize_restarts'): self.optimize_restarts  = self.kwargs['optimize_restarts'] 
-            else: self.optimize_restarts=5
+            else: self.optimize_restarts=0
         
             if self.kwargs.has_key('max_iters'): self.max_iters  = self.kwargs['max_iters'] 
             else: self.max_iters=1000
@@ -179,13 +179,17 @@ class BayesianOptimization(BO):
             else: self.back_constraint=False 
             
             if self.kwargs.has_key('repeatX'): self.repeatX  = self.kwargs['repeatX']  
-            else: self.repeatX=False 
+            else: self.repeatX=True 
             
             if self.kwargs.has_key('num_inducing'): self.num_inducing  = self.kwargs['num_inducing']  
-            else: self.num_inducing = 8
+            else: self.num_inducing = 15
+
+            if self.kwargs.has_key('Ds'): self.Ds  = self.kwargs['Ds']  
+            else: self.Ds = 1
+
 
             return DeepGPModel(self.kernel, self.noise_var, self.exact_feval, self.normalize_Y, self.model_optimizer_type , self.max_iters, 
-                self.optimize_restarts,self.num_inducing, self.back_constraint, self.repeatX, self.verbosity, self.max_init_iters)
+                self.optimize_restarts,self.num_inducing, self.back_constraint, self.repeatX, self.verbosity, self.max_init_iters,self.Ds)
 
         # --------
         # --- Initilize warped GP model (paramenter so far taken by default)
