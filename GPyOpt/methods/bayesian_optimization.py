@@ -17,7 +17,7 @@ from ..models.gpmodel import GPModel, GPModel_MCMC
 from ..models.rfmodel import RFModel
 from ..models.warpedgpmodel import WarpedGPModel
 from ..optimization.acquisition_optimizer import AcquisitionOptimizer
-
+import GPyOpt
 
 import warnings
 warnings.filterwarnings("ignore")

@@ -60,6 +60,9 @@ class BO(object):
         self.cum_time  = 0
         self.num_acquisitions = 0
 
+        self.suggested_sample = self.X
+        self.Y_new = self.Y
+
         # --- Initialize time cost of the evaluations
         while (self.max_time > self.cum_time):
             # --- Update model
@@ -113,9 +116,9 @@ class BO(object):
 
 
     def evaluate_objective(self):
-        Y_new, cost_new = self.objective.evaluate(self.suggested_sample)
+        self.Y_new, cost_new = self.objective.evaluate(self.suggested_sample)
         self.cost.update_cost_model(self.suggested_sample, cost_new)
-        self.Y = np.vstack((self.Y,Y_new))
+        self.Y = np.vstack((self.Y,self.Y_new))
 
     def _compute_results(self):
         self.Y_best = best_value(self.Y)
@@ -134,9 +137,9 @@ class BO(object):
     def _update_model(self):
         if (self.num_acquisitions%self.model_update_interval)==0:
             if self.normalize_Y:
-                self.model.updateModel(self.X,(self.Y-self.Y.mean())/(self.Y.std()),None,None)
+                self.model.updateModel(self.X,(self.Y-self.Y.mean())/(self.Y.std()),self.suggested_sample,self.Y_new)
             else:
-                self.model.updateModel(self.X, self.Y,None,None)
+                self.model.updateModel(self.X, self.Y,self.suggested_sample,self.Y_new)
 
 
     def plot_acquisition(self,filename=None):
