@@ -76,6 +76,8 @@ class BayesianOptimization(BO):
                 self.model = kwargs['model']
                 self.model_type = 'User defined model used.'
                 print 'Using a model defined by the used.'
+            else:
+                self.model = self._model_chooser()
         else:
             self.model = self._model_chooser()
 
