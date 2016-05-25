@@ -5,7 +5,7 @@
 from .base import BOModel
 import numpy as np
 import GPy
-import deepgp
+#import deepgp
 
 class WarpedGPModel(BOModel):
 
