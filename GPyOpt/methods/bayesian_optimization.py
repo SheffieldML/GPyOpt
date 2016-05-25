@@ -111,11 +111,11 @@ class BayesianOptimization(BO):
     def _model_chooser(self):
         
         if self.kwargs.has_key('kernel'): 
-            self.kernel = kwargs['kernel']
+            self.kernel = self.kwargs['kernel']
         else: 
             self.kernel = None
 
-        if self.kwargs.has_key('noise_var'): self.noise_var = kwargs['noise_var']
+        if self.kwargs.has_key('noise_var'): self.noise_var = self.kwargs['noise_var']
         else: self.noise_var = None
             
         # --------    
