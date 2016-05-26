@@ -5,8 +5,19 @@ from .EI import AcquisitionEI
 
 class AcquisitionEI_MCMC(AcquisitionEI):
     """
-    Class for Expected improvement acquisition functions.
+    Integrated Expected improvement acquisition function
+
+    :param model: GPyOpt class of model
+    :param space: GPyOpt class of domain
+    :param optimizer: optimizer of the acquisition. Should be a GPyOpt optimizer
+    :param cost_withGradients: function
+    :param jitter: positive value to make the acquisition more explorative
+
+    .. Note:: allows to compute the Improvement per unit of cost
+
     """
+
+
     def __init__(self, model, space, optimizer=None, cost_withGradients=None, jitter=0.01):
         super(AcquisitionEI_MCMC, self).__init__(model, space, optimizer)
         
@@ -14,7 +25,7 @@ class AcquisitionEI_MCMC(AcquisitionEI):
 
     def acquisition_function(self,x):
         """
-        Expected Improvement
+        Integrated Expected Improvement
         """    
         means, stds = self.model.predict(x)
         fmin = self.model.get_fmin()
@@ -25,7 +36,7 @@ class AcquisitionEI_MCMC(AcquisitionEI):
 
     def acquisition_function_withGradients(self, x):
         """
-        Derivative of the Expected Improvement (has a very easy derivative!)
+        Integrated Expected Improvement and its derivative
         """
         means, stds, dmdxs, dsdxs = self.model.predict_withGradients(x)
         fmin = self.model.get_fmin()

@@ -7,10 +7,20 @@ from ..core.task.cost import constant_cost_withGradients
 
 class AcquisitionEI(AcquisitionBase):
     """
-    Class for Expected improvement acquisition functions.
+    Expected improvement acquisition function
+
+    :param model: GPyOpt class of model
+    :param space: GPyOpt class of domain
+    :param optimizer: optimizer of the acquisition. Should be a GPyOpt optimizer
+    :param cost_withGradients: function
+    :param jitter: positive value to make the acquisition more explorative
+
+    .. Note:: allows to compute the Improvement per unit of cost
+
     """
+
     def __init__(self, model, space, optimizer=None, cost_withGradients=None, jitter=0.01):
-        optimizer = optimizer
+        self.optimizer = optimizer
         super(AcquisitionEI, self).__init__(model, space, optimizer)
         self.jitter = jitter
 
@@ -20,6 +30,9 @@ class AcquisitionEI(AcquisitionBase):
             self.cost_withGradients = cost_withGradients 
 
     def _compute_acq(self, m, s, fmin, x):
+        """
+        Computes the Expected Improvement per unit of cost
+        """
         phi, Phi, _ = get_quantiles(self.jitter, fmin, m, s)    
         f_acqu = (fmin - m + self.jitter) * Phi + s * phi
         cost_x, _ = self.cost_withGradients(x)
@@ -34,6 +47,9 @@ class AcquisitionEI(AcquisitionBase):
         return self._compute_acq(m, s, fmin, x)
     
     def _compute_acq_withGradients(self, m, s, fmin, dmdx, dsdx, x):
+        """
+        Computes the Expected Improvement and its derivative (has a very easy derivative!)
+        """
         phi, Phi, _ = get_quantiles(self.jitter, fmin, m, s)    
         f_acqu = (fmin - m + self.jitter) * Phi + s * phi        
         df_acqu = dsdx * phi - Phi * dmdx
@@ -42,10 +58,9 @@ class AcquisitionEI(AcquisitionBase):
         df_acq_cost = (df_acqu*cost_x - f_acqu*cost_grad_x)/(cost_x**2)
         return -f_acq_cost*self.space.indicator_constrains(x), -df_acq_cost*self.space.indicator_constrains(x)
 
-
     def acquisition_function_withGradients(self, x):
         """
-        Derivative of the Expected Improvement (has a very easy derivative!)
+        Expected Improvement and its derivative
         """
         m, s, dmdx, dsdx = self.model.predict_withGradients(x)
         fmin = self.model.get_fmin()

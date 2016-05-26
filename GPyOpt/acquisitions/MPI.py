@@ -7,10 +7,19 @@ from ..core.task.cost import constant_cost_withGradients
 
 class AcquisitionMPI(AcquisitionBase):
     """
-    Class for Maximum probability of improvement acquisition functions.
+    Maximum probability of improvement acquisition function
+
+    :param model: GPyOpt class of model
+    :param space: GPyOpt class of domain
+    :param optimizer: optimizer of the acquisition. Should be a GPyOpt optimizer
+    :param cost_withGradients: function
+    :param jitter: positive value to make the acquisition more explorative
+
+    .. Note:: allows to compute the Improvement per unit of cost
+
     """
     def __init__(self, model, space, optimizer=None, cost_withGradients=None, jitter=0.01):
-        optimizer = optimizer
+        self.optimizer = optimizer
         super(AcquisitionMPI, self).__init__(model, space, optimizer)
         self.jitter = jitter
 
@@ -21,17 +30,26 @@ class AcquisitionMPI(AcquisitionBase):
 
     
     def _compute_acq(self, m, s, fmin, x):
+        """
+        Computes the Maximum Probability of Improvement per unit of cost
+        """
         _, Phi,_ = get_quantiles(self.jitter, fmin, m, s)    
         f_acqu =  Phi
         cost_x, _ = self.cost_withGradients(x)
         return -(f_acqu*self.space.indicator_constrains(x))/cost_x
 
     def acquisition_function(self,x):
+        """
+        Maximum Probability of Improvement
+        """
         m, s = self.model.predict(x)
         fmin = self.model.get_fmin()   
         return self._compute_acq(m, s, fmin, x)  # note: returns negative value for posterior minimization 
 
     def _compute_acq_withGradients(self, m, s, fmin, dmdx, dsdx, x):
+        """
+        Computes the Maximum Probability of Improvement and its derivative (has a very easy derivative!)
+        """
         phi, Phi, u = get_quantiles(self.jitter, fmin, m, s)    
         f_acqu =  Phi        
         df_acqu = -(phi/s)* (dmdx + dsdx * u)
@@ -42,7 +60,7 @@ class AcquisitionMPI(AcquisitionBase):
 
     def acquisition_function_withGradients(self, x):
         """
-        Derivative of Maximum Probability of Improvement
+        Maximum Probability of Improvement and its derivative
         """
         m, s, dmdx, dsdx = self.model.predict_withGradients(x)
         fmin = self.model.get_fmin()

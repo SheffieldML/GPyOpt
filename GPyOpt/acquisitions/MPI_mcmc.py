@@ -5,14 +5,28 @@ from .MPI import AcquisitionMPI
 
 class AcquisitionMPI_MCMC(AcquisitionMPI):
     """
-    Class for MPI acquisition functions.
+    Integrated Maximum Probability of Improvement acquisition function
+
+    :param model: GPyOpt class of model
+    :param space: GPyOpt class of domain
+    :param optimizer: optimizer of the acquisition. Should be a GPyOpt optimizer
+    :param cost_withGradients: function
+    :param jitter: positive value to make the acquisition more explorative
+
+    .. Note:: allows to compute the Improvement per unit of cost
+
     """
+
+
     def __init__(self, model, space, optimizer=None, cost_withGradients=None, jitter=0.01):
         super(AcquisitionMPI_MCMC, self).__init__(model, space, optimizer)
         
         assert self.model.MCMC_sampler, 'Samples from the hyperparameters are needed to compute the integrated MPI'
 
     def acquisition_function(self,x):
+        """
+        Integrated Maximum Probability of Improvement
+        """
         means, stds = self.model.predict(x)
         fmin = self.model.get_fmin()
         f_acqu = 0
@@ -21,6 +35,9 @@ class AcquisitionMPI_MCMC(AcquisitionMPI):
         return f_acqu/(len(means))
 
     def acquisition_function_withGradients(self, x):
+        """
+        Integrated Maximum Probability of Improvement and its derivative
+        """
         means, stds, dmdxs, dsdxs = self.model.predict_withGradients(x)
         fmin = self.model.get_fmin()
         f_acqu = None

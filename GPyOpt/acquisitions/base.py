@@ -5,7 +5,10 @@ class AcquisitionBase(object):
     """
     Base class for acquisition functions in Bayesian Optimization
     
-    TODO for models that do not have gradients
+    :param model: GPyOpt class of model
+    :param space: GPyOpt class of domain
+    :param optimizer: optimizer of the acquisition. Should be a GPyOpt optimizer
+
     """
 
     def __init__(self, model, space, optimizer):
@@ -21,6 +24,9 @@ class AcquisitionBase(object):
         pass
     
     def optimize(self):
+        """
+        Optimizes the acquisition function (uses a flag from the model to use gradients or not).
+        """
         if not self.analytical_gradient_acq:
             out = self.optimizer.optimize(f=self.acquisition_function)[0]
         else:

@@ -5,7 +5,16 @@ from .LCB import AcquisitionLCB
 
 class AcquisitionLCB_MCMC(AcquisitionLCB):
     """
-    Class for Expected improvement acquisition functions.
+    Integrated GP-Lower Confidence Bound acquisition function
+
+    :param model: GPyOpt class of model
+    :param space: GPyOpt class of domain
+    :param optimizer: optimizer of the acquisition. Should be a GPyOpt optimizer
+    :param cost_withGradients: function
+    :param exploration_weight: positive parameter to comtrol exploration/explotitation
+
+    .. Note:: allows to compute the Improvement per unit of cost
+
     """
     def __init__(self, model, space, optimizer=None, cost_withGradients=None, exploration_weight=2):
         super(AcquisitionLCB_MCMC, self).__init__(model, space, optimizer)
@@ -14,8 +23,8 @@ class AcquisitionLCB_MCMC(AcquisitionLCB):
 
     def acquisition_function(self,x):
         """
-        Expected Improvement
-        """    
+        Integrated GP-Lower Confidence Bound
+        """ 
         means, stds = self.model.predict(x)
         fmin = self.model.get_fmin()
         f_acqu = 0
@@ -25,7 +34,7 @@ class AcquisitionLCB_MCMC(AcquisitionLCB):
 
     def acquisition_function_withGradients(self, x):
         """
-        Derivative of the Expected Improvement (has a very easy derivative!)
+        Integrated GP-Lower Confidence Bound and its derivative
         """
         means, stds, dmdxs, dsdxs = self.model.predict_withGradients(x)
         fmin = self.model.get_fmin()
