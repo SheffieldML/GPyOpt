@@ -12,7 +12,7 @@ Gaussian process optimization using [GPy](http://sheffieldml.github.io/GPy/). Pe
 
     @Misc{gpy2014,
       author =   {The GPyOpt authors},
-      title =    {{GPy}: A Bayesian Optimization framework in python},
+      title =    {{GPyOpt}: A Bayesian Optimization framework in python},
       howpublished = {\url{http://github.com/SheffieldML/GPyOpt}},
       year = {2015}
     }
