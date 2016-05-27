@@ -1,3 +1,6 @@
+# Copyright (c) 2016, the GPyOpt Authors
+# Licensed under the BSD 3-clause license (see LICENSE.txt)
+
 import numpy as np
 import itertools
 
@@ -37,6 +40,9 @@ class Design_space(object):
 
     If no constrains are provided the hypercube determined by the bounds constrains are used.
 
+    param space: list of dictionaries as indicated above.
+    param constrains: list of dictionaries as indicated above (default, none)
+
     """
     
     supported_types = ['continuous', 'discrete', 'bandit']
@@ -50,6 +56,9 @@ class Design_space(object):
             print 'Conbinations of bandits with other variables are not supported.'
         
     def _complete_attributes(self, space):
+        """
+        Creates an internal dictionary where all the missing elements are completed.
+        """   
         from copy import deepcopy
         self.space = []
         self.dimensionality = 0
@@ -73,9 +82,16 @@ class Design_space(object):
             self.has_types[d_out['type']] = True
 
     def has_constrains(self):
+        """
+        Checks if the problem has constrains.
+        """
         return self.constrains != None
 
     def _expand_attributes(self, space):
+        """
+        Creates and internal dictionary where the atributes with dimensionality larger than one are expanded. This
+        dictionary is the one that is used internaly to do the optimization.
+        """
         space_expanded = []
         for d in space:
             d_new = []
@@ -88,6 +104,9 @@ class Design_space(object):
         return space_expanded
 
     def get_continuous_bounds(self):
+        """
+        Extracts the bounds of the contunuous variables.
+        """
         bounds = []
         for d in self.space:
             if d['type']=='continuous':
@@ -95,6 +114,9 @@ class Design_space(object):
         return bounds
     
     def get_bounds(self):
+        """
+        Extracts the bounds of all the inputs of the domain.
+        """
         bounds = []
         if self.has_types['bandit']:
             bandit = self.get_bandit()
@@ -110,7 +132,7 @@ class Design_space(object):
 
     def get_subspace(self,dims):
         '''
-        Extracts a the subspace according to a list of dimension
+        Extracts a the subspace according to a list of dimension.
         '''
         subspace = []
         for i in dims:
@@ -118,6 +140,9 @@ class Design_space(object):
         return subspace
 
     def get_continuous_space(self):
+        """
+        Extracts the list of dictionaries with continupus components
+        """
         space = []
         for d in self.space:
             if d['type']=='continuous':
@@ -125,6 +150,10 @@ class Design_space(object):
         return space
 
     def get_discrete_grid(self):
+        """
+        Computes a numpy array with the grid of points that resutls after crossing the posible outputs of the discrete 
+        variables
+        """
         sets_grid = []
         for d in self.space:
             if d['type']=='discrete':
@@ -132,6 +161,9 @@ class Design_space(object):
         return np.array(list(itertools.product(*sets_grid)))
 
     def get_bandit(self):
+        """
+        Extracts the arms of the badit if any.
+        """
         arms_bandit = []
         for d in self.space:
             if d['type']=='bandit':
@@ -139,6 +171,9 @@ class Design_space(object):
         return np.asarray(arms_bandit)
 
     def get_continuous_dims(self):
+        """
+        Returns the dimension of the continuous components of the domain.
+        """
         continuous_dims = []
         for i in range(self.dimensionality):
             if self.space_expanded[i]['type']=='continuous':
@@ -146,6 +181,9 @@ class Design_space(object):
         return continuous_dims
 
     def get_discrete_dims(self):
+        """
+        Returns the dimension of the discrete components of the domain.
+        """
         discrete_dims = []
         for i in range(self.dimensionality):
             if self.space_expanded[i]['type']=='discrete':
@@ -153,6 +191,9 @@ class Design_space(object):
         return discrete_dims
 
     def indicator_constrains(self,x):
+        """
+        Returs zero if x is within the contrains and zero otherwise.
+        """
         x = np.atleast_2d(x)
         I_x = np.ones((x.shape[0],1))
         if self.constrains != None:
@@ -163,6 +204,9 @@ class Design_space(object):
         return I_x
 
     def input_dim(self):
+        """
+        Extracts the input dimension of the domain.
+        """
         n_cont = len(self.get_continuous_dims())
         n_disc = len(self.get_discrete_dims())
         return n_cont + n_disc
