@@ -11,6 +11,22 @@ except:
     pass
 
 class BO(object):
+    """
+    Runner of Bayesian optimization loop. This class wraps the optimization loop around the different handlers.
+
+    :param model: GPyOpt model class.
+    :param space: GPyOpt space class.
+    :param objective: GPyOpt objective class.
+    :param acquisition: GPyOpt acquisition class.
+    :param evaluator: GPyOpt evaluator class.
+    :param X_init: 2d numpy array containing the initial inputs (one per row) of the model.
+    :param Y_init: 2d numpy array containing the initial outputs (one per row) of the model.
+    :param cost: GPyOpt cost class (defaut, none).
+    :param normalize_Y: wheter to normalize the outputs before performing any optimization (default, True).
+    :param model_update_interval: interval of collected observations after which the model is updated (default, 1).
+    """
+
+
     def __init__(self, model, space, objective, acquisition, evaluator, X_init, Y_init=None, cost = None, normalize_Y = True, model_update_interval = 1):
         self.model = model
         self.space = space
@@ -30,7 +46,9 @@ class BO(object):
 
         :param max_iter: exploration horizon, or number of acquisitions. If nothing is provided optimizes the current acquisition.  
         :param max_time: maximum exploration horizont in seconds.
-        :param eps: minimum distance between two consecutive x's to keep running the model
+        :param eps: minimum distance between two consecutive x's to keep running the model.
+        :param vervosity: flag to print the optimization results after each iteration (default, True).
+        :param report_file: filename of the file where the results of the optimization are saved (default, None).
         """
         self.verbosity = verbosity
 
@@ -97,6 +115,9 @@ class BO(object):
 
 
     def _print_convergence(self):
+        """
+        Prints the reason why the optimization stoped.
+        """
         # --- Print stopping reason
         if self.verbosity: 
             if (self.num_acquisitions == self.max_iter) and (not self.initial_iter):        
@@ -116,25 +137,39 @@ class BO(object):
 
 
     def evaluate_objective(self):
+        """
+        Evaluates the objective
+        """
         self.Y_new, cost_new = self.objective.evaluate(self.suggested_sample)
         self.cost.update_cost_model(self.suggested_sample, cost_new)
         self.Y = np.vstack((self.Y,self.Y_new))
 
     def _compute_results(self):
+        """
+        Computes the optimum and its value.
+        """
         self.Y_best = best_value(self.Y)
         self.x_opt = self.X[np.argmin(self.Y),:]
         self.fx_opt = min(self.Y)
 
 
     def _distance_last_evaluations(self):
+        """
+        Computes the distance between the last two evaluations.
+        """
         return np.sqrt(sum((self.X[self.X.shape[0]-1,:]-self.X[self.X.shape[0]-2,:])**2))  
 
 
     def _compute_next_evaluations(self):
-        return self.evaluator.compute_batch() # in the sequential case this simpy optimzes the acquisition 
-
+        """
+        Computes the location of the new evalaution (optimizes the acquisition in the standard case). 
+        """
+        return self.evaluator.compute_batch() 
         
     def _update_model(self):
+        """
+        Updates the model.
+        """
         if (self.num_acquisitions%self.model_update_interval)==0:
             if self.normalize_Y:
                 self.model.updateModel(self.X,(self.Y-self.Y.mean())/(self.Y.std()),self.suggested_sample,self.Y_new)
@@ -161,10 +196,9 @@ class BO(object):
 
     def plot_convergence(self,filename=None):
         """
-        Makes three plots to evaluate the convergence of the model
+        Makes twp plots to evaluate the convergence of the model:
             plot 1: Iterations vs. distance between consecutive selected x's
             plot 2: Iterations vs. the mean of the current model in the selected sample.
-            plot 3: Iterations vs. the variance of the current model in the selected sample.
         :param filename: name of the file where the plot is saved
         """
         return plot_convergence(self.X,self.Y_best,filename)
@@ -173,14 +207,12 @@ class BO(object):
         return self.X.copy(), self.Y.copy()
 
     def save_report(self, report_file= 'GPyOpt-results.txt'):
-
-        ##
-        ## TODO
-        ##
         """
-        Save a report with the results of the optimization. A file is produced every 
+        Saves a report with the main resutls of the optimization.
+ 
         :param report_file: name of the file in which the results of the optimization are saved.
         """
+
         with open(report_file,'w') as file:
             file.write('---------------------------------' + ' Results file ' + '--------------------------------------\n')
             file.write('GPyOpt Version 1.0.0 \n')

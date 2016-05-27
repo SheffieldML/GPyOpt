@@ -12,7 +12,7 @@ class  CostModel(object):
     param cost_withGradients: function that returns the cost of evaluating the function and its gradient. By default
     no cost is used. Options are:
         - cost_withGradients is some pre-defined cost fucntion. Should return numpy array as outputs.
-        - cost_withGradients = 'evaluation time'.
+        - cost_withGradients = 'evaluation_time'.
 
     .. Note:: if cost_withGradients = 'evaluation time' the evaluation time of the function is used to model a GP whose
     mean is used as cost.

@@ -2,7 +2,6 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 import GPy
-#import deepgp
 import numpy as np
 import time
 from ..acquisitions import AcquisitionEI, AcquisitionMPI, AcquisitionLCB, AcquisitionEI_MCMC, AcquisitionMPI_MCMC, AcquisitionLCB_MCMC, AcquisitionLP  
@@ -23,12 +22,56 @@ import warnings
 warnings.filterwarnings("ignore")
 
 class BayesianOptimization(BO):
+    """
+    Main class to initialize a Bayesian Optimization method.
+    :param f: function to optimize. It should take 2-dimentional numpy arrays as input and return 2-dimentional outputs (one evaluation per row).
+    :param domain: list of dictionies containin the description of the inputs variables (See GPyOpt.core.space.Design_space class for details).
+    :param constrains: list of dicctionies containin the description of the problem constrains (See GPyOpt.core.space.Design_space class for details).
+    :cost_withGradients: cost function of the objective. The input can be:
+        - a fucntion that returns the cost and the derivatives and any set of points in the domain.
+        - 'evaluation_time': a Gaussian process (mean) is used to handle the evaluation cost.
+    :model_type: type of model to use as surrogate:
+        - 'GP', standad Gaussian process.
+        - 'GP_MCMC',  Gaussian process with priors in the hyperparameters.
+        - 'sparseGP', sparse Gaussian process.
+        - 'warperdGP', warped Gaussian process.
+        - 'RF', random forrest (scikit-learn).    
+    :param X: 2d numpy array containing the initial inputs (one per row) of the model.
+    :param Y: 2d numpy array containing the initial outputs (one per row) of the model.
+    :initial_design_numdata: number of initial points that are collected jointly before start running the optimization.
+    :initial_design_type: type of initial design:
+        - 'random', to collect points in random locations.
+        - 'latin', to collect points in a latin hypercube (discrete variables are sampled randomly.)
+    :acquisition_type: type of acquisition function to use.
+        - 'EI', expected improvement.
+        - 'EI_MCMC', integrated expected improvement (requieres GP_MCMC model).
+        - 'MPI', maximum probability of improvement.
+        - 'MPI_MCMC', maximum probability of improvement (requieres GP_MCMC model).
+        - 'LCB', GP-Lower confidence bound.
+        - 'LCB_MCMC', integrated GP-Lower confidence bound (requieres GP_MCMC model).
+    :param normalize_Y: wheter to normalize the outputs before performing any optimization (default, True).
+    :exact_feval: whether the outputs are exact (default, False).
+    :acquisition_optimizer_type: type of acquisition function to use.
+    :param model_update_interval: interval of collected observations after which the model is updated (default, 1). 
+    :evaluator_type: determines the way the objective is evaluated (all methods are equivalent if the batch size is one)
+        - 'sequential', sequential evaluations.
+        - 'predictive', syncronous batch that uses a parallel model to phantasize new outputs.
+        - 'random': syncronous batch that selects the firt element as in a sequential policy and the rest randomly.
+        - 'local_penalization': batch method proposed in (Gonzalez et al. 2016). 
+    :batch_size: size of the batch in which the objective is evaluted (default, 1).
+    :num_cores: number of cores used to evaluate the objective (default, 1).
+    :verbosity: prints the models and other options during the optimization.
+    :**kwargs: extra parameters. Can be used to tune the current optimization setup or to use depreciated options in this package release.
+
+
+    .. Note:: parameters used in previous versions of GPyOpt can be passed through the kwargs. This means that such parameters should be passed at the end. 
+    """
+
 
     def __init__(self, f, domain = None, constrains = None, cost_withGradients = None, model_type = 'GP', X = None, Y = None, 
     	initial_design_numdata = None, initial_design_type='random', acquisition_type ='EI', normalize_Y = True, 
         exact_feval = False, acquisition_optimizer_type = 'lbfgs', model_update_interval=1, verbosity=0, evaluator_type = 'sequential', 
         batch_size = 1, num_cores = 1, **kwargs):
-
 
         self.initial_iter = True
         self.verbosity              = verbosity
@@ -109,6 +152,9 @@ class BayesianOptimization(BO):
         self.run_optimization(0)
 
     def _model_chooser(self):
+        """
+        Model chooser from the available options. Extra parameters can be passed via **kwargs.
+        """
         
         if self.kwargs.has_key('kernel'): 
             self.kernel = self.kwargs['kernel']
@@ -173,6 +219,9 @@ class BayesianOptimization(BO):
 
 
     def _acquisition_chooser(self):
+        """
+        Acquisition chooser from the available options. Extra parameters can be passed via **kwargs.
+        """
 
         # --- Extract relevant parameters from the ***kwargs
         if self.kwargs.has_key('acquisition_jitter'):
@@ -209,6 +258,9 @@ class BayesianOptimization(BO):
 
 
     def _init_design_chooser(self):
+        """
+        Initializes the choice of X and Y based on the selected initial design and number of points selected.
+        """
         # Case 1:
         if self.X is None:
             self.X = initial_design(self.initial_design_type, self.space, self.initial_design_numdata)
@@ -220,6 +272,9 @@ class BayesianOptimization(BO):
 
 
     def _evaluator_chooser(self):
+        """
+        Acquisition chooser from the available options. Guide the optimization through sequential or parallel evalutions of the objective.
+        """
 
         if self.kwargs.has_key('acquisition_transformation'):
             self.acquisition_transformation = self.kwargs['acquisition_transformation']

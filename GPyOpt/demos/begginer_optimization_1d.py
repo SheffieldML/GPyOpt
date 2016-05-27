@@ -1,7 +1,5 @@
-# Copyright (c) 2015, Javier Gonzalez
-# Copyright (c) 2015, the GPy Authors (see GPy AUTHORS.txt)
+# Copyright (c) 2016, the GPyOpt Authors
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
-
 
 """
 This is a simple demo to demonstrate the use of Bayesian optimization with GPyOpt with some simple options. Run the example by writing:
@@ -47,7 +45,7 @@ def begginer_optimization_1d(plots=True):
     print '-----'
     
     # Run the optimization                                                  
-    myBopt.run_optimization(max_time=max_time, eps=eps)                              # stop criterion
+    myBopt.run_optimization(max_time=max_time, eps=eps)   
                             
 
     # --- Plots

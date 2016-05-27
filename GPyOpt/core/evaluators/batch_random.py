@@ -1,3 +1,6 @@
+# Copyright (c) 2016, the GPyOpt Authors
+# Licensed under the BSD 3-clause license (see LICENSE.txt)
+
 from .base import EvaluatorBase
 from ...util.stats import initial_design
 import numpy as np
