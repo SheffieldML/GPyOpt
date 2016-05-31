@@ -1,11 +1,9 @@
-# Copyright (c) 2015, Javier Gonzalez
-# Copyright (c) 2015, the GPy Authors (see GPy AUTHORS.txt)
+# Copyright (c) 2016, the GPyOpt Authors
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 from .base import BOModel
 import numpy as np
 import GPy
-#import deepgp
 
 class WarpedGPModel(BOModel):
 

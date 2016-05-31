@@ -8,15 +8,23 @@ import numpy as np
 
 class LocalPenalization(EvaluatorBase):
     """
-    Class for Expected improvement acquisition functions.
+    Class for the batch method on 'Batch Bayesian optimization via local penalization' (Gonzalez et al., 2016). 
+
+    :param acquisition: acquisition function to be used to compute the batch.
+    :param batch size: the number of elements in the batch.
+    :normalize_Y: wehter to normalize the outputs.
+
     """
-    def __init__(self, acquisition, batch_size,normalize_Y):
+    def __init__(self, acquisition, batch_size, normalize_Y):
         super(LocalPenalization, self).__init__(acquisition, batch_size)
         self.acquisition = acquisition
         self.batch_size = batch_size
         self.normalize_Y = normalize_Y
 
     def compute_batch(self):
+        """
+        Computes the elements of the batch sequentially by penalizing the acquisition.
+        """
         from ...acquisitions import AcquisitionLP
         assert isinstance(self.acquisition, AcquisitionLP)
         
@@ -45,9 +53,9 @@ class LocalPenalization(EvaluatorBase):
 
 
 def estimate_L(model,bounds,storehistory=True):
-    '''
+    """
     Estimate the Lipschitz constant of f by taking maximizing the norm of the expectation of the gradient of *f*.
-    '''
+    """
     def df(x,model,x0):
         x = np.atleast_2d(x)
         dmdx,_ = model.predictive_gradients(x)

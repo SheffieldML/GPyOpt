@@ -1,5 +1,11 @@
+# Copyright (c) 2016, the GPyOpt Authors
+# Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 def select_optimizer(name):
+    """
+    Chooser between different optimizers
+    """
+
     if name == 'lbfgs':
         return Opt_lbfgs
     elif name == 'DIRECT':
@@ -10,11 +16,22 @@ def select_optimizer(name):
         raise Exception('Invalid optimizer selected.')
 
 class Optimizer(object):
+    """
+    Class for a general acquisition optimizer.
+
+    :param space: desing space GPyOpt class.
+    """
     
     def __init__(self, space):
         self.space = space
         
     def optimize(self, x0, f=None, df=None, f_df=None):
+        """
+        :param x0: initial point for a local optimizer.
+        :param f: function to optimize.
+        :param df: gradient of the function to optimize.
+        :param f_df: returns both the function to optimize and its gradient.
+        """
         return None, None
     
 
@@ -28,6 +45,12 @@ class Opt_lbfgs(Optimizer):
         assert self.space.has_types['continuous']
         
     def optimize(self, x0, f=None, df=None, f_df=None):
+        """
+        :param x0: initial point for a local optimizer.
+        :param f: function to optimize.
+        :param df: gradient of the function to optimize.
+        :param f_df: returns both the function to optimize and its gradient.
+        """
 
         import scipy.optimize
         import numpy as np
@@ -46,7 +69,7 @@ class Opt_lbfgs(Optimizer):
 class Opt_DIRECT(Optimizer):
     '''
     Wrapper for DIRECT optimization method. It works partitioning iteratively the domain 
-    of the function. Only requieres f and the box constrains to work
+    of the function. Only requieres f and the box constrains to work.
 
     '''
     def __init__(self, space, maxiter=1000):
@@ -55,6 +78,12 @@ class Opt_DIRECT(Optimizer):
         assert self.space.has_types['continuous']
 
     def optimize(self, x0=None, f=None, df=None, f_df=None):
+        """
+        :param x0: initial point for a local optimizer.
+        :param f: function to optimize.
+        :param df: gradient of the function to optimize.
+        :param f_df: returns both the function to optimize and its gradient.
+        """
         try:
             from DIRECT import solve
             import numpy as np
@@ -73,7 +102,7 @@ class Opt_DIRECT(Optimizer):
 class Opt_CMA(Optimizer):
     '''
     Wrapper the Covariance Matrix Adaptation Evolutionary strategy (CMA-ES) optimization method. It works generating 
-    an stochastic seach based on mutivariate Gaussian samples. Only requieres f and the box constrains to work
+    an stochastic seach based on mutivariate Gaussian samples. Only requieres f and the box constrains to work.
 
     '''
     def __init__(self, space, maxiter=1000):

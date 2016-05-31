@@ -1,5 +1,4 @@
-# Copyright (c) 2015, Javier Gonzalez
-# Copyright (c) 2015, the GPy Authors (see GPy AUTHORS.txt)
+# Copyright (c) 2016, the GPyOpt Authors
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 import numpy as np
@@ -99,7 +98,6 @@ class gSobol:
             noise = np.random.normal(0,self.sd,n).reshape(n,1)
         return fval.reshape(n,1) + noise
 
-#####
 class ackley:
     '''
     Ackley function 
@@ -133,18 +131,4 @@ class ackley:
         else:
             noise = np.random.normal(0,self.sd,n).reshape(n,1)
         return fval.reshape(n,1) + noise
-
-
-# function out = ackley(x)
-# ackley test function
-# 
-# constraints:
-# x can be any dimension
-# -32.768 <= x_i <= 32.768
-# global optimum at x1 = x2 = ... = xn = 0, where ackley = 0
-
-#function out = ackley(x)
-
-#out = (20+exp(1)-20*exp(-0.2*sqrt(sum(x.^2)/numel(x)))-exp(sum(cos(2*pi*x)/numel(x))));
-
 

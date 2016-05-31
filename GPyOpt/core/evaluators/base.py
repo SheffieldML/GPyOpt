@@ -3,9 +3,8 @@
 
 class EvaluatorBase(object):
     """
-    Base class for the batch method to use
+    Base class for the evaluator of the function. This class handles both sequential and batch evaluators.
     
-    TODO for models that do not have gradients
     """
 
     def __init__(self, acquisition, batch_size, **kwargs):

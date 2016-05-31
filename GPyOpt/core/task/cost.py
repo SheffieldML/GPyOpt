@@ -49,8 +49,8 @@ class  CostModel(object):
         """
         Predicts the time cost and its gradient of evaluating the fucntion at x.
         """
-            m, _, dmdx, _= self.cost_model.predict_withGradients(x)
-            return np.exp(m), np.exp(m)*dmdx
+        m, _, dmdx, _= self.cost_model.predict_withGradients(x)
+        return np.exp(m), np.exp(m)*dmdx
 
     def update_cost_model(self, x, cost_x):
         """
@@ -77,7 +77,7 @@ def constant_cost_withGradients(x):
     """
     Constant cost function used by default: cost=1, d_cost =0.
     """
-        return np.ones(x.shape[0])[:,None], np.zeros(x.shape)
+    return np.ones(x.shape[0])[:,None], np.zeros(x.shape)
 
 
 

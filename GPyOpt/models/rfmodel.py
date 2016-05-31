@@ -1,11 +1,9 @@
-# Copyright (c) 2015, Javier Gonzalez
-# Copyright (c) 2015, the GPy Authors (see GPy AUTHORS.txt)
+# Copyright (c) 2016, the GPyOpt Authors
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 from .base import BOModel
 import numpy as np
 import GPy
-from sklearn.ensemble import RandomForestRegressor
 
 class RFModel(BOModel):
 
@@ -36,6 +34,7 @@ class RFModel(BOModel):
     	self.model = None
 
     def _create_model(self, X, Y):
+        from sklearn.ensemble import RandomForestRegressor
         self.X = X
         self.Y = Y
         self.model = RandomForestRegressor(bootstrap = self.bootstrap, 

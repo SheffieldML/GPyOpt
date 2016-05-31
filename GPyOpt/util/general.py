@@ -1,5 +1,4 @@
-# Copyright (c) 2015, Javier Gonzalez
-# Copyright (c) 2015, the GPy Authors (see GPy AUTHORS.txt)
+# Copyright (c) 2016, the GPyOpt Authors
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 import numpy as np
@@ -8,6 +7,13 @@ import time
 
 
 def compute_integrated_acquisition(acquisition,x):
+    '''
+    Used to compute the acquisition function when samples of the hyperparameters have been generated (used in GP_MCMC model).
+
+    :param acquisition: acquisition function with GpyOpt model type GP_MCMC.
+    :param x: location where the acquisition is evaluated.
+    '''
+    
     acqu_x = 0 
 
     for i in range(acquisition.model.num_hmc_samples): 
@@ -19,6 +25,13 @@ def compute_integrated_acquisition(acquisition,x):
 
 
 def compute_integrated_acquisition_withGradients(acquisition,x):
+    '''
+    Used to compute the acquisition function with gradients when samples of the hyperparameters have been generated (used in GP_MCMC model).
+
+    :param acquisition: acquisition function with GpyOpt model type GP_MCMC.
+    :param x: location where the acquisition is evaluated.
+    '''
+
     acqu_x = 0 
     d_acqu_x = 0 
 

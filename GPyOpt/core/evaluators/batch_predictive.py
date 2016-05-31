@@ -17,13 +17,22 @@ from copy import deepcopy
 
 class Predictive(EvaluatorBase):
     """
-    Class for Expected improvement acquisition functions.
+    Class a predictive batch method. Computes the element of the batch Sequentially by predicting outputs of the function with the mean of the GP.
+    The model is updated after every phantasized evaluation is collected.
+
+    :param acquisition: acquisition function to be used to compute the batch.
+    :param batch size: the number of elements in the batch.
+    :normalize_Y: wehter to normalize the outputs.
+
     """
     def __init__(self, acquisition, batch_size, normalize_Y):
         super(Predictive, self).__init__(acquisition, batch_size)
         self.normalize_Y = normalize_Y
 
     def compute_batch(self):
+        """
+        Computes the elements of the batch sequentially by using predictions from the model.
+        """
 
         # --- Compute local entities
         X = self.acquisition.model.model.X.copy()

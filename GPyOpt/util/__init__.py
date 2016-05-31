@@ -1,4 +1,4 @@
-# Copyright (c) 2012, GPyOpt authors (see AUTHORS.txt).
+# Copyright (c) 2016, the GPyOpt Authors
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 import general

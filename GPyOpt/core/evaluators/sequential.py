@@ -5,13 +5,20 @@ from .base import EvaluatorBase
 
 class Sequential(EvaluatorBase):
     """
-    Class for Expected improvement acquisition functions.
+    Class for standard Sequential Bayesian optimization methods.
+
+    :param acquisition: acquisition function to be used to compute the batch.
+    :param batch size: it is 1 by default since this class is only used for sequential methods.
     """
+
     def __init__(self, acquisition, batch_size=1):
         super(Sequential, self).__init__(acquisition, batch_size)
         #self.acquisition = acquisition
 
     def compute_batch(self):
+        """
+        Selects the new location to evaluate the objective.
+        """
     	return self.acquisition.optimize()
 
 

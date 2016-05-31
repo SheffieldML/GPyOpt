@@ -1,11 +1,12 @@
+# Copyright (c) 2016, the GPyOpt Authors
+# Licensed under the BSD 3-clause license (see LICENSE.txt)
+
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
-
 from GPyOpt.core.task.space import Design_space
 import core
 import methods
 import util
-#from GPyOpt import objective_examples
 import plotting
 import demos
 import interface

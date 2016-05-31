@@ -1,5 +1,4 @@
-# Copyright (c) 2015, Javier Gonzalez
-# Copyright (c) 2015, the GPy Authors (see GPy AUTHORS.txt)
+# Copyright (c) 2016, the GPyOpt Authors
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 import numpy as np
@@ -142,14 +141,6 @@ def plot_convergence(Xdata,best_Y, filename = None):
     plt.ylabel('Best y')
     grid(True)
 
-    # Plot of the proposed v(x) at the proposed sampling points
-    # plt.subplot(1, 3, 3)
-    # plt.errorbar(range(len(s_in_min[:,0])),[0]*n , yerr=s_in_min[:,0],ecolor='b', capthick=1)
-    # plt.title('Predicted sd. in the next sample')
-    # plt.xlabel('Iteration')
-    # plt.ylim(0,max(s_in_min[:,0])+np.sqrt(max(s_in_min[:,0])))
-    # plt.ylabel('CI (centered at zero)')
-    # grid(True)
     if filename!=None:
         savefig(filename)
     else:
