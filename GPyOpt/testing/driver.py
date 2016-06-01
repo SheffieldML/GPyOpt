@@ -1,8 +1,10 @@
+# Copyright (c) 2016, the GPyOpt Authors
+# Licensed under the BSD 3-clause license (see LICENSE.txt)
+
 import GPyOpt
 import numpy as np
 import os
-# Copyright (c) 2016, the GPyOpt Authors
-# Licensed under the BSD 3-clause license (see LICENSE.txt)
+
 
 
 def run_eval(problem_config, f_inits, method_config, name = 'run', outpath='.', time_limit=-1, unittest = False):
@@ -34,7 +36,7 @@ def run_eval(problem_config, f_inits, method_config, name = 'run', outpath='.', 
                                                 acquisition_optimizer_type  = m_c['acquisition_optimizer_type'], 
                                                 model_update_interval       = m_c['model_update_interval'], 
                                                 verbosity                   = m_c['verbosity'], 
-                                                evaluator_type              = m_c['evaluator_type'] , 
+                                                evaluator_type              = m_c['evaluator_type'], 
                                                 batch_size                  = m_c['batch_size'], 
                                                 num_cores                   = m_c['num_cores'])
 

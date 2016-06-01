@@ -5,6 +5,11 @@ from .base import BOModel
 import numpy as np
 import GPy
 
+##
+## TODO: not fully tested yet.
+##
+
+
 class WarpedGPModel(BOModel):
 
     analytical_gradient_prediction = False

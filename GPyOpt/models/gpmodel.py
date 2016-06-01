@@ -6,8 +6,26 @@ import numpy as np
 import GPy
 
 class GPModel(BOModel):
+    """
+    General class for handling a Gaussain Process in GPyOpt. 
 
-    analytical_gradient_prediction = True
+    :param kernel: GPy kernel to use in the GP model.
+    :param noise_var: value of the noise variance if known.
+    :param exact_feval: whether noiseless evaluatios are avaiable. IMPORTANT to make the optimization work well in noiseless scenarios (default, False).
+    :param normalize_Y: normalization of the outputs to the interval [0,1] (default, True). 
+    :param optimizer: optimizer of the model. Check GPy for details.
+    :param max_iters: maximum nunber of iterations used to optimize the parameters of the model.
+    :param optimize_restarts: number of restarts in the optimization.
+    :param sparse: whether to use a sparse GP (default, False). This is usefull when many observations are avaiable.
+    :param num_inducing: number of inducing points if a sparse GP is used.  
+    :param verbose: print out the model messages (default, False).
+
+    .. Note:: This model does Maximum likelihood estimation of the hyper-parameters.
+
+    """
+
+
+    analytical_gradient_prediction = True  # --- Needed in all models to check is the gradiens of acquisitions are computable.
     
     def __init__(self, kernel=None, noise_var=None, exact_feval=False, normalize_Y=True, optimizer='bfgs', max_iters=1000, optimize_restarts=5, sparse = False, num_inducing = 10,  verbose=False):
         self.kernel = kernel
@@ -23,6 +41,9 @@ class GPModel(BOModel):
         self.model = None
         
     def _create_model(self, X, Y):
+        """
+        Creates the model given some input data X and Y.
+        """
         
         # --- define kernel
         self.input_dim = X.shape[1]
@@ -40,7 +61,6 @@ class GPModel(BOModel):
         else:
             self.model = GPy.models.SparseGPRegression(X, Y, kernel=kern, num_inducing=self.num_inducing)
 
-
         # --- restrict variance if exact evaluations of the objective
         if self.exact_feval:
             self.model.Gaussian_noise.constrain_fixed(1e-6, warning=False)
@@ -48,6 +68,10 @@ class GPModel(BOModel):
             self.model.Gaussian_noise.constrain_positive(warning=False)
             
     def updateModel(self, X_all, Y_all, X_new, Y_new):
+        """
+        Updates the model with new observations.
+        """
+
         if self.normalize_Y:
             Y_all = (Y_all - Y_all.mean())/(Y_all.std())
         if self.model is None: self._create_model(X_all, Y_all)
@@ -61,15 +85,24 @@ class GPModel(BOModel):
             self.model.optimize_restarts(num_restarts=self.optimize_restarts, optimizer=self.optimizer, max_iters = self.max_iters, verbose=self.verbose)
 
     def predict(self, X):
+        """
+        Preditions with the model. Returns posterior means and standard deviations at X. Note that this is different in GPy where the variances are given. 
+        """
         if X.ndim==1: X = X[None,:]
         m, v = self.model.predict(X)
         v = np.clip(v, 1e-10, np.inf)
         return m, np.sqrt(v)
 
     def get_fmin(self):
+        """
+        Returns the location where the posterior mean is takes its minimal value.
+        """
         return self.model.predict(self.model.X)[0].min()
     
     def predict_withGradients(self, X):
+        """
+        Returns the mean, standard deviation, mean gradient and standard deviation gradient at X.
+        """
         if X.ndim==1: X = X[None,:]
         m, v = self.model.predict(X)
         v = np.clip(v, 1e-10, np.inf)
@@ -79,6 +112,9 @@ class GPModel(BOModel):
         return m, np.sqrt(v), dmdx, dsdx
 
     def copy(self):
+        """
+        Makes a safe copy of the model.
+        """
         copied_model = GPModel(kernel = self.model.kern.copy(), 
                             noise_var=self.noise_var, 
                             exact_feval=self.exact_feval, 
@@ -94,9 +130,28 @@ class GPModel(BOModel):
 
 
 class GPModel_MCMC(BOModel):
-    
+    """
+    General class for handling a Gaussain Process in GPyOpt. 
+
+    :param kernel: GPy kernel to use in the GP model.
+    :param noise_var: value of the noise variance if known.
+    :param exact_feval: whether noiseless evaluatios are avaiable. IMPORTANT to make the optimization work well in noiseless scenarios (default, False).
+    :param normalize_Y: normalization of the outputs to the interval [0,1] (default, True). 
+    :param n_samples: number of MCMC samples.
+    :param n_burnin: number of samples not used.
+    :param subsample_interval: subsample interval in the MCMC.
+    :param step_size: stepsize in the MCMC.
+    :param leapfrog_steps: ??
+    :param verbose: print out the model messages (default, False).
+
+    .. Note:: This model does MCMC over the hyperparameters.
+
+    """    
+
+
+
     MCMC_sampler = True
-    analytical_gradient_prediction = True
+    analytical_gradient_prediction = True # --- Needed in all models to check is the gradiens of acquisitions are computable.
     
     def __init__(self, kernel=None, noise_var=None, exact_feval=False, normalize_Y=True, n_samples = 10, n_burnin = 100, subsample_interval = 10, step_size = 1e-1, leapfrog_steps=20, verbose=False):
         self.kernel = kernel
@@ -112,6 +167,9 @@ class GPModel_MCMC(BOModel):
         self.model = None
         
     def _create_model(self, X, Y):
+        """
+        Creates the model given some input data X and Y.
+        """
         
         # --- define kernel
         self.input_dim = X.shape[1]
@@ -129,13 +187,16 @@ class GPModel_MCMC(BOModel):
         self.model.kern.set_prior(GPy.priors.Gamma.from_EV(2.,4.))
         self.model.likelihood.variance.set_prior(GPy.priors.Gamma.from_EV(2.,4.))
 
-        # --- restrict variance if exact evaluations of the objective
+        # --- Restrict variance if exact evaluations of the objective
         if self.exact_feval:
             self.model.Gaussian_noise.constrain_fixed(1e-6, warning=False)
         else: 
             self.model.Gaussian_noise.constrain_positive(warning=False)
             
     def updateModel(self, X_all, Y_all, X_new, Y_new):
+        """
+        Updates the model with new observations.
+        """
         if self.normalize_Y:
             Y_all = (Y_all - Y_all.mean())/(Y_all.std())
         if self.model is None: self._create_model(X_all, Y_all)
@@ -150,6 +211,10 @@ class GPModel_MCMC(BOModel):
         self.hmc_samples = ss[self.n_burnin::self.subsample_interval]
 
     def predict(self, X):
+        """
+        Preditions with the model for all the MCMC samples. Returns posterior means and standard deviations at X. Note that this is different in GPy where the variances are given. 
+        """
+
         if X.ndim==1: X = X[None,:]
         ps = self.model.param_array.copy()
         means = []
@@ -168,9 +233,15 @@ class GPModel_MCMC(BOModel):
         return means, stds
 
     def get_fmin(self):
+        """
+        Returns the location where the posterior mean is takes its minimal value.
+        """
         return self.model.predict(self.model.X)[0].min()
     
     def predict_withGradients(self, X):
+        """
+        Returns the mean, standard deviation, mean gradient and standard deviation gradient at X for all the MCMC samples.
+        """
         if X.ndim==1: X = X[None,:]
         ps = self.model.param_array.copy()
         means = []
@@ -197,6 +268,10 @@ class GPModel_MCMC(BOModel):
         return means, stds, dmdxs, dsdxs
 
     def copy(self):
+        """
+        Makes a safe copy of the model.
+        """
+
         copied_model = GPModel( kernel = self.model.kern.copy(), 
                                 noise_var= self.noise_var , 
                                 exact_feval= self.exact_feval, 

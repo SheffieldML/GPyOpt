@@ -6,6 +6,13 @@ import numpy as np
 import GPy
 
 class RFModel(BOModel):
+    """
+    General class for handling a Ramdom Forrest in GPyOpt.
+
+    .. Note:: The model has beed wrapper 'as it is' from  Scikit-learn. Check 
+    http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html
+    for further details.  
+    """
 
     analytical_gradient_prediction = False
 
@@ -34,6 +41,9 @@ class RFModel(BOModel):
     	self.model = None
 
     def _create_model(self, X, Y):
+        """
+        Creates the model given some input data X and Y.
+        """
         from sklearn.ensemble import RandomForestRegressor
         self.X = X
         self.Y = Y
@@ -57,6 +67,9 @@ class RFModel(BOModel):
         
         
     def updateModel(self, X_all, Y_all, X_new, Y_new):
+        """
+        Updates the model with new observations.
+        """
         self.X = X_all
         self.Y = Y_all
         if self.normalize_Y:
@@ -66,6 +79,9 @@ class RFModel(BOModel):
             self.model.fit(X_all, Y_all.flatten())
                  
     def predict(self, X):
+        """
+        Preditions with the model. Returns posterior means and standard deviations at X. 
+        """
         X = np.atleast_2d(X)
         m = np.empty(shape=(0,1))
         s = np.empty(shape=(0,1))

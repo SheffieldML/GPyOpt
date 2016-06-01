@@ -52,6 +52,9 @@ class BayesianOptimization(BO):
     :param normalize_Y: wheter to normalize the outputs before performing any optimization (default, True).
     :exact_feval: whether the outputs are exact (default, False).
     :acquisition_optimizer_type: type of acquisition function to use.
+        - 'lbfgs': L-BFGS.
+        - 'DIRECT': Dividing Rectangles.
+        - 'CMA': covariance matrix adaptation.
     :param model_update_interval: interval of collected observations after which the model is updated (default, 1). 
     :evaluator_type: determines the way the objective is evaluated (all methods are equivalent if the batch size is one)
         - 'sequential', sequential evaluations.
