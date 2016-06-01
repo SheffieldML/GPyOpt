@@ -70,8 +70,8 @@ class BayesianOptimization(BO):
 
     def __init__(self, f, domain = None, constrains = None, cost_withGradients = None, model_type = 'GP', X = None, Y = None, 
     	initial_design_numdata = None, initial_design_type='random', acquisition_type ='EI', normalize_Y = True, 
-        exact_feval = False, acquisition_optimizer_type = 'lbfgs', model_update_interval=1, verbosity=0, evaluator_type = 'sequential', 
-        batch_size = 1, num_cores = 1, **kwargs):
+        exact_feval = False, acquisition_optimizer_type = 'lbfgs', model_update_interval=1, evaluator_type = 'sequential', 
+        batch_size = 1, num_cores = 1, verbosity= True, **kwargs):
 
         self.initial_iter = True
         self.verbosity              = verbosity
@@ -149,7 +149,7 @@ class BayesianOptimization(BO):
                 									model_update_interval  = self.model_update_interval)
 
         # --- Initilize everyting
-        self.run_optimization(0)
+        self.run_optimization(0,verbosity=self.verbosity)
 
     def _model_chooser(self):
         """
