@@ -13,6 +13,8 @@ import interface
 import models
 import acquisitions
 import optimization
+import objective_examples 
+import objective_examples as fmodels
 from GPyOpt import objective_examples
 
 

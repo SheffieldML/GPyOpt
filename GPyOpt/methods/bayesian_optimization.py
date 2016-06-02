@@ -56,37 +56,111 @@ class BayesianOptimization(BO):
         - 'DIRECT': Dividing Rectangles.
         - 'CMA': covariance matrix adaptation.
     :param model_update_interval: interval of collected observations after which the model is updated (default, 1). 
-    :evaluator_type: determines the way the objective is evaluated (all methods are equivalent if the batch size is one)
+    :param evaluator_type: determines the way the objective is evaluated (all methods are equivalent if the batch size is one)
         - 'sequential', sequential evaluations.
         - 'predictive', syncronous batch that uses a parallel model to phantasize new outputs.
         - 'random': syncronous batch that selects the firt element as in a sequential policy and the rest randomly.
         - 'local_penalization': batch method proposed in (Gonzalez et al. 2016). 
-    :batch_size: size of the batch in which the objective is evaluted (default, 1).
-    :num_cores: number of cores used to evaluate the objective (default, 1).
-    :verbosity: prints the models and other options during the optimization.
-    :**kwargs: extra parameters. Can be used to tune the current optimization setup or to use depreciated options in this package release.
+    :param batch_size: size of the batch in which the objective is evaluted (default, 1).
+    :param num_cores: number of cores used to evaluate the objective (default, 1).
+    :param verbosity: prints the models and other options during the optimization.
+    :param **kwargs: extra parameters. Can be used to tune the current optimization setup or to use depreciated options in this package release. 
 
 
-    .. Note:: parameters used in previous versions of GPyOpt can be passed through the kwargs. This means that such parameters should be passed at the end. 
+    .. Note::   The parameters bounds, kernel, numdata_initial_design, type_initial_design, model_optimize_interval, acquisition, acquisition_par
+                model_optimize_restarts, sparseGP, num_inducing and normalize can still be used but will be deprecited in the next version.
     """
 
 
     def __init__(self, f, domain = None, constrains = None, cost_withGradients = None, model_type = 'GP', X = None, Y = None, 
     	initial_design_numdata = None, initial_design_type='random', acquisition_type ='EI', normalize_Y = True, 
         exact_feval = False, acquisition_optimizer_type = 'lbfgs', model_update_interval=1, evaluator_type = 'sequential', 
-        batch_size = 1, num_cores = 1, verbosity= True, **kwargs):
+        batch_size = 1, num_cores = 1, verbosity= True, verbosity_model = False,  
+        bounds=None,             
+        kernel=None, 
+        numdata_initial_design = None, 
+        type_initial_design='random',
+        model_optimize_interval=1,
+        acquisition='EI',
+        acquisition_par= None, 
+        model_optimize_restarts=None, 
+        sparseGP=False, 
+        num_inducing=None, 
+        normalize=None,
+        **kwargs):
+
+
+        ## ******************************  NOTE  *************************************************************************************
+        ## --- This part of the code ensures the compatibility with the previous version. It will be depreciated in the next release
+        ## ***************************************************************************************************************************
+
+        ## Bounds to space
+        if domain == None and bounds!=None:
+            self.domain = bounds_to_space(bounds)
+        else: 
+            self.domain = domain 
+
+        ## Kernel
+        self.kernel = kernel
+
+        ## Number of data in initial design
+        if initial_design_numdata == None and numdata_initial_design!=None:
+            initial_design_numdata = numdata_initial_design      
+
+        ## Type of initial design
+        if type_initial_design!='random':
+            initial_design_type = type_initial_design
+
+        ## Model optimize interval
+        if model_optimize_interval!= 1:
+            model_update_interval = model_optimize_interval
+
+        ## Acquisition
+        if acquisition != 'EI':
+            acquisition_type = acquisition
+
+        ### Acquisition parameter
+        if acquisition_par!=None:
+            if acquisition_type == 'EI' or acquisition_type == 'MPI':
+                self.acquisition_jitter = acquisition_par
+
+            elif acquisition_type == 'LCB':
+                self.acquisition_weight = acquisition_par
+
+        ### Optimize restarts
+        if model_optimize_restarts!= None:
+            self.optimize_restarts = model_optimize_restarts
+
+        ## Model type
+        if sparseGP == True:
+            model_type = sparseGP
+
+        if num_inducing!=None:
+            self.num_inducing = num_inducing
+
+        ## Output normalization
+        if normalize != None:
+            normalize_Y== normalize
+
+        ## ***************************************************************************************************************************
+        ## ***************************************************************************************************************************
+        ## ***************************************************************************************************************************
+
 
         self.initial_iter = True
-        self.verbosity              = verbosity
-        self.model_update_interval  = model_update_interval
+        self.verbosity = verbosity
+        self.verbosity_model = verbosity_model
+        self.model_update_interval = model_update_interval
         self.kwargs = kwargs
 
         # --- CHOOSE design space
-        if domain == None and self.kwargs.has_key('bounds'): 
-            self.domain = bounds_to_space(kwargs['bounds'])
-        else: 
-            self.domain = domain 
-            
+
+        if not hasattr(self,'domain'): ### XXXXXXXXXXXXXXXXXXXXXXXX NOTE: remove this line in next version to depreciate arguments
+            if domain == None and self.kwargs.has_key('bounds'): 
+                self.domain = bounds_to_space(kwargs['bounds'])
+            else: 
+                self.domain = domain 
+                
         self.constrains = constrains
         self.space = Design_space(self.domain, self.constrains)
 
@@ -129,7 +203,7 @@ class BayesianOptimization(BO):
 
         # --- CHOOSE the acquisition optimizer_type
         self.acquisition_optimizer_type = acquisition_optimizer_type
-        self.acquisition_optimizer = AcquisitionOptimizer(self.space, self.acquisition_optimizer_type, current_X = self.X)  ## morre arguments may come here
+        self.acquisition_optimizer = AcquisitionOptimizer(self.space, self.acquisition_optimizer_type, current_X = self.X)  ## more arguments may come here
 
         # --- CHOOSE acquistion function
         self.acquisition_type = acquisition_type
@@ -159,10 +233,11 @@ class BayesianOptimization(BO):
         Model chooser from the available options. Extra parameters can be passed via **kwargs.
         """
         
-        if self.kwargs.has_key('kernel'): 
-            self.kernel = self.kwargs['kernel']
-        else: 
-            self.kernel = None
+        if self.kernel == None: ### XXXXXXXXXXXXXXXXXXXXXXXX NOTE: remove this line in next version to depreciate arguments
+            if self.kwargs.has_key('kernel'): 
+                self.kernel = self.kwargs['kernel']
+            else: 
+                self.kernel = None
 
         if self.kwargs.has_key('noise_var'): self.noise_var = self.kwargs['noise_var']
         else: self.noise_var = None
@@ -174,19 +249,22 @@ class BayesianOptimization(BO):
             if self.kwargs.has_key('model_optimizer_type'): self.model_optimizer_type = self.kwargs['model_optimizer_type'] 
             else: self.model_optimizer_type = 'lbfgs' 
 
-            if self.kwargs.has_key('optimize_restarts'): self.optimize_restarts = self.kwargs['optimize_restarts']
-            else: self.optimize_restarts = 5
+
+            if not hasattr(self,'optimize_restarts'): ### XXXXXXXXXXXXXXXXXXXXXXXX NOTE: remove this line in next version to depreciate arguments
+                if self.kwargs.has_key('optimize_restarts'): self.optimize_restarts = self.kwargs['optimize_restarts']
+                else: self.optimize_restarts = 5
 
             if self.kwargs.has_key('max_iters'): self.max_iters = self.kwargs['max_iters']
             else: self.max_iters = 1000
 
-            if self.kwargs.has_key('num_inducing'): self.num_inducing = self.kwargs['num_inducing']
-            else: self.num_inducing = 10
+            if not hasattr(self,'num_inducing'): ### XXXXXXXXXXXXXXXXXXXXXXXX NOTE: remove this line in next version to depreciate arguments
+                if self.kwargs.has_key('num_inducing'): self.num_inducing = self.kwargs['num_inducing']
+                else: self.num_inducing = 10
 
             if self.model_type == 'GP': self.sparse = False
             if self.model_type == 'sparseGP': self.sparse = True
 
-            return GPModel(self.kernel, self.noise_var, self.exact_feval, self.normalize_Y, self.model_optimizer_type, self.max_iters, self.optimize_restarts, self.sparse, self.num_inducing, self.verbosity)
+            return GPModel(self.kernel, self.noise_var, self.exact_feval, self.normalize_Y, self.model_optimizer_type, self.max_iters, self.optimize_restarts, self.sparse, self.num_inducing, self.verbosity_model)
 
         # --------
         # --- Initilize GP model with MCMC on the parameters
@@ -207,7 +285,7 @@ class BayesianOptimization(BO):
             if self.kwargs.has_key('leapfrog_steps'): self.leapfrog_steps = self.kwargs['leapfrog_steps']
             else: self.leapfrog_steps = 20
 
-            return  GPModel_MCMC(self.kernel, self.noise_var, self.exact_feval, self.normalize_Y, self.n_samples, self.n_burnin, self.subsample_interval, self.step_size, self.leapfrog_steps, self.verbosity)
+            return  GPModel_MCMC(self.kernel, self.noise_var, self.exact_feval, self.normalize_Y, self.n_samples, self.n_burnin, self.subsample_interval, self.step_size, self.leapfrog_steps, self.verbosity_model)
 
         # --------
         # --- Initilize RF: values taken from default in scikit-learn
@@ -227,15 +305,18 @@ class BayesianOptimization(BO):
         """
 
         # --- Extract relevant parameters from the ***kwargs
-        if self.kwargs.has_key('acquisition_jitter'):
-            self.acquisition_jitter = self.kwargs['acquisition_jitter']
-        else:
-            self.acquisition_jitter = 0.01
 
-        if self.kwargs.has_key('acquisition_weight'):
-            self.acquisition_weight = self.kwargs['acquisition_weight']
-        else:
-            self.acquisition_weight = 2  ## TODO: implement the optimal rate (only for bandits)
+        if not hasattr(self,'acquisition_jitter'):  ### XXXXXXXXXXXXXXXXXXXXXXXX NOTE: remove this line in next version to depreciate arguments
+            if self.kwargs.has_key('acquisition_jitter'):
+                self.acquisition_jitter = self.kwargs['acquisition_jitter']
+            else:
+                self.acquisition_jitter = 0.01
+
+        if not hasattr(self,'acquisition_weight'):  ### XXXXXXXXXXXXXXXXXXXXXXXX NOTE: remove this line in next version to depreciate arguments
+            if self.kwargs.has_key('acquisition_weight'):
+                self.acquisition_weight = self.kwargs['acquisition_weight']
+            else:
+                self.acquisition_weight = 2  ## TODO: implement the optimal rate (only for bandits)
 
         # --- Choose the acquisition
         if self.acquisition_type == None or self.acquisition_type =='EI':
