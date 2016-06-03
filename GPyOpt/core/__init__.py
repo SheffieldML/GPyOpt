@@ -3,3 +3,4 @@
 
 from .bo import BO
 import task
+from .. import acquisitions as acquisition

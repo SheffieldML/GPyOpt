@@ -55,7 +55,7 @@ class SingleObjective(Objective):
             except:
                 if not hasattr(self, 'parallel_error'):
                     print 'Error in parallel computation. Fall back to single process!'
-                    f_evals, cost_evals = self._single_evaluation(x)        
+            f_evals, cost_evals = self._single_evaluation(x)        
         return f_evals, cost_evals 
 
 
@@ -83,15 +83,19 @@ class SingleObjective(Objective):
         from itertools import izip          
         
         # --- parallel evaluation of the function
-        divided_samples = [x[i::self.n_procs] for i in xrange(self.n_procs)]
-        pipe = [Pipe() for i in xrange(self.n_procs)]
-        proc = [Process(target=spawn(self.func),args=(c,x)) for x,(p,c) in izip(divided_samples,pipe)]
+        divided_samples = [x[i::self.n_procs] for i in range(self.n_procs)]
+        pipe = [Pipe() for i in range(self.n_procs)]
+        proc = [Process(target=spawn(self.func),args=(c,k)) for k,(p,c) in izip(divided_samples,pipe)]
         [p.start() for p in proc]
         [p.join() for p in proc] 
-        f_evals = np.vstack([p.recv() for (p,c) in pipe])
         
         # --- time of evalation is set to constant (=1). This is one of the hypothesis of syncronous batch methods.
+        f_evals = np.zeros((x.shape[0],1))
         cost_evals = np.ones((x.shape[0],1))
+        i = 0
+        for (p,c) in pipe:
+            f_evals[i::self.n_procs] = p.recv()
+            i += 1
         return f_evals, cost_evals 
 
     def _asyncronous_batch_evaluation(self,x):   

@@ -40,69 +40,7 @@ class BO(object):
         self.cost = CostModel(cost)
         
 
-    def run_optimization(self, max_iter = None, max_time = None,  eps = 1e-8, verbosity=True, report_file = None,
-                        n_inbatch=None, 
-                        acqu_optimize_method= None, 
-                        acqu_optimize_restarts=None, 
-                        batch_method=None,
-                        n_procs=None,
-                        true_gradients = None, 
-                        verbose=None,
-                        **kargs):
-
-
-        ## ******************************  NOTE  *************************************************************************************
-        ## --- This part of the code ensures the compatibility with the previous version. It will be depreciated in the next release
-        ## ***************************************************************************************************************************
-
-        if verbose!= None:
-            verbosiy = verbose    
-
-        if n_inbatch!=None:
-            self.batch_size = n_inbatch
-
-        if n_procs!=None:
-            self.num_cores = n_procs
-
-        if batch_method!= None:
-            if batch_method == 'lp':
-                self.evaluator_type = 'local_penalization'
-                self.evaluator = self._evaluator_chooser()
-            else:
-                self.evaluator_type = 'local_penalization'
-                self.evaluator = self._evaluator_chooser()
-
-
-        if acqu_optimize_restarts!=None:
-            self.acquisition_optimizer.n_samples = acqu_optimize_restarts
-
-        if acqu_optimize_method!=None:
-            if acqu_optimize_method == 'fast_random':
-                self.acquisition_optimizer.fast = True
-                self.acquisition_optimizer.random = True
-            elif acqu_optimize_method == 'fast_brute':
-                self.acquisition_optimizer.fast = True
-                self.acquisition_optimizer.random = False
-            elif acqu_optimize_method == 'random':
-                self.acquisition_optimizer.fast = False
-                self.acquisition_optimizer.random = True
-            elif acqu_optimize_method == 'fast_brute':
-                self.acquisition_optimizer.fast = False
-                self.acquisition_optimizer.random = False
-            elif acqu_optimize_method == 'grid':
-                self.acquisition_optimizer.fast = False
-                self.acquisition_optimizer.random = False
-                self.acquisition_optimizer.search = False
-            elif acqu_optimize_method == 'DIRECT':
-                self.acquisition_optimizer.optimizer ='DIRECT'
-            elif acqu_optimize_method =='CMA':
-                self.acquisition_optimizer.optimizer ='CMA'
-
-        ## ***************************************************************************************************************************
-        ## ***************************************************************************************************************************
-        ## ***************************************************************************************************************************
-
-
+    def run_optimization(self, max_iter = None, max_time = None,  eps = 1e-8, verbosity=True, report_file = None):
         """ 
         Runs Bayesian Optimization for a number 'max_iter' of iterations (after the initial exploration data)
 
