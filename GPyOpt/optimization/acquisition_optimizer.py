@@ -87,7 +87,7 @@ class ContAcqOptimizer(AcquOptimizer):
         self.optimizer_name = optimizer
         self.kwargs = kwargs
         self.optimizer = select_optimizer(self.optimizer_name)(space, **kwargs)
-        self.free_dims = range(space.dimensionality)
+        self.free_dims = list(range(space.dimensionality))
         self.bounds = self.space.get_bounds()
         self.subspace = self.space
 
@@ -108,7 +108,7 @@ class ContAcqOptimizer(AcquOptimizer):
         self.fixed_values = np.atleast_2d(values)
         
         # -- restore to initial values
-        self.free_dims = range(self.space.dimensionality) 
+        self.free_dims = list(range(self.space.dimensionality))
         self.bounds = self.space.get_bounds()
 
         # -- change free dimensions and remove bounds from fixed dimensions

@@ -127,7 +127,7 @@ def plot_convergence(Xdata,best_Y, filename = None):
     ## Distances between consecutive x's
     plt.figure(figsize=(10,5))
     plt.subplot(1, 2, 1)
-    plt.plot(range(n-1), distances, '-ro')
+    plt.plot(list(range(n-1)), distances, '-ro')
     plt.xlabel('Iteration')
     plt.ylabel('d(x[n], x[n-1])')
     plt.title('Distance between consecutive x\'s')
@@ -135,7 +135,7 @@ def plot_convergence(Xdata,best_Y, filename = None):
 
     # Estimated m(x) at the proposed sampling points
     plt.subplot(1, 2, 2)
-    plt.plot(range(n),best_Y,'-o')
+    plt.plot(list(range(n)),best_Y,'-o')
     plt.title('Value of the best selected sample')
     plt.xlabel('Iteration')
     plt.ylabel('Best y')
