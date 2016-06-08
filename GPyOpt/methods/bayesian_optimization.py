@@ -223,8 +223,8 @@ class BayesianOptimization(BO):
                 									normalize_Y            = self.normalize_Y, 
                 									model_update_interval  = self.model_update_interval)
 
-        # --- Initilize everyting
-        self.run_optimization(0,verbosity=self.verbosity)
+        # --- Initilize everything
+        self.run_optimization(max_iter=0,verbosity=self.verbosity)
 
     def _model_chooser(self):
         """
