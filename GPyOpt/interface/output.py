@@ -65,7 +65,7 @@ class Logger(DataSaver):
         try:
             self.fileout = open(self.filename,'w')
         except:
-            print 'Data logger '+self.name+' fails to open the output file '+self.filename+'!'
+            print('Data logger '+self.name+' fails to open the output file '+self.filename+'!')
     
     def close(self):
         if self.fileout is not None:

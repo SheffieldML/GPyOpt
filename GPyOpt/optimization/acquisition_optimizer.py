@@ -234,7 +234,7 @@ class BanditAcqOptimizer(AcquOptimizer):
             f_min = f(x_min)
             
         else:
-            print 'All locations of the design space have been sampled.'
+            print('All locations of the design space have been sampled.')
             #break
         
         self.pulled_arms = np.vstack((self.pulled_arms, x_min))

@@ -2,5 +2,5 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 from .bo import BO
-import task
+from . import task
 from .. import acquisitions as acquisition

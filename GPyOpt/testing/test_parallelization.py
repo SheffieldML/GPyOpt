@@ -97,7 +97,7 @@ class TestAcquisitions(unittest.TestCase):
     def test_run(self):
         np.random.seed(1)
         for m_c in self.methods_configs:        
-            print 'Testing acquisition ' + m_c['name']
+            print('Testing acquisition ' + m_c['name')]
             name = m_c['name']+'_'+'acquisition_gradient_testfile'
             unittest_result = run_eval(problem_config= self.problem_config, f_inits= self.f_inits, method_config=m_c, name=name, outpath=self.outpath, time_limit=None, unittest = self.is_unittest)           
             original_result = np.loadtxt(self.outpath +'/'+ name+'.txt')

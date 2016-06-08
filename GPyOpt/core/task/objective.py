@@ -54,7 +54,7 @@ class SingleObjective(Objective):
                 f_evals, cost_evals = self._syncronous_batch_evaluation(x)
             except:
                 if not hasattr(self, 'parallel_error'):
-                    print 'Error in parallel computation. Fall back to single process!'
+                    print('Error in parallel computation. Fall back to single process!')
             f_evals, cost_evals = self._single_evaluation(x)        
         return f_evals, cost_evals 
 
