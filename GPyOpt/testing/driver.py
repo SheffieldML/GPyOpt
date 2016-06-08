@@ -52,8 +52,8 @@ def run_eval(problem_config, f_inits, method_config, name = 'run', outpath='.', 
     # Used to run the original resuult used for testing
     if unittest==False:
         np.savetxt(os.path.join(outpath,name+'.txt'),results)
-        print '*********************************************************************************'
-        print 'This is not a test. This option is used to generate the files used for the tests.'
-        print '*********************************************************************************'
+        print('*********************************************************************************')
+        print('This is not a test. This option is used to generate the files used for the tests.')
+        print('*********************************************************************************')
 
     return results

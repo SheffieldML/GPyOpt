@@ -54,7 +54,7 @@ class SingleObjective(Objective):
                 f_evals, cost_evals = self._syncronous_batch_evaluation(x)
             except:
                 if not hasattr(self, 'parallel_error'):
-                    print 'Error in parallel computation. Fall back to single process!'
+                    print('Error in parallel computation. Fall back to single process!')
             f_evals, cost_evals = self._single_evaluation(x)        
         return f_evals, cost_evals 
 
@@ -80,12 +80,11 @@ class SingleObjective(Objective):
         according to the number of accesible cores.
         """
         from multiprocessing import Process, Pipe
-        from itertools import izip          
         
         # --- parallel evaluation of the function
         divided_samples = [x[i::self.n_procs] for i in range(self.n_procs)]
         pipe = [Pipe() for i in range(self.n_procs)]
-        proc = [Process(target=spawn(self.func),args=(c,k)) for k,(p,c) in izip(divided_samples,pipe)]
+        proc = [Process(target=spawn(self.func),args=(c,k)) for k,(p,c) in zip(divided_samples,pipe)]
         [p.start() for p in proc]
         [p.join() for p in proc] 
         

@@ -38,7 +38,7 @@ class RFModel(BOModel):
         self.warm_start = warm_start
         self.normalize_Y = normalize_Y
 
-    	self.model = None
+        self.model = None
 
     def _create_model(self, X, Y):
         """

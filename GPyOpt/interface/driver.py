@@ -25,7 +25,8 @@ class BODriver(object):
         
         bounds = []
         var = self.config['variables']
-        for k in var.keys():
+        # for k in var.keys():
+        for k in list(var.keys()):
             assert var[k]['type'].lower().startswith('float'), 'Only real value variables are supported!'
             bounds.extend([(float(var[k]['min']), float(var[k]['max']))]*int(var[k]['size']))
         return bounds

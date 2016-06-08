@@ -53,7 +53,7 @@ class Design_space(object):
         self.constrains = constrains
 
         if self.has_types['bandit'] and (self.has_types['continuous'] or self.has_types['discrete']):
-            print 'Conbinations of bandits with other variables are not supported.'
+            print('Conbinations of bandits with other variables are not supported.')
         
     def _complete_attributes(self, space):
         """
@@ -198,8 +198,8 @@ class Design_space(object):
         I_x = np.ones((x.shape[0],1))
         if self.constrains != None:
             for d in self.constrains:
-                exec 'constrain =  lambda x:' + d['constrain']
-                exec 'ind_x = (constrain(x)<0)*1'
+                exec('constrain =  lambda x:' + d['constrain'],globals())
+                ind_x = (constrain(x)<0)*1
                 I_x *= ind_x.reshape(x.shape[0],1)
         return I_x
 

@@ -63,8 +63,10 @@ default_config = {
 
 def update_config(config_new, config_default):
 
-    if any([isinstance(v, dict) for v in config_new.values()]):
-        for k,v in config_new.iteritems():
+    # if any([isinstance(v, dict) for v in config_new.values()]):
+    #     for k,v in config_new.iteritems():
+    if any([isinstance(v, dict) for v in list(config_new.values())]):
+        for k,v in list(config_new.items()):
             if isinstance(v,dict) and k in config_default:
                 update_config(config_new[k],config_default[k])
             else:
