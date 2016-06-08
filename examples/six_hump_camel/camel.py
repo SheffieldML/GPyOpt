@@ -12,8 +12,8 @@ def main(job_id, params):
   x = params['X'][0]
   y = params['Y'][0]
   res = camel(x, y)
-  print "The Six hump camel back function:"
-  print "\tf(%.4f, %0.4f) = %f" % (x, y, res)
+  print('The Six hump camel back function:')
+  print('\tf(%.4f, %0.4f) = %f' % (x, y, res))
   return camel(x, y)
 
 

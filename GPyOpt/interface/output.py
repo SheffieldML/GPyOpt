@@ -65,7 +65,7 @@ class Logger(DataSaver):
         try:
             self.fileout = open(self.filename,'w')
         except:
-            print 'Data logger '+self.name+' fails to open the output file '+self.filename+'!'
+            print(('Data logger '+self.name+' fails to open the output file '+self.filename+'!'))
     
     def close(self):
         if self.fileout is not None:
@@ -100,7 +100,7 @@ class OutputEng(object):
         self.Ys = []
         
         # create all the data savers
-        self.data_savers = [self._support_savers[ds['type']](ds, config['prjpath'], config['experiment-name'],name) for name, ds in config['output'].iteritems() if isinstance(ds, dict)]
+        self.data_savers = [self._support_savers[ds['type']](ds, config['prjpath'], config['experiment-name'],name) for name, ds in list(config['output'].items()) if isinstance(ds, dict)]
         
         self.clock = [ds.interval for ds in self.data_savers]
         
@@ -111,7 +111,7 @@ class OutputEng(object):
         self.Ys.append(Y)
         self.offsets.append(X.shape[0])
         
-        for i in xrange(len(self.data_savers)):
+        for i in range(len(self.data_savers)):
             if final:
                 if self.clock[i]==-1: self.clock[i] = 0
             elif self.clock[i]>0: self.clock[i] += -1

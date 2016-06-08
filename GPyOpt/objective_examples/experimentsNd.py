@@ -122,7 +122,7 @@ class ackley:
 
     def f(self,X):
         X = reshape(X,self.input_dim)
-        print X
+        print(X)
         n = X.shape[0]
         fval = (20+np.exp(1)-20*np.exp(-0.2*np.sqrt((X**2).sum(1)/self.input_dim))-np.exp(np.cos(2*np.pi*X).sum(1)/self.input_dim))
         

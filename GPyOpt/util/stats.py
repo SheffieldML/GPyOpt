@@ -10,7 +10,7 @@ def initial_design(design,space,data_init):
     if design == 'latin':
         samples = sample_initial_design(design,space,data_init)
         if space.has_constrains() == True:
-            print 'Sampling with constrains is now allowed with latin designs.'
+            print('Sampling with constrains is now allowed with latin designs.')
     
     elif space.has_constrains() == False:
         samples = sample_initial_design(design,space,data_init)

@@ -40,9 +40,9 @@ def begginer_optimization_1d(plots=True):
     max_time = 10        
     eps = 1e-8                                                 
 
-    print '-----'
-    print '----- Running demo. It may take a few seconds.'
-    print '-----'
+    print('-----')
+    print('----- Running demo. It may take a few seconds.')
+    print('-----')
     
     # Run the optimization                                                  
     myBopt.run_optimization(max_time=max_time, eps=eps)   

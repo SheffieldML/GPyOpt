@@ -90,27 +90,27 @@ class BayesianOptimization(BO):
         ## Kernel
         if 'kernel' in kwargs:
             self.kernel = kwargs['kernel']
-            print 'WARNING: "kernel" will be depreciated in the next version!'
+            print('WARNING: "kernel" will be depreciated in the next version!')
 
         ## Number of data in initial design
         if 'numdata_initial_design' in kwargs:
             initial_design_numdata = kwargs['numdata_initial_design']
-            print 'WARNING: "numdata_initial_design" will be depreciated in the next version!'      
+            print('WARNING: "numdata_initial_design" will be depreciated in the next version!')      
 
         ## Type of initial design
         if 'type_initial_design' in kwargs:
             initial_design_type = kwargs['type_initial_design']
-            print 'WARNING: "type_initial_design" will be depreciated in the next version!'
+            print('WARNING: "type_initial_design" will be depreciated in the next version!')
 
         ## Model optimize interval
         if 'model_optimize_interval' in kwargs:
             model_update_interval = kwargs['model_optimize_interval']
-            print 'WARNING: "model_optimize_interval" will be depreciated in the next version!'
+            print('WARNING: "model_optimize_interval" will be depreciated in the next version!')
 
         ## Acquisition
         if 'acquisition' in kwargs:
             acquisition_type = kwargs['acquisition']
-            print 'WARNING: "acquisition" will be depreciated in the next version!'
+            print('WARNING: "acquisition" will be depreciated in the next version!')
 
         ### Acquisition parameter
         if 'acquisition_par' in kwargs:
@@ -123,22 +123,22 @@ class BayesianOptimization(BO):
         ### Optimize restarts
         if 'model_optimize_restarts' in kwargs:
             self.optimize_restarts = kwargs['model_optimize_restarts']
-            print 'WARNING: "model_optimize_restarts" will be depreciated in the next version!'
+            print('WARNING: "model_optimize_restarts" will be depreciated in the next version!')
 
         ## Model type
         if 'sparseGP' in kwargs:
             model_type = kwargs['sparseGP']
-            print 'WARNING: "sparseGP" will be depreciated in the next version!'
+            print('WARNING: "sparseGP" will be depreciated in the next version!')
 
 
         if 'num_inducing' in kwargs:
             self.num_inducing = kwargs['num_inducing']
-            print 'WARNING: "num_inducing" will be depreciated in the next version!'
+            print('WARNING: "num_inducing" will be depreciated in the next version!')
 
         ## Output normalization
         if 'normalize' in ['kwargs']:
             normalize_Y = kwargs['normalize']
-            print 'WARNING: "normalize" will be depreciated in the next version!'
+            print('WARNING: "normalize" will be depreciated in the next version!')
 
         ## ***************************************************************************************************************************
         ## ***************************************************************************************************************************
@@ -154,7 +154,7 @@ class BayesianOptimization(BO):
         # --- CHOOSE design space
 
         if not hasattr(self,'domain'): ### XXXXXXXXXXXXXXXXXXXXXXXX NOTE: remove this line in next version to depreciate arguments
-            if domain == None and self.kwargs.has_key('bounds'): 
+            if domain == None and 'bounds' in self.kwargs: 
                 self.domain = bounds_to_space(kwargs['bounds'])
             else: 
                 self.domain = domain 
@@ -164,7 +164,7 @@ class BayesianOptimization(BO):
 
         # --- CHOOSE objective function
         self.f = f
-        if self.kwargs.has_key('objective_name'): self.objective_name = kwargs['objective_name']
+        if 'objective_name' in self.kwargs: self.objective_name = kwargs['objective_name']
         else: self.objective_name = 'no_name'  
         self.batch_size = batch_size
         self.num_cores = num_cores
@@ -189,11 +189,11 @@ class BayesianOptimization(BO):
         self.normalize_Y = normalize_Y      
 
         # If an istance of a GPyOpt model is passed (possibly user defined), it is used here:
-        if self.kwargs.has_key('model'):
+        if 'model' in self.kwargs:
             if isinstance(kwargs['model'], GPyOpt.models.base.BOModel):
                 self.model = kwargs['model']
                 self.model_type = 'User defined model used.'
-                print 'Using a model defined by the used.'
+                print('Using a model defined by the used.')
             else:
                 self.model = self._model_chooser()
         else:
@@ -223,8 +223,8 @@ class BayesianOptimization(BO):
                 									normalize_Y            = self.normalize_Y, 
                 									model_update_interval  = self.model_update_interval)
 
-        # --- Initilize everyting
-        self.run_optimization(0,verbosity=self.verbosity)
+        # --- Initilize everything
+        self.run_optimization(max_iter=0,verbosity=self.verbosity)
 
     def _model_chooser(self):
         """
@@ -232,31 +232,31 @@ class BayesianOptimization(BO):
         """
         
         if not hasattr(self,'kernel'): ### XXXXXXXXXXXXXXXXXXXXXXXX NOTE: remove this line in next version to depreciate arguments
-            if self.kwargs.has_key('kernel'): 
+            if 'kernel' in self.kwargs: 
                 self.kernel = self.kwargs['kernel']
             else: 
                 self.kernel = None
 
-        if self.kwargs.has_key('noise_var'): self.noise_var = self.kwargs['noise_var']
+        if 'noise_var' in self.kwargs: self.noise_var = self.kwargs['noise_var']
         else: self.noise_var = None
             
         # --------    
         # --- Initilize GP model with MLE on the parameters
         # --------
         if self.model_type == 'GP' or self.model_type == 'sparseGP':
-            if self.kwargs.has_key('model_optimizer_type'): self.model_optimizer_type = self.kwargs['model_optimizer_type'] 
+            if 'model_optimizer_type' in self.kwargs: self.model_optimizer_type = self.kwargs['model_optimizer_type'] 
             else: self.model_optimizer_type = 'lbfgs' 
 
 
             if not hasattr(self,'optimize_restarts'): ### XXXXXXXXXXXXXXXXXXXXXXXX NOTE: remove this line in next version to depreciate arguments
-                if self.kwargs.has_key('optimize_restarts'): self.optimize_restarts = self.kwargs['optimize_restarts']
+                if 'optimize_restarts' in self.kwargs: self.optimize_restarts = self.kwargs['optimize_restarts']
                 else: self.optimize_restarts = 5
 
-            if self.kwargs.has_key('max_iters'): self.max_iters = self.kwargs['max_iters']
+            if 'max_iters' in self.kwargs: self.max_iters = self.kwargs['max_iters']
             else: self.max_iters = 1000
 
             if not hasattr(self,'num_inducing'): ### XXXXXXXXXXXXXXXXXXXXXXXX NOTE: remove this line in next version to depreciate arguments
-                if self.kwargs.has_key('num_inducing'): self.num_inducing = self.kwargs['num_inducing']
+                if 'num_inducing' in self.kwargs: self.num_inducing = self.kwargs['num_inducing']
                 else: self.num_inducing = 10
 
             if self.model_type == 'GP': self.sparse = False
@@ -268,19 +268,19 @@ class BayesianOptimization(BO):
         # --- Initilize GP model with MCMC on the parameters
         # --------
         elif self.model_type == 'GP_MCMC':
-            if self.kwargs.has_key('n_samples'): self.n_samples = self.kwargs['n_samples']
+            if 'n_samples' in self.kwargs: self.n_samples = self.kwargs['n_samples']
             else: self.n_samples = 10 
 
-            if self.kwargs.has_key('n_burnin'): self.n_burnin = self.kwargs['n_burnin']
+            if 'n_burnin' in self.kwargs: self.n_burnin = self.kwargs['n_burnin']
             else: self.n_burnin = 100
             
-            if self.kwargs.has_key('subsample_interval'): self.subsample_interval = self.kwargs['subsample_interval']
+            if 'subsample_interval' in self.kwargs: self.subsample_interval = self.kwargs['subsample_interval']
             else: self.subsample_interval =10
             
-            if self.kwargs.has_key('step_size'): self.step_size  = self.kwargs['step_size']
+            if 'step_size' in self.kwargs: self.step_size  = self.kwargs['step_size']
             else: self.step_size = 1e-1
             
-            if self.kwargs.has_key('leapfrog_steps'): self.leapfrog_steps = self.kwargs['leapfrog_steps']
+            if 'leapfrog_steps' in self.kwargs: self.leapfrog_steps = self.kwargs['leapfrog_steps']
             else: self.leapfrog_steps = 20
 
             return  GPModel_MCMC(self.kernel, self.noise_var, self.exact_feval, self.normalize_Y, self.n_samples, self.n_burnin, self.subsample_interval, self.step_size, self.leapfrog_steps, self.verbosity_model)
@@ -305,13 +305,13 @@ class BayesianOptimization(BO):
         # --- Extract relevant parameters from the ***kwargs
 
         if not hasattr(self,'acquisition_jitter'):  ### XXXXXXXXXXXXXXXXXXXXXXXX NOTE: remove this line in next version to depreciate arguments
-            if self.kwargs.has_key('acquisition_jitter'):
+            if 'acquisition_jitter' in self.kwargs:
                 self.acquisition_jitter = self.kwargs['acquisition_jitter']
             else:
                 self.acquisition_jitter = 0.01
 
         if not hasattr(self,'acquisition_weight'):  ### XXXXXXXXXXXXXXXXXXXXXXXX NOTE: remove this line in next version to depreciate arguments
-            if self.kwargs.has_key('acquisition_weight'):
+            if 'acquisition_weight' in self.kwargs:
                 self.acquisition_weight = self.kwargs['acquisition_weight']
             else:
                 self.acquisition_weight = 2  ## TODO: implement the optimal rate (only for bandits)
@@ -358,7 +358,7 @@ class BayesianOptimization(BO):
         Acquisition chooser from the available options. Guide the optimization through sequential or parallel evalutions of the objective.
         """
 
-        if self.kwargs.has_key('acquisition_transformation'):
+        if 'acquisition_transformation' in self.kwargs:
             self.acquisition_transformation = self.kwargs['acquisition_transformation']
         else:
             self.acquisition_transformation = 'none'
@@ -395,15 +395,15 @@ class BayesianOptimization(BO):
 
         if 'verbose' in kwargs:
             verbosity = kwargs['verbose']
-            print 'WARNING: "verbose" will be depreciated in the next version!'
+            print('WARNING: "verbose" will be depreciated in the next version!')
  
         if 'n_inbatch' in kwargs:
             self.batch_size = kwargs['n_inbatch']
-            print 'WARNING: "n_inbatch" will be depreciated in the next version!'
+            print('WARNING: "n_inbatch" will be depreciated in the next version!')
 
         if 'n_procs' in kwargs:
             self.num_cores = kwargs['n_procs']
-            print 'WARNING: "n_proc" will be depreciated in the next version!'
+            print('WARNING: "n_proc" will be depreciated in the next version!')
 
         if 'batch_method' in kwargs:
             if kwargs['batch_method'] == 'lp':
@@ -412,11 +412,11 @@ class BayesianOptimization(BO):
             else:
                 self.evaluator_type = 'local_penalization'
                 self.evaluator = self._evaluator_chooser()
-            print 'WARNING: "batch_method" will be depreciated in the next version!'
+            print('WARNING: "batch_method" will be depreciated in the next version!')
 
         if 'acqu_optimize_restarts' in kwargs:
             self.acquisition_optimizer.n_samples = kwargs['acqu_optimize_restarts']
-            print 'WARNING: "acqu_optimize_restarts" will be depreciated in the next version!'
+            print('WARNING: "acqu_optimize_restarts" will be depreciated in the next version!')
 
         if 'acqu_optimize_method'  in kwargs:
             if kwargs['acqu_optimize_method'] == 'fast_random':
@@ -439,7 +439,7 @@ class BayesianOptimization(BO):
                 self.acquisition_optimizer.optimizer ='DIRECT'
             elif kwargs['acqu_optimize_method'] =='CMA':
                 self.acquisition_optimizer.optimizer ='CMA'
-            print 'WARNING: "acqu_optimize_method" will be depreciated in the next version!'
+            print('WARNING: "acqu_optimize_method" will be depreciated in the next version!')
         super(BayesianOptimization, self).run_optimization(max_iter = max_iter, max_time = max_time,  eps = eps, verbosity=verbosity, report_file = report_file)
 
 

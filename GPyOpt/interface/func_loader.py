@@ -35,7 +35,7 @@ class ObjectiveFunc(object):
         param_offsets = []
         param_types = []
         total_size = 0
-        for k, v in var.iteritems():
+        for k, v in list(var.items()):
             param_names.append(k)
             param_sizes.append(v['size'])
             assert v['type'].lower().startswith('float'), 'Only real parameters are supported at the moment!'
@@ -48,14 +48,14 @@ class ObjectiveFunc(object):
         def obj_func(x):
             params = []
             if len(x.shape)==1: x = x[None,:]
-            for i in xrange(len(self.param_sizes)):
+            for i in range(len(self.param_sizes)):
                 params.append(x[:,self.param_offsets[i]:self.param_offsets[i]+self.param_sizes[i]])
             
             if self.support_multi_eval:
                 return self.orgfunc(*params)
             else:
                 rts = np.empty((x.shape[0],1))
-                for i in xrange(x.shape[0]):
+                for i in range(x.shape[0]):
                     rts[i] = self.orgfunc(*[p[i] for p in params])
                 return rts
         return obj_func

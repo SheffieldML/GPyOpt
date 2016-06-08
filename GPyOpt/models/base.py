@@ -3,8 +3,7 @@
 
 import abc
 
-class BOModel(object):
-    __metaclass__ = abc.ABCMeta
+class BOModel(object, metaclass=abc.ABCMeta):
     """
     The abstract Model for Bayesian Optimization
     """
