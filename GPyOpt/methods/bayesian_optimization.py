@@ -64,7 +64,7 @@ class BayesianOptimization(BO):
     :param batch_size: size of the batch in which the objective is evaluted (default, 1).
     :param num_cores: number of cores used to evaluate the objective (default, 1).
     :param verbosity: prints the models and other options during the optimization.
-    :param **kwargs: extra parameters. Can be used to tune the current optimization setup or to use depreciated options in this package release. 
+    :param **kwargs: extra parameters. Can be used to tune the current optimization setup or to use deprecated options in this package release. 
 
 
     .. Note::   The parameters bounds, kernel, numdata_initial_design, type_initial_design, model_optimize_interval, acquisition, acquisition_par
@@ -78,7 +78,7 @@ class BayesianOptimization(BO):
 
 
         ## ******************************  NOTE  *************************************************************************************
-        ## --- This part of the code ensures the compatibility with the previous version. It will be depreciated in the next release
+        ## --- This part of the code ensures the compatibility with the previous version. It will be deprecated in the next release
         ## ***************************************************************************************************************************
 
         ## Bounds to space
@@ -90,27 +90,27 @@ class BayesianOptimization(BO):
         ## Kernel
         if 'kernel' in kwargs:
             self.kernel = kwargs['kernel']
-            print('WARNING: "kernel" will be depreciated in the next version!')
+            print('WARNING: "kernel" will be deprecated in the next version!')
 
         ## Number of data in initial design
         if 'numdata_initial_design' in kwargs:
             initial_design_numdata = kwargs['numdata_initial_design']
-            print('WARNING: "numdata_initial_design" will be depreciated in the next version!')      
+            print('WARNING: "numdata_initial_design" will be deprecated in the next version!')      
 
         ## Type of initial design
         if 'type_initial_design' in kwargs:
             initial_design_type = kwargs['type_initial_design']
-            print('WARNING: "type_initial_design" will be depreciated in the next version!')
+            print('WARNING: "type_initial_design" will be deprecated in the next version!')
 
         ## Model optimize interval
         if 'model_optimize_interval' in kwargs:
             model_update_interval = kwargs['model_optimize_interval']
-            print('WARNING: "model_optimize_interval" will be depreciated in the next version!')
+            print('WARNING: "model_optimize_interval" will be deprecated in the next version!')
 
         ## Acquisition
         if 'acquisition' in kwargs:
             acquisition_type = kwargs['acquisition']
-            print('WARNING: "acquisition" will be depreciated in the next version!')
+            print('WARNING: "acquisition" will be deprecated in the next version!')
 
         ### Acquisition parameter
         if 'acquisition_par' in kwargs:
@@ -123,22 +123,22 @@ class BayesianOptimization(BO):
         ### Optimize restarts
         if 'model_optimize_restarts' in kwargs:
             self.optimize_restarts = kwargs['model_optimize_restarts']
-            print('WARNING: "model_optimize_restarts" will be depreciated in the next version!')
+            print('WARNING: "model_optimize_restarts" will be deprecated in the next version!')
 
         ## Model type
         if 'sparseGP' in kwargs:
             model_type = kwargs['sparseGP']
-            print('WARNING: "sparseGP" will be depreciated in the next version!')
+            print('WARNING: "sparseGP" will be deprecated in the next version!')
 
 
         if 'num_inducing' in kwargs:
             self.num_inducing = kwargs['num_inducing']
-            print('WARNING: "num_inducing" will be depreciated in the next version!')
+            print('WARNING: "num_inducing" will be deprecated in the next version!')
 
         ## Output normalization
         if 'normalize' in ['kwargs']:
             normalize_Y = kwargs['normalize']
-            print('WARNING: "normalize" will be depreciated in the next version!')
+            print('WARNING: "normalize" will be deprecated in the next version!')
 
         ## ***************************************************************************************************************************
         ## ***************************************************************************************************************************
@@ -379,7 +379,7 @@ class BayesianOptimization(BO):
 
 
 ## ******************************  NOTE  *************************************************************************************
-## --- This part of the code ensures the compatibility with the previous version. It will be depreciated in the next release
+## --- This part of the code ensures the compatibility with the previous version. It will be deprecated in the next release
 ## ***************************************************************************************************************************
 
     def run_optimization(self, max_iter = None, max_time = None,  eps = 1e-8, verbosity=True, report_file = None, **kwargs):
@@ -395,15 +395,15 @@ class BayesianOptimization(BO):
 
         if 'verbose' in kwargs:
             verbosity = kwargs['verbose']
-            print('WARNING: "verbose" will be depreciated in the next version!')
+            print('WARNING: "verbose" will be deprecated in the next version!')
  
         if 'n_inbatch' in kwargs:
             self.batch_size = kwargs['n_inbatch']
-            print('WARNING: "n_inbatch" will be depreciated in the next version!')
+            print('WARNING: "n_inbatch" will be deprecated in the next version!')
 
         if 'n_procs' in kwargs:
             self.num_cores = kwargs['n_procs']
-            print('WARNING: "n_proc" will be depreciated in the next version!')
+            print('WARNING: "n_proc" will be deprecated in the next version!')
 
         if 'batch_method' in kwargs:
             if kwargs['batch_method'] == 'lp':
@@ -412,11 +412,11 @@ class BayesianOptimization(BO):
             else:
                 self.evaluator_type = 'local_penalization'
                 self.evaluator = self._evaluator_chooser()
-            print('WARNING: "batch_method" will be depreciated in the next version!')
+            print('WARNING: "batch_method" will be deprecated in the next version!')
 
         if 'acqu_optimize_restarts' in kwargs:
             self.acquisition_optimizer.n_samples = kwargs['acqu_optimize_restarts']
-            print('WARNING: "acqu_optimize_restarts" will be depreciated in the next version!')
+            print('WARNING: "acqu_optimize_restarts" will be deprecated in the next version!')
 
         if 'acqu_optimize_method'  in kwargs:
             if kwargs['acqu_optimize_method'] == 'fast_random':
@@ -439,7 +439,7 @@ class BayesianOptimization(BO):
                 self.acquisition_optimizer.optimizer ='DIRECT'
             elif kwargs['acqu_optimize_method'] =='CMA':
                 self.acquisition_optimizer.optimizer ='CMA'
-            print('WARNING: "acqu_optimize_method" will be depreciated in the next version!')
+            print('WARNING: "acqu_optimize_method" will be deprecated in the next version!')
         super(BayesianOptimization, self).run_optimization(max_iter = max_iter, max_time = max_time,  eps = eps, verbosity=verbosity, report_file = report_file)
 
 
