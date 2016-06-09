@@ -5,7 +5,7 @@ import numpy as np
 import os
 import GPyOpt
 from GPyOpt.util.general import samples_multidimensional_uniform
-from driver import run_eval
+from GPyOpt.testing.driver import run_eval
 import unittest
 
 class TestAcquisitions(unittest.TestCase):
@@ -131,7 +131,7 @@ class TestAcquisitions(unittest.TestCase):
     def test_run(self):
         np.random.seed(1)
         for m_c in self.methods_configs:        
-            print('Testing acquisition ' + m_c['name')]
+            print('Testing acquisition ' + m_c['name'])
             name = m_c['name']+'_'+'acquisition_gradient_testfile'
             unittest_result = run_eval(problem_config= self.problem_config, f_inits= self.f_inits, method_config=m_c, name=name, outpath=self.outpath, time_limit=None, unittest = self.is_unittest)           
             original_result = np.loadtxt(self.outpath +'/'+ name+'.txt')
