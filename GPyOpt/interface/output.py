@@ -3,6 +3,7 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 import numpy as np
+from builtins import range  # compatible with 2 and 3
 
 class DataSaver(object):
     

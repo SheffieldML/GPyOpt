@@ -2,8 +2,9 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 import abc
+from six import with_metaclass
 
-class BOModel(object, metaclass=abc.ABCMeta):
+class BOModel(with_metaclass(abc.ABCMeta, object)):
     """
     The abstract Model for Bayesian Optimization
     """
