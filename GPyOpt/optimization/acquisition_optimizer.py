@@ -119,7 +119,7 @@ class ContAcqOptimizer(AcquOptimizer):
         # -- take only the fixed components of the random samples
         self.samples = self.samples[:,np.array(self.free_dims)] # take only the component of active dims
         self.subspace = self.space.get_subspace(self.free_dims)
-        self.optimizer = select_optimizer(self.optimizer_name)(Design_space(self.subspace), self.kwargs)
+        self.optimizer = select_optimizer(self.optimizer_name)(Design_space(self.subspace), **self.kwargs)
 
     def _expand_vector(self,x):
         '''
