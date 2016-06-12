@@ -13,7 +13,6 @@ except:
 class BO(object):
     """
     Runner of Bayesian optimization loop. This class wraps the optimization loop around the different handlers.
-
     :param model: GPyOpt model class.
     :param space: GPyOpt space class.
     :param objective: GPyOpt objective class.
