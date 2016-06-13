@@ -26,11 +26,8 @@ class AcquisitionLCB(AcquisitionBase):
         super(AcquisitionLCB, self).__init__(model, space, optimizer)
         self.exploration_weight = exploration_weight
 
-        if cost_withGradients == None:
-            self.cost_withGradients = constant_cost_withGradients
-        else:
-            print('LBC acquisition does now make sense with cost. Cost set to constant.')  
-            self.cost_withGradients = constant_cost_withGradients
+        if cost_withGradients is not None:
+            print('The set cost function is ignored! LBC acquisition does not make sense with cost.')  
     
     def _compute_acq(self, m, s, x):
         """

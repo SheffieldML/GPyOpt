@@ -2,6 +2,8 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 from .EI import AcquisitionEI
+from ..util.general import get_quantiles
+
 
 class AcquisitionEI_MCMC(AcquisitionEI):
     """
@@ -20,34 +22,38 @@ class AcquisitionEI_MCMC(AcquisitionEI):
     analytical_gradient_prediction = True
 
     def __init__(self, model, space, optimizer=None, cost_withGradients=None, jitter=0.01):
-        super(AcquisitionEI_MCMC, self).__init__(model, space, optimizer)
+        super(AcquisitionEI_MCMC, self).__init__(model, space, optimizer, cost_withGradients, jitter)
         
         assert self.model.MCMC_sampler, 'Samples from the hyperparameters are needed to compute the integrated EI'
 
-    def acquisition_function(self,x):
+    def _compute_acq(self,x):
         """
         Integrated Expected Improvement
         """    
         means, stds = self.model.predict(x)
-        fmin = self.model.get_fmin()
+        fmins = self.model.get_fmin()
         f_acqu = 0
-        for m,s in zip(means, stds):
-            f_acqu += self._compute_acq(m, s, fmin, x)
+        for m,s,fmin in zip(means, stds, fmins):
+            phi, Phi, _ = get_quantiles(self.jitter, fmin, m, s)    
+            f_acqu += (fmin - m + self.jitter) * Phi + s * phi
         return f_acqu/(len(means))
 
-    def acquisition_function_withGradients(self, x):
+    def _compute_acq_withGradients(self, x):
         """
         Integrated Expected Improvement and its derivative
         """
         means, stds, dmdxs, dsdxs = self.model.predict_withGradients(x)
-        fmin = self.model.get_fmin()
+        fmins = self.model.get_fmin()
         f_acqu = None
         df_acqu = None
-        for m, s, dmdx, dsdx in zip(means, stds, dmdxs, dsdxs):
+        for m, s, fmin, dmdx, dsdx in zip(means, stds, fmins, dmdxs, dsdxs):
+            phi, Phi, _ = get_quantiles(self.jitter, fmin, m, s)    
+            f = (fmin - m + self.jitter) * Phi + s * phi        
+            df = dsdx * phi - Phi * dmdx
             if f_acqu is None:
-                f_acqu, df_acqu = self._compute_acq_withGradients(m, s, fmin, dmdx, dsdx, x)
+                f_acqu = f        
+                df_acqu = df
             else:
-                f, df = self._compute_acq_withGradients(m, s, fmin, dmdx, dsdx, x)
                 f_acqu += f
                 df_acqu += df
         return f_acqu/(len(means)), df_acqu/(len(means))

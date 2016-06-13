@@ -248,7 +248,19 @@ class GPModel_MCMC(BOModel):
         """
         Returns the location where the posterior mean is takes its minimal value.
         """
-        return self.model.predict(self.model.X)[0].min()
+        ps = self.model.param_array.copy()
+        fmins = []
+        for s in self.hmc_samples:
+            if self.model._fixes_ is None:
+                self.model[:] = s
+            else:
+                self.model[self.model._fixes_] = s
+            self.model._trigger_params_changed()
+            fmins.append(self.model.predict(self.model.X)[0].min())
+        self.model.param_array[:] = ps
+        self.model._trigger_params_changed()
+
+        return fmins
     
     def predict_withGradients(self, X):
         """

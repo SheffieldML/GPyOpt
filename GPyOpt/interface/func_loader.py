@@ -3,7 +3,7 @@
 
 import os
 import numpy as np
-from builtins import range  # compatible with 2 and 3
+#from builtins import range  # compatible with 2 and 3
 
 class ObjectiveFunc(object):
     
