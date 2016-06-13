@@ -27,7 +27,7 @@ class GPModel(BOModel):
 
     analytical_gradient_prediction = True  # --- Needed in all models to check is the gradiens of acquisitions are computable.
     
-    def __init__(self, kernel=None, noise_var=None, exact_feval=False, normalize_Y=True, optimizer='bfgs', max_iters=1000, optimize_restarts=5, sparse = False, num_inducing = 10,  verbose=False):
+    def __init__(self, kernel=None, noise_var=None, exact_feval=False, normalize_Y=True, optimizer='bfgs', max_iters=1000, optimize_restarts=5, sparse = False, num_inducing = 10,  verbose=True):
         self.kernel = kernel
         self.noise_var = noise_var
         self.exact_feval = exact_feval
@@ -127,6 +127,18 @@ class GPModel(BOModel):
         copied_model._create_model(self.model.X,self.model.Y)
         copied_model.updateModel(self.model.X,self.model.Y, None, None)
         return copied_model
+
+    def get_model_parameters(self):
+        """
+        Returns a 2D numpy array with the parametes of the model
+        """
+        return np.atleast_2d(self.model[:])
+
+    def get_model_parameters_names(self):
+        """
+        Returns a list with the names of the parametes of the model
+        """
+        return self.model.parameter_names()
 
 
 class GPModel_MCMC(BOModel):
@@ -286,6 +298,18 @@ class GPModel_MCMC(BOModel):
         copied_model._create_model(self.model.X,self.model.Y)
         copied_model.updateModel(self.model.X,self.model.Y, None, None)
         return copied_model
+
+    def get_model_parameters(self):
+        """
+        Returns a 2D numpy array with the parametes of the model
+        """
+        return np.atleast_2d(self.model[:])
+
+    def get_model_parameters_names(self):
+        """
+        Returns a list with the names of the parametes of the model
+        """
+        return self.model.parameter_names()
 
 
 

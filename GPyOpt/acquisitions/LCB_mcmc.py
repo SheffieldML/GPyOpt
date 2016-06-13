@@ -16,6 +16,9 @@ class AcquisitionLCB_MCMC(AcquisitionLCB):
     .. Note:: allows to compute the Improvement per unit of cost
 
     """
+
+    analytical_gradient_prediction = True
+    
     def __init__(self, model, space, optimizer=None, cost_withGradients=None, exploration_weight=2):
         super(AcquisitionLCB_MCMC, self).__init__(model, space, optimizer)
         

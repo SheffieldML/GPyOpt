@@ -17,6 +17,7 @@ class AcquisitionMPI_MCMC(AcquisitionMPI):
 
     """
 
+    analytical_gradient_prediction = True
 
     def __init__(self, model, space, optimizer=None, cost_withGradients=None, jitter=0.01):
         super(AcquisitionMPI_MCMC, self).__init__(model, space, optimizer)

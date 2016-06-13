@@ -1,6 +1,7 @@
 # Copyright (c) 2016, the GPyOpt Authors
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
+import GPyOpt
 import numpy as np
 import time
 from ..util.general import best_value, reshape
@@ -39,7 +40,7 @@ class BO(object):
         self.cost = CostModel(cost)
         
 
-    def run_optimization(self, max_iter = None, max_time = None,  eps = 1e-8, verbosity=True, report_file = None):
+    def run_optimization(self, max_iter = 0, max_time = -999,  eps = 1e-8, verbosity=True, save_models_parameters= True, report_file = None, evaluations_file= None, models_file=None):
         """ 
         Runs Bayesian Optimization for a number 'max_iter' of iterations (after the initial exploration data)
 
@@ -49,7 +50,20 @@ class BO(object):
         :param vervosity: flag to print the optimization results after each iteration (default, True).
         :param report_file: filename of the file where the results of the optimization are saved (default, None).
         """
+
+        # --- Save the optinos to print and save the results
         self.verbosity = verbosity
+        self.save_models_parameters = save_models_parameters
+        self.report_file = report_file
+        self.evaluations_file = evaluations_file
+        self.models_file = models_file
+        self.model_parameters_iterations = None
+
+        # --- Check if we can save the model parametes in each iteration
+        if self.save_models_parameters == True:
+            if not isinstance(self.model, GPyOpt.models.GPModel) or isinstance(self.model, GPyOpt.models.GPModel_MCMC):
+                print('Models printout after each iteration is only available for GP and GP_MCMC models') 
+                self.save_models_parameters = False
 
         # --- Setting up stop conditions
         self.eps = eps 
@@ -108,9 +122,13 @@ class BO(object):
         # --- Stop messages and execution time   
         self._compute_results()
 
-        # --- Plot convergence results and print report
-        self._print_convergence()
-        if report_file != None:  self.save_report(report_file)
+        # --- Print the desired result in files
+        if self.report_file != None: 
+            self.save_report(self.report_file)
+        if self.evaluations_file != None: 
+            self.save_evaluations(self.evaluations_file)
+        if self.models_file != None:  
+            self.save_models(self.models_file)
 
 
     def _print_convergence(self):
@@ -167,7 +185,7 @@ class BO(object):
         
     def _update_model(self):
         """
-        Updates the model.
+        Updates the model and saves the parameters (if avaiable).
         """
         if (self.num_acquisitions%self.model_update_interval)==0:
             if self.normalize_Y:
@@ -175,6 +193,13 @@ class BO(object):
             else:
                 self.model.updateModel(self.X, self.Y,self.suggested_sample,self.Y_new)
 
+        self._save_model_parameter_values()
+
+    def _save_model_parameter_values(self):
+        if self.model_parameters_iterations == None:
+            self.model_parameters_iterations = self.model.get_model_parameters()
+        else:
+            self.model_parameters_iterations = np.vstack((self.model_parameters_iterations,self.model.get_model_parameters()))
 
     def plot_acquisition(self,filename=None):
         """        
@@ -205,7 +230,7 @@ class BO(object):
     def get_evaluations(self):
         return self.X.copy(), self.Y.copy()
 
-    def save_report(self, report_file= 'GPyOpt-results.txt'):
+    def save_report(self, report_file= None):
         """
         Saves a report with the main resutls of the optimization.
  
@@ -258,9 +283,36 @@ class BO(object):
             file.write('----------------------------------------------------------------------------------------------\n')
             file.close()
 
+    def save_evaluations(self, evaluations_file= None):
+        """
+        Saves a report with the results of the iterations of the optimization
 
+        :param evaluations_file: name of the file in which the results are saved.
+        """
+        import pandas as pd
 
+        iterations = np.array(range(1,self.Y.shape[0]+1))[:,None]
+        results   = np.hstack((iterations,self.Y,self.X))
+        header = ['Iteration', 'Y']
+        for k in range(1,self.X.shape[1]+1): 
+            header += ['var_' +str(k)] 
 
+        df_results = pd.DataFrame(results,columns = header)
+        df_results.to_csv(evaluations_file,index =False,sep='\t')
+
+    def save_models(self, models_file= None):
+        """
+        Saves a report with the results of the iterations of the optimization
+
+        :param iterations_file: name of the file in which the results are saved.
+        """
+        import pandas as pd
+        iterations = np.array(range(1,self.model_parameters_iterations.shape[0]+1))[:,None]
+        results   = np.hstack((iterations,self.model_parameters_iterations))
+
+        header  = ['Iteration'] + self.model.get_model_parameters_names()
+        df_results = pd.DataFrame(results,columns = header)
+        df_results.to_csv(models_file,index =False, sep='\t')
 
 
 

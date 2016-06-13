@@ -391,7 +391,7 @@ class BayesianOptimization(BO):
 ## --- This part of the code ensures the compatibility with the previous version. It will be deprecated in the next release
 ## ***************************************************************************************************************************
 
-    def run_optimization(self, max_iter = None, max_time = None,  eps = 1e-8, verbosity=True, report_file = None, **kwargs):
+    def run_optimization(self, max_iter = None, max_time = None,  eps = 1e-8, verbosity=True, save_models_parameters= True, report_file = None, evaluations_file= None, models_file=None, **kwargs):
         """ 
         Runs Bayesian Optimization for a number 'max_iter' of iterations (after the initial exploration data)
 
@@ -449,7 +449,7 @@ class BayesianOptimization(BO):
             elif kwargs['acqu_optimize_method'] =='CMA':
                 self.acquisition_optimizer.optimizer ='CMA'
             print('WARNING: "acqu_optimize_method" will be deprecated in the next version!')
-        super(BayesianOptimization, self).run_optimization(max_iter = max_iter, max_time = max_time,  eps = eps, verbosity=verbosity, report_file = report_file)
+        super(BayesianOptimization, self).run_optimization(max_iter = max_iter, max_time = max_time,  eps = eps, verbosity=verbosity, save_models_parameters = save_models_parameters, report_file = report_file, evaluations_file= evaluations_file, models_file=models_file)
 
 
 

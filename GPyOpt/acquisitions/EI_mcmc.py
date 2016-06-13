@@ -17,6 +17,7 @@ class AcquisitionEI_MCMC(AcquisitionEI):
 
     """
 
+    analytical_gradient_prediction = True
 
     def __init__(self, model, space, optimizer=None, cost_withGradients=None, jitter=0.01):
         super(AcquisitionEI_MCMC, self).__init__(model, space, optimizer)

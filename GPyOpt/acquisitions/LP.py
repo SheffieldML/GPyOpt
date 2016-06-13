@@ -20,6 +20,9 @@ class AcquisitionLP(AcquisitionBase):
     This way gradiens can be computed aditively and are more stable.
  
     """
+
+    analytical_gradient_prediction = True
+
     def __init__(self, model, space, optimizer, acquisition, transform='none'):
         super(AcquisitionLP, self).__init__(model, space, optimizer)
         
