@@ -15,7 +15,7 @@ class WarpedGPModel(BOModel):
     analytical_gradient_prediction = False
     
     def __init__(self, kernel=None, noise_var=None, exact_feval=False, normalize_Y=True, optimizer='bfgs', max_iters=1000, 
-    			optimize_restarts=5, warping_function=None, warping_terms=3, verbose=False):   
+                        optimize_restarts=5, warping_function=None, warping_terms=3, verbose=False):   
 
         self.kernel = kernel
         self.noise_var = noise_var
@@ -46,16 +46,16 @@ class WarpedGPModel(BOModel):
         if self.exact_feval:
             self.model.Gaussian_noise.constrain_fixed(1e-6, warning=False)
         else: 
-        	self.model.Gaussian_noise.constrain_positive(warning=False)
+                self.model.Gaussian_noise.constrain_positive(warning=False)
 
 
     def updateModel(self, X_all, Y_all, X_new, Y_new):
 
         if self.normalize_Y:
-        	Y_all = (Y_all - Y_all.mean())/(Y_all.std())
+                Y_all = (Y_all - Y_all.mean())/(Y_all.std())
 
-		self._create_model(X_all, Y_all)
-		self.model.optimize(optimizer = self.optimizer, messages=self.verbose, max_iters=self.max_iters)
+                self._create_model(X_all, Y_all)
+                self.model.optimize(optimizer = self.optimizer, messages=self.verbose, max_iters=self.max_iters)
 
 
     def predict(self, X):
@@ -65,7 +65,7 @@ class WarpedGPModel(BOModel):
         return m, np.sqrt(v)
 
     def get_fmin(self):
-    	return self.model.predict(self.model.X)[0].min()
+        return self.model.predict(self.model.X)[0].min()
 
 
 

@@ -19,6 +19,6 @@ class Sequential(EvaluatorBase):
         """
         Selects the new location to evaluate the objective.
         """
-    	return self.acquisition.optimize()
+        return self.acquisition.optimize()
 
 

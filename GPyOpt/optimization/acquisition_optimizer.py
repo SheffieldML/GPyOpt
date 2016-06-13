@@ -87,7 +87,7 @@ class ContAcqOptimizer(AcquOptimizer):
         self.optimizer_name = optimizer
         self.kwargs = kwargs
         self.optimizer = select_optimizer(self.optimizer_name)(space, **kwargs)
-        self.free_dims = range(space.dimensionality)
+        self.free_dims = list(range(space.dimensionality))
         self.bounds = self.space.get_bounds()
         self.subspace = self.space
 
@@ -108,18 +108,18 @@ class ContAcqOptimizer(AcquOptimizer):
         self.fixed_values = np.atleast_2d(values)
         
         # -- restore to initial values
-        self.free_dims = range(self.space.dimensionality) 
+        self.free_dims = list(range(self.space.dimensionality))
         self.bounds = self.space.get_bounds()
 
         # -- change free dimensions and remove bounds from fixed dimensions
-        for idx in self.fixed_dims[::-1]: # need to reverse the order to start removing from the back, otherwise dimensions dont' maach
+        for idx in self.fixed_dims[::-1]: # need to reverse the order to start removing from the back, otherwise dimensions dont' match
             self.free_dims.remove(idx)
             del self.bounds[idx]
 
         # -- take only the fixed components of the random samples
         self.samples = self.samples[:,np.array(self.free_dims)] # take only the component of active dims
         self.subspace = self.space.get_subspace(self.free_dims)
-        self.optimizer = select_optimizer(self.optimizer_name)(Design_space(self.subspace), self.kwargs)
+        self.optimizer = select_optimizer(self.optimizer_name)(Design_space(self.subspace), **self.kwargs)
 
     def _expand_vector(self,x):
         '''
@@ -234,7 +234,7 @@ class BanditAcqOptimizer(AcquOptimizer):
             f_min = f(x_min)
             
         else:
-            print 'All locations of the design space have been sampled.'
+            print('All locations of the design space have been sampled.')
             #break
         
         self.pulled_arms = np.vstack((self.pulled_arms, x_min))

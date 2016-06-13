@@ -13,7 +13,6 @@ except:
 class BO(object):
     """
     Runner of Bayesian optimization loop. This class wraps the optimization loop around the different handlers.
-
     :param model: GPyOpt model class.
     :param space: GPyOpt space class.
     :param objective: GPyOpt objective class.
@@ -121,17 +120,17 @@ class BO(object):
         # --- Print stopping reason
         if self.verbosity: 
             if (self.num_acquisitions == self.max_iter) and (not self.initial_iter):        
-                print '   ** Maximum number of iterations reached **' 
+                print('   ** Maximum number of iterations reached **')
                 return 1
             elif (self._distance_last_evaluations() < self.eps) and (not self.initial_iter): 
-                print '   ** Two equal location selected **'
+                print('   ** Two equal location selected **')
                 return 1
             elif (self.max_time < self.cum_time) and not (self.initial_iter):               
-                print '   ** Evaluation time reached **'
+                print('   ** Evaluation time reached **')
                 return 0
 
             if self.initial_iter:
-                print '** GPyOpt Bayesian Optimization class initialized succesfuly **'
+                print('** GPyOpt Bayesian Optimization class initialized succesfuly **')
                 self.initial_iter = False  
 
 
@@ -214,35 +213,49 @@ class BO(object):
         """
 
         with open(report_file,'w') as file:
-            file.write('---------------------------------' + ' Results file ' + '--------------------------------------\n')
-            file.write('GPyOpt Version 1.0.0 \n')
-            file.write('Date and time:              ' + time.strftime("%c")+'\n')
-            if self.num_acquisitions==self.max_iter: 
-                file.write('Optimization completed:     ' +'YES, ' + str(self.X.shape[0]).strip('[]') + ' samples collected.\n')
-            else:
-                file.write('Optimization completed:     ' +'NO,' + str(self.X.shape[0]).strip('[]') + ' samples collected.\n')
-            file.write('Optimization time:          ' + str(self.time).strip('[]') +' seconds.\n')   
-            
-            file.write('---------------------------------' + ' Problem set up ' + '------------------------------------\n')   
-            #file.write('Problem Name:          ' + str(self.input_dim).strip('[]') +'\n')            
-            #file.write('Problem Dimension:          ' + str(self.input_dim).strip('[]') +'\n')    
-            #file.write('Continous variables     ' + str(self.bounds).strip('[]') +'\n') 
-            #file.write('Discrete variables     ' + str(self.bounds).strip('[]') +'\n') 
-            #file.write('Bandits                ' + str(self.bounds).strip('[]') +'\n')            
-            #file.write('Cost used:                  ' + str(self.bounds).strip('[]') +'\n') 
-
-            file.write('-------------------------------' + ' Optimization set up ' + '----------------------------------\n')
+            import GPyOpt
+            import time
  
-            #file.write('Model type:                 ' + str(self.sparseGP).strip('[]') + '\n')  
-            #file.write('Acquisition:                ' + self.acqu_name + '\n')   
-            #file.write('Acquisition optimizer:      ' + self.acqu_optimize_method+ '\n') 
-            #file.write('Batch method:               ' + self.acqu_name + '\n')             
-            #file.write('Batch size:                 ' + str(self.n_inbatch).strip('[]') +'\n')  
+            file.write('-----------------------------' + ' GPyOpt Report file ' + '-----------------------------------\n')
+            file.write('GPyOpt Version ' + str(GPyOpt.__version__) + '\n')
+            file.write('Date and time:               ' + time.strftime("%c")+'\n')
+            if self.num_acquisitions==self.max_iter: 
+                file.write('Optimization completed:      ' +'YES, ' + str(self.X.shape[0]).strip('[]') + ' samples collected.\n')
+                file.write('Numer initial samples:       ' + str(self.initial_design_numdata) +' \n')
+            else:
+                file.write('Optimization completed:      ' +'NO,' + str(self.X.shape[0]).strip('[]') + ' samples collected.\n')
+                file.write('Numer initial samples:       ' + str(self.initial_design_numdata) +' \n')
 
+            file.write('Tolerance:                   ' + str(self.eps) + '.\n')
+            file.write('Optimization time:           ' + str(self.cum_time).strip('[]') +' seconds.\n')   
+
+            file.write('\n')           
+            file.write('--------------------------------' + ' Problem set up ' + '------------------------------------\n')   
+            file.write('Problem name:                ' + self.objective_name +'\n')            
+            file.write('Problem dimension:           ' + str(self.space.dimensionality) +'\n')    
+            file.write('Number continous variables   ' + str(len(self.space.get_continuous_dims()) ) +'\n') 
+            file.write('Number discrete variables    ' + str(len(self.space.get_discrete_dims())) +'\n') 
+            file.write('Number bandits               ' + str(self.space.get_bandit().shape[0]) +'\n') 
+            file.write('Noiseless evaluations:       ' + str(self.exact_feval) +'\n')         
+            file.write('Cost used:                   ' + self.cost.cost_type +'\n') 
+            file.write('Constrains:                  ' + str(self.constrains==True) +'\n')            
+
+            file.write('\n')
+            file.write('------------------------------' + ' Optimization set up ' + '---------------------------------\n') 
+            file.write('Normalized outputs:          ' + str(self.normalize_Y) + '\n')  
+            file.write('Model type:                  ' + str(self.model_type).strip('[]') + '\n')  
+            file.write('Model update interval:       ' + str(self.model_update_interval) + '\n')  
+            file.write('Acquisition type:            ' + str(self.acquisition_type).strip('[]') + '\n') 
+            file.write('Acquisition optimizer:       ' + str(self.acquisition_optimizer.optimizer_name).strip('[]') + '\n') 
+            file.write('Evaluator type (batch size): ' + str(self.evaluator_type).strip('[]') + ' (' + str(self.batch_size) + ')' + '\n')
+            file.write('Cores used:                  ' + str(self.num_cores) + '\n')
+
+            file.write('\n')
             file.write('---------------------------------' + ' Summary ' + '------------------------------------------\n')
-            file.write('Best found minimum:         ' + str(min(self.Y)).strip('[]') +'\n') 
-            file.write('Minumum location:           ' + str(self.X[np.argmin(self.Y),:]).strip('[]') +'\n') 
+            file.write('Value at minimum:            ' + str(min(self.Y)).strip('[]') +'\n') 
+            file.write('Best found minimum location: ' + str(self.X[np.argmin(self.Y),:]).strip('[]') +'\n') 
     
+            file.write('----------------------------------------------------------------------------------------------\n')
             file.close()
 
 

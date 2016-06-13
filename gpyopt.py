@@ -7,7 +7,7 @@ from GPyOpt.interface import parser, BODriver, ObjectiveFunc, OutputEng
 if __name__ == '__main__':
     import sys,os
     if len(sys.argv)<1:
-        print 'Need the config file!'
+        print('Need the config file!')
         exit()
     
     configfile = sys.argv[1]

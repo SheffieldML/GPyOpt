@@ -46,3 +46,5 @@ iterate.dat
 *.orig
 
 .DS_Store
+
+.ipynb_checkpoints
