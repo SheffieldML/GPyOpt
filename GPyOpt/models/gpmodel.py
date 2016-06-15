@@ -25,7 +25,7 @@ class GPModel(BOModel):
     """
 
 
-    analytical_gradient_prediction = True  # --- Needed in all models to check is the gradiens of acquisitions are computable.
+    analytical_gradient_prediction = True  # --- Needed in all models to check is the gradients of acquisitions are computable.
     
     def __init__(self, kernel=None, noise_var=None, exact_feval=False, normalize_Y=True, optimizer='bfgs', max_iters=1000, optimize_restarts=5, sparse = False, num_inducing = 10,  verbose=True):
         self.kernel = kernel
@@ -39,6 +39,10 @@ class GPModel(BOModel):
         self.sparse = sparse
         self.num_inducing = num_inducing
         self.model = None
+        
+    @staticmethod
+    def fromConfig(config):
+        return GPModel(**config)
         
     def _create_model(self, X, Y):
         """
@@ -158,12 +162,10 @@ class GPModel_MCMC(BOModel):
 
     .. Note:: This model does MCMC over the hyperparameters.
 
-    """    
-
-
+    """
 
     MCMC_sampler = True
-    analytical_gradient_prediction = True # --- Needed in all models to check is the gradiens of acquisitions are computable.
+    analytical_gradient_prediction = True # --- Needed in all models to check is the gradients of acquisitions are computable.
     
     def __init__(self, kernel=None, noise_var=None, exact_feval=False, normalize_Y=True, n_samples = 10, n_burnin = 100, subsample_interval = 10, step_size = 1e-1, leapfrog_steps=20, verbose=False):
         self.kernel = kernel

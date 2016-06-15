@@ -30,27 +30,7 @@ class Report(DataSaver):
         self.filename = os.path.join(self.outpath,filename)
             
     def save_data(self, iters, times, offsets, X, Y, bo):
-        import time
-        
-        with open(self.filename,'w') as file:
-            file.write('---------------------------------' + ' Results file ' + '--------------------------------------\n')
-            file.write('GPyOpt Version 0.1.0 \n')
-            file.write('Date and time:              ' + time.strftime("%c")+'\n')
-            file.write('Optimization completed:     '+ str(bo.X.shape[0]).strip('[]') + ' samples collected.\n')
-            file.write('Optimization time:          ' + str(bo.time).strip('[]') +' seconds.\n') 
-    
-            file.write('---------------------------------' + ' Problem set up ' + '------------------------------------\n')
-            file.write('Problem Dimension:          ' + str(bo.input_dim).strip('[]') +'\n')    
-            file.write('Problem bounds:             ' + str(bo.bounds).strip('[]') +'\n') 
-            file.write('Batch size:                 ' + str(bo.n_inbatch).strip('[]') +'\n')    
-            file.write('Acquisition:                ' + bo.acqu_name + '\n')  
-            file.write('Acquisition optimizer:      ' + bo.acqu_optimize_method+ '\n')  
-            file.write('Sparse GP:                  ' + str(bo.sparseGP).strip('[]') + '\n')  
-            file.write('---------------------------------' + ' Summary ' + '------------------------------------------\n')
-            file.write('Best found minimum:         ' + str(min(bo.Y)).strip('[]') +'\n') 
-            file.write('Minumum location:           ' + str(bo.X[np.argmin(bo.Y),:]).strip('[]') +'\n') 
-    
-            file.close()
+        bo.save_report(report_file= self.filename)
             
 class Logger(DataSaver):
     def __init__(self, config, outpath, prjname='',name=''):

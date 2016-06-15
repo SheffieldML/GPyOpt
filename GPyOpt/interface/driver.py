@@ -1,6 +1,7 @@
 # Copyright (c) 2014, GPyOpt authors (see AUTHORS.txt).
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
+import numpy as np
 import time
 from ..methods import BayesianOptimization
 
@@ -20,16 +21,48 @@ class BODriver(object):
         self.obj_func = obj_func
         self.outputEng = outputEng
         
-    def _get_bounds(self):
-        assert 'variables' in self.config, 'No variable configurations!'
+    def _get_obj(self):
+        obj_func = self.obj_func.objective_function()
         
-        bounds = []
-        var = self.config['variables']
-        # for k in var.keys():
-        for k in list(var.keys()):
-            assert var[k]['type'].lower().startswith('float'), 'Only real value variables are supported!'
-            bounds.extend([(float(var[k]['min']), float(var[k]['max']))]*int(var[k]['size']))
-        return bounds
+        from ..core.task import SingleObjective
+        return SingleObjective(obj_func, self.config['resources']['cores'])
+        
+    def _get_space(self):
+        assert 'space' in self.config, 'The search space is NOT configured!'
+        
+        space_config = self.config['space']
+        constraint_config = None if len(self.config['constraints'])==0 else self.config['constraints']  
+        from ..core.task.space import Design_space
+        return Design_space(space_config, constraint_config)
+    
+    def _get_model(self):
+
+        from copy import deepcopy
+        model_args = deepcopy(self.config['model'])
+        del model_args['type']
+        from ..models import select_model
+        
+        return select_model(self.config['model']['type']).fromConfig(model_args)
+        
+    
+    def _get_acquisition(self, model, space):
+
+        from copy import deepcopy        
+        acqOpt_config = deepcopy(self.config['acquisition']['optimizer'])
+        acqOpt_name = acqOpt_config['name']
+        del acqOpt_config['name']
+        
+        from ..optimization import AcquisitionOptimizer
+        acqOpt = AcquisitionOptimizer(space, acqOpt_name, **acqOpt_config)
+        from ..acquisitions import select_acquisition
+        return select_acquisition(self.config['acqusition']['type']).fromConfig(model, space, acqOpt, None, self.config['acqusition'])
+    
+    def _get_acq_evaluator(self, acq):
+        from ..core.evaluators import select_evaluator
+        from copy import deepcopy
+        eval_args = deepcopy(self.config['acquisition']['evaluator'])
+        del eval_args['type']
+        return select_evaluator(self.config['acquisition']['evaluator']['type'], **eval_args)
     
     def _check_stop(self, iters, elapsed_time, converged):
         r_c = self.config['resources']
@@ -44,39 +77,15 @@ class BODriver(object):
         return stop
             
     def run(self):
-        m_c, a_c, r_c, p_c = self.config['model'], self.config['acquisition'], self.config['resources'], self.config['parallelization']
-        o_c = self.config['output']
-        bounds = self._get_bounds()
-        obj_func = self.obj_func.objective_function()
+        space = self._get_space()
+        obj_func = self._get_obj()
+        model = self._get_model()
+        acq = self._get_acquisition(model, space)
+        acq_eval = self._get_acq_evaluator(acq)
         
-        xs_init = None
-        ys_init = None
-        iters = 0
-        offset = 0
-    
-        bo = BayesianOptimization(obj_func, bounds=bounds, X= xs_init, Y=ys_init, 
-                                                 numdata_initial_design = m_c['initial-points'],type_initial_design= m_c['design-initial-points'],
-                                                 model_optimize_interval=m_c['optimization-interval'],model_optimize_restarts=m_c['optimization-restarts'],
-                                                 sparseGP=True if m_c['type'].lower()=='sparsegp' else False, num_inducing=m_c['inducing-points'],
-                                                 acquisition=a_c['type'], acquisition_par = a_c['parameter'],normalize=m_c['normalized-evaluations'],
-                                                 exact_feval=True if self.config['likelihood'].lower()=="noiseless" else False, verbosity=o_c['verbosity'])
-        X, Y = bo.get_evaluations()
-        offset = X.shape[0]
-        if self.outputEng is not None: self.outputEng.append_iter(iters, 0., X, Y, bo)
-
-        start_time = time.time()
-        while True:
-            rt = bo.run_optimization(max_iter = r_c['iterations_per_call'], n_inbatch= p_c['batch-size'], batch_method = p_c['type'], 
-                                      acqu_optimize_method=a_c['optimization-method'], acqu_optimize_restarts= a_c['optimization-restarts'], 
-                                      true_gradients = a_c["true-gradients"], n_procs=r_c['cores'], eps=r_c['tolerance'], verbose=o_c['verbosity'])
-            
-            iters += r_c['iterations_per_call']
-            elapsed_time = time.time() - start_time
-
-            X, Y = bo.get_evaluations()
-            if self.outputEng is not None:  self.outputEng.append_iter(iters, elapsed_time, X[offset:], Y[offset:], bo)
-            offset = X.shape[0]
-            
-            if self._check_stop(iters, elapsed_time, rt): break
-        self.outputEng.append_iter(iters, elapsed_time, X[offset:], Y[offset:], bo, final=True)
+        from ..methods import ModularBayesianOptimization
+        bo = ModularBayesianOptimization(model, space, obj_func, acq, acq_eval, None)
+        
+        bo.run_optimization(max_iter = self.config['resources']['maximum-iterations'], max_time = self.config['resources']['max-run-time'] if self.config['resources']['max-run-time']!="NA" else np.inf,
+                              eps = self.config['resources']['tolerance'], verbosity=True)        
         return bo

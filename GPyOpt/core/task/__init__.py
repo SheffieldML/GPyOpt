@@ -2,3 +2,5 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 from .objective import SingleObjective
+import space
+from .cost import CostModel

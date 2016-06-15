@@ -8,11 +8,11 @@ class EvaluatorBase(object):
     """
 
     def __init__(self, acquisition, batch_size, **kwargs):
-    	self.acquisition = acquisition
-    	self.batch_size = batch_size
+        self.acquisition = acquisition
+        self.batch_size = batch_size
 
     def compute_batch(self):
-    	pass
+        pass
 
 
 

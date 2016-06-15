@@ -14,7 +14,7 @@ class Design_space(object):
     space  =[{'name': 'var_1', 'type': 'bandit', 'domain': [(-1,1),(1,0),(0,1)]},
              {'name': 'var_2', 'type': 'bandit', 'domain': [(-1,4),(0,0),(1,2)]}]
 
-    - Continous domain
+    - Continuous domain
     space =[ {'name': 'var_1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality':1},
              {'name': 'var_2', 'type': 'continuous', 'domain':(-3,1), 'dimensionality':2},
              {'name': 'var_3', 'type': 'bandit', 'domain': [(-1,1),(1,0),(0,1)], 'dimensionality':2},
@@ -36,24 +36,24 @@ class Design_space(object):
     of dictionaries. For instance, this is an example of an space coupled with a constrain
 
     space =[ {'name': 'var_1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality':2}]
-    constrains = [ {'name': 'const_1', 'constrain': 'x[:,0]**2 + x[:,1]**2 - 1'}]
+    constraints = [ {'name': 'const_1', 'constrain': 'x[:,0]**2 + x[:,1]**2 - 1'}]
 
-    If no constrains are provided the hypercube determined by the bounds constrains are used.
+    If no constrains are provided the hypercube determined by the bounds constraints are used.
 
     param space: list of dictionaries as indicated above.
-    param constrains: list of dictionaries as indicated above (default, none)
+    param constraints: list of dictionaries as indicated above (default, none)
 
     """
     
     supported_types = ['continuous', 'discrete', 'bandit']
     
-    def __init__(self, space, constrains=None):
+    def __init__(self, space, constraints=None):
         self._complete_attributes(space)
         self.space_expanded = self._expand_attributes(self.space)
-        self.constrains = constrains
+        self.constraints = constraints
 
         if self.has_types['bandit'] and (self.has_types['continuous'] or self.has_types['discrete']):
-            print('Conbinations of bandits with other variables are not supported.')
+            print('Combinations of bandits with other variables are not supported.')
         
     def _complete_attributes(self, space):
         """
@@ -89,8 +89,8 @@ class Design_space(object):
 
     def _expand_attributes(self, space):
         """
-        Creates and internal dictionary where the atributes with dimensionality larger than one are expanded. This
-        dictionary is the one that is used internaly to do the optimization.
+        Creates and internal dictionary where the attributes with dimensionality larger than one are expanded. This
+        dictionary is the one that is used internally to do the optimization.
         """
         space_expanded = []
         for d in space:
@@ -105,7 +105,7 @@ class Design_space(object):
 
     def get_continuous_bounds(self):
         """
-        Extracts the bounds of the contunuous variables.
+        Extracts the bounds of the continuous variables.
         """
         bounds = []
         for d in self.space:
@@ -151,7 +151,7 @@ class Design_space(object):
 
     def get_discrete_grid(self):
         """
-        Computes a numpy array with the grid of points that resutls after crossing the posible outputs of the discrete 
+        Computes a Numpy array with the grid of points that results after crossing the possible outputs of the discrete 
         variables
         """
         sets_grid = []
@@ -162,7 +162,7 @@ class Design_space(object):
 
     def get_bandit(self):
         """
-        Extracts the arms of the badit if any.
+        Extracts the arms of the bandit if any.
         """
         arms_bandit = []
         for d in self.space:
@@ -190,17 +190,21 @@ class Design_space(object):
                 discrete_dims += [i]
         return discrete_dims
 
-    def indicator_constrains(self,x):
+    def indicator_constraints(self,x):
         """
-        Returs zero if x is within the contrains and zero otherwise.
+        Return zero if x is within the contrains and zero otherwise.
         """
         x = np.atleast_2d(x)
         I_x = np.ones((x.shape[0],1))
         if self.constrains != None:
             for d in self.constrains:
-                exec('constrain =  lambda x:' + d['constrain'],globals())
-                ind_x = (constrain(x)<0)*1
-                I_x *= ind_x.reshape(x.shape[0],1)
+                try:
+                    exec('constrain =  lambda x:' + d['constrain'],globals())
+                    ind_x = (constrain(x)<0)*1
+                    I_x *= ind_x.reshape(x.shape[0],1)
+                except:
+                    print 'Fail to compile the constraint: '+str(d)
+                    raise
         return I_x
 
     def input_dim(self):
@@ -215,7 +219,7 @@ class Design_space(object):
 def bounds_to_space(bounds):
     """
     Takes as input a list of tuples with bounds, and create a dictionary to be processed by the class Design_space. This function
-    us used to keep the compatibility with previous versions of GPyOpt in which only bounded contunous optimization was possible
+    us used to keep the compatibility with previous versions of GPyOpt in which only bounded continuous optimization was possible
     (and the optimization domain passed as a list of tuples).
     """
     space = []

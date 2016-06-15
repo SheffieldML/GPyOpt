@@ -1,5 +1,5 @@
 
-from GPyOpt.fmodels.experiments2d import branin as branin_creator
+from GPyOpt.objective_examples.experiments2d import branin as branin_creator
 import numpy as np
 
 f = branin_creator()

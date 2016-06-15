@@ -5,3 +5,15 @@ from .base import BOModel
 from .gpmodel import GPModel, GPModel_MCMC
 from .rfmodel import RFModel
 from .warpedgpmodel import WarpedGPModel
+
+def select_model(name):
+    if name == 'GP':
+        return GPModel
+    elif name == 'GP_MCMC':
+        return GPModel_MCMC
+    elif name == 'RF':
+        return RFModel
+    elif name == 'warpGP':
+        return WarpedGPModel
+    else:
+        raise Exception('Invalid model selected.')

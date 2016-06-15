@@ -7,20 +7,20 @@
         "maximum-iterations" :  1,
         "max-run-time": "NA"
     },
-    "variables" : {
-        "y" : {
-            "type" : "FLOAT",
-            "size" : 1,
-            "min"  : -2,
-            "max"  : 5
+    "space" : [
+        {   "name" : "y",
+            "type" : "continuous",
+            "domain": "(-2,5)",
+            "dimensionality": "1"
         },
-        "x" : {
-            "type" : "FLOAT",
-            "size" : 1,
-            "min"  : 0,
-            "max"  : 5
+        {
+            "name" : "x",
+            "type" : "continuous",
+            "domain": "(0,5)",
+            "dimensionality": "1"
         }
-    },
+    ],
+    "constraints": [],
     "output":{
         "verbosity": true
     }

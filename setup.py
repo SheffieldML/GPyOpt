@@ -3,15 +3,13 @@
 
 import os
 from setuptools import setup
-
-# Version number
-version = '0.1.4'
+from GPyOpt.__version__ import __version__
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(name = 'GPyOpt',
-      version = version,
+      version = __version__,
       author = read('AUTHORS.txt'),
       author_email = "j.h.gonzalez@sheffield.ac.uk",
       description = ("The Bayesian Optimization Toolbox"),
@@ -29,8 +27,8 @@ setup(name = 'GPyOpt',
       include_package_data = True,
       py_modules = ['GPyOpt.__init__'],
       long_description=read('README.md'),
-      install_requires=['numpy>=1.7', 'scipy>=0.12', 'GPy>=0.6'],
-      extras_require = {'optimizer':['DIRECT','cma','pyDOE'],'docs':['matplotlib >=1.3','Sphinx','IPython']},
+      install_requires=['numpy>=1.7', 'scipy>=0.16', 'GPy>=0.6'],
+      extras_require = {'optimizer':['DIRECT','cma','pyDOE'],'docs':['matplotlib >=1.3','Sphinx','IPython'],'others':['pandas']},
       classifiers=['License :: OSI Approved :: BSD License',
                    'Natural Language :: English',
                    'Operating System :: MacOS :: MacOS X',

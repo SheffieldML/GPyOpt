@@ -33,22 +33,22 @@ class SingleObjective(Objective):
     """
 
     
-    def __init__(self, func, batch_size = 1, num_cores = 1, objective_name = 'no_name', batch_type = 'syncronous', space = None):
+    def __init__(self, func, num_cores = 1, objective_name = 'no_name', batch_type = 'syncronous', unfold_args=False, space = None):
         self.func  = func
-        self.batch_size = batch_size
         self.n_procs = num_cores
         self.num_evaluations = 0
         self.space = space
+        self.unfold_args = unfold_args
         self.objective_name = objective_name
-
+        
 
     def evaluate(self, x):       
         """
         Performs the evalution of the objective at x.
         """
 
-        if self.batch_size == 1:
-            f_evals, cost_evals = self._single_evaluation(x)
+        if self.n_procs == 1:
+            f_evals, cost_evals = self._eval_func(x)
         else:
             try:
                 f_evals, cost_evals = self._syncronous_batch_evaluation(x)
@@ -59,7 +59,7 @@ class SingleObjective(Objective):
         return f_evals, cost_evals 
 
 
-    def _single_evaluation(self,x):
+    def _eval_func(self, x):
         """
         Performs sequential evaluations of the function at x (single location or batch). The computing time of each 
         evaluation is also provided.
@@ -67,7 +67,7 @@ class SingleObjective(Objective):
         cost_evals = []
         f_evals     = np.empty(shape=[0, 1])
         
-        for i in range(x.shape[0]): 
+        for i in range(x.shape[0]):
             st_time    = time.time()
             f_evals     = np.vstack([f_evals,self.func(np.atleast_2d(x[i]))])
             cost_evals += [time.time()-st_time]  
@@ -84,7 +84,7 @@ class SingleObjective(Objective):
         # --- parallel evaluation of the function
         divided_samples = [x[i::self.n_procs] for i in range(self.n_procs)]
         pipe = [Pipe() for i in range(self.n_procs)]
-        proc = [Process(target=spawn(self.func),args=(c,k)) for k,(p,c) in zip(divided_samples,pipe)]
+        proc = [Process(target=spawn(self._eval_func),args=(c,k)) for k,(p,c) in zip(divided_samples,pipe)]
         [p.start() for p in proc]
         [p.join() for p in proc] 
         

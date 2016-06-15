@@ -25,7 +25,10 @@ class AcquisitionBase(object):
             self.cost_withGradients = constant_cost_withGradients
         else:
             self.cost_withGradients = cost_withGradients 
-
+            
+    @staticmethod
+    def fromDict(model, space, optimizer, cost_withGradients, config):
+        raise NotImplementedError()
 
     def acquisition_function(self,x):
         """

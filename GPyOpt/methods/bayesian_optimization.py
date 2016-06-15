@@ -127,7 +127,7 @@ class BayesianOptimization(BO):
 
         ## Model type
         if 'sparseGP' in kwargs:
-            model_type = kwargs['sparseGP']
+            model_type = 'sparseGP' if kwargs['sparseGP'] else 'GP'
             print('WARNING: "sparseGP" will be deprecated in the next version!')
 
 
@@ -187,7 +187,7 @@ class BayesianOptimization(BO):
         self.model_type = model_type  
         self.exact_feval = exact_feval  # note tha this 2 options are not used with the predefined model
         self.normalize_Y = normalize_Y      
-
+        
         if 'model' in self.kwargs:
             if isinstance(kwargs['model'], GPyOpt.models.base.BOModel):
                 self.model = kwargs['model']
@@ -197,7 +197,7 @@ class BayesianOptimization(BO):
                 self.model = self._model_chooser()
         else:
             self.model = self._model_chooser()
-
+        
         # --- CHOOSE the acquisition optimizer_type
         self.acquisition_optimizer_type = acquisition_optimizer_type
         self.acquisition_optimizer = AcquisitionOptimizer(self.space, self.acquisition_optimizer_type, current_X = self.X)  ## more arguments may come here
@@ -206,7 +206,7 @@ class BayesianOptimization(BO):
         self.acquisition_type = acquisition_type
         
         if 'acquisition' in self.kwargs:
-            if isinstance(kwargs['aquisition'], GPyOpt.acquisitions.AcquisitionBase):
+            if isinstance(kwargs['acquisition'], GPyOpt.acquisitions.AcquisitionBase):
                 self.acquisition = kwargs['acquisition']
                 self.acquisition_type = 'User defined acquisition used.'
                 print('Using an acquisition defined by the used.')

@@ -12,34 +12,27 @@ default_config = {
 
     "model": {
         "type" : "GP",
-        "inducing-points": 10,
-        "initial-points": 10,
-        "design-initial-points": "random",
-        "normalized-evaluations": True,
-        "optimization-restarts": 5,
-        "optimization-interval": 1,
+        "num_inducing": 10,
         },
+                  
+    "constraints": [],
 
     "resources": {
         "maximum-iterations" :  20,
         "max-run-time": 'NA', #minutes
         "cores": 1,
         "tolerance": 1e-8,
-        'iterations_per_call': 1,
         },
 
     "acquisition": {
         "type" : 'EI',
-        "parameter": 0,
-        "true-gradients": True,
-        "optimization-method": "fast_random",
-        "optimization-restarts": 200
-        },
-
-    "parallelization":{
-        "distributed": False,
-        "type":"lp",
-        "batch-size":1,
+        "jitter" : 0.01,
+        "optimizer" : {
+                "name": "lbfgs"
+            },
+        "evaluator" : {
+                "type" : "sequential"
+            }
         },
 
     "output":{
@@ -84,7 +77,7 @@ def parser(input_file_path='config.json'):
             config_new = json.load(config_file)
             config_file.close()
     except:
-        raise Exception('File config.json not loaded properly. Please check it an try again.')
+        raise Exception('Config file "'+input_file_path+'" not loaded properly. Please check it an try again.')
 
     import copy
     options = update_config(config_new, copy.deepcopy(default_config))
