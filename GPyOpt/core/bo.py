@@ -40,7 +40,7 @@ class BO(object):
         self.cost = CostModel(cost)
         
 
-    def run_optimization(self, max_iter = 0, max_time = -999,  eps = 1e-8, verbosity=True, save_models_parameters= True, report_file = None, evaluations_file= None, models_file=None):
+    def run_optimization(self, max_iter = 0, max_time = np.inf,  eps = 1e-8, verbosity=True, save_models_parameters= True, report_file = None, evaluations_file= None, models_file=None):
         """ 
         Runs Bayesian Optimization for a number 'max_iter' of iterations (after the initial exploration data)
 
