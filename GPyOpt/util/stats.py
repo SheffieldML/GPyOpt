@@ -19,7 +19,7 @@ def initial_design(design,space,data_init):
         samples = np.empty((0,space.dimensionality))
         while samples.shape[0] < data_init:
             domain_samples = sample_initial_design(design, space, data_init)
-            valid_indices = (space.indicator_constrains(domain_samples)==1).flatten()
+            valid_indices = (space.indicator_constraints(domain_samples)==1).flatten()
             if sum(valid_indices)>0: 
                 valid_samples = domain_samples[valid_indices,:]
                 samples = np.vstack((samples,valid_samples))

@@ -35,7 +35,7 @@ class AcquisitionLCB(AcquisitionBase):
         """
         f_acqu = -m + self.exploration_weight * s
         cost_x, _ = self.cost_withGradients(x)
-        return -(f_acqu*self.space.indicator_constrains(x))/cost_x
+        return -(f_acqu*self.space.indicator_constraints(x))/cost_x
 
     def acquisition_function(self,x):
         """
@@ -60,4 +60,4 @@ class AcquisitionLCB(AcquisitionBase):
         cost_x, cost_grad_x = self.cost_withGradients(x)
         f_acq_cost = f_acqu/cost_x
         df_acq_cost = (df_acqu*cost_x - f_acqu*cost_grad_x)/(cost_x**2)
-        return -f_acq_cost*self.space.indicator_constrains(x), -df_acq_cost*self.space.indicator_constrains(x)
+        return -f_acq_cost*self.space.indicator_constraints(x), -df_acq_cost*self.space.indicator_constraints(x)

@@ -55,7 +55,7 @@ class SingleObjective(Objective):
             except:
                 if not hasattr(self, 'parallel_error'):
                     print('Error in parallel computation. Fall back to single process!')
-            f_evals, cost_evals = self._single_evaluation(x)        
+                f_evals, cost_evals = self._eval_func(x)        
         return f_evals, cost_evals 
 
 

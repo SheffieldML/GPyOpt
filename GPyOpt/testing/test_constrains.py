@@ -76,7 +76,7 @@ class TestAcquisitions(unittest.TestCase):
             'cost_withGradients': None}
 
 
-        feasible_region = GPyOpt.Design_space(space = self.problem_config['domain'], constrains = self.problem_config['constrains'])        
+        feasible_region = GPyOpt.Design_space(space = self.problem_config['domain'], constraints = self.problem_config['constrains'])        
         self.f_inits = GPyOpt.util.stats.initial_design('random', feasible_region, 5)
         self.f_inits = self.f_inits.reshape(1,  n_inital_design, input_dim)
 
