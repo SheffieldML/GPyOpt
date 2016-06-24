@@ -223,7 +223,7 @@ class Design_space(object):
                     ind_x = (constrain(x)<0)*1
                     I_x *= ind_x.reshape(x.shape[0],1)
                 except:
-                    print 'Fail to compile the constraint: '+str(d)
+                    print('Fail to compile the constraint: '+str(d))
                     raise
         return I_x
 
