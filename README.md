@@ -8,6 +8,8 @@ Gaussian process optimization using [GPy](http://sheffieldml.github.io/GPy/). Pe
 * [Users Mailing list](https://lists.shef.ac.uk/sympa/info/gpyopt-users)
 * [Online documentation](http://pythonhosted.org/GPyOpt)
 
+[![develstat](https://travis-ci.org/SheffieldML/GPyOpt.svg?branch=devel)](https://travis-ci.org/SheffieldML/GPyOpt)
+
 ### Citation
 
     @Misc{gpyopt2016,
