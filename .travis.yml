@@ -1,6 +1,8 @@
 
 sudo: false
 
+notifications: never
+
 os:
 - osx
 - linux
