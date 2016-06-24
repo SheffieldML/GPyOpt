@@ -1,0 +1,32 @@
+
+sudo: false
+
+os:
+- osx
+- linux
+
+addons:
+  apt_packages:
+    - pandoc
+
+env:
+  - PYTHON_VERSION=2.7
+  - PYTHON_VERSION=3.3
+  - PYTHON_VERSION=3.4
+  - PYTHON_VERSION=3.5
+
+before_install:
+- wget https://github.com/mzwiessele/travis_scripts/raw/master/download_miniconda.sh
+- wget https://github.com/mzwiessele/travis_scripts/raw/master/install_retry.sh
+- source download_miniconda.sh
+- echo $PATH
+
+install:
+- echo $PATH
+- source install_retry.sh
+- pip install codecov
+- pip install pypandoc
+- pip install git+git://github.com/BRML/climin.git
+- python setup.py develop
+
+skip_cleanup: true
