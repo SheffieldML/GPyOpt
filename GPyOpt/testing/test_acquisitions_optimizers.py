@@ -16,7 +16,7 @@ class TestAcquisitions(unittest.TestCase):
     def setUp(self):
 
         # -- This file was used to generate the test files
-        self.outpath = './test_files'
+        self.outpath = os.path.join(os.path.dirname(__file__),'test_files')
         self.is_unittest = True  # Test files were generated with this line = False
 
         ##
