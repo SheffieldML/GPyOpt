@@ -21,19 +21,19 @@ class BODriver(object):
         self.obj_func = obj_func
         self.outputEng = outputEng
         
-    def _get_obj(self):
-        obj_func = self.obj_func.objective_function()
+    def _get_obj(self,space):
+        obj_func = self.obj_func
         
         from ..core.task import SingleObjective
-        return SingleObjective(obj_func, self.config['resources']['cores'])
+        return SingleObjective(obj_func, self.config['resources']['cores'], space=space, unfold_args=True)
         
     def _get_space(self):
         assert 'space' in self.config, 'The search space is NOT configured!'
         
         space_config = self.config['space']
-        constraint_config = None if len(self.config['constraints'])==0 else self.config['constraints']  
+        constraint_config = self.config['constraints']
         from ..core.task.space import Design_space
-        return Design_space(space_config, constraint_config)
+        return Design_space.fromConfig(space_config, constraint_config)
     
     def _get_model(self):
 
@@ -55,14 +55,14 @@ class BODriver(object):
         from ..optimization import AcquisitionOptimizer
         acqOpt = AcquisitionOptimizer(space, acqOpt_name, **acqOpt_config)
         from ..acquisitions import select_acquisition
-        return select_acquisition(self.config['acqusition']['type']).fromConfig(model, space, acqOpt, None, self.config['acqusition'])
+        return select_acquisition(self.config['acquisition']['type']).fromConfig(model, space, acqOpt, None, self.config['acquisition'])
     
     def _get_acq_evaluator(self, acq):
         from ..core.evaluators import select_evaluator
         from copy import deepcopy
         eval_args = deepcopy(self.config['acquisition']['evaluator'])
         del eval_args['type']
-        return select_evaluator(self.config['acquisition']['evaluator']['type'], **eval_args)
+        return select_evaluator(self.config['acquisition']['evaluator']['type'])(acq, **eval_args)
     
     def _check_stop(self, iters, elapsed_time, converged):
         r_c = self.config['resources']
@@ -78,14 +78,17 @@ class BODriver(object):
             
     def run(self):
         space = self._get_space()
-        obj_func = self._get_obj()
+        obj_func = self._get_obj(space)
         model = self._get_model()
         acq = self._get_acquisition(model, space)
         acq_eval = self._get_acq_evaluator(acq)
-        
+                
+        from ..util.stats import initial_design
+        X_init = initial_design(self.config['initialization']['type'], space, self.config['initialization']['num-eval'])
+
         from ..methods import ModularBayesianOptimization
-        bo = ModularBayesianOptimization(model, space, obj_func, acq, acq_eval, None)
-        
+        bo = ModularBayesianOptimization(model, space, obj_func, acq, acq_eval, X_init)
+                
         bo.run_optimization(max_iter = self.config['resources']['maximum-iterations'], max_time = self.config['resources']['max-run-time'] if self.config['resources']['max-run-time']!="NA" else np.inf,
                               eps = self.config['resources']['tolerance'], verbosity=True)        
         return bo

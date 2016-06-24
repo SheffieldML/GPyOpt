@@ -7,8 +7,11 @@ import json
 default_config = {
     "language"        : "PYTHON",
     "experiment-name" : "no-named-experiment",
-    'support-multi-eval': False,
     "likelihood"      : "NOISELESS",
+    'initialization': {
+            'type':'random',
+            'num-eval':5,
+        },
 
     "model": {
         "type" : "GP",

@@ -14,7 +14,7 @@ class Objective(object):
     """
     
     def evaluate(self, x):
-        pass
+        raise NotImplementedError()
 
 
 class SingleObjective(Objective):
@@ -69,7 +69,13 @@ class SingleObjective(Objective):
         
         for i in range(x.shape[0]):
             st_time    = time.time()
-            f_evals     = np.vstack([f_evals,self.func(np.atleast_2d(x[i]))])
+            if self.unfold_args:
+                args_indices = self.space.get_variable_indices()
+                args = [x[i,args_indices[j,0]:args_indices[j,1]] for j in range(args_indices.shape[0])]
+                rlt = self.func(*args)
+            else:
+                rlt = self.func(np.atleast_2d(x[i]))
+            f_evals     = np.vstack([f_evals,rlt])
             cost_evals += [time.time()-st_time]  
         return f_evals, cost_evals 
 

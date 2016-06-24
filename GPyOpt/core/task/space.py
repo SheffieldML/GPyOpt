@@ -54,6 +54,17 @@ class Design_space(object):
 
         if self.has_types['bandit'] and (self.has_types['continuous'] or self.has_types['discrete']):
             print('Combinations of bandits with other variables are not supported.')
+
+    @staticmethod
+    def fromConfig(space, constraints):
+        import six
+        from ast import literal_eval
+
+        for d in space:
+            if isinstance(d['dimensionality'],six.string_types):
+                d['dimensionality'] = int(d['dimensionality'])
+            d['domain'] = literal_eval(d['domain'])
+        return Design_space(space, None if len(constraints)==0 else constraints)
         
     def _complete_attributes(self, space):
         """
@@ -72,7 +83,9 @@ class Design_space(object):
             if 'domain' not in d_out:
                 raise Exception('Domain attribute cannot be missing!')
             if 'dimensionality' not in d_out:
-                if d_out['domain'] == 'bandit': 
+                if d_out['domain'] == 'bandit':
+                    dims = np.array([len (a) for a in d_out['domain']])
+                    assert np.all(dims==dims[0]), 'The dimensionalities of the bandit variable '+d_out['name']+' have to be the same!'
                     d_out['dimensionality'] = len(d_out['domain'][0])
                 else:
                     d_out['dimensionality'] = 1
@@ -81,11 +94,22 @@ class Design_space(object):
             self.space.append(d_out)
             self.has_types[d_out['type']] = True
 
+        dims = [d['dimensionality'] for d in self.space]
+        self._var_indices = np.zeros((len(dims),2),dtype=np.int)
+        offset = 0
+        for i in range(len(dims)):
+            self._var_indices[i,0] = offset
+            self._var_indices[i,1] = offset + dims[i]
+            offset += dims[i]
+
+    def get_variable_indices(self):
+        return self._var_indices
+
     def has_constrains(self):
         """
         Checks if the problem has constrains.
         """
-        return self.constrains != None
+        return self.constraints != None
 
     def _expand_attributes(self, space):
         """
@@ -143,11 +167,7 @@ class Design_space(object):
         """
         Extracts the list of dictionaries with continupus components
         """
-        space = []
-        for d in self.space:
-            if d['type']=='continuous':
-                space += [d]
-        return space
+        return [d for d in self.space if d['type']=='continuous']
 
     def get_discrete_grid(self):
         """
@@ -196,8 +216,8 @@ class Design_space(object):
         """
         x = np.atleast_2d(x)
         I_x = np.ones((x.shape[0],1))
-        if self.constrains != None:
-            for d in self.constrains:
+        if self.constraints != None:
+            for d in self.constraints:
                 try:
                     exec('constrain =  lambda x:' + d['constrain'],globals())
                     ind_x = (constrain(x)<0)*1
