@@ -32,4 +32,12 @@ install:
 - pip install GPy
 - python setup.py develop
 
+
+script:
+- coverage run travis_tests.py
+
+
+after_success:
+- codecov
+
 skip_cleanup: true
