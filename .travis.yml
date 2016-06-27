@@ -1,7 +1,10 @@
 
 sudo: false
 
-notifications: never
+notifications:
+  email:
+    on_success: change
+    on_failure: always
 
 os:
 - osx
