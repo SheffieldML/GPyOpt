@@ -3,9 +3,11 @@
 
 import os
 import numpy as np
-#from builtins import range  # compatible with 2 and 3
 
 def load_objective(config):
+    """
+    Loads the objective function from a .json file.
+    """
 
     assert 'prjpath' in config
     assert 'main-file' in config, "The problem file ('main-file') is missing!"
