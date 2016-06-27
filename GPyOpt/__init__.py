@@ -9,7 +9,6 @@ from . import core
 from . import methods
 from . import util
 from . import plotting
-from . import demos
 from . import interface
 from . import models
 from . import acquisitions
