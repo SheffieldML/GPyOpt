@@ -15,7 +15,7 @@ def run_eval(problem_config, f_inits, method_config, name = 'run', outpath='.', 
     # Methods configuration
     m_c = method_config
 
-    # Inital values
+    # In ital values
     xs_init = f_inits[0]
     f_obj   = problem_config['objective'] 
     ys_init = f_obj(xs_init)

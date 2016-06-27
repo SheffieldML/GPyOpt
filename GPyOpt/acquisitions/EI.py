@@ -12,7 +12,7 @@ class AcquisitionEI(AcquisitionBase):
     :param space: GPyOpt class of domain
     :param optimizer: optimizer of the acquisition. Should be a GPyOpt optimizer
     :param cost_withGradients: function
-    :param jitter: positive value to make the acquisition more explorative
+    :param jitter: positive value to make the acquisition more explorative.
 
     .. Note:: allows to compute the Improvement per unit of cost
 

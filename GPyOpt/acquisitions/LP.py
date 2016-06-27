@@ -47,7 +47,7 @@ class AcquisitionLP(AcquisitionBase):
         
     def _hammer_function_precompute(self,x0, L, Min, model):
         """
-        Pre-computes the parameters of a penalizer centred at x0.
+        Pre-computes the parameters of a penalizer centered at x0.
         """
         if x0 is None: return None, None
         if len(x0.shape)==1: x0 = x0[None,:]
@@ -90,7 +90,7 @@ class AcquisitionLP(AcquisitionBase):
     
     def _d_hammer_function(self, x, X_batch, r_x0, s_x0):
         """
-        Computes the value of the penalizer (centred at x_0) at any x.
+        Computes the value of the penalizer (centered at x_0) at any x.
         """
         dx = np.atleast_2d(x)[:,None,:]-np.atleast_2d(X_batch)[None,:,:]
         nm = np.sqrt((np.square(dx)).sum(-1))

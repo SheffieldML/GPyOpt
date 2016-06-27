@@ -10,7 +10,7 @@ import unittest
 
 class TestAcquisitions(unittest.TestCase):
     '''
-    Unittest for the available aquisition functions
+    Unittest for the constraints
     '''
 
     def setUp(self):
