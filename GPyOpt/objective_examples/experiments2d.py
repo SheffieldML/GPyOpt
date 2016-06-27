@@ -13,7 +13,7 @@ from ..util.general import reshape
 
 class function2d:
     '''
-    This is a benchmark of bidimensional functions interesting to optimize. 
+    This is a benchmark of bi-dimensional functions interesting to optimize. 
 
     '''
     

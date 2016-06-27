@@ -10,12 +10,12 @@ from ..core.task.space import Design_space
 def AcquisitionOptimizer(space, optimizer='lbfgs', current_X = None, **kwargs):
     """
     Chooser for the type of acquisition optimizer to use. The decision is based on the type of input space and
-    wether it contains discrete, continuous, bandit variables or a mix of them. If the problem is defiened for
+    whether it contains discrete, continuous, bandit variables or a mix of them. If the problem is defined for
     a mix of discrete and continuous variables the optimization is done as follows:
-        - All posible combinations of the values of the discre variables are computed.
+        - All possible combinations of the values of the discrete variables are computed.
         - For each combination the problem is solved for the remaining continuous variables.
-        - The arg min of all the subproblems is taken.
-    Note that this may be slow in cases with many discrete variables. In the bandits setttings not optimization is 
+        - The arg min of all the sub-problems is taken.
+    Note that this may be slow in cases with many discrete variables. In the bandits settings not optimization is 
     carried out. Since the space is finite the argmin is computed.
 
     :param space: design space class from GPyOpt.
@@ -68,12 +68,12 @@ class ContAcqOptimizer(AcquOptimizer):
         - 'lbfgs': L-BFGS.
         - 'DIRECT': Dividing Rectangles.
         - 'CMA': covariance matrix adaptation.
-    :param n_samples: number of unitial points in which the acquisition is evaluated.
+    :param n_samples: number of initial points in which the acquisition is evaluated.
     :param fast: whether just a local optimizer should be run starting in the best location (default, True). If False a local search is performed
             for each point and the best of all is taken.
     :param ramdom: whether the initial samples are taken randomly (or in a grid if False). Note that, if False, n_samples represent the number
             of points user per dimension.
-    :param search: whether to do local seach pr not.
+    :param search: whether to do local search or not.
     """
 
     
@@ -146,7 +146,7 @@ class ContAcqOptimizer(AcquOptimizer):
 
         def fp(x):
             '''
-            Wrapper of *f*: takes an input x with size of the not fixed dimenions expands it and evaluates the entire function.
+            Wrapper of *f*: takes an input x with size of the not fixed dimensions expands it and evaluates the entire function.
             '''
             x = np.atleast_2d(x)
             xx = self._expand_vector(x)        
@@ -157,7 +157,7 @@ class ContAcqOptimizer(AcquOptimizer):
 
         def fp_dfp(x):
             '''
-            Wrapper of the derivative of *f*: takes an input x with size of the not fixed dimenions expands it and evaluates the gradient of the entire function.
+            Wrapper of the derivative of *f*: takes an input x with size of the not fixed dimensions expands it and evaluates the gradient of the entire function.
             '''
             x = np.atleast_2d(x)
             xx = self._expand_vector(x)        
@@ -257,12 +257,12 @@ class MixedAcqOptimizer(AcquOptimizer):
         - 'lbfgs': L-BFGS.
         - 'DIRECT': Dividing Rectangles.
         - 'CMA': covariance matrix adaptation.
-    :param n_samples: number of unitial points in which the acquisition is evaluated.
+    :param n_samples: number of initial points in which the acquisition is evaluated.
     :param fast: whether just a local optimizer should be run starting in the best location (default, True). If False a local search is performed
             for each point and the best of all is taken.
     :param ramdom: whether the initial samples are taken randomly (or in a grid if False). Note that, if False, n_samples represent the number
             of points user per dimension.
-    :param search: whether to do local seach pr not.
+    :param search: whether to do local search or not.
     """
 
     def __init__(self, space, optimizer='lbfgs', n_samples=1000, fast=True, random=True, search=True, **kwargs):

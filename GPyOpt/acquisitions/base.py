@@ -32,7 +32,7 @@ class AcquisitionBase(object):
 
     def acquisition_function(self,x):
         """
-        New acquisition  in domain and with cost
+        Takes an acquisition and weights it so the domain and cost are taken into account.
         """
         f_acqu = self._compute_acq(x)
         cost_x, _ = self.cost_withGradients(x)
@@ -41,7 +41,7 @@ class AcquisitionBase(object):
 
     def acquisition_function_withGradients(self, x):
         """
-        New acquisition and its derivative in domain and with cost
+        Takes an acquisition and it gradient and weights it so the domain and cost are taken into account.
         """
         f_acqu,df_acqu = self._compute_acq_withGradients(x)
         cost_x, cost_grad_x = self.cost_withGradients(x)

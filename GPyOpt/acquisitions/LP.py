@@ -11,13 +11,13 @@ class AcquisitionLP(AcquisitionBase):
     """
     Class for Local Penalization acquisition. Used for batch design.
     :param model: model of the class GPyOpt
-    :param space: desing space of the class GPyOpt.
+    :param space: design space of the class GPyOpt.
     :param optimizer: optimizer of the class GPyOpt.
     :param acquisition: acquisition function of the class GPyOpt
     :param transform: transformation applied to the acquisition (default, none).
 
-    .. Note:: irrespective of the transfomation applied the penalized acquisition is always mapped again to the log space. 
-    This way gradiens can be computed aditively and are more stable.
+    .. Note:: irrespective of the transformation applied the penalized acquisition is always mapped again to the log space. 
+    This way gradients can be computed additively and are more stable.
  
     """
 
@@ -39,7 +39,7 @@ class AcquisitionLP(AcquisitionBase):
 
     def update_batches(self, X_batch, L, Min):
         """
-        Updates the batches internally and precomputes the 
+        Updates the batches internally and pre-computes the 
         """
         self.X_batch = X_batch
         if X_batch is not None:
@@ -47,7 +47,7 @@ class AcquisitionLP(AcquisitionBase):
         
     def _hammer_function_precompute(self,x0, L, Min, model):
         """
-        Precomputes the parametes of a penalizer center at x0.
+        Pre-computes the parameters of a penalizer centred at x0.
         """
         if x0 is None: return None, None
         if len(x0.shape)==1: x0 = x0[None,:]
@@ -71,7 +71,7 @@ class AcquisitionLP(AcquisitionBase):
         '''
         Creates a penalized acquisition function using 'hammer' functions around the points collected in the batch
 
-        .. Note:: the penalized acquisition is always mapped to the log space. This way gradiens can be computed aditively and are more stable.
+        .. Note:: the penalized acquisition is always mapped to the log space. This way gradients can be computed additively and are more stable.
         '''
         fval = -self.acq.acquisition_function(x)[:,0]
         
@@ -90,7 +90,7 @@ class AcquisitionLP(AcquisitionBase):
     
     def _d_hammer_function(self, x, X_batch, r_x0, s_x0):
         """
-        Computes the value of the penalizer (center at x_0) at any x.
+        Computes the value of the penalizer (centred at x_0) at any x.
         """
         dx = np.atleast_2d(x)[:,None,:]-np.atleast_2d(X_batch)[None,:,:]
         nm = np.sqrt((np.square(dx)).sum(-1))
@@ -111,7 +111,7 @@ class AcquisitionLP(AcquisitionBase):
 
     def d_acquisition_function(self, x):
         """
-        Returns the gradient of the acquisition fucntion at x.
+        Returns the gradient of the acquisition function at x.
         """
         x = np.atleast_2d(x)
         

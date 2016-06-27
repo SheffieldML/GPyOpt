@@ -11,7 +11,7 @@ class  CostModel(object):
 
     param cost_withGradients: function that returns the cost of evaluating the function and its gradient. By default
     no cost is used. Options are:
-        - cost_withGradients is some pre-defined cost fucntion. Should return numpy array as outputs.
+        - cost_withGradients is some pre-defined cost function. Should return numpy array as outputs.
         - cost_withGradients = 'evaluation_time'.
 
     .. Note:: if cost_withGradients = 'evaluation time' the evaluation time of the function is used to model a GP whose
@@ -40,14 +40,14 @@ class  CostModel(object):
 
     def _cost_gp(self,x):
         """
-        Predicts the time cost of evaluating the fucntion at x.
+        Predicts the time cost of evaluating the function at x.
         """
         m, _, _, _= self.cost_model.predict_withGradients(x)
         return np.exp(m)
 
     def _cost_gp_withGradients(self,x):
         """
-        Predicts the time cost and its gradient of evaluating the fucntion at x.
+        Predicts the time cost and its gradient of evaluating the function at x.
         """
         m, _, dmdx, _= self.cost_model.predict_withGradients(x)
         return np.exp(m), np.exp(m)*dmdx

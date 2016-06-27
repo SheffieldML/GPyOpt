@@ -8,7 +8,7 @@ import time
 
 def compute_integrated_acquisition(acquisition,x):
     '''
-    Used to compute the acquisition function when samples of the hyperparameters have been generated (used in GP_MCMC model).
+    Used to compute the acquisition function when samples of the hyper-parameters have been generated (used in GP_MCMC model).
 
     :param acquisition: acquisition function with GpyOpt model type GP_MCMC.
     :param x: location where the acquisition is evaluated.
@@ -26,7 +26,7 @@ def compute_integrated_acquisition(acquisition,x):
 
 def compute_integrated_acquisition_withGradients(acquisition,x):
     '''
-    Used to compute the acquisition function with gradients when samples of the hyperparameters have been generated (used in GP_MCMC model).
+    Used to compute the acquisition function with gradients when samples of the hyper-parameters have been generated (used in GP_MCMC model).
 
     :param acquisition: acquisition function with GpyOpt model type GP_MCMC.
     :param x: location where the acquisition is evaluated.
@@ -165,7 +165,7 @@ def spawn(f):
 
 def evaluate_function(f,X):
     '''
-    Returs the evaluation of a function *f* and the time per evaluation
+    Returns the evaluation of a function *f* and the time per evaluation
     '''
     num_data, dim_data = X.shape
     Y_eval = np.zeros((num_data, dim_data))

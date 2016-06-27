@@ -12,7 +12,7 @@ class LocalPenalization(EvaluatorBase):
 
     :param acquisition: acquisition function to be used to compute the batch.
     :param batch size: the number of elements in the batch.
-    :normalize_Y: wehter to normalize the outputs.
+    :normalize_Y: whether to normalize the outputs.
 
     """
     def __init__(self, acquisition, batch_size, normalize_Y):
@@ -30,7 +30,7 @@ class LocalPenalization(EvaluatorBase):
         
         self.acquisition.update_batches(None,None,None)
 
-        # --- GET first elemnt in the batc 
+        # --- GET first element in the batch 
         X_batch = self.acquisition.optimize()
         k=1
         

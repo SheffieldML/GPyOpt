@@ -10,7 +10,7 @@ def initial_design(design,space,data_init):
     if design == 'latin':
         samples = sample_initial_design(design,space,data_init)
         if space.has_constrains() == True:
-            print('Sampling with constrains is now allowed with latin designs.')
+            print('Sampling with constrains is now allowed with Latin designs.')
     
     elif space.has_constrains() == False:
         samples = sample_initial_design(design,space,data_init)
@@ -57,7 +57,7 @@ def sample_initial_design(design,space,data_init):
             except:
                 print("Cannot find pyDOE library, please install it to use a Latin hypercube to initialize the model.")
 
-        ## Add random dicrete component
+        ## Add random discrete component
         for k in space.get_discrete_dims():
             X_design[:,k] = np.random.choice(space.space_expanded[k]['domain'], data_init)
     

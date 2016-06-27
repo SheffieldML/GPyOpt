@@ -18,11 +18,11 @@ from copy import deepcopy
 class Predictive(EvaluatorBase):
     """
     Class a predictive batch method. Computes the element of the batch Sequentially by predicting outputs of the function with the mean of the GP.
-    The model is updated after every phantasized evaluation is collected.
+    The model is updated after every fantasized evaluation is collected.
 
     :param acquisition: acquisition function to be used to compute the batch.
     :param batch size: the number of elements in the batch.
-    :normalize_Y: wehter to normalize the outputs.
+    :normalize_Y: whether to normalize the outputs.
 
     """
     def __init__(self, acquisition, batch_size, normalize_Y):
@@ -37,7 +37,7 @@ class Predictive(EvaluatorBase):
         # --- Compute local entities
         X = self.acquisition.model.model.X.copy()
         Y = self.acquisition.model.model.Y.copy()
-        model_local = self.acquisition.model.copy()  #### how to make acopy of this???
+        model_local = self.acquisition.model.copy()  #### how to make a copy of this???
         space_local = self.acquisition.space
         objective_local = SingleObjective(lambda x: 0 )
         acquisition_local = deepcopy(self.acquisition) 

@@ -7,12 +7,12 @@ import numpy as np
 
 class RandomBatch(EvaluatorBase):
     """
-    Class for a random batch method. The first element of the batch is selected by optimizing the acquisition in a standard way. The remaining elemnts are
-    selected uniformly random in the domain of the objecitve.
+    Class for a random batch method. The first element of the batch is selected by optimizing the acquisition in a standard way. The remaining elements are
+    selected uniformly random in the domain of the objective.
 
     :param acquisition: acquisition function to be used to compute the batch.
     :param batch size: the number of elements in the batch.
-    :normalize_Y: wehter to normalize the outputs.
+    :normalize_Y: whether to normalize the outputs.
 
     """
     def __init__(self, acquisition, batch_size):

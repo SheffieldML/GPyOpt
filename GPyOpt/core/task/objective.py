@@ -10,7 +10,7 @@ import GPyOpt
 
 class Objective(object):
     """
-    General class to handle the objective function internaly.
+    General class to handle the objective function internally.
     """
     
     def evaluate(self, x):
@@ -19,21 +19,21 @@ class Objective(object):
 
 class SingleObjective(Objective):
     """
-    Class to hadle problems with one single objective function.
+    Class to handle problems with one single objective function.
 
-    param func: objective fuction. 
+    param func: objective function. 
     param batch_size: size of the batches (default, 1)
-    param num_cores: number of cores to use in the process of evaluting the objective (default, 1).
+    param num_cores: number of cores to use in the process of evaluating the objective (default, 1).
     param objective_name: name of the objective function.
-    param batch_type: Type of batch used. Only 'syncronous' evaluations are posible at the moment.
+    param batch_type: Type of batch used. Only 'synchronous' evaluations are possible at the moment.
     param space: Not in use.
 
-    .. Note:: the objective function should take 2-dimentionnal numpy arrays as input and outputs. Each row should
-    contain a location (in the case of the inputs) or a function evalution (in the case of the outputs).
+    .. Note:: the objective function should take 2-dimensional numpy arrays as input and outputs. Each row should
+    contain a location (in the case of the inputs) or a function evaluation (in the case of the outputs).
     """
 
     
-    def __init__(self, func, num_cores = 1, objective_name = 'no_name', batch_type = 'syncronous', unfold_args=False, space = None):
+    def __init__(self, func, num_cores = 1, objective_name = 'no_name', batch_type = 'synchronous', unfold_args=False, space = None):
         self.func  = func
         self.n_procs = num_cores
         self.num_evaluations = 0
@@ -44,7 +44,7 @@ class SingleObjective(Objective):
 
     def evaluate(self, x):       
         """
-        Performs the evalution of the objective at x.
+        Performs the evaluation of the objective at x.
         """
 
         if self.n_procs == 1:
@@ -82,8 +82,8 @@ class SingleObjective(Objective):
 
     def _syncronous_batch_evaluation(self,x):   
         """
-        Evalutes the function a x, where x can be a single location or a batch. The evalution is performed in parallel
-        according to the number of accesible cores.
+        Evaluates the function a x, where x can be a single location or a batch. The evaluation is performed in parallel
+        according to the number of accessible cores.
         """
         from multiprocessing import Process, Pipe
         
@@ -94,7 +94,7 @@ class SingleObjective(Objective):
         [p.start() for p in proc]
         [p.join() for p in proc] 
         
-        # --- time of evalation is set to constant (=1). This is one of the hypothesis of syncronous batch methods.
+        # --- time of evaluation is set to constant (=1). This is one of the hypothesis of synchronous batch methods.
         f_evals = np.zeros((x.shape[0],1))
         cost_evals = np.ones((x.shape[0],1))
         i = 0
@@ -106,7 +106,7 @@ class SingleObjective(Objective):
     def _asyncronous_batch_evaluation(self,x):   
 
         """
-        Performs the evalution of the function at x while other evaluations are pending. 
+        Performs the evaluation of the function at x while other evaluations are pending. 
         """
         ### --- TODO
         pass

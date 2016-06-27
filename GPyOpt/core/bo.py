@@ -45,9 +45,9 @@ class BO(object):
         Runs Bayesian Optimization for a number 'max_iter' of iterations (after the initial exploration data)
 
         :param max_iter: exploration horizon, or number of acquisitions. If nothing is provided optimizes the current acquisition.  
-        :param max_time: maximum exploration horizont in seconds.
+        :param max_time: maximum exploration horizon in seconds.
         :param eps: minimum distance between two consecutive x's to keep running the model.
-        :param vervosity: flag to print the optimization results after each iteration (default, True).
+        :param verbosity: flag to print the optimization results after each iteration (default, True).
         :param report_file: filename of the file where the results of the optimization are saved (default, None).
         """
 
@@ -133,7 +133,7 @@ class BO(object):
 
     def _print_convergence(self):
         """
-        Prints the reason why the optimization stoped.
+        Prints the reason why the optimization stopped.
         """
         # --- Print stopping reason
         if self.verbosity: 
@@ -148,7 +148,7 @@ class BO(object):
                 return 0
 
             if self.initial_iter:
-                print('** GPyOpt Bayesian Optimization class initialized succesfuly **')
+                print('** GPyOpt Bayesian Optimization class initialized successfully **')
                 self.initial_iter = False  
 
 
@@ -179,13 +179,13 @@ class BO(object):
 
     def _compute_next_evaluations(self):
         """
-        Computes the location of the new evalaution (optimizes the acquisition in the standard case). 
+        Computes the location of the new evaluation (optimizes the acquisition in the standard case). 
         """
         return self.evaluator.compute_batch() 
         
     def _update_model(self):
         """
-        Updates the model and saves the parameters (if avaiable).
+        Updates the model and saves the parameters (if available).
         """
         if (self.num_acquisitions%self.model_update_interval)==0:
             if self.normalize_Y:
@@ -246,10 +246,10 @@ class BO(object):
             file.write('Date and time:               ' + time.strftime("%c")+'\n')
             if self.num_acquisitions==self.max_iter: 
                 file.write('Optimization completed:      ' +'YES, ' + str(self.X.shape[0]).strip('[]') + ' samples collected.\n')
-                file.write('Numer initial samples:       ' + str(self.initial_design_numdata) +' \n')
+                file.write('Number initial samples:      ' + str(self.initial_design_numdata) +' \n')
             else:
                 file.write('Optimization completed:      ' +'NO,' + str(self.X.shape[0]).strip('[]') + ' samples collected.\n')
-                file.write('Numer initial samples:       ' + str(self.initial_design_numdata) +' \n')
+                file.write('Number initial samples:      ' + str(self.initial_design_numdata) +' \n')
 
             file.write('Tolerance:                   ' + str(self.eps) + '.\n')
             file.write('Optimization time:           ' + str(self.cum_time).strip('[]') +' seconds.\n')   
@@ -258,7 +258,7 @@ class BO(object):
             file.write('--------------------------------' + ' Problem set up ' + '------------------------------------\n')   
             file.write('Problem name:                ' + self.objective_name +'\n')            
             file.write('Problem dimension:           ' + str(self.space.dimensionality) +'\n')    
-            file.write('Number continous variables   ' + str(len(self.space.get_continuous_dims()) ) +'\n') 
+            file.write('Number continuous variables  ' + str(len(self.space.get_continuous_dims()) ) +'\n') 
             file.write('Number discrete variables    ' + str(len(self.space.get_discrete_dims())) +'\n') 
             file.write('Number bandits               ' + str(self.space.get_bandit().shape[0]) +'\n') 
             file.write('Noiseless evaluations:       ' + str(self.exact_feval) +'\n')         

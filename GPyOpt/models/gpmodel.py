@@ -7,16 +7,16 @@ import GPy
 
 class GPModel(BOModel):
     """
-    General class for handling a Gaussain Process in GPyOpt. 
+    General class for handling a Gaussian Process in GPyOpt. 
 
     :param kernel: GPy kernel to use in the GP model.
     :param noise_var: value of the noise variance if known.
-    :param exact_feval: whether noiseless evaluatios are avaiable. IMPORTANT to make the optimization work well in noiseless scenarios (default, False).
+    :param exact_feval: whether noiseless evaluations are available. IMPORTANT to make the optimization work well in noiseless scenarios (default, False).
     :param normalize_Y: normalization of the outputs to the interval [0,1] (default, True). 
     :param optimizer: optimizer of the model. Check GPy for details.
-    :param max_iters: maximum nunber of iterations used to optimize the parameters of the model.
+    :param max_iters: maximum number of iterations used to optimize the parameters of the model.
     :param optimize_restarts: number of restarts in the optimization.
-    :param sparse: whether to use a sparse GP (default, False). This is usefull when many observations are avaiable.
+    :param sparse: whether to use a sparse GP (default, False). This is useful when many observations are available.
     :param num_inducing: number of inducing points if a sparse GP is used.  
     :param verbose: print out the model messages (default, False).
 
@@ -82,7 +82,7 @@ class GPModel(BOModel):
         else: 
             self.model.set_XY(X_all, Y_all)
             
-        # --- update the model maximixing the marginal likelihood.
+        # --- update the model maximizing the marginal likelihood.
         if self.optimize_restarts==1:
             self.model.optimize(optimizer=self.optimizer, max_iters = self.max_iters, verbose=self.verbose)
         else:
@@ -90,7 +90,7 @@ class GPModel(BOModel):
 
     def predict(self, X):
         """
-        Preditions with the model. Returns posterior means and standard deviations at X. Note that this is different in GPy where the variances are given. 
+        Predictions with the model. Returns posterior means and standard deviations at X. Note that this is different in GPy where the variances are given. 
         """
         if X.ndim==1: X = X[None,:]
         m, v = self.model.predict(X)
@@ -134,29 +134,29 @@ class GPModel(BOModel):
 
     def get_model_parameters(self):
         """
-        Returns a 2D numpy array with the parametes of the model
+        Returns a 2D numpy array with the parameters of the model
         """
         return np.atleast_2d(self.model[:])
 
     def get_model_parameters_names(self):
         """
-        Returns a list with the names of the parametes of the model
+        Returns a list with the names of the parameters of the model
         """
         return self.model.parameter_names()
 
 
 class GPModel_MCMC(BOModel):
     """
-    General class for handling a Gaussain Process in GPyOpt. 
+    General class for handling a Gaussian Process in GPyOpt. 
 
     :param kernel: GPy kernel to use in the GP model.
     :param noise_var: value of the noise variance if known.
-    :param exact_feval: whether noiseless evaluatios are avaiable. IMPORTANT to make the optimization work well in noiseless scenarios (default, False).
+    :param exact_feval: whether noiseless evaluations are available. IMPORTANT to make the optimization work well in noiseless scenarios (default, False).
     :param normalize_Y: normalization of the outputs to the interval [0,1] (default, True). 
     :param n_samples: number of MCMC samples.
     :param n_burnin: number of samples not used.
-    :param subsample_interval: subsample interval in the MCMC.
-    :param step_size: stepsize in the MCMC.
+    :param subsample_interval: sub-sample interval in the MCMC.
+    :param step_size: step-size in the MCMC.
     :param leapfrog_steps: ??
     :param verbose: print out the model messages (default, False).
 
@@ -197,7 +197,7 @@ class GPModel_MCMC(BOModel):
         noise_var = Y.var()*0.01 if self.noise_var is None else self.noise_var
         self.model = GPy.models.GPRegression(X, Y, kernel=kern, noise_var=noise_var)
         
-        # --- Define priors on the hyperparameters for the kernel (for integrated acquisitions)
+        # --- Define prior on the hyper-parameters for the kernel (for integrated acquisitions)
         self.model.kern.set_prior(GPy.priors.Gamma.from_EV(2.,4.))
         self.model.likelihood.variance.set_prior(GPy.priors.Gamma.from_EV(2.,4.))
 
@@ -226,7 +226,7 @@ class GPModel_MCMC(BOModel):
 
     def predict(self, X):
         """
-        Preditions with the model for all the MCMC samples. Returns posterior means and standard deviations at X. Note that this is different in GPy where the variances are given. 
+        Predictions with the model for all the MCMC samples. Returns posterior means and standard deviations at X. Note that this is different in GPy where the variances are given. 
         """
 
         if X.ndim==1: X = X[None,:]
@@ -315,13 +315,13 @@ class GPModel_MCMC(BOModel):
 
     def get_model_parameters(self):
         """
-        Returns a 2D numpy array with the parametes of the model
+        Returns a 2D numpy array with the parameters of the model
         """
         return np.atleast_2d(self.model[:])
 
     def get_model_parameters_names(self):
         """
-        Returns a list with the names of the parametes of the model
+        Returns a list with the names of the parameters of the model
         """
         return self.model.parameter_names()
 

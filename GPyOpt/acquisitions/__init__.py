@@ -11,6 +11,9 @@ from .LCB_mcmc import AcquisitionLCB_MCMC
 from .LP import AcquisitionLP
 
 def select_acquisition(name):
+    '''
+    Acquisition selector
+    '''
     if name == 'EI':
         return AcquisitionEI
     elif name == 'EI_MCMC':

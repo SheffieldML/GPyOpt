@@ -19,7 +19,7 @@ class Optimizer(object):
     """
     Class for a general acquisition optimizer.
 
-    :param space: desing space GPyOpt class.
+    :param space: design space GPyOpt class.
     """
     
     def __init__(self, space):
@@ -69,7 +69,7 @@ class Opt_lbfgs(Optimizer):
 class Opt_DIRECT(Optimizer):
     '''
     Wrapper for DIRECT optimization method. It works partitioning iteratively the domain 
-    of the function. Only requieres f and the box constrains to work.
+    of the function. Only requires f and the box constrains to work.
 
     '''
     def __init__(self, space, maxiter=1000):
@@ -102,7 +102,7 @@ class Opt_DIRECT(Optimizer):
 class Opt_CMA(Optimizer):
     '''
     Wrapper the Covariance Matrix Adaptation Evolutionary strategy (CMA-ES) optimization method. It works generating 
-    an stochastic seach based on mutivariate Gaussian samples. Only requieres f and the box constrains to work.
+    an stochastic search based on multivariate Gaussian samples. Only requires f and the box constrains to work.
 
     '''
     def __init__(self, space, maxiter=1000):

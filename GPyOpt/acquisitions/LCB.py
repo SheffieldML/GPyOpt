@@ -3,7 +3,6 @@
 
 from .base import AcquisitionBase
 from ..util.general import get_quantiles
-from ..core.task.cost import constant_cost_withGradients
 
 class AcquisitionLCB(AcquisitionBase):
     """
@@ -13,12 +12,12 @@ class AcquisitionLCB(AcquisitionBase):
     :param space: GPyOpt class of domain
     :param optimizer: optimizer of the acquisition. Should be a GPyOpt optimizer
     :param cost_withGradients: function
-    :param exploration_weight: positive parameter to comtrol exploration/explotitation
+    :param jitter: positive value to make the acquisition more explorative
 
-    .. Note:: allows to compute the Improvement per unit of cost
+    .. Note:: does not allow to be used with cost
 
     """
-    
+
     analytical_gradient_prediction = True
 
     def __init__(self, model, space, optimizer=None, cost_withGradients=None, exploration_weight=2):
@@ -28,36 +27,21 @@ class AcquisitionLCB(AcquisitionBase):
 
         if cost_withGradients is not None:
             print('The set cost function is ignored! LBC acquisition does not make sense with cost.')  
-    
-    def _compute_acq(self, m, s, x):
+
+    def _compute_acq(self, x):
         """
-        Computes the GP-Lower Confidence Bound per unit of cost
+        Computes the GP-Lower Confidence Bound 
         """
+        m, s = self.model.predict(x)   
         f_acqu = -m + self.exploration_weight * s
-        cost_x, _ = self.cost_withGradients(x)
-        return -(f_acqu*self.space.indicator_constraints(x))/cost_x
+        return f_acqu
 
-    def acquisition_function(self,x):
+    def _compute_acq_withGradients(self, x):
         """
-        GP-Lower Confidence Bound
+        Computes the GP-Lower Confidence Bound and its derivative
         """
-        m, s = self.model.predict(x)
-        return self._compute_acq(m, s, x) # note: returns negative value for posterior minimization
-
-    def acquisition_function_withGradients(self, x):
-        """
-        Computes the GP-Lower Confidence Bound and its derivative (has a very easy derivative!)
-        """
-        m, s, dmdx, dsdx = self.model.predict_withGradients(x)
-        return self._compute_acq_withGradients(m, s, dmdx, dsdx, x)
-
-    def _compute_acq_withGradients(self, m, s, dmdx, dsdx, x):
-        """
-        GP-Lower Confidence Bound and its derivative
-        """
-        f_acqu = -m + self.exploration_weight * s
+        m, s, dmdx, dsdx = self.model.predict_withGradients(x) 
+        f_acqu = -m + self.exploration_weight * s       
         df_acqu = -dmdx + self.exploration_weight * dsdx
-        cost_x, cost_grad_x = self.cost_withGradients(x)
-        f_acq_cost = f_acqu/cost_x
-        df_acq_cost = (df_acqu*cost_x - f_acqu*cost_grad_x)/(cost_x**2)
-        return -f_acq_cost*self.space.indicator_constraints(x), -df_acq_cost*self.space.indicator_constraints(x)
+        return f_acqu, df_acqu
+

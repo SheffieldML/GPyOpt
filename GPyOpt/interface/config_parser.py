@@ -1,3 +1,6 @@
+# Copyright (c) 2016, the GPyOpt Authors
+# Licensed under the BSD 3-clause license (see LICENSE.txt)
+
 import sys
 import optparse
 import os
@@ -52,15 +55,15 @@ default_config = {
                 'filename': None,
                 'interval': 1,
         },
-#        "convergence-plot": False
         },
 }
 
 
 def update_config(config_new, config_default):
 
-    # if any([isinstance(v, dict) for v in config_new.values()]):
-    #     for k,v in config_new.iteritems():
+    '''
+    Updates the loaded method configuration with default values.
+    '''
     if any([isinstance(v, dict) for v in list(config_new.values())]):
         for k,v in list(config_new.items()):
             if isinstance(v,dict) and k in config_default:
@@ -73,6 +76,9 @@ def update_config(config_new, config_default):
 
 
 def parser(input_file_path='config.json'):
+    '''
+    Parser for the json file containing the configuration of the method.
+    '''
 
     # --- Read .json file
     try:

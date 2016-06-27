@@ -7,7 +7,7 @@ import GPy
 
 class RFModel(BOModel):
     """
-    General class for handling a Ramdom Forrest in GPyOpt.
+    General class for handling a Ramdom Forest in GPyOpt.
 
     .. Note:: The model has beed wrapper 'as it is' from  Scikit-learn. Check 
     http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html
@@ -80,7 +80,7 @@ class RFModel(BOModel):
                  
     def predict(self, X):
         """
-        Preditions with the model. Returns posterior means and standard deviations at X. 
+        Predictions with the model. Returns posterior means and standard deviations at X. 
         """
         X = np.atleast_2d(X)
         m = np.empty(shape=(0,1))

@@ -24,32 +24,32 @@ warnings.filterwarnings("ignore")
 class BayesianOptimization(BO):
     """
     Main class to initialize a Bayesian Optimization method.
-    :param f: function to optimize. It should take 2-dimentional numpy arrays as input and return 2-dimentional outputs (one evaluation per row).
-    :param domain: list of dictionies containin the description of the inputs variables (See GPyOpt.core.space.Design_space class for details).
-    :param constrains: list of dicctionies containin the description of the problem constrains (See GPyOpt.core.space.Design_space class for details).
+    :param f: function to optimize. It should take 2-dimensional numpy arrays as input and return 2-dimensional outputs (one evaluation per row).
+    :param domain: list of dictionaries containing the description of the inputs variables (See GPyOpt.core.space.Design_space class for details).
+    :param constrains: list of dictionaries containing the description of the problem constrains (See GPyOpt.core.space.Design_space class for details).
     :cost_withGradients: cost function of the objective. The input can be:
-        - a fucntion that returns the cost and the derivatives and any set of points in the domain.
+        - a function that returns the cost and the derivatives and any set of points in the domain.
         - 'evaluation_time': a Gaussian process (mean) is used to handle the evaluation cost.
     :model_type: type of model to use as surrogate:
-        - 'GP', standad Gaussian process.
-        - 'GP_MCMC',  Gaussian process with priors in the hyperparameters.
+        - 'GP', standard Gaussian process.
+        - 'GP_MCMC',  Gaussian process with prior in the hyper-parameters.
         - 'sparseGP', sparse Gaussian process.
         - 'warperdGP', warped Gaussian process.
-        - 'RF', random forrest (scikit-learn).    
+        - 'RF', random forest (scikit-learn).    
     :param X: 2d numpy array containing the initial inputs (one per row) of the model.
     :param Y: 2d numpy array containing the initial outputs (one per row) of the model.
     :initial_design_numdata: number of initial points that are collected jointly before start running the optimization.
     :initial_design_type: type of initial design:
         - 'random', to collect points in random locations.
-        - 'latin', to collect points in a latin hypercube (discrete variables are sampled randomly.)
+        - 'Latin', to collect points in a Latin hypercube (discrete variables are sampled randomly.)
     :acquisition_type: type of acquisition function to use.
         - 'EI', expected improvement.
-        - 'EI_MCMC', integrated expected improvement (requieres GP_MCMC model).
+        - 'EI_MCMC', integrated expected improvement (requires GP_MCMC model).
         - 'MPI', maximum probability of improvement.
-        - 'MPI_MCMC', maximum probability of improvement (requieres GP_MCMC model).
+        - 'MPI_MCMC', maximum probability of improvement (requires GP_MCMC model).
         - 'LCB', GP-Lower confidence bound.
-        - 'LCB_MCMC', integrated GP-Lower confidence bound (requieres GP_MCMC model).
-    :param normalize_Y: wheter to normalize the outputs before performing any optimization (default, True).
+        - 'LCB_MCMC', integrated GP-Lower confidence bound (requires GP_MCMC model).
+    :param normalize_Y: whether to normalize the outputs before performing any optimization (default, True).
     :exact_feval: whether the outputs are exact (default, False).
     :acquisition_optimizer_type: type of acquisition function to use.
         - 'lbfgs': L-BFGS.
@@ -58,10 +58,10 @@ class BayesianOptimization(BO):
     :param model_update_interval: interval of collected observations after which the model is updated (default, 1). 
     :param evaluator_type: determines the way the objective is evaluated (all methods are equivalent if the batch size is one)
         - 'sequential', sequential evaluations.
-        - 'predictive', syncronous batch that uses a parallel model to phantasize new outputs.
-        - 'random': syncronous batch that selects the firt element as in a sequential policy and the rest randomly.
+        - 'predictive', synchronous batch that uses a parallel model to fantasize new outputs.
+        - 'random': synchronous batch that selects the first element as in a sequential policy and the rest randomly.
         - 'local_penalization': batch method proposed in (Gonzalez et al. 2016). 
-    :param batch_size: size of the batch in which the objective is evaluted (default, 1).
+    :param batch_size: size of the batch in which the objective is evaluated (default, 1).
     :param num_cores: number of cores used to evaluate the objective (default, 1).
     :param verbosity: prints the models and other options during the optimization.
     :param **kwargs: extra parameters. Can be used to tune the current optimization setup or to use deprecated options in this package release. 
@@ -232,7 +232,7 @@ class BayesianOptimization(BO):
                 									normalize_Y            = self.normalize_Y, 
                 									model_update_interval  = self.model_update_interval)
 
-        # --- Initilize everything
+        # --- Initialize everything
         self.run_optimization(max_iter=0,verbosity=self.verbosity)
 
     def _model_chooser(self):
@@ -250,7 +250,7 @@ class BayesianOptimization(BO):
         else: self.noise_var = None
             
         # --------    
-        # --- Initilize GP model with MLE on the parameters
+        # --- Initialize GP model with MLE on the parameters
         # --------
         if self.model_type == 'GP' or self.model_type == 'sparseGP':
             if 'model_optimizer_type' in self.kwargs: self.model_optimizer_type = self.kwargs['model_optimizer_type'] 
@@ -274,7 +274,7 @@ class BayesianOptimization(BO):
             return GPModel(self.kernel, self.noise_var, self.exact_feval, self.normalize_Y, self.model_optimizer_type, self.max_iters, self.optimize_restarts, self.sparse, self.num_inducing, self.verbosity_model)
 
         # --------
-        # --- Initilize GP model with MCMC on the parameters
+        # --- Initialize GP model with MCMC on the parameters
         # --------
         elif self.model_type == 'GP_MCMC':
             if 'n_samples' in self.kwargs: self.n_samples = self.kwargs['n_samples']
@@ -295,7 +295,7 @@ class BayesianOptimization(BO):
             return  GPModel_MCMC(self.kernel, self.noise_var, self.exact_feval, self.normalize_Y, self.n_samples, self.n_burnin, self.subsample_interval, self.step_size, self.leapfrog_steps, self.verbosity_model)
 
         # --------
-        # --- Initilize RF: values taken from default in scikit-learn
+        # --- Initialize RF: values taken from default in scikit-learn
         # --------
         elif self.model_type =='RF':
             # TODO: add options via kwargs
@@ -396,9 +396,9 @@ class BayesianOptimization(BO):
         Runs Bayesian Optimization for a number 'max_iter' of iterations (after the initial exploration data)
 
         :param max_iter: exploration horizon, or number of acquisitions. If nothing is provided optimizes the current acquisition.  
-        :param max_time: maximum exploration horizont in seconds.
+        :param max_time: maximum exploration horizon in seconds.
         :param eps: minimum distance between two consecutive x's to keep running the model.
-        :param vervosity: flag to print the optimization results after each iteration (default, True).
+        :param verbosity: flag to print the optimization results after each iteration (default, True).
         :param report_file: filename of the file where the results of the optimization are saved (default, None).
         """
 

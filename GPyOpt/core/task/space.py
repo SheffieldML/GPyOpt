@@ -27,15 +27,15 @@ class Design_space(object):
 
 
     - Mixed domain 
-    space =[{'name': 'var_1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality':1},
-            {'name': 'var_4', 'type': 'continuous', 'domain':(-3,1), 'dimensionality':2},
+    space =[{'name': 'var_1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality' :1},
+            {'name': 'var_4', 'type': 'continuous', 'domain':(-3,1), 'dimensionality' :2},
             {'name': 'var_3', 'type': 'discrete', 'domain': (0,1,2,3)}]
 
     Restrictions can be added to the problem. Each restriction is of the form c(x) <= 0 where c(x) is a function of 
     the input variables previously defined in the space. Restrictions should be written as a list
     of dictionaries. For instance, this is an example of an space coupled with a constrain
 
-    space =[ {'name': 'var_1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality':2}]
+    space =[ {'name': 'var_1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality' :2}]
     constraints = [ {'name': 'const_1', 'constrain': 'x[:,0]**2 + x[:,1]**2 - 1'}]
 
     If no constrains are provided the hypercube determined by the bounds constraints are used.
@@ -165,7 +165,7 @@ class Design_space(object):
 
     def get_continuous_space(self):
         """
-        Extracts the list of dictionaries with continupus components
+        Extracts the list of dictionaries with continuous components
         """
         return [d for d in self.space if d['type']=='continuous']
 
@@ -212,7 +212,7 @@ class Design_space(object):
 
     def indicator_constraints(self,x):
         """
-        Return zero if x is within the contrains and zero otherwise.
+        Return zero if x is within the constrains and zero otherwise.
         """
         x = np.atleast_2d(x)
         I_x = np.ones((x.shape[0],1))

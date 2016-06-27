@@ -15,8 +15,8 @@ class ModularBayesianOptimization(BO):
     :param evaluator: GPyOpt evaluator class.
     :param X_init: 2d numpy array containing the initial inputs (one per row) of the model.
     :param Y_init: 2d numpy array containing the initial outputs (one per row) of the model.
-    :param cost: GPyOpt cost class (defaut, none).
-    :param normalize_Y: wheter to normalize the outputs before performing any optimization (default, True).
+    :param cost: GPyOpt cost class (default, none).
+    :param normalize_Y: whether to normalize the outputs before performing any optimization (default, True).
     :param model_update_interval: interval of collected observations after which the model is updated (default, 1).
     """
 
@@ -36,5 +36,5 @@ class ModularBayesianOptimization(BO):
                                                             normalize_Y            = normalize_Y, 
                                                             model_update_interval  = model_update_interval)
 
-        # --- Initilize everyting
+        # --- Initialize everything
         self.run_optimization(0)
