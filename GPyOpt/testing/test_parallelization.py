@@ -10,7 +10,7 @@ import unittest
 
 class TestAcquisitions(unittest.TestCase):
     '''
-    Unittest for the available bathc methods
+    Unittest for the available batch methods
     '''
 
     def setUp(self):

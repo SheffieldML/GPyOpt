@@ -48,7 +48,7 @@ class Predictive(EvaluatorBase):
         X_batch = X_new
         k = 1
 
-        # --- Colect the rest of the elements in the batch by 
+        # --- Collect the rest of the elements in the batch by 
         while k<self.batch_size:
             X = np.vstack((X,X_new))       # update the sample within the batch
             Y = np.vstack((Y,model_local.predict(X_new)[0]))

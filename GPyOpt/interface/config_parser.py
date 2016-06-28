@@ -77,7 +77,7 @@ def update_config(config_new, config_default):
 
 def parser(input_file_path='config.json'):
     '''
-    Parser for the json file containing the configuration of the method.
+    Parser for the .json file containing the configuration of the method.
     '''
 
     # --- Read .json file

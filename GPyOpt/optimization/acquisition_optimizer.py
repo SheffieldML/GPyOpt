@@ -101,7 +101,7 @@ class ContAcqOptimizer(AcquOptimizer):
         '''
         Fix the values of some of the dimensions. Once this this done the optimization is carried out only across the not fixed dimensions.
 
-        :param dims: list of the indices of the dimensions to fix.
+        :param dims: list of the indexes of the dimensions to fix.
         :param values: list of the values at which the selected dimensions should be fixed.
         ''' 
         self.fixed_dims = dims
@@ -240,7 +240,7 @@ class BanditAcqOptimizer(AcquOptimizer):
         self.pulled_arms = np.vstack((self.pulled_arms, x_min))
 
 
-        # --- Previus approach: do not remove those oalready sampled
+        # --- Previous approach: do not remove those already sampled
         # pref_f = f(arms)
         # x_min = arms[np.argmin(pref_f)]
         # f_min = f(x_min)

@@ -21,8 +21,8 @@ class BO(object):
     :param evaluator: GPyOpt evaluator class.
     :param X_init: 2d numpy array containing the initial inputs (one per row) of the model.
     :param Y_init: 2d numpy array containing the initial outputs (one per row) of the model.
-    :param cost: GPyOpt cost class (defaut, none).
-    :param normalize_Y: wheter to normalize the outputs before performing any optimization (default, True).
+    :param cost: GPyOpt cost class (default, none).
+    :param normalize_Y: whether to normalize the outputs before performing any optimization (default, True).
     :param model_update_interval: interval of collected observations after which the model is updated (default, 1).
     """
 
@@ -51,7 +51,7 @@ class BO(object):
         :param report_file: filename of the file where the results of the optimization are saved (default, None).
         """
 
-        # --- Save the optinos to print and save the results
+        # --- Save the options to print and save the results
         self.verbosity = verbosity
         self.save_models_parameters = save_models_parameters
         self.report_file = report_file
@@ -59,7 +59,7 @@ class BO(object):
         self.models_file = models_file
         self.model_parameters_iterations = None
 
-        # --- Check if we can save the model parametes in each iteration
+        # --- Check if we can save the model parameters in each iteration
         if self.save_models_parameters == True:
             if not isinstance(self.model, GPyOpt.models.GPModel) or isinstance(self.model, GPyOpt.models.GPModel_MCMC):
                 print('Models printout after each iteration is only available for GP and GP_MCMC models') 

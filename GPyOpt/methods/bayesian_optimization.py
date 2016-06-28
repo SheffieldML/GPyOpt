@@ -183,9 +183,9 @@ class BayesianOptimization(BO):
             self.initial_design_numdata = initial_design_numdata
         self._init_design_chooser()
 
-        # --- CHOOSE the model type. If an istance of a GPyOpt model is passed (possibly user defined), it is used.
+        # --- CHOOSE the model type. If an instance of a GPyOpt model is passed (possibly user defined), it is used.
         self.model_type = model_type  
-        self.exact_feval = exact_feval  # note tha this 2 options are not used with the predefined model
+        self.exact_feval = exact_feval  # note that this 2 options are not used with the predefined model
         self.normalize_Y = normalize_Y      
         
         if 'model' in self.kwargs:
@@ -202,7 +202,7 @@ class BayesianOptimization(BO):
         self.acquisition_optimizer_type = acquisition_optimizer_type
         self.acquisition_optimizer = AcquisitionOptimizer(self.space, self.acquisition_optimizer_type, current_X = self.X)  ## more arguments may come here
 
-        # --- CHOOSE acquistion function. If an istance of an aquisition is passed (possibly user defined), it is used.
+        # --- CHOOSE acquisition function. If an instance of an acquisition is passed (possibly user defined), it is used.
         self.acquisition_type = acquisition_type
         
         if 'acquisition' in self.kwargs:

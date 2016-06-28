@@ -22,12 +22,19 @@ class BODriver(object):
         self.outputEng = outputEng
         
     def _get_obj(self,space):
+
+        """
+        Imports the acquisition function.
+        """
         obj_func = self.obj_func
         
         from ..core.task import SingleObjective
         return SingleObjective(obj_func, self.config['resources']['cores'], space=space, unfold_args=True)
         
     def _get_space(self):
+        """
+        Imports the domain.
+        """
         assert 'space' in self.config, 'The search space is NOT configured!'
         
         space_config = self.config['space']
@@ -36,6 +43,9 @@ class BODriver(object):
         return Design_space.fromConfig(space_config, constraint_config)
     
     def _get_model(self):
+        """
+        Imports the model.
+        """
 
         from copy import deepcopy
         model_args = deepcopy(self.config['model'])
@@ -46,6 +56,9 @@ class BODriver(object):
         
     
     def _get_acquisition(self, model, space):
+        """
+        Imports the acquisition
+        """
 
         from copy import deepcopy        
         acqOpt_config = deepcopy(self.config['acquisition']['optimizer'])
@@ -58,6 +71,10 @@ class BODriver(object):
         return select_acquisition(self.config['acquisition']['type']).fromConfig(model, space, acqOpt, None, self.config['acquisition'])
     
     def _get_acq_evaluator(self, acq):
+        """
+        Imports the evaluator
+        """
+
         from ..core.evaluators import select_evaluator
         from copy import deepcopy
         eval_args = deepcopy(self.config['acquisition']['evaluator'])
@@ -65,6 +82,10 @@ class BODriver(object):
         return select_evaluator(self.config['acquisition']['evaluator']['type'])(acq, **eval_args)
     
     def _check_stop(self, iters, elapsed_time, converged):
+        """
+        Defines the stopping criterion.
+        """
+
         r_c = self.config['resources']
         
         stop = False
@@ -77,6 +98,10 @@ class BODriver(object):
         return stop
             
     def run(self):
+        """
+        Runs the optimization using the previously loaded elements.
+        """
+
         space = self._get_space()
         obj_func = self._get_obj(space)
         model = self._get_model()
