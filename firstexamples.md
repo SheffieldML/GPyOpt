@@ -27,7 +27,7 @@ $ myBopt.run_optimization(max_iter=15)
 $ myBopt.plot_acquisition()
 ````
 
-<center> <img  src="./img/bo_example.png" style="width:500px" align="middle"></center>
+<center> <img  src="/img/bo_example.png" style="width:500px" align="middle"></center>
 
 
 ## GPyOpt from config files
