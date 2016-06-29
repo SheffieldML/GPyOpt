@@ -15,6 +15,7 @@ This is an example of how to use GPyOpt in the Python console. The following cod
 ```python
 # --- Load GPyOpt
 from GPyOpt import BayesianOptimization
+import numpy as np
 
 # --- Define your problem
 def f(x): return (6*x-2)**2\np.sin(12*x-4)
@@ -35,13 +36,13 @@ You can also solve your problems via the Linux console. To start, create a direc
 
 The problem definition should be a .py file. This is an example of a file that contains the Branin function.
 
-``branin.py``
+``myfunc.py``
 
 ```python
 import numpy as np
 
-def branin(x,y):
-    return (6*x-2)**2\np.sin(12*y-4)
+def myfunc(x,y):
+    return (4-2.1*x**2 + x**4/3)*x**2 + x*y + (-4 +4*y**2)*y**2
 ```
 
 In a json file, configure the parameters of the optimization. Details of the different options can be found in the reference manual. This is an exmaple of a json file that configures the optimization to solve the above defined problem. 
@@ -51,8 +52,8 @@ In a json file, configure the parameters of the optimization. Details of the dif
 ```json
 {
     "language"        : "PYTHON",
-    "main-file"       : "branin.py",
-    "experiment-name" : "simple-branin",
+    "main-file"       : "myfunc.py",
+    "experiment-name" : "simple-example",
     "likelihood"      : "gaussian",
     "resources": {
         "maximum-iterations" :  1,
@@ -62,14 +63,14 @@ In a json file, configure the parameters of the optimization. Details of the dif
         "y" : {
             "type" : "FLOAT",
             "size" : 1,
-            "min"  : -2,
-            "max"  : 5
+            "min"  : -3,
+            "max"  : 3
         },
         "x" : {
             "type" : "FLOAT",
             "size" : 1,
-            "min"  : 0,
-            "max"  : 5
+            "min"  : -2,
+            "max"  : 2
         }
     },
     "output":{
