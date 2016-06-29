@@ -1,18 +1,27 @@
-language: PYTHON
-name:     "camel"
-
-variable {
- name: "X"
- type: FLOAT
- size: 1
- min:  -3.0
- max:  3.0
-}
-
-variable {
- name: "Y"
- type: FLOAT
- size: 1
- min:  -2.0
- max:  2.0
+{
+    "language"        : "PYTHON",
+    "main-file"       : "camel.py",
+    "experiment-name" : "simple-camel",
+    "likelihood"      : "gaussian",
+    "resources": {
+        "maximum-iterations" :  50,
+        "max-run-time": "NA"
+    },
+    "space" : [
+        {   "name" : "X",
+            "type" : "continuous",
+            "domain": "(-3,3)",
+            "dimensionality": "1"
+        },
+        {
+            "name" : "Y",
+            "type" : "continuous",
+            "domain": "(-2,2)",
+            "dimensionality": "1"
+        }
+    ],
+    "constraints": [],
+    "output":{
+        "verbosity": true
+    }
 }
