@@ -81,7 +81,7 @@ In a json file, configure the parameters of the optimization. Details of the dif
 Now you just need to run the optimization by doing 
 
 ```bash
-$ gpyopt.py ..\myproblem\config.json
+$ gpyopt.py ../myproblem/config.json
 ```
 
 Once the the optimisation has finished three new files should appear in your folder folder:
