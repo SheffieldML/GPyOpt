@@ -18,7 +18,7 @@ We are very proud of using GPyOpt not only for research but also to create a com
 <center> <img  src="../img/gpss_2015.jpg" style="width:550px" align="middle"></center>
 
 
-*Course in Bayesian Optimization based on GPyOpt delivered on October 27-30th, 2015 at the University of Pereira Colombia (organized by [Javier Gonzalez](http://javiergonzalezh.github.io/) and  [Mauricio Alvarez](href= https://sites.google.com/site/maalvarezl)).*
+*Course in Bayesian Optimization based on GPyOpt delivered on October 27-30th, 2015 at the University of Pereira Colombia (organized by [Javier Gonzalez](http://javiergonzalezh.github.io/) and  [Mauricio Alvarez](https://sites.google.com/site/maalvarezl)).
 <center> <img  src="../img/bo_pereira.jpg" style="width:550px" align="middle"></center>
 
 
