@@ -4,8 +4,8 @@
 # baseurl is the website's URL without the hostname
 
 # If you are building a simple GitHub user page (http://username.github.io) then use these settings:
-url: "https://github.com/SheffieldML/GPyOpt"
-baseurl: ""
+url: "http://sheffieldml.github.io/GPyOpt"
+baseurl: "GPyOpt"
 
 # If you are building a GitHub project page then use these settings:
 #url: "http://username.github.io/projectname"
@@ -14,7 +14,7 @@ baseurl: ""
 # Of course don't forget to change the username and projectname to YOUR username and project
 
 # Name of website
-title: Fork me on GitHub
+title: GPyOpt
 
 # Short description of your site
 description: Python package for Bayesian optimization
@@ -43,7 +43,7 @@ avatar: "/img/avatar-icon.png"
 # Important: you must keep the "name" parameter, everything else you can remove
 author:
   name: Machine Learning Group - University of Sheffield.
-  email: "j.h.gonzaelez@sheffield.ac.uk"
+  email: "j.h.gonzalez@sheffield.ac.uk"
   github: https://github.com/SheffieldML    # eg. daattali
  
 # Select which links to show in the footer
