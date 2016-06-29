@@ -1,29 +1,21 @@
 GPyOpt.core package
 ===================
 
+Subpackages
+-----------
+
+.. toctree::
+
+    GPyOpt.core.evaluators
+    GPyOpt.core.task
+
 Submodules
 ----------
-
-GPyOpt.core.acquisition module
-------------------------------
-
-.. automodule:: GPyOpt.core.acquisition
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 GPyOpt.core.bo module
 ---------------------
 
 .. automodule:: GPyOpt.core.bo
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-GPyOpt.core.optimization module
--------------------------------
-
-.. automodule:: GPyOpt.core.optimization
     :members:
     :undoc-members:
     :show-inheritance:

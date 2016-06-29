@@ -6,12 +6,15 @@ Subpackages
 
 .. toctree::
 
+    GPyOpt.acquisitions
     GPyOpt.core
-    GPyOpt.demos
-    GPyOpt.fmodels
     GPyOpt.interface
     GPyOpt.methods
+    GPyOpt.models
+    GPyOpt.objective_examples
+    GPyOpt.optimization
     GPyOpt.plotting
+    GPyOpt.testing
     GPyOpt.util
 
 Module contents
