@@ -35,7 +35,7 @@ The simplest way to install GPyOpt is using pip. ubuntu users can do:
 If you'd like to install from source, or want to contribute to the project (e.g. by sending pull requests via github), read on. Clone the repository in GitHub and add it to your $PYTHONPATH.
 
 ```bash
-    https://github.com/SheffieldML/GPyOpt.git
+    git clone https://github.com/SheffieldML/GPyOpt.git
     cd GPyOpt
     python setup.py develop
 ```
