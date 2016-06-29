@@ -84,7 +84,7 @@ Now you just need to run the optimization by doing
 $ gpyopt.py ../myproblem/config.json
 ```
 
-Once the the optimisation has finished three new files should appear in your folder folder:
+Once the the optimisation has finished new files with the details of the optimization process should appear in your folder folder:
 
 - ```Evaluations.txt:``` containing the locations and values of the function evaluations.
 - ```Models.txt```: containing the parameters of all the models used.
