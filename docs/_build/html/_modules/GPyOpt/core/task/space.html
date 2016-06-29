@@ -1,0 +1,347 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>GPyOpt.core.task.space &mdash; GPyOpt  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="GPyOpt  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for GPyOpt.core.task.space</h1><div class="highlight"><pre>
+<span class="c"># Copyright (c) 2016, the GPyOpt Authors</span>
+<span class="c"># Licensed under the BSD 3-clause license (see LICENSE.txt)</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+
+<div class="viewcode-block" id="Design_space"><a class="viewcode-back" href="../../../../GPyOpt.core.task.html#GPyOpt.core.task.space.Design_space">[docs]</a><span class="k">class</span> <span class="nc">Design_space</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to handle the input domain of the function. </span>
+<span class="sd">    The format of a input domain, possibly with restrictions:</span>
+<span class="sd">    The domain is defined as a list of dictionaries contains a list of attributes, e.g.:</span>
+
+<span class="sd">    - Arm bandit</span>
+<span class="sd">    space  =[{&#39;name&#39;: &#39;var_1&#39;, &#39;type&#39;: &#39;bandit&#39;, &#39;domain&#39;: [(-1,1),(1,0),(0,1)]},</span>
+<span class="sd">             {&#39;name&#39;: &#39;var_2&#39;, &#39;type&#39;: &#39;bandit&#39;, &#39;domain&#39;: [(-1,4),(0,0),(1,2)]}]</span>
+
+<span class="sd">    - Continuous domain</span>
+<span class="sd">    space =[ {&#39;name&#39;: &#39;var_1&#39;, &#39;type&#39;: &#39;continuous&#39;, &#39;domain&#39;:(-1,1), &#39;dimensionality&#39;:1},</span>
+<span class="sd">             {&#39;name&#39;: &#39;var_2&#39;, &#39;type&#39;: &#39;continuous&#39;, &#39;domain&#39;:(-3,1), &#39;dimensionality&#39;:2},</span>
+<span class="sd">             {&#39;name&#39;: &#39;var_3&#39;, &#39;type&#39;: &#39;bandit&#39;, &#39;domain&#39;: [(-1,1),(1,0),(0,1)], &#39;dimensionality&#39;:2},</span>
+<span class="sd">             {&#39;name&#39;: &#39;var_4&#39;, &#39;type&#39;: &#39;bandit&#39;, &#39;domain&#39;: [(-1,4),(0,0),(1,2)]},</span>
+<span class="sd">             {&#39;name&#39;: &#39;var_5&#39;, &#39;type&#39;: &#39;discrete&#39;, &#39;domain&#39;: (0,1,2,3)}]</span>
+
+<span class="sd">    - Discrete domain</span>
+<span class="sd">    space =[ {&#39;name&#39;: &#39;var_3&#39;, &#39;type&#39;: &#39;discrete&#39;, &#39;domain&#39;: (0,1,2,3)}]</span>
+<span class="sd">             {&#39;name&#39;: &#39;var_3&#39;, &#39;type&#39;: &#39;discrete&#39;, &#39;domain&#39;: (-10,10)}]</span>
+
+
+<span class="sd">    - Mixed domain </span>
+<span class="sd">    space =[{&#39;name&#39;: &#39;var_1&#39;, &#39;type&#39;: &#39;continuous&#39;, &#39;domain&#39;:(-1,1), &#39;dimensionality&#39; :1},</span>
+<span class="sd">            {&#39;name&#39;: &#39;var_4&#39;, &#39;type&#39;: &#39;continuous&#39;, &#39;domain&#39;:(-3,1), &#39;dimensionality&#39; :2},</span>
+<span class="sd">            {&#39;name&#39;: &#39;var_3&#39;, &#39;type&#39;: &#39;discrete&#39;, &#39;domain&#39;: (0,1,2,3)}]</span>
+
+<span class="sd">    Restrictions can be added to the problem. Each restriction is of the form c(x) &lt;= 0 where c(x) is a function of </span>
+<span class="sd">    the input variables previously defined in the space. Restrictions should be written as a list</span>
+<span class="sd">    of dictionaries. For instance, this is an example of an space coupled with a constrain</span>
+
+<span class="sd">    space =[ {&#39;name&#39;: &#39;var_1&#39;, &#39;type&#39;: &#39;continuous&#39;, &#39;domain&#39;:(-1,1), &#39;dimensionality&#39; :2}]</span>
+<span class="sd">    constraints = [ {&#39;name&#39;: &#39;const_1&#39;, &#39;constrain&#39;: &#39;x[:,0]**2 + x[:,1]**2 - 1&#39;}]</span>
+
+<span class="sd">    If no constrains are provided the hypercube determined by the bounds constraints are used.</span>
+
+<span class="sd">    param space: list of dictionaries as indicated above.</span>
+<span class="sd">    param constraints: list of dictionaries as indicated above (default, none)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">supported_types</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;continuous&#39;</span><span class="p">,</span> <span class="s">&#39;discrete&#39;</span><span class="p">,</span> <span class="s">&#39;bandit&#39;</span><span class="p">]</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">space</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_complete_attributes</span><span class="p">(</span><span class="n">space</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">space_expanded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expand_attributes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span> <span class="o">=</span> <span class="n">constraints</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_types</span><span class="p">[</span><span class="s">&#39;bandit&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">has_types</span><span class="p">[</span><span class="s">&#39;continuous&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_types</span><span class="p">[</span><span class="s">&#39;discrete&#39;</span><span class="p">]):</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;Combinations of bandits with other variables are not supported.&#39;</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Design_space.fromConfig"><a class="viewcode-back" href="../../../../GPyOpt.core.task.html#GPyOpt.core.task.space.Design_space.fromConfig">[docs]</a>    <span class="k">def</span> <span class="nf">fromConfig</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">constraints</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">six</span>
+        <span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">literal_eval</span>
+
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">space</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;dimensionality&#39;</span><span class="p">],</span><span class="n">six</span><span class="o">.</span><span class="n">string_types</span><span class="p">):</span>
+                <span class="n">d</span><span class="p">[</span><span class="s">&#39;dimensionality&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;dimensionality&#39;</span><span class="p">])</span>
+            <span class="n">d</span><span class="p">[</span><span class="s">&#39;domain&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;domain&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">Design_space</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="bp">None</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">constraints</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span> <span class="k">else</span> <span class="n">constraints</span><span class="p">)</span>
+        </div>
+    <span class="k">def</span> <span class="nf">_complete_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">space</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates an internal dictionary where all the missing elements are completed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>   
+        <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">space</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimensionality</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">has_types</span> <span class="o">=</span> <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="nb">type</span><span class="p">:</span> <span class="bp">False</span> <span class="k">for</span> <span class="nb">type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_types</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">space</span><span class="p">)):</span>
+            <span class="n">d_out</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">space</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">if</span> <span class="s">&#39;name&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">d_out</span><span class="p">:</span>
+                <span class="n">d_out</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;var_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s">&#39;type&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">d_out</span><span class="p">:</span>
+                <span class="n">d_out</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;continuous&#39;</span>
+            <span class="k">if</span> <span class="s">&#39;domain&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">d_out</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Domain attribute cannot be missing!&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s">&#39;dimensionality&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">d_out</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">d_out</span><span class="p">[</span><span class="s">&#39;domain&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;bandit&#39;</span><span class="p">:</span>
+                    <span class="n">dims</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span> <span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">d_out</span><span class="p">[</span><span class="s">&#39;domain&#39;</span><span class="p">]])</span>
+                    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">dims</span><span class="o">==</span><span class="n">dims</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="s">&#39;The dimensionalities of the bandit variable &#39;</span><span class="o">+</span><span class="n">d_out</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">+</span><span class="s">&#39; have to be the same!&#39;</span>
+                    <span class="n">d_out</span><span class="p">[</span><span class="s">&#39;dimensionality&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">d_out</span><span class="p">[</span><span class="s">&#39;domain&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">d_out</span><span class="p">[</span><span class="s">&#39;dimensionality&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">dimensionality</span> <span class="o">+=</span> <span class="n">d_out</span><span class="p">[</span><span class="s">&#39;dimensionality&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d_out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">has_types</span><span class="p">[</span><span class="n">d_out</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="n">dims</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;dimensionality&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_var_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">dims</span><span class="p">),</span><span class="mi">2</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dims</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_var_indices</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">offset</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_var_indices</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">dims</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">offset</span> <span class="o">+=</span> <span class="n">dims</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Design_space.get_variable_indices"><a class="viewcode-back" href="../../../../GPyOpt.core.task.html#GPyOpt.core.task.space.Design_space.get_variable_indices">[docs]</a>    <span class="k">def</span> <span class="nf">get_variable_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_var_indices</span>
+</div>
+<div class="viewcode-block" id="Design_space.has_constrains"><a class="viewcode-back" href="../../../../GPyOpt.core.task.html#GPyOpt.core.task.space.Design_space.has_constrains">[docs]</a>    <span class="k">def</span> <span class="nf">has_constrains</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if the problem has constrains.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span> <span class="o">!=</span> <span class="bp">None</span>
+</div>
+    <span class="k">def</span> <span class="nf">_expand_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">space</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates and internal dictionary where the attributes with dimensionality larger than one are expanded. This</span>
+<span class="sd">        dictionary is the one that is used internally to do the optimization.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">space_expanded</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">space</span><span class="p">:</span>
+            <span class="n">d_new</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;dimensionality&#39;</span><span class="p">]):</span>
+                <span class="n">dd</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">dd</span><span class="p">[</span><span class="s">&#39;dimensionality&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">dd</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">d_new</span> <span class="o">+=</span> <span class="p">[</span><span class="n">dd</span><span class="p">]</span> 
+            <span class="n">space_expanded</span> <span class="o">+=</span> <span class="n">d_new</span>
+        <span class="k">return</span> <span class="n">space_expanded</span>
+
+<div class="viewcode-block" id="Design_space.get_continuous_bounds"><a class="viewcode-back" href="../../../../GPyOpt.core.task.html#GPyOpt.core.task.space.Design_space.get_continuous_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">get_continuous_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts the bounds of the continuous variables.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;continuous&#39;</span><span class="p">:</span>
+                <span class="n">bounds</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;domain&#39;</span><span class="p">]]</span><span class="o">*</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;dimensionality&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">bounds</span>
+    </div>
+<div class="viewcode-block" id="Design_space.get_bounds"><a class="viewcode-back" href="../../../../GPyOpt.core.task.html#GPyOpt.core.task.space.Design_space.get_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">get_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts the bounds of all the inputs of the domain.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_types</span><span class="p">[</span><span class="s">&#39;bandit&#39;</span><span class="p">]:</span>
+            <span class="n">bandit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bandit</span><span class="p">()</span>
+            <span class="n">mins</span><span class="p">,</span> <span class="n">maxs</span> <span class="o">=</span> <span class="n">bandit</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">bandit</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bandit</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">())):</span> <span class="n">bounds</span> <span class="o">+=</span> <span class="p">[(</span><span class="n">mins</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">maxs</span><span class="p">[</span><span class="n">i</span><span class="p">])]</span> 
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;continuous&#39;</span><span class="p">:</span>
+                    <span class="n">bounds</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;domain&#39;</span><span class="p">]]</span><span class="o">*</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;dimensionality&#39;</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">d</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;discrete&#39;</span><span class="p">:</span>
+                    <span class="n">bounds</span><span class="o">.</span><span class="n">extend</span><span class="p">([(</span><span class="nb">min</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;domain&#39;</span><span class="p">])</span><span class="o">-.</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;domain&#39;</span><span class="p">])</span><span class="o">+.</span><span class="mi">1</span><span class="p">)</span> <span class="p">]</span> <span class="o">*</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;dimensionality&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">bounds</span>
+</div>
+<div class="viewcode-block" id="Design_space.get_subspace"><a class="viewcode-back" href="../../../../GPyOpt.core.task.html#GPyOpt.core.task.space.Design_space.get_subspace">[docs]</a>    <span class="k">def</span> <span class="nf">get_subspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dims</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Extracts a the subspace according to a list of dimension.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">subspace</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">dims</span><span class="p">:</span>
+            <span class="n">subspace</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">space_expanded</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+        <span class="k">return</span> <span class="n">subspace</span>
+</div>
+<div class="viewcode-block" id="Design_space.get_continuous_space"><a class="viewcode-back" href="../../../../GPyOpt.core.task.html#GPyOpt.core.task.space.Design_space.get_continuous_space">[docs]</a>    <span class="k">def</span> <span class="nf">get_continuous_space</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts the list of dictionaries with continuous components</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span> <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;continuous&#39;</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="Design_space.get_discrete_grid"><a class="viewcode-back" href="../../../../GPyOpt.core.task.html#GPyOpt.core.task.space.Design_space.get_discrete_grid">[docs]</a>    <span class="k">def</span> <span class="nf">get_discrete_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes a Numpy array with the grid of points that results after crossing the possible outputs of the discrete </span>
+<span class="sd">        variables</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sets_grid</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;discrete&#39;</span><span class="p">:</span>
+                <span class="n">sets_grid</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;domain&#39;</span><span class="p">]]</span><span class="o">*</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;dimensionality&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">sets_grid</span><span class="p">)))</span>
+</div>
+<div class="viewcode-block" id="Design_space.get_bandit"><a class="viewcode-back" href="../../../../GPyOpt.core.task.html#GPyOpt.core.task.space.Design_space.get_bandit">[docs]</a>    <span class="k">def</span> <span class="nf">get_bandit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts the arms of the bandit if any.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">arms_bandit</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;bandit&#39;</span><span class="p">:</span>
+                <span class="n">arms_bandit</span> <span class="o">+=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">d</span><span class="p">[</span><span class="s">&#39;domain&#39;</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">arms_bandit</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Design_space.get_continuous_dims"><a class="viewcode-back" href="../../../../GPyOpt.core.task.html#GPyOpt.core.task.space.Design_space.get_continuous_dims">[docs]</a>    <span class="k">def</span> <span class="nf">get_continuous_dims</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the dimension of the continuous components of the domain.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">continuous_dims</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensionality</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">space_expanded</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;type&#39;</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;continuous&#39;</span><span class="p">:</span>
+                <span class="n">continuous_dims</span> <span class="o">+=</span> <span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">continuous_dims</span>
+</div>
+<div class="viewcode-block" id="Design_space.get_discrete_dims"><a class="viewcode-back" href="../../../../GPyOpt.core.task.html#GPyOpt.core.task.space.Design_space.get_discrete_dims">[docs]</a>    <span class="k">def</span> <span class="nf">get_discrete_dims</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the dimension of the discrete components of the domain.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">discrete_dims</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensionality</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">space_expanded</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;type&#39;</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;discrete&#39;</span><span class="p">:</span>
+                <span class="n">discrete_dims</span> <span class="o">+=</span> <span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">discrete_dims</span>
+</div>
+<div class="viewcode-block" id="Design_space.indicator_constraints"><a class="viewcode-back" href="../../../../GPyOpt.core.task.html#GPyOpt.core.task.space.Design_space.indicator_constraints">[docs]</a>    <span class="k">def</span> <span class="nf">indicator_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return zero if x is within the constrains and zero otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">I_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">exec</span><span class="p">(</span><span class="s">&#39;constrain =  lambda x:&#39;</span> <span class="o">+</span> <span class="n">d</span><span class="p">[</span><span class="s">&#39;constrain&#39;</span><span class="p">],</span><span class="nb">globals</span><span class="p">())</span>
+                    <span class="n">ind_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">constrain</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="mi">1</span>
+                    <span class="n">I_x</span> <span class="o">*=</span> <span class="n">ind_x</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s">&#39;Fail to compile the constraint: &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
+                    <span class="k">raise</span>
+        <span class="k">return</span> <span class="n">I_x</span>
+</div>
+<div class="viewcode-block" id="Design_space.input_dim"><a class="viewcode-back" href="../../../../GPyOpt.core.task.html#GPyOpt.core.task.space.Design_space.input_dim">[docs]</a>    <span class="k">def</span> <span class="nf">input_dim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts the input dimension of the domain.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n_cont</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_continuous_dims</span><span class="p">())</span>
+        <span class="n">n_disc</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_discrete_dims</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">n_cont</span> <span class="o">+</span> <span class="n">n_disc</span>
+
+</div></div>
+<div class="viewcode-block" id="bounds_to_space"><a class="viewcode-back" href="../../../../GPyOpt.core.task.html#GPyOpt.core.task.space.bounds_to_space">[docs]</a><span class="k">def</span> <span class="nf">bounds_to_space</span><span class="p">(</span><span class="n">bounds</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes as input a list of tuples with bounds, and create a dictionary to be processed by the class Design_space. This function</span>
+<span class="sd">    us used to keep the compatibility with previous versions of GPyOpt in which only bounded continuous optimization was possible</span>
+<span class="sd">    (and the optimization domain passed as a list of tuples).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">space</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">)):</span>
+        <span class="n">space</span> <span class="o">+=</span> <span class="p">[{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;var_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;continuous&#39;</span><span class="p">,</span> <span class="s">&#39;domain&#39;</span><span class="p">:</span><span class="n">bounds</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="s">&#39;dimensionality&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">}]</span>
+    <span class="k">return</span> <span class="n">space</span>
+
+    
+
+
+
+
+    </div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Javier Gonzalez.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

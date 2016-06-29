@@ -1,0 +1,217 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>GPyOpt.core.evaluators.batch_predictive &mdash; GPyOpt  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="GPyOpt  documentation" href="../../../../index.html" />
+    <link rel="up" title="GPyOpt.core.evaluators" href="../evaluators.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../evaluators.html" accesskey="U">GPyOpt.core.evaluators</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for GPyOpt.core.evaluators.batch_predictive</h1><div class="highlight"><pre>
+<span class="c"># Copyright (c) 2016, the GPyOpt Authors</span>
+<span class="c"># Licensed under the BSD 3-clause license (see LICENSE.txt)</span>
+
+<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">EvaluatorBase</span>
+<span class="kn">from</span> <span class="nn">...util.stats</span> <span class="kn">import</span> <span class="n">initial_design</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">...models</span> <span class="kn">import</span> <span class="n">GPModel</span>
+<span class="kn">from</span> <span class="nn">..bo</span> <span class="kn">import</span> <span class="n">BO</span>
+<span class="kn">from</span> <span class="nn">..task.objective</span> <span class="kn">import</span> <span class="n">SingleObjective</span>
+<span class="kn">from</span> <span class="nn">..evaluators</span> <span class="kn">import</span> <span class="n">Sequential</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+
+<span class="c">#### </span>
+<span class="c">#### TODO! : runs but it does not work well yet!!! THERE IS SOMETHING WRONG</span>
+<span class="c">####</span>
+
+
+<div class="viewcode-block" id="Predictive"><a class="viewcode-back" href="../../../../GPyOpt.core.evaluators.html#GPyOpt.core.evaluators.batch_predictive.Predictive">[docs]</a><span class="k">class</span> <span class="nc">Predictive</span><span class="p">(</span><span class="n">EvaluatorBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class a predictive batch method. Computes the element of the batch Sequentially by predicting outputs of the function with the mean of the GP.</span>
+<span class="sd">    The model is updated after every fantasized evaluation is collected.</span>
+
+<span class="sd">    :param acquisition: acquisition function to be used to compute the batch.</span>
+<span class="sd">    :param batch size: the number of elements in the batch.</span>
+<span class="sd">    :normalize_Y: whether to normalize the outputs.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acquisition</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">normalize_Y</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Predictive</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalize_Y</span> <span class="o">=</span> <span class="n">normalize_Y</span>
+
+<div class="viewcode-block" id="Predictive.compute_batch"><a class="viewcode-back" href="../../../../GPyOpt.core.evaluators.html#GPyOpt.core.evaluators.batch_predictive.Predictive.compute_batch">[docs]</a>    <span class="k">def</span> <span class="nf">compute_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the elements of the batch sequentially by using predictions from the model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># --- Compute local entities</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">Y</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">model_local</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c">#### how to make a copy of this???</span>
+        <span class="n">space_local</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span><span class="o">.</span><span class="n">space</span>
+        <span class="n">objective_local</span> <span class="o">=</span> <span class="n">SingleObjective</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">0</span> <span class="p">)</span>
+        <span class="n">acquisition_local</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span><span class="p">)</span> 
+        <span class="n">collection_method</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">(</span><span class="n">acquisition_local</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c"># --- Optimize the acquisition by first time</span>
+        <span class="n">X_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span><span class="o">.</span><span class="n">optimize</span><span class="p">())</span>
+        <span class="n">X_batch</span> <span class="o">=</span> <span class="n">X_new</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="c"># --- Collect the rest of the elements in the batch by </span>
+        <span class="k">while</span> <span class="n">k</span><span class="o">&lt;</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">X</span><span class="p">,</span><span class="n">X_new</span><span class="p">))</span>       <span class="c"># update the sample within the batch</span>
+            <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">Y</span><span class="p">,</span><span class="n">model_local</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_new</span><span class="p">)[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="k">print</span><span class="p">((</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">))</span>
+            <span class="n">model_local</span><span class="o">.</span><span class="n">updateModel</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="bp">None</span><span class="p">)</span>
+            <span class="k">print</span><span class="p">((</span><span class="n">model_local</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">model_local</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">Y</span><span class="p">))</span>
+
+            <span class="k">print</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span> <span class="c"># this exception is included in case two equal points are selected in a batch, in this case the method stops</span>
+                <span class="n">batchBO</span> <span class="o">=</span> <span class="n">BO</span><span class="p">(</span><span class="n">model_local</span><span class="p">,</span> <span class="n">space_local</span><span class="p">,</span> <span class="n">objective_local</span><span class="p">,</span> <span class="n">acquisition_local</span><span class="p">,</span> <span class="n">collection_method</span><span class="p">,</span> <span class="n">X_init</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">Y_init</span><span class="o">=</span><span class="n">Y</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">normalize_Y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize_Y</span><span class="p">)</span>  
+            <span class="k">except</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinAlgError</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&#39;Optimization stopped. Two equal points selected.&#39;</span><span class="p">)</span>
+                <span class="k">break</span>        
+
+            <span class="n">batchBO</span><span class="o">.</span><span class="n">run_optimization</span><span class="p">(</span><span class="n">max_iter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>        
+            <span class="n">X_new</span> <span class="o">=</span> <span class="n">batchBO</span><span class="o">.</span><span class="n">suggested_sample</span>
+            <span class="n">X_batch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">X_batch</span><span class="p">,</span><span class="n">X_new</span><span class="p">))</span>
+            <span class="n">k</span><span class="o">+=</span><span class="mi">1</span>    
+
+        <span class="k">return</span> <span class="n">X_batch</span>
+
+
+
+
+<span class="c"># def predictive_batch_optimization(acqu_name, acquisition_par, acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, n_inbatch):   </span>
+<span class="c">#     &#39;&#39;&#39;</span>
+<span class="c">#     Computes batch optimization using the predictive mean to obtain new batch elements</span>
+
+<span class="c">#     :param acquisition: acquisition function in which the batch selection is based</span>
+<span class="c">#     :param d_acquisition: gradient of the acquisition</span>
+<span class="c">#     :param bounds: the box constrains of the optimization</span>
+<span class="c">#     :param acqu_optimize_restarts: the number of restarts in the optimization of the surrogate</span>
+<span class="c">#     :param acqu_optimize_method: the method to optimize the acquisition function</span>
+<span class="c">#     :param model: the GP model based on the current samples</span>
+<span class="c">#     :param n_inbatch: the number of samples to collect</span>
+<span class="c">#     &#39;&#39;&#39;</span>
+<span class="c">#     model_copy = model.copy()</span>
+<span class="c">#     X = model.X.copy() </span>
+<span class="c">#     Y = model.Y.copy()</span>
+<span class="c">#     input_dim = X.shape[1] </span>
+<span class="c">#     #kernel = model_copy.kern    </span>
+
+<span class="c">#     # Optimization of the first element in the batch</span>
+<span class="c">#     X_new = optimize_acquisition(acquisition, d_acquisition, bounds, acqu_optimize_restarts, acqu_optimize_method, model, X_batch=None, L=None, Min=None)</span>
+<span class="c">#     X_batch = reshape(X_new,input_dim)</span>
+<span class="c">#     k=1</span>
+<span class="c">#     while k&lt;n_inbatch:</span>
+<span class="c">#         X = np.vstack((X,reshape(X_new,input_dim)))       # update the sample within the batch</span>
+<span class="c">#         Y = np.vstack((Y,model.predict(reshape(X_new, input_dim))[0]))</span>
+       
+<span class="c">#         try: # this exception is included in case two equal points are selected in a batch, in this case the method stops</span>
+<span class="c">#             batchBO = GPyOpt.methods.BayesianOptimization(f=0, </span>
+<span class="c">#                                         bounds= bounds, </span>
+<span class="c">#                                         X=X, </span>
+<span class="c">#                                         Y=Y, </span>
+<span class="c">#                                         kernel = kernel,</span>
+<span class="c">#                                         acquisition = acqu_name, </span>
+<span class="c">#                                         acquisition_par = acquisition_par)</span>
+<span class="c">#         except np.linalg.linalg.LinAlgError:</span>
+<span class="c">#             print(&#39;Optimization stopped. Two equal points selected.&#39;)</span>
+<span class="c">#             break        </span>
+
+<span class="c">#         batchBO.run_optimization(max_iter = 0, </span>
+<span class="c">#                                     n_inbatch=1, </span>
+<span class="c">#                                     acqu_optimize_method = acqu_optimize_method,  </span>
+<span class="c">#                                     acqu_optimize_restarts = acqu_optimize_restarts, </span>
+<span class="c">#                                     eps = 1e-6,verbose = False)</span>
+        
+<span class="c">#         X_new = batchBO.suggested_sample</span>
+<span class="c">#         X_batch = np.vstack((X_batch,X_new))</span>
+<span class="c">#         k+=1    </span>
+<span class="c">#     return X_batch</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../evaluators.html" >GPyOpt.core.evaluators</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Javier Gonzalez.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

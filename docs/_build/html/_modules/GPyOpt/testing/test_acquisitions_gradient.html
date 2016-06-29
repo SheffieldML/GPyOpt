@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>GPyOpt.testing.test_acquisitions_gradient &mdash; GPyOpt  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="GPyOpt  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for GPyOpt.testing.test_acquisitions_gradient</h1><div class="highlight"><pre>
+<span class="c"># Copyright (c) 2016, the GPyOpt Authors</span>
+<span class="c"># Licensed under the BSD 3-clause license (see LICENSE.txt)</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">GPyOpt</span>
+<span class="kn">import</span> <span class="nn">GPy</span>
+<span class="kn">from</span> <span class="nn">GPyOpt.util.general</span> <span class="kn">import</span> <span class="n">samples_multidimensional_uniform</span>
+<span class="kn">from</span> <span class="nn">GPyOpt.acquisitions</span> <span class="kn">import</span> <span class="n">AcquisitionEI</span><span class="p">,</span> <span class="n">AcquisitionMPI</span><span class="p">,</span> <span class="n">AcquisitionLCB</span>
+<span class="kn">from</span> <span class="nn">GPy.models.gradient_checker</span> <span class="kn">import</span> <span class="n">GradientChecker</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+
+
+<div class="viewcode-block" id="acquisition_for_test"><a class="viewcode-back" href="../../../GPyOpt.testing.html#GPyOpt.testing.test_acquisitions_gradient.acquisition_for_test">[docs]</a><span class="k">class</span> <span class="nc">acquisition_for_test</span><span class="p">():</span>
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	Class to run the unit test for the gradients of the acquisitions</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">gpyopt_acuq</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">gpyopt_acuq</span> <span class="o">=</span> <span class="n">gpyopt_acuq</span>
+
+<div class="viewcode-block" id="acquisition_for_test.acquisition_function"><a class="viewcode-back" href="../../../GPyOpt.testing.html#GPyOpt.testing.test_acquisitions_gradient.acquisition_for_test.acquisition_function">[docs]</a>	<span class="k">def</span> <span class="nf">acquisition_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gpyopt_acuq</span><span class="o">.</span><span class="n">acquisition_function_withGradients</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="acquisition_for_test.d_acquisition_function"><a class="viewcode-back" href="../../../GPyOpt.testing.html#GPyOpt.testing.test_acquisitions_gradient.acquisition_for_test.d_acquisition_function">[docs]</a>	<span class="k">def</span> <span class="nf">d_acquisition_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gpyopt_acuq</span><span class="o">.</span><span class="n">acquisition_function_withGradients</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+</div></div>
+<div class="viewcode-block" id="TestAcquisitionsGradients"><a class="viewcode-back" href="../../../GPyOpt.testing.html#GPyOpt.testing.test_acquisitions_gradient.TestAcquisitionsGradients">[docs]</a><span class="k">class</span> <span class="nc">TestAcquisitionsGradients</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	Unittest for the gradients of the available acquisition functions</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="TestAcquisitionsGradients.setUp"><a class="viewcode-back" href="../../../GPyOpt.testing.html#GPyOpt.testing.test_acquisitions_gradient.TestAcquisitionsGradients.setUp">[docs]</a>	<span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">tolerance</span> 	<span class="o">=</span> <span class="mf">0.01</span>  <span class="c">#Tolerance for difference between true and approximated gradients</span>
+		<span class="n">objective</span> 		<span class="o">=</span> <span class="n">GPyOpt</span><span class="o">.</span><span class="n">objective_examples</span><span class="o">.</span><span class="n">experiments1d</span><span class="o">.</span><span class="n">forrester</span><span class="p">()</span>   
+		<span class="bp">self</span><span class="o">.</span><span class="n">feasible_region</span> <span class="o">=</span>  <span class="n">GPyOpt</span><span class="o">.</span><span class="n">Design_space</span><span class="p">(</span><span class="n">space</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;var_1&#39;</span><span class="p">,</span> <span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;continuous&#39;</span><span class="p">,</span> <span class="s">&#39;domain&#39;</span><span class="p">:</span> <span class="n">objective</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]}])</span>
+		<span class="n">n_inital_design</span> <span class="o">=</span> <span class="mi">10</span>
+		<span class="n">X</span> 				<span class="o">=</span> <span class="n">samples_multidimensional_uniform</span><span class="p">(</span><span class="n">objective</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span><span class="n">n_inital_design</span><span class="p">)</span>
+		<span class="n">Y</span> 				<span class="o">=</span> <span class="n">objective</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">X_test</span> 	<span class="o">=</span> <span class="n">samples_multidimensional_uniform</span><span class="p">(</span><span class="n">objective</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span><span class="n">n_inital_design</span><span class="p">)</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">GPyOpt</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">GPModel</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_create_model</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">)</span> 
+		<span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">optimize_restarts</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">Gaussian_noise</span><span class="o">.</span><span class="n">constrain_fixed</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">warning</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="TestAcquisitionsGradients.test_ChecKGrads_EI"><a class="viewcode-back" href="../../../GPyOpt.testing.html#GPyOpt.testing.test_acquisitions_gradient.TestAcquisitionsGradients.test_ChecKGrads_EI">[docs]</a>	<span class="k">def</span> <span class="nf">test_ChecKGrads_EI</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">acquisition_ei</span> <span class="o">=</span> <span class="n">acquisition_for_test</span><span class="p">(</span><span class="n">AcquisitionEI</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">feasible_region</span><span class="p">))</span>
+		<span class="n">grad_ei</span> <span class="o">=</span> <span class="n">GradientChecker</span><span class="p">(</span><span class="n">acquisition_ei</span><span class="o">.</span><span class="n">acquisition_function</span><span class="p">,</span><span class="n">acquisition_ei</span><span class="o">.</span><span class="n">d_acquisition_function</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">X_test</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">grad_ei</span><span class="o">.</span><span class="n">checkgrad</span><span class="p">(</span><span class="n">tolerance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tolerance</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="TestAcquisitionsGradients.test_ChecKGrads_MPI"><a class="viewcode-back" href="../../../GPyOpt.testing.html#GPyOpt.testing.test_acquisitions_gradient.TestAcquisitionsGradients.test_ChecKGrads_MPI">[docs]</a>	<span class="k">def</span> <span class="nf">test_ChecKGrads_MPI</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">acquisition_mpi</span> <span class="o">=</span> <span class="n">acquisition_for_test</span><span class="p">(</span><span class="n">AcquisitionMPI</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">feasible_region</span><span class="p">))</span>
+		<span class="n">grad_mpi</span> <span class="o">=</span> <span class="n">GradientChecker</span><span class="p">(</span><span class="n">acquisition_mpi</span><span class="o">.</span><span class="n">acquisition_function</span><span class="p">,</span><span class="n">acquisition_mpi</span><span class="o">.</span><span class="n">d_acquisition_function</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">X_test</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">grad_mpi</span><span class="o">.</span><span class="n">checkgrad</span><span class="p">(</span><span class="n">tolerance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tolerance</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="TestAcquisitionsGradients.test_ChecKGrads_LCB"><a class="viewcode-back" href="../../../GPyOpt.testing.html#GPyOpt.testing.test_acquisitions_gradient.TestAcquisitionsGradients.test_ChecKGrads_LCB">[docs]</a>	<span class="k">def</span> <span class="nf">test_ChecKGrads_LCB</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">acquisition_lcb</span> <span class="o">=</span> <span class="n">acquisition_for_test</span><span class="p">(</span><span class="n">AcquisitionLCB</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">feasible_region</span><span class="p">))</span>
+		<span class="n">grad_lcb</span> <span class="o">=</span> <span class="n">GradientChecker</span><span class="p">(</span><span class="n">acquisition_lcb</span><span class="o">.</span><span class="n">acquisition_function</span><span class="p">,</span><span class="n">acquisition_lcb</span><span class="o">.</span><span class="n">d_acquisition_function</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">X_test</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">grad_lcb</span><span class="o">.</span><span class="n">checkgrad</span><span class="p">(</span><span class="n">tolerance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tolerance</span><span class="p">))</span>
+
+</div></div>
+<span class="k">if</span> <span class="n">__name__</span><span class="o">==</span><span class="s">&#39;main&#39;</span><span class="p">:</span>
+	<span class="n">unittest</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Javier Gonzalez.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

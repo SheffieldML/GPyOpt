@@ -1,0 +1,548 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>GPyOpt.methods.bayesian_optimization &mdash; GPyOpt  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="GPyOpt  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for GPyOpt.methods.bayesian_optimization</h1><div class="highlight"><pre>
+<span class="c"># Copyright (c) 2016, the GPyOpt Authors</span>
+<span class="c"># Licensed under the BSD 3-clause license (see LICENSE.txt)</span>
+
+<span class="kn">import</span> <span class="nn">GPy</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">..acquisitions</span> <span class="kn">import</span> <span class="n">AcquisitionEI</span><span class="p">,</span> <span class="n">AcquisitionMPI</span><span class="p">,</span> <span class="n">AcquisitionLCB</span><span class="p">,</span> <span class="n">AcquisitionEI_MCMC</span><span class="p">,</span> <span class="n">AcquisitionMPI_MCMC</span><span class="p">,</span> <span class="n">AcquisitionLCB_MCMC</span><span class="p">,</span> <span class="n">AcquisitionLP</span>  
+<span class="kn">from</span> <span class="nn">..core.bo</span> <span class="kn">import</span> <span class="n">BO</span>
+<span class="kn">from</span> <span class="nn">..core.task.space</span> <span class="kn">import</span> <span class="n">Design_space</span><span class="p">,</span> <span class="n">bounds_to_space</span>
+<span class="kn">from</span> <span class="nn">..core.task.objective</span> <span class="kn">import</span> <span class="n">SingleObjective</span>
+<span class="kn">from</span> <span class="nn">..core.task.cost</span> <span class="kn">import</span> <span class="n">CostModel</span>
+<span class="kn">from</span> <span class="nn">..util.general</span> <span class="kn">import</span> <span class="n">samples_multidimensional_uniform</span><span class="p">,</span> <span class="n">reshape</span><span class="p">,</span> <span class="n">evaluate_function</span>
+<span class="kn">from</span> <span class="nn">..core.evaluators</span> <span class="kn">import</span> <span class="n">Sequential</span><span class="p">,</span> <span class="n">RandomBatch</span><span class="p">,</span> <span class="n">Predictive</span><span class="p">,</span> <span class="n">LocalPenalization</span>
+<span class="kn">from</span> <span class="nn">..util.stats</span> <span class="kn">import</span> <span class="n">initial_design</span>
+<span class="kn">from</span> <span class="nn">..models.gpmodel</span> <span class="kn">import</span> <span class="n">GPModel</span><span class="p">,</span> <span class="n">GPModel_MCMC</span> 
+<span class="kn">from</span> <span class="nn">..models.rfmodel</span> <span class="kn">import</span> <span class="n">RFModel</span>
+<span class="kn">from</span> <span class="nn">..models.warpedgpmodel</span> <span class="kn">import</span> <span class="n">WarpedGPModel</span>
+<span class="kn">from</span> <span class="nn">..optimization.acquisition_optimizer</span> <span class="kn">import</span> <span class="n">AcquisitionOptimizer</span>
+<span class="kn">import</span> <span class="nn">GPyOpt</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s">&quot;ignore&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BayesianOptimization"><a class="viewcode-back" href="../../../GPyOpt.methods.html#GPyOpt.methods.bayesian_optimization.BayesianOptimization">[docs]</a><span class="k">class</span> <span class="nc">BayesianOptimization</span><span class="p">(</span><span class="n">BO</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Main class to initialize a Bayesian Optimization method.</span>
+<span class="sd">    :param f: function to optimize. It should take 2-dimensional numpy arrays as input and return 2-dimensional outputs (one evaluation per row).</span>
+<span class="sd">    :param domain: list of dictionaries containing the description of the inputs variables (See GPyOpt.core.space.Design_space class for details).</span>
+<span class="sd">    :param constrains: list of dictionaries containing the description of the problem constrains (See GPyOpt.core.space.Design_space class for details).</span>
+<span class="sd">    :cost_withGradients: cost function of the objective. The input can be:</span>
+<span class="sd">        - a function that returns the cost and the derivatives and any set of points in the domain.</span>
+<span class="sd">        - &#39;evaluation_time&#39;: a Gaussian process (mean) is used to handle the evaluation cost.</span>
+<span class="sd">    :model_type: type of model to use as surrogate:</span>
+<span class="sd">        - &#39;GP&#39;, standard Gaussian process.</span>
+<span class="sd">        - &#39;GP_MCMC&#39;,  Gaussian process with prior in the hyper-parameters.</span>
+<span class="sd">        - &#39;sparseGP&#39;, sparse Gaussian process.</span>
+<span class="sd">        - &#39;warperdGP&#39;, warped Gaussian process.</span>
+<span class="sd">        - &#39;RF&#39;, random forest (scikit-learn).    </span>
+<span class="sd">    :param X: 2d numpy array containing the initial inputs (one per row) of the model.</span>
+<span class="sd">    :param Y: 2d numpy array containing the initial outputs (one per row) of the model.</span>
+<span class="sd">    :initial_design_numdata: number of initial points that are collected jointly before start running the optimization.</span>
+<span class="sd">    :initial_design_type: type of initial design:</span>
+<span class="sd">        - &#39;random&#39;, to collect points in random locations.</span>
+<span class="sd">        - &#39;Latin&#39;, to collect points in a Latin hypercube (discrete variables are sampled randomly.)</span>
+<span class="sd">    :acquisition_type: type of acquisition function to use.</span>
+<span class="sd">        - &#39;EI&#39;, expected improvement.</span>
+<span class="sd">        - &#39;EI_MCMC&#39;, integrated expected improvement (requires GP_MCMC model).</span>
+<span class="sd">        - &#39;MPI&#39;, maximum probability of improvement.</span>
+<span class="sd">        - &#39;MPI_MCMC&#39;, maximum probability of improvement (requires GP_MCMC model).</span>
+<span class="sd">        - &#39;LCB&#39;, GP-Lower confidence bound.</span>
+<span class="sd">        - &#39;LCB_MCMC&#39;, integrated GP-Lower confidence bound (requires GP_MCMC model).</span>
+<span class="sd">    :param normalize_Y: whether to normalize the outputs before performing any optimization (default, True).</span>
+<span class="sd">    :exact_feval: whether the outputs are exact (default, False).</span>
+<span class="sd">    :acquisition_optimizer_type: type of acquisition function to use.</span>
+<span class="sd">        - &#39;lbfgs&#39;: L-BFGS.</span>
+<span class="sd">        - &#39;DIRECT&#39;: Dividing Rectangles.</span>
+<span class="sd">        - &#39;CMA&#39;: covariance matrix adaptation.</span>
+<span class="sd">    :param model_update_interval: interval of collected observations after which the model is updated (default, 1). </span>
+<span class="sd">    :param evaluator_type: determines the way the objective is evaluated (all methods are equivalent if the batch size is one)</span>
+<span class="sd">        - &#39;sequential&#39;, sequential evaluations.</span>
+<span class="sd">        - &#39;predictive&#39;, synchronous batch that uses a parallel model to fantasize new outputs.</span>
+<span class="sd">        - &#39;random&#39;: synchronous batch that selects the first element as in a sequential policy and the rest randomly.</span>
+<span class="sd">        - &#39;local_penalization&#39;: batch method proposed in (Gonzalez et al. 2016). </span>
+<span class="sd">    :param batch_size: size of the batch in which the objective is evaluated (default, 1).</span>
+<span class="sd">    :param num_cores: number of cores used to evaluate the objective (default, 1).</span>
+<span class="sd">    :param verbosity: prints the models and other options during the optimization.</span>
+<span class="sd">    :param **kwargs: extra parameters. Can be used to tune the current optimization setup or to use deprecated options in this package release. </span>
+
+
+<span class="sd">    .. Note::   The parameters bounds, kernel, numdata_initial_design, type_initial_design, model_optimize_interval, acquisition, acquisition_par</span>
+<span class="sd">                model_optimize_restarts, sparseGP, num_inducing and normalize can still be used but will be deprecited in the next version.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">domain</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">constrains</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">cost_withGradients</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">model_type</span> <span class="o">=</span> <span class="s">&#39;GP&#39;</span><span class="p">,</span> <span class="n">X</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> 
+    	<span class="n">initial_design_numdata</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">initial_design_type</span><span class="o">=</span><span class="s">&#39;random&#39;</span><span class="p">,</span> <span class="n">acquisition_type</span> <span class="o">=</span><span class="s">&#39;EI&#39;</span><span class="p">,</span> <span class="n">normalize_Y</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> 
+        <span class="n">exact_feval</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">acquisition_optimizer_type</span> <span class="o">=</span> <span class="s">&#39;lbfgs&#39;</span><span class="p">,</span> <span class="n">model_update_interval</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">evaluator_type</span> <span class="o">=</span> <span class="s">&#39;sequential&#39;</span><span class="p">,</span> 
+        <span class="n">batch_size</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num_cores</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">verbosity_model</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+
+        <span class="c">## ******************************  NOTE  *************************************************************************************</span>
+        <span class="c">## --- This part of the code ensures the compatibility with the previous version. It will be deprecated in the next release</span>
+        <span class="c">## ***************************************************************************************************************************</span>
+
+        <span class="c">## Bounds to space</span>
+        <span class="k">if</span> <span class="n">domain</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">bounds</span><span class="o">!=</span><span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span> <span class="o">=</span> <span class="n">bounds_to_space</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span> <span class="o">=</span> <span class="n">domain</span> 
+
+        <span class="c">## Kernel</span>
+        <span class="k">if</span> <span class="s">&#39;kernel&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;kernel&#39;</span><span class="p">]</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;WARNING: &quot;kernel&quot; will be deprecated in the next version!&#39;</span><span class="p">)</span>
+
+        <span class="c">## Number of data in initial design</span>
+        <span class="k">if</span> <span class="s">&#39;numdata_initial_design&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">initial_design_numdata</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;numdata_initial_design&#39;</span><span class="p">]</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;WARNING: &quot;numdata_initial_design&quot; will be deprecated in the next version!&#39;</span><span class="p">)</span>      
+
+        <span class="c">## Type of initial design</span>
+        <span class="k">if</span> <span class="s">&#39;type_initial_design&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">initial_design_type</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;type_initial_design&#39;</span><span class="p">]</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;WARNING: &quot;type_initial_design&quot; will be deprecated in the next version!&#39;</span><span class="p">)</span>
+
+        <span class="c">## Model optimize interval</span>
+        <span class="k">if</span> <span class="s">&#39;model_optimize_interval&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">model_update_interval</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;model_optimize_interval&#39;</span><span class="p">]</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;WARNING: &quot;model_optimize_interval&quot; will be deprecated in the next version!&#39;</span><span class="p">)</span>
+
+        <span class="c">## Acquisition</span>
+        <span class="k">if</span> <span class="s">&#39;acquisition&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">acquisition_type</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;acquisition&#39;</span><span class="p">]</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;WARNING: &quot;acquisition&quot; will be deprecated in the next version!&#39;</span><span class="p">)</span>
+
+        <span class="c">### Acquisition parameter</span>
+        <span class="k">if</span> <span class="s">&#39;acquisition_par&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">acquisition_type</span> <span class="o">==</span> <span class="s">&#39;EI&#39;</span> <span class="ow">or</span> <span class="n">acquisition_type</span> <span class="o">==</span> <span class="s">&#39;MPI&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_jitter</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;acquisition_par&#39;</span><span class="p">]</span>
+
+            <span class="k">elif</span> <span class="n">acquisition_type</span> <span class="o">==</span> <span class="s">&#39;LCB&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_weight</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;acquisition_par&#39;</span><span class="p">]</span>
+
+        <span class="c">### Optimize restarts</span>
+        <span class="k">if</span> <span class="s">&#39;model_optimize_restarts&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optimize_restarts</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;model_optimize_restarts&#39;</span><span class="p">]</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;WARNING: &quot;model_optimize_restarts&quot; will be deprecated in the next version!&#39;</span><span class="p">)</span>
+
+        <span class="c">## Model type</span>
+        <span class="k">if</span> <span class="s">&#39;sparseGP&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">model_type</span> <span class="o">=</span> <span class="s">&#39;sparseGP&#39;</span> <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;sparseGP&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="s">&#39;GP&#39;</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;WARNING: &quot;sparseGP&quot; will be deprecated in the next version!&#39;</span><span class="p">)</span>
+
+
+        <span class="k">if</span> <span class="s">&#39;num_inducing&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_inducing</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;num_inducing&#39;</span><span class="p">]</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;WARNING: &quot;num_inducing&quot; will be deprecated in the next version!&#39;</span><span class="p">)</span>
+
+        <span class="c">## Output normalization</span>
+        <span class="k">if</span> <span class="s">&#39;normalize&#39;</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;kwargs&#39;</span><span class="p">]:</span>
+            <span class="n">normalize_Y</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;normalize&#39;</span><span class="p">]</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;WARNING: &quot;normalize&quot; will be deprecated in the next version!&#39;</span><span class="p">)</span>
+
+        <span class="c">## ***************************************************************************************************************************</span>
+        <span class="c">## ***************************************************************************************************************************</span>
+        <span class="c">## ***************************************************************************************************************************</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_iter</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">=</span> <span class="n">verbosity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbosity_model</span> <span class="o">=</span> <span class="n">verbosity_model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_update_interval</span> <span class="o">=</span> <span class="n">model_update_interval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+
+        <span class="c"># --- CHOOSE design space</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&#39;domain&#39;</span><span class="p">):</span> <span class="c">### XXXXXXXXXXXXXXXXXXXXXXXX NOTE: remove this line in next version to depreciate arguments</span>
+            <span class="k">if</span> <span class="n">domain</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">and</span> <span class="s">&#39;bounds&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span> 
+                <span class="bp">self</span><span class="o">.</span><span class="n">domain</span> <span class="o">=</span> <span class="n">bounds_to_space</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;bounds&#39;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span> 
+                <span class="bp">self</span><span class="o">.</span><span class="n">domain</span> <span class="o">=</span> <span class="n">domain</span> 
+                
+        <span class="bp">self</span><span class="o">.</span><span class="n">constrains</span> <span class="o">=</span> <span class="n">constrains</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">space</span> <span class="o">=</span> <span class="n">Design_space</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constrains</span><span class="p">)</span>
+
+        <span class="c"># --- CHOOSE objective function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="k">if</span> <span class="s">&#39;objective_name&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective_name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;objective_name&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective_name</span> <span class="o">=</span> <span class="s">&#39;no_name&#39;</span>  
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_cores</span> <span class="o">=</span> <span class="n">num_cores</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">SingleObjective</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_cores</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">objective_name</span><span class="p">)</span>
+
+        <span class="c"># --- CHOOSE the cost model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cost</span> <span class="o">=</span> <span class="n">CostModel</span><span class="p">(</span><span class="n">cost_withGradients</span><span class="p">)</span>
+
+        <span class="c"># --- CHOOSE initial design</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_design_type</span>  <span class="o">=</span> <span class="n">initial_design_type</span>
+        <span class="k">if</span> <span class="n">initial_design_numdata</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_design_numdata</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_design_numdata</span> <span class="o">=</span> <span class="n">initial_design_numdata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_design_chooser</span><span class="p">()</span>
+
+        <span class="c"># --- CHOOSE the model type. If an instance of a GPyOpt model is passed (possibly user defined), it is used.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span> <span class="o">=</span> <span class="n">model_type</span>  
+        <span class="bp">self</span><span class="o">.</span><span class="n">exact_feval</span> <span class="o">=</span> <span class="n">exact_feval</span>  <span class="c"># note that this 2 options are not used with the predefined model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalize_Y</span> <span class="o">=</span> <span class="n">normalize_Y</span>      
+        
+        <span class="k">if</span> <span class="s">&#39;model&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;model&#39;</span><span class="p">],</span> <span class="n">GPyOpt</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">BOModel</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;model&#39;</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span> <span class="o">=</span> <span class="s">&#39;User defined model used.&#39;</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&#39;Using a model defined by the used.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_chooser</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_chooser</span><span class="p">()</span>
+        
+        <span class="c"># --- CHOOSE the acquisition optimizer_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer_type</span> <span class="o">=</span> <span class="n">acquisition_optimizer_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span> <span class="o">=</span> <span class="n">AcquisitionOptimizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer_type</span><span class="p">,</span> <span class="n">current_X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">)</span>  <span class="c">## more arguments may come here</span>
+
+        <span class="c"># --- CHOOSE acquisition function. If an instance of an acquisition is passed (possibly user defined), it is used.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_type</span> <span class="o">=</span> <span class="n">acquisition_type</span>
+        
+        <span class="k">if</span> <span class="s">&#39;acquisition&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;acquisition&#39;</span><span class="p">],</span> <span class="n">GPyOpt</span><span class="o">.</span><span class="n">acquisitions</span><span class="o">.</span><span class="n">AcquisitionBase</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;acquisition&#39;</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_type</span> <span class="o">=</span> <span class="s">&#39;User defined acquisition used.&#39;</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&#39;Using an acquisition defined by the used.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acquisition_chooser</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acquisition_chooser</span><span class="p">()</span>
+
+
+        <span class="c"># --- CHOOSE evaluator method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluator_type</span> <span class="o">=</span> <span class="n">evaluator_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluator_chooser</span><span class="p">()</span>
+
+        <span class="c"># --- Create optimization space</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BayesianOptimization</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span>	<span class="n">model</span>                  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> 
+                									<span class="n">space</span>                  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">,</span> 
+                									<span class="n">objective</span>              <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="p">,</span> 
+                									<span class="n">acquisition</span>            <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span><span class="p">,</span> 
+                                                    <span class="n">evaluator</span>              <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span><span class="p">,</span>
+                									<span class="n">X_init</span>                 <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> 
+                                                    <span class="n">Y_init</span>                 <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">,</span>
+                                                    <span class="n">cost</span>                   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost</span><span class="p">,</span>
+                									<span class="n">normalize_Y</span>            <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize_Y</span><span class="p">,</span> 
+                									<span class="n">model_update_interval</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_update_interval</span><span class="p">)</span>
+
+        <span class="c"># --- Initialize everything</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_optimization</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">verbosity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_model_chooser</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Model chooser from the available options. Extra parameters can be passed via **kwargs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&#39;kernel&#39;</span><span class="p">):</span> <span class="c">### XXXXXXXXXXXXXXXXXXXXXXXX NOTE: remove this line in next version to depreciate arguments</span>
+            <span class="k">if</span> <span class="s">&#39;kernel&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span> 
+                <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;kernel&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span> 
+                <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="s">&#39;noise_var&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;noise_var&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_var</span> <span class="o">=</span> <span class="bp">None</span>
+            
+        <span class="c"># --------    </span>
+        <span class="c"># --- Initialize GP model with MLE on the parameters</span>
+        <span class="c"># --------</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span> <span class="o">==</span> <span class="s">&#39;GP&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span> <span class="o">==</span> <span class="s">&#39;sparseGP&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&#39;model_optimizer_type&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_optimizer_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;model_optimizer_type&#39;</span><span class="p">]</span> 
+            <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_optimizer_type</span> <span class="o">=</span> <span class="s">&#39;lbfgs&#39;</span> 
+
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&#39;optimize_restarts&#39;</span><span class="p">):</span> <span class="c">### XXXXXXXXXXXXXXXXXXXXXXXX NOTE: remove this line in next version to depreciate arguments</span>
+                <span class="k">if</span> <span class="s">&#39;optimize_restarts&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize_restarts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;optimize_restarts&#39;</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize_restarts</span> <span class="o">=</span> <span class="mi">5</span>
+
+            <span class="k">if</span> <span class="s">&#39;max_iters&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_iters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;max_iters&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_iters</span> <span class="o">=</span> <span class="mi">1000</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&#39;num_inducing&#39;</span><span class="p">):</span> <span class="c">### XXXXXXXXXXXXXXXXXXXXXXXX NOTE: remove this line in next version to depreciate arguments</span>
+                <span class="k">if</span> <span class="s">&#39;num_inducing&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_inducing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;num_inducing&#39;</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_inducing</span> <span class="o">=</span> <span class="mi">10</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span> <span class="o">==</span> <span class="s">&#39;GP&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sparse</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span> <span class="o">==</span> <span class="s">&#39;sparseGP&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sparse</span> <span class="o">=</span> <span class="bp">True</span>
+
+            <span class="k">return</span> <span class="n">GPModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_var</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">exact_feval</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize_Y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_optimizer_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_iters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize_restarts</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sparse</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_inducing</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbosity_model</span><span class="p">)</span>
+
+        <span class="c"># --------</span>
+        <span class="c"># --- Initialize GP model with MCMC on the parameters</span>
+        <span class="c"># --------</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span> <span class="o">==</span> <span class="s">&#39;GP_MCMC&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&#39;n_samples&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;n_samples&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">=</span> <span class="mi">10</span> 
+
+            <span class="k">if</span> <span class="s">&#39;n_burnin&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_burnin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;n_burnin&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_burnin</span> <span class="o">=</span> <span class="mi">100</span>
+            
+            <span class="k">if</span> <span class="s">&#39;subsample_interval&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsample_interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;subsample_interval&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsample_interval</span> <span class="o">=</span><span class="mi">10</span>
+            
+            <span class="k">if</span> <span class="s">&#39;step_size&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_size</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;step_size&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_size</span> <span class="o">=</span> <span class="mf">1e-1</span>
+            
+            <span class="k">if</span> <span class="s">&#39;leapfrog_steps&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">leapfrog_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;leapfrog_steps&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">leapfrog_steps</span> <span class="o">=</span> <span class="mi">20</span>
+
+            <span class="k">return</span>  <span class="n">GPModel_MCMC</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_var</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">exact_feval</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize_Y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_burnin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsample_interval</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">leapfrog_steps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbosity_model</span><span class="p">)</span>
+
+        <span class="c"># --------</span>
+        <span class="c"># --- Initialize RF: values taken from default in scikit-learn</span>
+        <span class="c"># --------</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span> <span class="o">==</span><span class="s">&#39;RF&#39;</span><span class="p">:</span>
+            <span class="c"># TODO: add options via kwargs</span>
+            <span class="k">return</span> <span class="n">RFModel</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span><span class="p">,</span>  <span class="n">normalize_Y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">normalize_Y</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span> <span class="o">==</span><span class="s">&#39;warpedGP&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">WarpedGPModel</span><span class="p">()</span>
+
+
+
+    <span class="k">def</span> <span class="nf">_acquisition_chooser</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Acquisition chooser from the available options. Extra parameters can be passed via **kwargs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># --- Extract relevant parameters from the ***kwargs</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&#39;acquisition_jitter&#39;</span><span class="p">):</span>  <span class="c">### XXXXXXXXXXXXXXXXXXXXXXXX NOTE: remove this line in next version to depreciate arguments</span>
+            <span class="k">if</span> <span class="s">&#39;acquisition_jitter&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_jitter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;acquisition_jitter&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_jitter</span> <span class="o">=</span> <span class="mf">0.01</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&#39;acquisition_weight&#39;</span><span class="p">):</span>  <span class="c">### XXXXXXXXXXXXXXXXXXXXXXXX NOTE: remove this line in next version to depreciate arguments</span>
+            <span class="k">if</span> <span class="s">&#39;acquisition_weight&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;acquisition_weight&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_weight</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c">## TODO: implement the optimal rate (only for bandits)</span>
+
+        <span class="c"># --- Choose the acquisition</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_type</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_type</span> <span class="o">==</span><span class="s">&#39;EI&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">AcquisitionEI</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost</span><span class="o">.</span><span class="n">cost_withGradients</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_jitter</span><span class="p">)</span>
+        
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_type</span> <span class="o">==</span><span class="s">&#39;EI_MCMC&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">AcquisitionEI_MCMC</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost</span><span class="o">.</span><span class="n">cost_withGradients</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_jitter</span><span class="p">)</span>        
+        
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_type</span> <span class="o">==</span><span class="s">&#39;MPI&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">AcquisitionMPI</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost</span><span class="o">.</span><span class="n">cost_withGradients</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_jitter</span><span class="p">)</span>
+         
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_type</span> <span class="o">==</span><span class="s">&#39;MPI_MCMC&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">AcquisitionMPI_MCMC</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost</span><span class="o">.</span><span class="n">cost_withGradients</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_jitter</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_type</span> <span class="o">==</span><span class="s">&#39;LCB&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">AcquisitionLCB</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost</span><span class="o">.</span><span class="n">cost_withGradients</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_weight</span><span class="p">)</span>
+        
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_type</span> <span class="o">==</span><span class="s">&#39;LCB_MCMC&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">AcquisitionLCB_MCMC</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost</span><span class="o">.</span><span class="n">cost_withGradients</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_weight</span><span class="p">)</span>        
+        
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Invalid acquisition selected.&#39;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_init_design_chooser</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the choice of X and Y based on the selected initial design and number of points selected.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Case 1:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">initial_design</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_design_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_design_numdata</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="c"># Case 2</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_evaluator_chooser</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Acquisition chooser from the available options. Guide the optimization through sequential or parallel evalutions of the objective.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="s">&#39;acquisition_transformation&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_transformation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;acquisition_transformation&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_transformation</span> <span class="o">=</span> <span class="s">&#39;none&#39;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluator_type</span> <span class="o">==</span> <span class="s">&#39;sequential&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Sequential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">&gt;</span><span class="mi">1</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluator_type</span> <span class="o">==</span> <span class="s">&#39;random&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluator_type</span> <span class="o">==</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">RandomBatch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluator_type</span> <span class="o">==</span> <span class="s">&#39;predictive&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Predictive</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">normalize_Y</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluator_type</span> <span class="o">==</span> <span class="s">&#39;local_penalization&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">AcquisitionLP</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span> <span class="o">=</span> <span class="n">AcquisitionLP</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_transformation</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">LocalPenalization</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize_Y</span><span class="p">)</span>
+
+
+<span class="c">## ******************************  NOTE  *************************************************************************************</span>
+<span class="c">## --- This part of the code ensures the compatibility with the previous version. It will be deprecated in the next release</span>
+<span class="c">## ***************************************************************************************************************************</span>
+
+<div class="viewcode-block" id="BayesianOptimization.run_optimization"><a class="viewcode-back" href="../../../GPyOpt.methods.html#GPyOpt.methods.bayesian_optimization.BayesianOptimization.run_optimization">[docs]</a>    <span class="k">def</span> <span class="nf">run_optimization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_iter</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">max_time</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>  <span class="n">eps</span> <span class="o">=</span> <span class="mf">1e-8</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">save_models_parameters</span><span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">report_file</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">evaluations_file</span><span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">models_file</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Runs Bayesian Optimization for a number &#39;max_iter&#39; of iterations (after the initial exploration data)</span>
+
+<span class="sd">        :param max_iter: exploration horizon, or number of acquisitions. If nothing is provided optimizes the current acquisition.  </span>
+<span class="sd">        :param max_time: maximum exploration horizon in seconds.</span>
+<span class="sd">        :param eps: minimum distance between two consecutive x&#39;s to keep running the model.</span>
+<span class="sd">        :param verbosity: flag to print the optimization results after each iteration (default, True).</span>
+<span class="sd">        :param report_file: filename of the file where the results of the optimization are saved (default, None).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="s">&#39;verbose&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">verbosity</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;verbose&#39;</span><span class="p">]</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;WARNING: &quot;verbose&quot; will be deprecated in the next version!&#39;</span><span class="p">)</span>
+ 
+        <span class="k">if</span> <span class="s">&#39;n_inbatch&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;n_inbatch&#39;</span><span class="p">]</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;WARNING: &quot;n_inbatch&quot; will be deprecated in the next version!&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s">&#39;n_procs&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_cores</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;n_procs&#39;</span><span class="p">]</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;WARNING: &quot;n_proc&quot; will be deprecated in the next version!&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s">&#39;batch_method&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;batch_method&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;lp&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">evaluator_type</span> <span class="o">=</span> <span class="s">&#39;local_penalization&#39;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluator_chooser</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">evaluator_type</span> <span class="o">=</span> <span class="s">&#39;local_penalization&#39;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluator_chooser</span><span class="p">()</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;WARNING: &quot;batch_method&quot; will be deprecated in the next version!&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s">&#39;acqu_optimize_restarts&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;acqu_optimize_restarts&#39;</span><span class="p">]</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;WARNING: &quot;acqu_optimize_restarts&quot; will be deprecated in the next version!&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s">&#39;acqu_optimize_method&#39;</span>  <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;acqu_optimize_method&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;fast_random&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span><span class="o">.</span><span class="n">fast</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span><span class="o">.</span><span class="n">random</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">elif</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;acqu_optimize_method&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;fast_brute&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span><span class="o">.</span><span class="n">fast</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span><span class="o">.</span><span class="n">random</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">elif</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;acqu_optimize_method&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;random&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span><span class="o">.</span><span class="n">fast</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span><span class="o">.</span><span class="n">random</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">elif</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;acqu_optimize_method&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;fast_brute&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span><span class="o">.</span><span class="n">fast</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span><span class="o">.</span><span class="n">random</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">elif</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;acqu_optimize_method&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;grid&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span><span class="o">.</span><span class="n">fast</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span><span class="o">.</span><span class="n">random</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span><span class="o">.</span><span class="n">search</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">elif</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;acqu_optimize_method&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;DIRECT&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span><span class="s">&#39;DIRECT&#39;</span>
+            <span class="k">elif</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;acqu_optimize_method&#39;</span><span class="p">]</span> <span class="o">==</span><span class="s">&#39;CMA&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span><span class="s">&#39;CMA&#39;</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;WARNING: &quot;acqu_optimize_method&quot; will be deprecated in the next version!&#39;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BayesianOptimization</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">run_optimization</span><span class="p">(</span><span class="n">max_iter</span> <span class="o">=</span> <span class="n">max_iter</span><span class="p">,</span> <span class="n">max_time</span> <span class="o">=</span> <span class="n">max_time</span><span class="p">,</span>  <span class="n">eps</span> <span class="o">=</span> <span class="n">eps</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="n">verbosity</span><span class="p">,</span> <span class="n">save_models_parameters</span> <span class="o">=</span> <span class="n">save_models_parameters</span><span class="p">,</span> <span class="n">report_file</span> <span class="o">=</span> <span class="n">report_file</span><span class="p">,</span> <span class="n">evaluations_file</span><span class="o">=</span> <span class="n">evaluations_file</span><span class="p">,</span> <span class="n">models_file</span><span class="o">=</span><span class="n">models_file</span><span class="p">)</span>
+
+
+
+    </div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Javier Gonzalez.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

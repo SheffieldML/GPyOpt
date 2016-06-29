@@ -1,0 +1,284 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>GPyOpt.methods package &mdash; GPyOpt  documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="GPyOpt  documentation" href="index.html" />
+    <link rel="up" title="GPyOpt package" href="GPyOpt.html" />
+    <link rel="next" title="GPyOpt.models package" href="GPyOpt.models.html" />
+    <link rel="prev" title="GPyOpt.interface package" href="GPyOpt.interface.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.models.html" title="GPyOpt.models package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.interface.html" title="GPyOpt.interface package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="GPyOpt.html" accesskey="U">GPyOpt package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="gpyopt-methods-package">
+<h1>GPyOpt.methods package<a class="headerlink" href="#gpyopt-methods-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-GPyOpt.methods.bayesian_optimization">
+<span id="gpyopt-methods-bayesian-optimization-module"></span><h2>GPyOpt.methods.bayesian_optimization module<a class="headerlink" href="#module-GPyOpt.methods.bayesian_optimization" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.methods.bayesian_optimization.BayesianOptimization">
+<em class="property">class </em><code class="descclassname">GPyOpt.methods.bayesian_optimization.</code><code class="descname">BayesianOptimization</code><span class="sig-paren">(</span><em>f</em>, <em>domain=None</em>, <em>constrains=None</em>, <em>cost_withGradients=None</em>, <em>model_type='GP'</em>, <em>X=None</em>, <em>Y=None</em>, <em>initial_design_numdata=None</em>, <em>initial_design_type='random'</em>, <em>acquisition_type='EI'</em>, <em>normalize_Y=True</em>, <em>exact_feval=False</em>, <em>acquisition_optimizer_type='lbfgs'</em>, <em>model_update_interval=1</em>, <em>evaluator_type='sequential'</em>, <em>batch_size=1</em>, <em>num_cores=1</em>, <em>verbosity=True</em>, <em>verbosity_model=False</em>, <em>bounds=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/methods/bayesian_optimization.html#BayesianOptimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.methods.bayesian_optimization.BayesianOptimization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="GPyOpt.core.html#GPyOpt.core.bo.BO" title="GPyOpt.core.bo.BO"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.core.bo.BO</span></code></a></p>
+<p>Main class to initialize a Bayesian Optimization method.
+:param f: function to optimize. It should take 2-dimensional numpy arrays as input and return 2-dimensional outputs (one evaluation per row).
+:param domain: list of dictionaries containing the description of the inputs variables (See GPyOpt.core.space.Design_space class for details).
+:param constrains: list of dictionaries containing the description of the problem constrains (See GPyOpt.core.space.Design_space class for details).
+:cost_withGradients: cost function of the objective. The input can be:</p>
+<blockquote>
+<div><ul class="simple">
+<li>a function that returns the cost and the derivatives and any set of points in the domain.</li>
+<li>&#8216;evaluation_time&#8217;: a Gaussian process (mean) is used to handle the evaluation cost.</li>
+</ul>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Model_type:</th><td class="field-body"><p class="first">type of model to use as surrogate:
+- &#8216;GP&#8217;, standard Gaussian process.
+- &#8216;GP_MCMC&#8217;,  Gaussian process with prior in the hyper-parameters.
+- &#8216;sparseGP&#8217;, sparse Gaussian process.
+- &#8216;warperdGP&#8217;, warped Gaussian process.
+- &#8216;RF&#8217;, random forest (scikit-learn).</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> &#8211; 2d numpy array containing the initial inputs (one per row) of the model.</li>
+<li><strong>Y</strong> &#8211; 2d numpy array containing the initial outputs (one per row) of the model.</li>
+<li><strong>normalize_Y</strong> &#8211; whether to normalize the outputs before performing any optimization (default, True).</li>
+<li><strong>model_update_interval</strong> &#8211; interval of collected observations after which the model is updated (default, 1).</li>
+<li><strong>evaluator_type</strong> &#8211; determines the way the objective is evaluated (all methods are equivalent if the batch size is one)
+- &#8216;sequential&#8217;, sequential evaluations.
+- &#8216;predictive&#8217;, synchronous batch that uses a parallel model to fantasize new outputs.
+- &#8216;random&#8217;: synchronous batch that selects the first element as in a sequential policy and the rest randomly.
+- &#8216;local_penalization&#8217;: batch method proposed in (Gonzalez et al. 2016).</li>
+<li><strong>batch_size</strong> &#8211; size of the batch in which the objective is evaluated (default, 1).</li>
+<li><strong>num_cores</strong> &#8211; number of cores used to evaluate the objective (default, 1).</li>
+<li><strong>verbosity</strong> &#8211; prints the models and other options during the optimization.</li>
+<li><strong>**kwargs</strong> &#8211; <p>extra parameters. Can be used to tune the current optimization setup or to use deprecated options in this package release.</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Initial_design_numdata:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">number of initial points that are collected jointly before start running the optimization.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Initial_design_type:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">type of initial design:
+- &#8216;random&#8217;, to collect points in random locations.
+- &#8216;Latin&#8217;, to collect points in a Latin hypercube (discrete variables are sampled randomly.)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Acquisition_type:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">type of acquisition function to use.
+- &#8216;EI&#8217;, expected improvement.
+- &#8216;EI_MCMC&#8217;, integrated expected improvement (requires GP_MCMC model).
+- &#8216;MPI&#8217;, maximum probability of improvement.
+- &#8216;MPI_MCMC&#8217;, maximum probability of improvement (requires GP_MCMC model).
+- &#8216;LCB&#8217;, GP-Lower confidence bound.
+- &#8216;LCB_MCMC&#8217;, integrated GP-Lower confidence bound (requires GP_MCMC model).</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Exact_feval:</th><td class="field-body"><p class="first">whether the outputs are exact (default, False).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Acquisition_optimizer_type:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first last">type of acquisition function to use.
+- &#8216;lbfgs&#8217;: L-BFGS.
+- &#8216;DIRECT&#8217;: Dividing Rectangles.
+- &#8216;CMA&#8217;: covariance matrix adaptation.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The parameters bounds, kernel, numdata_initial_design, type_initial_design, model_optimize_interval, acquisition, acquisition_par
+model_optimize_restarts, sparseGP, num_inducing and normalize can still be used but will be deprecited in the next version.</p>
+</div>
+<dl class="method">
+<dt id="GPyOpt.methods.bayesian_optimization.BayesianOptimization.run_optimization">
+<code class="descname">run_optimization</code><span class="sig-paren">(</span><em>max_iter=None</em>, <em>max_time=None</em>, <em>eps=1e-08</em>, <em>verbosity=True</em>, <em>save_models_parameters=True</em>, <em>report_file=None</em>, <em>evaluations_file=None</em>, <em>models_file=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/methods/bayesian_optimization.html#BayesianOptimization.run_optimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.methods.bayesian_optimization.BayesianOptimization.run_optimization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs Bayesian Optimization for a number &#8216;max_iter&#8217; of iterations (after the initial exploration data)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>max_iter</strong> &#8211; exploration horizon, or number of acquisitions. If nothing is provided optimizes the current acquisition.</li>
+<li><strong>max_time</strong> &#8211; maximum exploration horizon in seconds.</li>
+<li><strong>eps</strong> &#8211; minimum distance between two consecutive x&#8217;s to keep running the model.</li>
+<li><strong>verbosity</strong> &#8211; flag to print the optimization results after each iteration (default, True).</li>
+<li><strong>report_file</strong> &#8211; filename of the file where the results of the optimization are saved (default, None).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.methods.modular_bayesian_optimization">
+<span id="gpyopt-methods-modular-bayesian-optimization-module"></span><h2>GPyOpt.methods.modular_bayesian_optimization module<a class="headerlink" href="#module-GPyOpt.methods.modular_bayesian_optimization" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.methods.modular_bayesian_optimization.ModularBayesianOptimization">
+<em class="property">class </em><code class="descclassname">GPyOpt.methods.modular_bayesian_optimization.</code><code class="descname">ModularBayesianOptimization</code><span class="sig-paren">(</span><em>model</em>, <em>space</em>, <em>objective</em>, <em>acquisition</em>, <em>evaluator</em>, <em>X_init</em>, <em>Y_init=None</em>, <em>cost=None</em>, <em>normalize_Y=True</em>, <em>model_update_interval=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/methods/modular_bayesian_optimization.html#ModularBayesianOptimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.methods.modular_bayesian_optimization.ModularBayesianOptimization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="GPyOpt.core.html#GPyOpt.core.bo.BO" title="GPyOpt.core.bo.BO"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.core.bo.BO</span></code></a></p>
+<p>Modular Bayesian optimization. This class wraps the optimization loop around the different handlers.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> &#8211; GPyOpt model class.</li>
+<li><strong>space</strong> &#8211; GPyOpt space class.</li>
+<li><strong>objective</strong> &#8211; GPyOpt objective class.</li>
+<li><strong>acquisition</strong> &#8211; GPyOpt acquisition class.</li>
+<li><strong>evaluator</strong> &#8211; GPyOpt evaluator class.</li>
+<li><strong>X_init</strong> &#8211; 2d numpy array containing the initial inputs (one per row) of the model.</li>
+<li><strong>Y_init</strong> &#8211; 2d numpy array containing the initial outputs (one per row) of the model.</li>
+<li><strong>cost</strong> &#8211; GPyOpt cost class (default, none).</li>
+<li><strong>normalize_Y</strong> &#8211; whether to normalize the outputs before performing any optimization (default, True).</li>
+<li><strong>model_update_interval</strong> &#8211; interval of collected observations after which the model is updated (default, 1).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.methods.multitask_bayesian_optimization">
+<span id="gpyopt-methods-multitask-bayesian-optimization-module"></span><h2>GPyOpt.methods.multitask_bayesian_optimization module<a class="headerlink" href="#module-GPyOpt.methods.multitask_bayesian_optimization" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-GPyOpt.methods.wetlab_experiments_designer">
+<span id="gpyopt-methods-wetlab-experiments-designer-module"></span><h2>GPyOpt.methods.wetlab_experiments_designer module<a class="headerlink" href="#module-GPyOpt.methods.wetlab_experiments_designer" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-GPyOpt.methods">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-GPyOpt.methods" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">GPyOpt.methods package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.methods.bayesian_optimization">GPyOpt.methods.bayesian_optimization module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.methods.modular_bayesian_optimization">GPyOpt.methods.modular_bayesian_optimization module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.methods.multitask_bayesian_optimization">GPyOpt.methods.multitask_bayesian_optimization module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.methods.wetlab_experiments_designer">GPyOpt.methods.wetlab_experiments_designer module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.methods">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="GPyOpt.interface.html"
+                        title="previous chapter">GPyOpt.interface package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="GPyOpt.models.html"
+                        title="next chapter">GPyOpt.models package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/GPyOpt.methods.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.models.html" title="GPyOpt.models package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.interface.html" title="GPyOpt.interface package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="GPyOpt.html" >GPyOpt package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Javier Gonzalez.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

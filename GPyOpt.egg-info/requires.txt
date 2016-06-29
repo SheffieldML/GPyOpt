@@ -1,0 +1,16 @@
+numpy>=1.7
+scipy>=0.16
+GPy>=0.6
+
+[docs]
+matplotlib >=1.3
+Sphinx
+IPython
+
+[optimizer]
+DIRECT
+cma
+pyDOE
+
+[others]
+pandas

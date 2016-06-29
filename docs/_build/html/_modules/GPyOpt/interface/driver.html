@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>GPyOpt.interface.driver &mdash; GPyOpt  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="GPyOpt  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for GPyOpt.interface.driver</h1><div class="highlight"><pre>
+<span class="c"># Copyright (c) 2014, GPyOpt authors (see AUTHORS.txt).</span>
+<span class="c"># Licensed under the BSD 3-clause license (see LICENSE.txt)</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">..methods</span> <span class="kn">import</span> <span class="n">BayesianOptimization</span>
+
+<div class="viewcode-block" id="BODriver"><a class="viewcode-back" href="../../../GPyOpt.interface.html#GPyOpt.interface.driver.BODriver">[docs]</a><span class="k">class</span> <span class="nc">BODriver</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The class for driving the Bayesian optimization according to the configuration.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">obj_func</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">outputEng</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        
+        <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">.config_parser</span> <span class="kn">import</span> <span class="n">default_config</span>
+            <span class="kn">import</span> <span class="nn">copy</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">default_config</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obj_func</span> <span class="o">=</span> <span class="n">obj_func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outputEng</span> <span class="o">=</span> <span class="n">outputEng</span>
+        
+    <span class="k">def</span> <span class="nf">_get_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">space</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Imports the acquisition function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">obj_func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj_func</span>
+        
+        <span class="kn">from</span> <span class="nn">..core.task</span> <span class="kn">import</span> <span class="n">SingleObjective</span>
+        <span class="k">return</span> <span class="n">SingleObjective</span><span class="p">(</span><span class="n">obj_func</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;resources&#39;</span><span class="p">][</span><span class="s">&#39;cores&#39;</span><span class="p">],</span> <span class="n">space</span><span class="o">=</span><span class="n">space</span><span class="p">,</span> <span class="n">unfold_args</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">_get_space</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Imports the domain.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="s">&#39;space&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="s">&#39;The search space is NOT configured!&#39;</span>
+        
+        <span class="n">space_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;space&#39;</span><span class="p">]</span>
+        <span class="n">constraint_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;constraints&#39;</span><span class="p">]</span>
+        <span class="kn">from</span> <span class="nn">..core.task.space</span> <span class="kn">import</span> <span class="n">Design_space</span>
+        <span class="k">return</span> <span class="n">Design_space</span><span class="o">.</span><span class="n">fromConfig</span><span class="p">(</span><span class="n">space_config</span><span class="p">,</span> <span class="n">constraint_config</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_get_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Imports the model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+        <span class="n">model_args</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;model&#39;</span><span class="p">])</span>
+        <span class="k">del</span> <span class="n">model_args</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span>
+        <span class="kn">from</span> <span class="nn">..models</span> <span class="kn">import</span> <span class="n">select_model</span>
+        
+        <span class="k">return</span> <span class="n">select_model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;model&#39;</span><span class="p">][</span><span class="s">&#39;type&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">fromConfig</span><span class="p">(</span><span class="n">model_args</span><span class="p">)</span>
+        
+    
+    <span class="k">def</span> <span class="nf">_get_acquisition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">space</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Imports the acquisition</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>        
+        <span class="n">acqOpt_config</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;acquisition&#39;</span><span class="p">][</span><span class="s">&#39;optimizer&#39;</span><span class="p">])</span>
+        <span class="n">acqOpt_name</span> <span class="o">=</span> <span class="n">acqOpt_config</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">acqOpt_config</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        
+        <span class="kn">from</span> <span class="nn">..optimization</span> <span class="kn">import</span> <span class="n">AcquisitionOptimizer</span>
+        <span class="n">acqOpt</span> <span class="o">=</span> <span class="n">AcquisitionOptimizer</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">acqOpt_name</span><span class="p">,</span> <span class="o">**</span><span class="n">acqOpt_config</span><span class="p">)</span>
+        <span class="kn">from</span> <span class="nn">..acquisitions</span> <span class="kn">import</span> <span class="n">select_acquisition</span>
+        <span class="k">return</span> <span class="n">select_acquisition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;acquisition&#39;</span><span class="p">][</span><span class="s">&#39;type&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">fromConfig</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">space</span><span class="p">,</span> <span class="n">acqOpt</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;acquisition&#39;</span><span class="p">])</span>
+    
+    <span class="k">def</span> <span class="nf">_get_acq_evaluator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acq</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Imports the evaluator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="kn">from</span> <span class="nn">..core.evaluators</span> <span class="kn">import</span> <span class="n">select_evaluator</span>
+        <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+        <span class="n">eval_args</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;acquisition&#39;</span><span class="p">][</span><span class="s">&#39;evaluator&#39;</span><span class="p">])</span>
+        <span class="k">del</span> <span class="n">eval_args</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">select_evaluator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;acquisition&#39;</span><span class="p">][</span><span class="s">&#39;evaluator&#39;</span><span class="p">][</span><span class="s">&#39;type&#39;</span><span class="p">])(</span><span class="n">acq</span><span class="p">,</span> <span class="o">**</span><span class="n">eval_args</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_check_stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iters</span><span class="p">,</span> <span class="n">elapsed_time</span><span class="p">,</span> <span class="n">converged</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Defines the stopping criterion.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">r_c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;resources&#39;</span><span class="p">]</span>
+        
+        <span class="n">stop</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">converged</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">stop</span><span class="o">=</span><span class="bp">True</span>
+        <span class="k">if</span> <span class="n">r_c</span><span class="p">[</span><span class="s">&#39;maximum-iterations&#39;</span><span class="p">]</span> <span class="o">!=</span><span class="s">&#39;NA&#39;</span> <span class="ow">and</span> <span class="n">iters</span><span class="o">&gt;=</span> <span class="n">r_c</span><span class="p">[</span><span class="s">&#39;maximum-iterations&#39;</span><span class="p">]:</span>
+            <span class="n">stop</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">if</span> <span class="n">r_c</span><span class="p">[</span><span class="s">&#39;max-run-time&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;NA&#39;</span> <span class="ow">and</span> <span class="n">elapsed_time</span><span class="o">/</span><span class="mf">60.</span><span class="o">&gt;=</span> <span class="n">r_c</span><span class="p">[</span><span class="s">&#39;max-run-time&#39;</span><span class="p">]:</span>
+            <span class="n">stop</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="n">stop</span>
+            
+<div class="viewcode-block" id="BODriver.run"><a class="viewcode-back" href="../../../GPyOpt.interface.html#GPyOpt.interface.driver.BODriver.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Runs the optimization using the previously loaded elements.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">space</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_space</span><span class="p">()</span>
+        <span class="n">obj_func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obj</span><span class="p">(</span><span class="n">space</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_model</span><span class="p">()</span>
+        <span class="n">acq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_acquisition</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">space</span><span class="p">)</span>
+        <span class="n">acq_eval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_acq_evaluator</span><span class="p">(</span><span class="n">acq</span><span class="p">)</span>
+                
+        <span class="kn">from</span> <span class="nn">..util.stats</span> <span class="kn">import</span> <span class="n">initial_design</span>
+        <span class="n">X_init</span> <span class="o">=</span> <span class="n">initial_design</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;initialization&#39;</span><span class="p">][</span><span class="s">&#39;type&#39;</span><span class="p">],</span> <span class="n">space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;initialization&#39;</span><span class="p">][</span><span class="s">&#39;num-eval&#39;</span><span class="p">])</span>
+
+        <span class="kn">from</span> <span class="nn">..methods</span> <span class="kn">import</span> <span class="n">ModularBayesianOptimization</span>
+        <span class="n">bo</span> <span class="o">=</span> <span class="n">ModularBayesianOptimization</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">space</span><span class="p">,</span> <span class="n">obj_func</span><span class="p">,</span> <span class="n">acq</span><span class="p">,</span> <span class="n">acq_eval</span><span class="p">,</span> <span class="n">X_init</span><span class="p">)</span>
+                
+        <span class="n">bo</span><span class="o">.</span><span class="n">run_optimization</span><span class="p">(</span><span class="n">max_iter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;resources&#39;</span><span class="p">][</span><span class="s">&#39;maximum-iterations&#39;</span><span class="p">],</span> <span class="n">max_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;resources&#39;</span><span class="p">][</span><span class="s">&#39;max-run-time&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;resources&#39;</span><span class="p">][</span><span class="s">&#39;max-run-time&#39;</span><span class="p">]</span><span class="o">!=</span><span class="s">&quot;NA&quot;</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
+                              <span class="n">eps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;resources&#39;</span><span class="p">][</span><span class="s">&#39;tolerance&#39;</span><span class="p">],</span> <span class="n">verbosity</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>        
+        <span class="k">return</span> <span class="n">bo</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Javier Gonzalez.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

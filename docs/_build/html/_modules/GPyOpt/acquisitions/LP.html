@@ -1,0 +1,234 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>GPyOpt.acquisitions.LP &mdash; GPyOpt  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="GPyOpt  documentation" href="../../../index.html" />
+    <link rel="up" title="GPyOpt.acquisitions" href="../acquisitions.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../acquisitions.html" accesskey="U">GPyOpt.acquisitions</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for GPyOpt.acquisitions.LP</h1><div class="highlight"><pre>
+<span class="c"># Copyright (c) 2016, the GPyOpt Authors</span>
+<span class="c"># Licensed under the BSD 3-clause license (see LICENSE.txt)</span>
+
+<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">AcquisitionBase</span>
+<span class="kn">from</span> <span class="nn">.LCB</span> <span class="kn">import</span> <span class="n">AcquisitionLCB</span>
+<span class="kn">from</span> <span class="nn">.LCB_mcmc</span> <span class="kn">import</span> <span class="n">AcquisitionLCB_MCMC</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">norm</span>
+
+<div class="viewcode-block" id="AcquisitionLP"><a class="viewcode-back" href="../../../GPyOpt.acquisitions.html#GPyOpt.acquisitions.LP.AcquisitionLP">[docs]</a><span class="k">class</span> <span class="nc">AcquisitionLP</span><span class="p">(</span><span class="n">AcquisitionBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for Local Penalization acquisition. Used for batch design.</span>
+<span class="sd">    :param model: model of the class GPyOpt</span>
+<span class="sd">    :param space: design space of the class GPyOpt.</span>
+<span class="sd">    :param optimizer: optimizer of the class GPyOpt.</span>
+<span class="sd">    :param acquisition: acquisition function of the class GPyOpt</span>
+<span class="sd">    :param transform: transformation applied to the acquisition (default, none).</span>
+
+<span class="sd">    .. Note:: irrespective of the transformation applied the penalized acquisition is always mapped again to the log space. </span>
+<span class="sd">    This way gradients can be computed additively and are more stable.</span>
+<span class="sd"> </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">analytical_gradient_prediction</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">space</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">acquisition</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="s">&#39;none&#39;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AcquisitionLP</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">space</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">acq</span> <span class="o">=</span> <span class="n">acquisition</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">AcquisitionLCB</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="o">==</span><span class="s">&#39;none&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="o">=</span><span class="s">&#39;softplus&#39;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">acquisition</span><span class="p">,</span> <span class="n">AcquisitionLCB_MCMC</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="o">==</span><span class="s">&#39;none&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="o">=</span><span class="s">&#39;softplus&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_batch</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r_x0</span><span class="o">=</span><span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s_x0</span><span class="o">=</span><span class="bp">None</span>
+
+<div class="viewcode-block" id="AcquisitionLP.update_batches"><a class="viewcode-back" href="../../../GPyOpt.acquisitions.html#GPyOpt.acquisitions.LP.AcquisitionLP.update_batches">[docs]</a>    <span class="k">def</span> <span class="nf">update_batches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates the batches internally and pre-computes the </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_batch</span> <span class="o">=</span> <span class="n">X_batch</span>
+        <span class="k">if</span> <span class="n">X_batch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">r_x0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">s_x0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hammer_function_precompute</span><span class="p">(</span><span class="n">X_batch</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+        </div>
+    <span class="k">def</span> <span class="nf">_hammer_function_precompute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x0</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Min</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Pre-computes the parameters of a penalizer centered at x0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">x0</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x0</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span> <span class="n">x0</span> <span class="o">=</span> <span class="n">x0</span><span class="p">[</span><span class="bp">None</span><span class="p">,:]</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x0</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">pred</span><span class="p">[</span><span class="n">pred</span><span class="o">&lt;</span><span class="mf">1e-16</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-16</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span>
+        <span class="n">r_x0</span> <span class="o">=</span> <span class="p">(</span><span class="n">m</span><span class="o">-</span><span class="n">Min</span><span class="p">)</span><span class="o">/</span><span class="n">L</span>
+        <span class="n">s_x0</span> <span class="o">=</span> <span class="n">s</span><span class="o">/</span><span class="n">L</span>
+        <span class="n">r_x0</span> <span class="o">=</span> <span class="n">r_x0</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">s_x0</span> <span class="o">=</span> <span class="n">s_x0</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">r_x0</span><span class="p">,</span> <span class="n">s_x0</span>
+
+    <span class="k">def</span> <span class="nf">_hammer_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span><span class="n">x0</span><span class="p">,</span><span class="n">r_x0</span><span class="p">,</span> <span class="n">s_x0</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Creates the function to define the exclusion zones</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">norm</span><span class="o">.</span><span class="n">logcdf</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">x</span><span class="p">)[:,</span><span class="bp">None</span><span class="p">,:]</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">x0</span><span class="p">)[</span><span class="bp">None</span><span class="p">,:,:]))</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">-</span> <span class="n">r_x0</span><span class="p">)</span><span class="o">/</span><span class="n">s_x0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_penalized_acquisition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span>  <span class="n">model</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">r_x0</span><span class="p">,</span> <span class="n">s_x0</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Creates a penalized acquisition function using &#39;hammer&#39; functions around the points collected in the batch</span>
+
+<span class="sd">        .. Note:: the penalized acquisition is always mapped to the log space. This way gradients can be computed additively and are more stable.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">fval</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">acq</span><span class="o">.</span><span class="n">acquisition_function</span><span class="p">(</span><span class="n">x</span><span class="p">)[:,</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="o">==</span><span class="s">&#39;softplus&#39;</span><span class="p">:</span>
+            <span class="n">fval_org</span> <span class="o">=</span> <span class="n">fval</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">fval</span><span class="p">[</span><span class="n">fval_org</span><span class="o">&gt;=</span><span class="mf">40.</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">fval_org</span><span class="p">[</span><span class="n">fval_org</span><span class="o">&gt;=</span><span class="mf">40.</span><span class="p">])</span>
+            <span class="n">fval</span><span class="p">[</span><span class="n">fval_org</span><span class="o">&lt;</span><span class="mf">40.</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">fval_org</span><span class="p">[</span><span class="n">fval_org</span><span class="o">&lt;</span><span class="mf">40.</span><span class="p">])))</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="o">==</span><span class="s">&#39;none&#39;</span><span class="p">:</span>
+            <span class="n">fval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">fval</span><span class="o">+</span><span class="mf">1e-50</span><span class="p">)</span>
+        
+        <span class="n">fval</span> <span class="o">=</span> <span class="o">-</span><span class="n">fval</span>
+        <span class="k">if</span> <span class="n">X_batch</span><span class="o">!=</span><span class="bp">None</span><span class="p">:</span>
+            <span class="n">h_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hammer_function</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">r_x0</span><span class="p">,</span> <span class="n">s_x0</span><span class="p">)</span>
+            <span class="n">fval</span> <span class="o">+=</span> <span class="o">-</span><span class="n">h_vals</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fval</span>
+    
+    <span class="k">def</span> <span class="nf">_d_hammer_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">X_batch</span><span class="p">,</span> <span class="n">r_x0</span><span class="p">,</span> <span class="n">s_x0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the value of the penalizer (centered at x_0) at any x.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">x</span><span class="p">)[:,</span><span class="bp">None</span><span class="p">,:]</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">X_batch</span><span class="p">)[</span><span class="bp">None</span><span class="p">,:,:]</span>
+        <span class="n">nm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">dx</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="p">(</span><span class="n">nm</span><span class="o">-</span> <span class="n">r_x0</span><span class="p">)</span><span class="o">/</span><span class="n">s_x0</span>
+        <span class="n">h_func</span> <span class="o">=</span> <span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+        
+        <span class="n">d</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="n">s_x0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span><span class="o">*</span><span class="n">h_func</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">nm</span>
+        <span class="n">d</span><span class="p">[</span><span class="n">h_func</span><span class="o">&lt;</span><span class="mf">1e-50</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="p">[:,:,</span><span class="bp">None</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">d</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AcquisitionLP.acquisition_function"><a class="viewcode-back" href="../../../GPyOpt.acquisitions.html#GPyOpt.acquisitions.LP.AcquisitionLP.acquisition_function">[docs]</a>    <span class="k">def</span> <span class="nf">acquisition_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the value of the acquisition function at x.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_penalized_acquisition</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_batch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_x0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">s_x0</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AcquisitionLP.d_acquisition_function"><a class="viewcode-back" href="../../../GPyOpt.acquisitions.html#GPyOpt.acquisitions.LP.AcquisitionLP.d_acquisition_function">[docs]</a>    <span class="k">def</span> <span class="nf">d_acquisition_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the gradient of the acquisition function at x.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="o">==</span><span class="s">&#39;softplus&#39;</span><span class="p">:</span>
+            <span class="n">fval</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">acq</span><span class="o">.</span><span class="n">acquisition_function</span><span class="p">(</span><span class="n">x</span><span class="p">)[:,</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">fval</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">fval</span><span class="p">)))</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="o">==</span><span class="s">&#39;none&#39;</span><span class="p">:</span>
+            <span class="n">fval</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">acq</span><span class="o">.</span><span class="n">acquisition_function</span><span class="p">(</span><span class="n">x</span><span class="p">)[:,</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="n">fval</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="mf">1.</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_batch</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">grad_acq_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">acq</span><span class="o">.</span><span class="n">acquisition_function_withGradients</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> 
+            <span class="k">return</span> <span class="n">scale</span><span class="o">*</span><span class="n">grad_acq_x</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">grad_acq_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">acq</span><span class="o">.</span><span class="n">acquisition_function_withGradients</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> 
+            <span class="k">return</span> <span class="n">scale</span><span class="o">*</span><span class="n">grad_acq_x</span>  <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d_hammer_function</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_batch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_x0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">s_x0</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AcquisitionLP.acquisition_function_withGradients"><a class="viewcode-back" href="../../../GPyOpt.acquisitions.html#GPyOpt.acquisitions.LP.AcquisitionLP.acquisition_function_withGradients">[docs]</a>    <span class="k">def</span> <span class="nf">acquisition_function_withGradients</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the acquisition function and its its gradient at x.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">aqu_x</span>      <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">aqu_x_grad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_acquisition_function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">aqu_x</span><span class="p">,</span> <span class="n">aqu_x_grad</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../acquisitions.html" >GPyOpt.acquisitions</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Javier Gonzalez.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

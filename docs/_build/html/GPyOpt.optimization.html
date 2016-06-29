@@ -1,0 +1,460 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>GPyOpt.optimization package &mdash; GPyOpt  documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="GPyOpt  documentation" href="index.html" />
+    <link rel="up" title="GPyOpt package" href="GPyOpt.html" />
+    <link rel="next" title="GPyOpt.plotting package" href="GPyOpt.plotting.html" />
+    <link rel="prev" title="GPyOpt.objective_examples package" href="GPyOpt.objective_examples.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.plotting.html" title="GPyOpt.plotting package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.objective_examples.html" title="GPyOpt.objective_examples package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="GPyOpt.html" accesskey="U">GPyOpt package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="gpyopt-optimization-package">
+<h1>GPyOpt.optimization package<a class="headerlink" href="#gpyopt-optimization-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-GPyOpt.optimization.acquisition_optimizer">
+<span id="gpyopt-optimization-acquisition-optimizer-module"></span><h2>GPyOpt.optimization.acquisition_optimizer module<a class="headerlink" href="#module-GPyOpt.optimization.acquisition_optimizer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.optimization.acquisition_optimizer.AcquOptimizer">
+<em class="property">class </em><code class="descclassname">GPyOpt.optimization.acquisition_optimizer.</code><code class="descname">AcquOptimizer</code><span class="sig-paren">(</span><em>space</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/optimization/acquisition_optimizer.html#AcquOptimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.optimization.acquisition_optimizer.AcquOptimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Base class for the optimizers of the acquisition functions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>space</strong> &#8211; design space class from GPyOpt.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="GPyOpt.optimization.acquisition_optimizer.AcquOptimizer.optimize">
+<code class="descname">optimize</code><span class="sig-paren">(</span><em>f=None</em>, <em>df=None</em>, <em>f_df=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/optimization/acquisition_optimizer.html#AcquOptimizer.optimize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.optimization.acquisition_optimizer.AcquOptimizer.optimize" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>f</strong> &#8211; function to optimize.</li>
+<li><strong>df</strong> &#8211; gradient of the function to optimize.</li>
+<li><strong>f_df</strong> &#8211; returns both the function to optimize and its gradient.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="GPyOpt.optimization.acquisition_optimizer.AcquisitionOptimizer">
+<code class="descclassname">GPyOpt.optimization.acquisition_optimizer.</code><code class="descname">AcquisitionOptimizer</code><span class="sig-paren">(</span><em>space</em>, <em>optimizer='lbfgs'</em>, <em>current_X=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/optimization/acquisition_optimizer.html#AcquisitionOptimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.optimization.acquisition_optimizer.AcquisitionOptimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Chooser for the type of acquisition optimizer to use. The decision is based on the type of input space and
+whether it contains discrete, continuous, bandit variables or a mix of them. If the problem is defined for
+a mix of discrete and continuous variables the optimization is done as follows:</p>
+<blockquote>
+<div><ul class="simple">
+<li>All possible combinations of the values of the discrete variables are computed.</li>
+<li>For each combination the problem is solved for the remaining continuous variables.</li>
+<li>The arg min of all the sub-problems is taken.</li>
+</ul>
+</div></blockquote>
+<p>Note that this may be slow in cases with many discrete variables. In the bandits settings not optimization is 
+carried out. Since the space is finite the argmin is computed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>space</strong> &#8211; design space class from GPyOpt.</li>
+<li><strong>optimizer</strong> &#8211; optimizer to use. Can be selected among:
+- &#8216;lbfgs&#8217;: L-BFGS.
+- &#8216;DIRECT&#8217;: Dividing Rectangles.
+- &#8216;CMA&#8217;: covariance matrix adaptation.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.optimization.acquisition_optimizer.BanditAcqOptimizer">
+<em class="property">class </em><code class="descclassname">GPyOpt.optimization.acquisition_optimizer.</code><code class="descname">BanditAcqOptimizer</code><span class="sig-paren">(</span><em>space</em>, <em>current_X</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/optimization/acquisition_optimizer.html#BanditAcqOptimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.optimization.acquisition_optimizer.BanditAcqOptimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.optimization.acquisition_optimizer.AcquOptimizer" title="GPyOpt.optimization.acquisition_optimizer.AcquOptimizer"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.optimization.acquisition_optimizer.AcquOptimizer</span></code></a></p>
+<p>General class for acquisition optimizers defined on bandits</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>space</strong> &#8211; design space class from GPyOpt.</li>
+<li><strong>current_X</strong> &#8211; numpy array containing the arms of the bandit that hasn&#8217;t been pulled yet.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="GPyOpt.optimization.acquisition_optimizer.BanditAcqOptimizer.optimize">
+<code class="descname">optimize</code><span class="sig-paren">(</span><em>f=None</em>, <em>df=None</em>, <em>f_df=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/optimization/acquisition_optimizer.html#BanditAcqOptimizer.optimize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.optimization.acquisition_optimizer.BanditAcqOptimizer.optimize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimization of the acquisition. Since it is a bandit it just takes the argmin of the outputs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>f</strong> &#8211; function to optimize.</li>
+<li><strong>df</strong> &#8211; gradient of the function to optimize.</li>
+<li><strong>f_df</strong> &#8211; returns both the function to optimize and its gradient.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.optimization.acquisition_optimizer.ContAcqOptimizer">
+<em class="property">class </em><code class="descclassname">GPyOpt.optimization.acquisition_optimizer.</code><code class="descname">ContAcqOptimizer</code><span class="sig-paren">(</span><em>space</em>, <em>optimizer='lbfgs'</em>, <em>n_samples=5000</em>, <em>fast=True</em>, <em>random=True</em>, <em>search=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/optimization/acquisition_optimizer.html#ContAcqOptimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.optimization.acquisition_optimizer.ContAcqOptimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.optimization.acquisition_optimizer.AcquOptimizer" title="GPyOpt.optimization.acquisition_optimizer.AcquOptimizer"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.optimization.acquisition_optimizer.AcquOptimizer</span></code></a></p>
+<p>General class for acquisition optimizers defined in continuous domains</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>space</strong> &#8211; design space class from GPyOpt.</li>
+<li><strong>optimizer</strong> &#8211; optimizer to use. Can be selected among:
+- &#8216;lbfgs&#8217;: L-BFGS.
+- &#8216;DIRECT&#8217;: Dividing Rectangles.
+- &#8216;CMA&#8217;: covariance matrix adaptation.</li>
+<li><strong>n_samples</strong> &#8211; number of initial points in which the acquisition is evaluated.</li>
+<li><strong>fast</strong> &#8211; whether just a local optimizer should be run starting in the best location (default, True). If False a local search is performed
+for each point and the best of all is taken.</li>
+<li><strong>ramdom</strong> &#8211; whether the initial samples are taken randomly (or in a grid if False). Note that, if False, n_samples represent the number
+of points user per dimension.</li>
+<li><strong>search</strong> &#8211; whether to do local search or not.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="GPyOpt.optimization.acquisition_optimizer.ContAcqOptimizer.fix_dimensions">
+<code class="descname">fix_dimensions</code><span class="sig-paren">(</span><em>dims=None</em>, <em>values=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/optimization/acquisition_optimizer.html#ContAcqOptimizer.fix_dimensions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.optimization.acquisition_optimizer.ContAcqOptimizer.fix_dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fix the values of some of the dimensions. Once this this done the optimization is carried out only across the not fixed dimensions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dims</strong> &#8211; list of the indexes of the dimensions to fix.</li>
+<li><strong>values</strong> &#8211; list of the values at which the selected dimensions should be fixed.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.optimization.acquisition_optimizer.ContAcqOptimizer.optimize">
+<code class="descname">optimize</code><span class="sig-paren">(</span><em>f=None</em>, <em>df=None</em>, <em>f_df=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/optimization/acquisition_optimizer.html#ContAcqOptimizer.optimize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.optimization.acquisition_optimizer.ContAcqOptimizer.optimize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimizes the input function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>f</strong> &#8211; function to optimize.</li>
+<li><strong>df</strong> &#8211; gradient of the function to optimize.</li>
+<li><strong>f_df</strong> &#8211; returns both the function to optimize and its gradient.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.optimization.acquisition_optimizer.MixedAcqOptimizer">
+<em class="property">class </em><code class="descclassname">GPyOpt.optimization.acquisition_optimizer.</code><code class="descname">MixedAcqOptimizer</code><span class="sig-paren">(</span><em>space</em>, <em>optimizer='lbfgs'</em>, <em>n_samples=1000</em>, <em>fast=True</em>, <em>random=True</em>, <em>search=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/optimization/acquisition_optimizer.html#MixedAcqOptimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.optimization.acquisition_optimizer.MixedAcqOptimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.optimization.acquisition_optimizer.AcquOptimizer" title="GPyOpt.optimization.acquisition_optimizer.AcquOptimizer"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.optimization.acquisition_optimizer.AcquOptimizer</span></code></a></p>
+<p>General class for acquisition optimizers defined on mixed domains of continuous and discrete variables.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>space</strong> &#8211; design space class from GPyOpt.</li>
+<li><strong>optimizer</strong> &#8211; optimizer to use. Can be selected among:
+- &#8216;lbfgs&#8217;: L-BFGS.
+- &#8216;DIRECT&#8217;: Dividing Rectangles.
+- &#8216;CMA&#8217;: covariance matrix adaptation.</li>
+<li><strong>n_samples</strong> &#8211; number of initial points in which the acquisition is evaluated.</li>
+<li><strong>fast</strong> &#8211; whether just a local optimizer should be run starting in the best location (default, True). If False a local search is performed
+for each point and the best of all is taken.</li>
+<li><strong>ramdom</strong> &#8211; whether the initial samples are taken randomly (or in a grid if False). Note that, if False, n_samples represent the number
+of points user per dimension.</li>
+<li><strong>search</strong> &#8211; whether to do local search or not.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="GPyOpt.optimization.acquisition_optimizer.MixedAcqOptimizer.optimize">
+<code class="descname">optimize</code><span class="sig-paren">(</span><em>f=None</em>, <em>df=None</em>, <em>f_df=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/optimization/acquisition_optimizer.html#MixedAcqOptimizer.optimize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.optimization.acquisition_optimizer.MixedAcqOptimizer.optimize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimization of the acquisition.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>f</strong> &#8211; function to optimize.</li>
+<li><strong>df</strong> &#8211; gradient of the function to optimize.</li>
+<li><strong>f_df</strong> &#8211; returns both the function to optimize and its gradient.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.optimization.optimizer">
+<span id="gpyopt-optimization-optimizer-module"></span><h2>GPyOpt.optimization.optimizer module<a class="headerlink" href="#module-GPyOpt.optimization.optimizer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.optimization.optimizer.Opt_CMA">
+<em class="property">class </em><code class="descclassname">GPyOpt.optimization.optimizer.</code><code class="descname">Opt_CMA</code><span class="sig-paren">(</span><em>space</em>, <em>maxiter=1000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/optimization/optimizer.html#Opt_CMA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.optimization.optimizer.Opt_CMA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.optimization.optimizer.Optimizer" title="GPyOpt.optimization.optimizer.Optimizer"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.optimization.optimizer.Optimizer</span></code></a></p>
+<p>Wrapper the Covariance Matrix Adaptation Evolutionary strategy (CMA-ES) optimization method. It works generating 
+an stochastic search based on multivariate Gaussian samples. Only requires f and the box constrains to work.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.optimization.optimizer.Opt_DIRECT">
+<em class="property">class </em><code class="descclassname">GPyOpt.optimization.optimizer.</code><code class="descname">Opt_DIRECT</code><span class="sig-paren">(</span><em>space</em>, <em>maxiter=1000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/optimization/optimizer.html#Opt_DIRECT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.optimization.optimizer.Opt_DIRECT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.optimization.optimizer.Optimizer" title="GPyOpt.optimization.optimizer.Optimizer"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.optimization.optimizer.Optimizer</span></code></a></p>
+<p>Wrapper for DIRECT optimization method. It works partitioning iteratively the domain 
+of the function. Only requires f and the box constrains to work.</p>
+<dl class="method">
+<dt id="GPyOpt.optimization.optimizer.Opt_DIRECT.optimize">
+<code class="descname">optimize</code><span class="sig-paren">(</span><em>x0=None</em>, <em>f=None</em>, <em>df=None</em>, <em>f_df=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/optimization/optimizer.html#Opt_DIRECT.optimize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.optimization.optimizer.Opt_DIRECT.optimize" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x0</strong> &#8211; initial point for a local optimizer.</li>
+<li><strong>f</strong> &#8211; function to optimize.</li>
+<li><strong>df</strong> &#8211; gradient of the function to optimize.</li>
+<li><strong>f_df</strong> &#8211; returns both the function to optimize and its gradient.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.optimization.optimizer.Opt_lbfgs">
+<em class="property">class </em><code class="descclassname">GPyOpt.optimization.optimizer.</code><code class="descname">Opt_lbfgs</code><span class="sig-paren">(</span><em>space</em>, <em>maxiter=1000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/optimization/optimizer.html#Opt_lbfgs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.optimization.optimizer.Opt_lbfgs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.optimization.optimizer.Optimizer" title="GPyOpt.optimization.optimizer.Optimizer"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.optimization.optimizer.Optimizer</span></code></a></p>
+<p>Wrapper for l-bfgs-b to use the true or the approximate gradients.</p>
+<dl class="method">
+<dt id="GPyOpt.optimization.optimizer.Opt_lbfgs.optimize">
+<code class="descname">optimize</code><span class="sig-paren">(</span><em>x0</em>, <em>f=None</em>, <em>df=None</em>, <em>f_df=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/optimization/optimizer.html#Opt_lbfgs.optimize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.optimization.optimizer.Opt_lbfgs.optimize" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x0</strong> &#8211; initial point for a local optimizer.</li>
+<li><strong>f</strong> &#8211; function to optimize.</li>
+<li><strong>df</strong> &#8211; gradient of the function to optimize.</li>
+<li><strong>f_df</strong> &#8211; returns both the function to optimize and its gradient.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.optimization.optimizer.Optimizer">
+<em class="property">class </em><code class="descclassname">GPyOpt.optimization.optimizer.</code><code class="descname">Optimizer</code><span class="sig-paren">(</span><em>space</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/optimization/optimizer.html#Optimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.optimization.optimizer.Optimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class for a general acquisition optimizer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>space</strong> &#8211; design space GPyOpt class.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="GPyOpt.optimization.optimizer.Optimizer.optimize">
+<code class="descname">optimize</code><span class="sig-paren">(</span><em>x0</em>, <em>f=None</em>, <em>df=None</em>, <em>f_df=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/optimization/optimizer.html#Optimizer.optimize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.optimization.optimizer.Optimizer.optimize" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x0</strong> &#8211; initial point for a local optimizer.</li>
+<li><strong>f</strong> &#8211; function to optimize.</li>
+<li><strong>df</strong> &#8211; gradient of the function to optimize.</li>
+<li><strong>f_df</strong> &#8211; returns both the function to optimize and its gradient.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="GPyOpt.optimization.optimizer.select_optimizer">
+<code class="descclassname">GPyOpt.optimization.optimizer.</code><code class="descname">select_optimizer</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/optimization/optimizer.html#select_optimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.optimization.optimizer.select_optimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Chooser between different optimizers</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.optimization">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-GPyOpt.optimization" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">GPyOpt.optimization package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.optimization.acquisition_optimizer">GPyOpt.optimization.acquisition_optimizer module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.optimization.optimizer">GPyOpt.optimization.optimizer module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.optimization">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="GPyOpt.objective_examples.html"
+                        title="previous chapter">GPyOpt.objective_examples package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="GPyOpt.plotting.html"
+                        title="next chapter">GPyOpt.plotting package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/GPyOpt.optimization.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.plotting.html" title="GPyOpt.plotting package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.objective_examples.html" title="GPyOpt.objective_examples package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="GPyOpt.html" >GPyOpt package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Javier Gonzalez.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

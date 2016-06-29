@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>GPyOpt.testing.test_general_features &mdash; GPyOpt  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="GPyOpt  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for GPyOpt.testing.test_general_features</h1><div class="highlight"><pre>
+<span class="c"># Copyright (c) 2016, the GPyOpt Authors</span>
+<span class="c"># Licensed under the BSD 3-clause license (see LICENSE.txt)</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">GPyOpt</span>
+<span class="kn">from</span> <span class="nn">GPyOpt.util.general</span> <span class="kn">import</span> <span class="n">samples_multidimensional_uniform</span>
+<span class="kn">from</span> <span class="nn">GPyOpt.testing.driver</span> <span class="kn">import</span> <span class="n">run_eval</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+
+<div class="viewcode-block" id="TestAcquisitions"><a class="viewcode-back" href="../../../GPyOpt.testing.html#GPyOpt.testing.test_general_features.TestAcquisitions">[docs]</a><span class="k">class</span> <span class="nc">TestAcquisitions</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Unittest for the general features</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="TestAcquisitions.setUp"><a class="viewcode-back" href="../../../GPyOpt.testing.html#GPyOpt.testing.test_general_features.TestAcquisitions.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c"># -- This file was used to generate the test files</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span><span class="s">&#39;test_files&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_unittest</span> <span class="o">=</span> <span class="bp">True</span>  <span class="c"># Test files were generated with this line = False</span>
+
+        <span class="c">##</span>
+        <span class="c"># -- methods configuration</span>
+        <span class="c">##</span>
+
+        <span class="n">model_type</span>                  <span class="o">=</span> <span class="s">&#39;GP&#39;</span> 
+        <span class="n">initial_design_numdata</span>      <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">initial_design_type</span>         <span class="o">=</span> <span class="s">&#39;random&#39;</span> 
+        <span class="n">acquisition_type</span>            <span class="o">=</span> <span class="s">&#39;EI&#39;</span>
+        <span class="n">normalize_Y</span>                 <span class="o">=</span> <span class="bp">True</span> 
+        <span class="n">exact_feval</span>                 <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">acquisition_optimizer_type</span>  <span class="o">=</span> <span class="s">&#39;lbfgs&#39;</span> 
+        <span class="n">model_update_interval</span>       <span class="o">=</span> <span class="mi">1</span> 
+        <span class="n">evaluator_type</span>              <span class="o">=</span> <span class="s">&#39;sequential&#39;</span> 
+        <span class="n">batch_size</span>                  <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">num_cores</span>                   <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">verbosity</span>                   <span class="o">=</span> <span class="bp">False</span> 
+
+        <span class="c"># stop conditions</span>
+        <span class="n">max_iter</span>                    <span class="o">=</span> <span class="mi">5</span>
+        <span class="n">max_time</span>                    <span class="o">=</span> <span class="mi">999</span>
+        <span class="n">eps</span>                         <span class="o">=</span> <span class="mf">1e-8</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">methods_configs</span> <span class="o">=</span> <span class="p">[</span> 
+                    <span class="p">{</span>   <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;output_normalization&#39;</span><span class="p">,</span>
+                        <span class="s">&#39;model_type&#39;</span>                 <span class="p">:</span> <span class="n">model_type</span><span class="p">,</span> 
+                        <span class="s">&#39;initial_design_numdata&#39;</span>     <span class="p">:</span> <span class="n">initial_design_numdata</span><span class="p">,</span>
+                        <span class="s">&#39;initial_design_type&#39;</span>        <span class="p">:</span> <span class="n">initial_design_type</span><span class="p">,</span> 
+                        <span class="s">&#39;acquisition_type&#39;</span>           <span class="p">:</span> <span class="n">acquisition_type</span><span class="p">,</span> 
+                        <span class="s">&#39;normalize_Y&#39;</span>                <span class="p">:</span> <span class="bp">False</span><span class="p">,</span> 
+                        <span class="s">&#39;exact_feval&#39;</span>                <span class="p">:</span> <span class="n">exact_feval</span><span class="p">,</span>
+                        <span class="s">&#39;acquisition_optimizer_type&#39;</span> <span class="p">:</span> <span class="n">acquisition_optimizer_type</span><span class="p">,</span> 
+                        <span class="s">&#39;model_update_interval&#39;</span>      <span class="p">:</span> <span class="n">model_update_interval</span><span class="p">,</span> 
+                        <span class="s">&#39;verbosity&#39;</span>                  <span class="p">:</span> <span class="n">verbosity</span><span class="p">,</span> 
+                        <span class="s">&#39;evaluator_type&#39;</span>             <span class="p">:</span> <span class="n">evaluator_type</span><span class="p">,</span> 
+                        <span class="s">&#39;batch_size&#39;</span>                 <span class="p">:</span> <span class="n">batch_size</span><span class="p">,</span>
+                        <span class="s">&#39;num_cores&#39;</span>                  <span class="p">:</span> <span class="n">num_cores</span><span class="p">,</span>
+                        <span class="s">&#39;max_iter&#39;</span>                   <span class="p">:</span> <span class="n">max_iter</span><span class="p">,</span>
+                        <span class="s">&#39;max_time&#39;</span>                   <span class="p">:</span> <span class="n">max_time</span><span class="p">,</span>
+                        <span class="s">&#39;eps&#39;</span>                        <span class="p">:</span> <span class="n">eps</span>
+                        <span class="p">},</span>
+                    <span class="p">{</span>   <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;noiseless_evauations&#39;</span><span class="p">,</span>
+                        <span class="s">&#39;model_type&#39;</span>                 <span class="p">:</span> <span class="n">model_type</span><span class="p">,</span> 
+                        <span class="s">&#39;initial_design_numdata&#39;</span>     <span class="p">:</span> <span class="n">initial_design_numdata</span><span class="p">,</span>
+                        <span class="s">&#39;initial_design_type&#39;</span>        <span class="p">:</span> <span class="n">initial_design_type</span><span class="p">,</span> 
+                        <span class="s">&#39;acquisition_type&#39;</span>           <span class="p">:</span> <span class="n">acquisition_type</span><span class="p">,</span> 
+                        <span class="s">&#39;normalize_Y&#39;</span>                <span class="p">:</span> <span class="n">normalize_Y</span><span class="p">,</span> 
+                        <span class="s">&#39;exact_feval&#39;</span>                <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                        <span class="s">&#39;acquisition_optimizer_type&#39;</span> <span class="p">:</span> <span class="n">acquisition_optimizer_type</span><span class="p">,</span> 
+                        <span class="s">&#39;model_update_interval&#39;</span>      <span class="p">:</span> <span class="n">model_update_interval</span><span class="p">,</span> 
+                        <span class="s">&#39;verbosity&#39;</span>                  <span class="p">:</span> <span class="n">verbosity</span><span class="p">,</span> 
+                        <span class="s">&#39;evaluator_type&#39;</span>             <span class="p">:</span> <span class="n">evaluator_type</span><span class="p">,</span> 
+                        <span class="s">&#39;batch_size&#39;</span>                 <span class="p">:</span> <span class="n">batch_size</span><span class="p">,</span>
+                        <span class="s">&#39;num_cores&#39;</span>                  <span class="p">:</span> <span class="n">num_cores</span><span class="p">,</span>
+                        <span class="s">&#39;max_iter&#39;</span>                   <span class="p">:</span> <span class="n">max_iter</span><span class="p">,</span>
+                        <span class="s">&#39;max_time&#39;</span>                   <span class="p">:</span> <span class="n">max_time</span><span class="p">,</span>
+                        <span class="s">&#39;eps&#39;</span>                        <span class="p">:</span> <span class="n">eps</span>
+                        <span class="p">},</span>
+                    <span class="p">{</span>   <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;update_intervals&#39;</span><span class="p">,</span>
+                        <span class="s">&#39;model_type&#39;</span>                 <span class="p">:</span> <span class="n">model_type</span><span class="p">,</span> 
+                        <span class="s">&#39;initial_design_numdata&#39;</span>     <span class="p">:</span> <span class="n">initial_design_numdata</span><span class="p">,</span>
+                        <span class="s">&#39;initial_design_type&#39;</span>        <span class="p">:</span> <span class="n">initial_design_type</span><span class="p">,</span> 
+                        <span class="s">&#39;acquisition_type&#39;</span>           <span class="p">:</span> <span class="n">acquisition_type</span><span class="p">,</span> 
+                        <span class="s">&#39;normalize_Y&#39;</span>                <span class="p">:</span> <span class="n">normalize_Y</span><span class="p">,</span> 
+                        <span class="s">&#39;exact_feval&#39;</span>                <span class="p">:</span> <span class="n">exact_feval</span><span class="p">,</span>
+                        <span class="s">&#39;acquisition_optimizer_type&#39;</span> <span class="p">:</span> <span class="n">acquisition_optimizer_type</span><span class="p">,</span> 
+                        <span class="s">&#39;model_update_interval&#39;</span>      <span class="p">:</span> <span class="mi">2</span><span class="p">,</span> 
+                        <span class="s">&#39;verbosity&#39;</span>                  <span class="p">:</span> <span class="n">verbosity</span><span class="p">,</span> 
+                        <span class="s">&#39;evaluator_type&#39;</span>             <span class="p">:</span> <span class="n">evaluator_type</span><span class="p">,</span> 
+                        <span class="s">&#39;batch_size&#39;</span>                 <span class="p">:</span> <span class="n">batch_size</span><span class="p">,</span>
+                        <span class="s">&#39;num_cores&#39;</span>                  <span class="p">:</span> <span class="n">num_cores</span><span class="p">,</span>
+                        <span class="s">&#39;max_iter&#39;</span>                   <span class="p">:</span> <span class="n">max_iter</span><span class="p">,</span>
+                        <span class="s">&#39;max_time&#39;</span>                   <span class="p">:</span> <span class="n">max_time</span><span class="p">,</span>
+                        <span class="s">&#39;eps&#39;</span>                        <span class="p">:</span> <span class="n">eps</span>
+                        <span class="p">},</span>
+                    <span class="c"># {   &#39;name&#39;: &#39;max_iterations&#39;,</span>
+                    <span class="c">#     &#39;model_type&#39;                 : model_type, </span>
+                    <span class="c">#     &#39;initial_design_numdata&#39;     : initial_design_numdata,</span>
+                    <span class="c">#     &#39;initial_design_type&#39;        : initial_design_type, </span>
+                    <span class="c">#     &#39;acquisition_type&#39;           : acquisition_type, </span>
+                    <span class="c">#     &#39;normalize_Y&#39;                : normalize_Y, </span>
+                    <span class="c">#     &#39;exact_feval&#39;                : exact_feval,</span>
+                    <span class="c">#     &#39;acquisition_optimizer_type&#39; : acquisition_optimizer_type, </span>
+                    <span class="c">#     &#39;model_update_interval&#39;      : model_update_interval, </span>
+                    <span class="c">#     &#39;verbosity&#39;                  : verbosity, </span>
+                    <span class="c">#     &#39;evaluator_type&#39;             : evaluator_type, </span>
+                    <span class="c">#     &#39;batch_size&#39;                 : batch_size,</span>
+                    <span class="c">#     &#39;num_cores&#39;                  : num_cores,</span>
+                    <span class="c">#     &#39;max_iter&#39;                   : 10,</span>
+                    <span class="c">#     &#39;max_time&#39;                   : max_time,</span>
+                    <span class="c">#     &#39;eps&#39;                        : eps</span>
+                    <span class="c">#     },</span>
+                    <span class="p">]</span>
+
+        <span class="c"># -- Problem setup</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">n_inital_design</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="n">input_dim</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="n">f_bounds</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_inits</span> <span class="o">=</span> <span class="n">samples_multidimensional_uniform</span><span class="p">([</span><span class="n">f_bounds</span><span class="p">]</span><span class="o">*</span><span class="n">input_dim</span><span class="p">,</span><span class="n">n_inital_design</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_inits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_inits</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_inits</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">problem_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;objective&#39;</span><span class="p">:</span> <span class="n">GPyOpt</span><span class="o">.</span><span class="n">objective_examples</span><span class="o">.</span><span class="n">experimentsNd</span><span class="o">.</span><span class="n">gSobol</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">input_dim</span><span class="p">))</span><span class="o">.</span><span class="n">f</span><span class="p">,</span>
+            <span class="s">&#39;domain&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;var_1&#39;</span><span class="p">,</span> <span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;continuous&#39;</span><span class="p">,</span> <span class="s">&#39;domain&#39;</span><span class="p">:</span> <span class="n">f_bounds</span><span class="p">,</span> <span class="s">&#39;dimensionality&#39;</span><span class="p">:</span> <span class="n">input_dim</span><span class="p">}],</span>
+            <span class="s">&#39;constrains&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+            <span class="s">&#39;cost_withGradients&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+
+</div>
+<div class="viewcode-block" id="TestAcquisitions.test_run"><a class="viewcode-back" href="../../../GPyOpt.testing.html#GPyOpt.testing.test_general_features.TestAcquisitions.test_run">[docs]</a>    <span class="k">def</span> <span class="nf">test_run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">m_c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">methods_configs</span><span class="p">:</span>        
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;Testing acquisition &#39;</span> <span class="o">+</span> <span class="n">m_c</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">m_c</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;_&#39;</span><span class="o">+</span><span class="s">&#39;acquisition_gradient_testfile&#39;</span>
+            <span class="n">unittest_result</span> <span class="o">=</span> <span class="n">run_eval</span><span class="p">(</span><span class="n">problem_config</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem_config</span><span class="p">,</span> <span class="n">f_inits</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_inits</span><span class="p">,</span> <span class="n">method_config</span><span class="o">=</span><span class="n">m_c</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">outpath</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">outpath</span><span class="p">,</span> <span class="n">time_limit</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">unittest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_unittest</span><span class="p">)</span>           
+            <span class="n">original_result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outpath</span> <span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span> <span class="n">name</span><span class="o">+</span><span class="s">&#39;.txt&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">((</span><span class="nb">abs</span><span class="p">(</span><span class="n">original_result</span> <span class="o">-</span> <span class="n">unittest_result</span><span class="p">)</span><span class="o">&lt;.</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
+</div></div>
+<span class="k">if</span> <span class="n">__name__</span><span class="o">==</span><span class="s">&#39;main&#39;</span><span class="p">:</span>
+    <span class="n">unittest</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Javier Gonzalez.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

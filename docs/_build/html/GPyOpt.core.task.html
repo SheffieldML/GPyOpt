@@ -1,0 +1,359 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>GPyOpt.core.task package &mdash; GPyOpt  documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="GPyOpt  documentation" href="index.html" />
+    <link rel="up" title="GPyOpt.core package" href="GPyOpt.core.html" />
+    <link rel="next" title="GPyOpt.interface package" href="GPyOpt.interface.html" />
+    <link rel="prev" title="GPyOpt.core.evaluators package" href="GPyOpt.core.evaluators.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.interface.html" title="GPyOpt.interface package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.core.evaluators.html" title="GPyOpt.core.evaluators package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="GPyOpt.html" >GPyOpt package</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="GPyOpt.core.html" accesskey="U">GPyOpt.core package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="gpyopt-core-task-package">
+<h1>GPyOpt.core.task package<a class="headerlink" href="#gpyopt-core-task-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-GPyOpt.core.task.cost">
+<span id="gpyopt-core-task-cost-module"></span><h2>GPyOpt.core.task.cost module<a class="headerlink" href="#module-GPyOpt.core.task.cost" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.core.task.cost.CostModel">
+<em class="property">class </em><code class="descclassname">GPyOpt.core.task.cost.</code><code class="descname">CostModel</code><span class="sig-paren">(</span><em>cost_withGradients</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/task/cost.html#CostModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.task.cost.CostModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class to handle the cost of evaluating the function.</p>
+<p>param cost_withGradients: function that returns the cost of evaluating the function and its gradient. By default
+no cost is used. Options are:</p>
+<blockquote>
+<div><ul class="simple">
+<li>cost_withGradients is some pre-defined cost function. Should return numpy array as outputs.</li>
+<li>cost_withGradients = &#8216;evaluation_time&#8217;.</li>
+</ul>
+</div></blockquote>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">if cost_withGradients = &#8216;evaluation time&#8217; the evaluation time of the function is used to model a GP whose</p>
+</div>
+<p>mean is used as cost.</p>
+<dl class="method">
+<dt id="GPyOpt.core.task.cost.CostModel.update_cost_model">
+<code class="descname">update_cost_model</code><span class="sig-paren">(</span><em>x</em>, <em>cost_x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/task/cost.html#CostModel.update_cost_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.task.cost.CostModel.update_cost_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the GP used to handle the cost.</p>
+<p>param x: input of the GP for the cost model.
+param x_cost: values of the time cost at the input locations.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="GPyOpt.core.task.cost.constant_cost_withGradients">
+<code class="descclassname">GPyOpt.core.task.cost.</code><code class="descname">constant_cost_withGradients</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/task/cost.html#constant_cost_withGradients"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.task.cost.constant_cost_withGradients" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constant cost function used by default: cost=1, d_cost =0.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.core.task.objective">
+<span id="gpyopt-core-task-objective-module"></span><h2>GPyOpt.core.task.objective module<a class="headerlink" href="#module-GPyOpt.core.task.objective" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.core.task.objective.Objective">
+<em class="property">class </em><code class="descclassname">GPyOpt.core.task.objective.</code><code class="descname">Objective</code><a class="reference internal" href="_modules/GPyOpt/core/task/objective.html#Objective"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.task.objective.Objective" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>General class to handle the objective function internally.</p>
+<dl class="method">
+<dt id="GPyOpt.core.task.objective.Objective.evaluate">
+<code class="descname">evaluate</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/task/objective.html#Objective.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.task.objective.Objective.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.core.task.objective.SingleObjective">
+<em class="property">class </em><code class="descclassname">GPyOpt.core.task.objective.</code><code class="descname">SingleObjective</code><span class="sig-paren">(</span><em>func</em>, <em>num_cores=1</em>, <em>objective_name='no_name'</em>, <em>batch_type='synchronous'</em>, <em>unfold_args=False</em>, <em>space=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/task/objective.html#SingleObjective"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.task.objective.SingleObjective" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.core.task.objective.Objective" title="GPyOpt.core.task.objective.Objective"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.core.task.objective.Objective</span></code></a></p>
+<p>Class to handle problems with one single objective function.</p>
+<p>param func: objective function. 
+param batch_size: size of the batches (default, 1)
+param num_cores: number of cores to use in the process of evaluating the objective (default, 1).
+param objective_name: name of the objective function.
+param batch_type: Type of batch used. Only &#8216;synchronous&#8217; evaluations are possible at the moment.
+param space: Not in use.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">the objective function should take 2-dimensional numpy arrays as input and outputs. Each row should</p>
+</div>
+<p>contain a location (in the case of the inputs) or a function evaluation (in the case of the outputs).</p>
+<dl class="method">
+<dt id="GPyOpt.core.task.objective.SingleObjective.evaluate">
+<code class="descname">evaluate</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/task/objective.html#SingleObjective.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.task.objective.SingleObjective.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs the evaluation of the objective at x.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.core.task.space">
+<span id="gpyopt-core-task-space-module"></span><h2>GPyOpt.core.task.space module<a class="headerlink" href="#module-GPyOpt.core.task.space" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.core.task.space.Design_space">
+<em class="property">class </em><code class="descclassname">GPyOpt.core.task.space.</code><code class="descname">Design_space</code><span class="sig-paren">(</span><em>space</em>, <em>constraints=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/task/space.html#Design_space"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.task.space.Design_space" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class to handle the input domain of the function. 
+The format of a input domain, possibly with restrictions:
+The domain is defined as a list of dictionaries contains a list of attributes, e.g.:</p>
+<ul class="simple">
+<li>Arm bandit</li>
+</ul>
+<dl class="docutils">
+<dt>space  =[{&#8216;name&#8217;: &#8216;var_1&#8217;, &#8216;type&#8217;: &#8216;bandit&#8217;, &#8216;domain&#8217;: [(-1,1),(1,0),(0,1)]},</dt>
+<dd>{&#8216;name&#8217;: &#8216;var_2&#8217;, &#8216;type&#8217;: &#8216;bandit&#8217;, &#8216;domain&#8217;: [(-1,4),(0,0),(1,2)]}]</dd>
+</dl>
+<ul class="simple">
+<li>Continuous domain</li>
+</ul>
+<dl class="docutils">
+<dt>space =[ {&#8216;name&#8217;: &#8216;var_1&#8217;, &#8216;type&#8217;: &#8216;continuous&#8217;, &#8216;domain&#8217;:(-1,1), &#8216;dimensionality&#8217;:1},</dt>
+<dd>{&#8216;name&#8217;: &#8216;var_2&#8217;, &#8216;type&#8217;: &#8216;continuous&#8217;, &#8216;domain&#8217;:(-3,1), &#8216;dimensionality&#8217;:2},
+{&#8216;name&#8217;: &#8216;var_3&#8217;, &#8216;type&#8217;: &#8216;bandit&#8217;, &#8216;domain&#8217;: [(-1,1),(1,0),(0,1)], &#8216;dimensionality&#8217;:2},
+{&#8216;name&#8217;: &#8216;var_4&#8217;, &#8216;type&#8217;: &#8216;bandit&#8217;, &#8216;domain&#8217;: [(-1,4),(0,0),(1,2)]},
+{&#8216;name&#8217;: &#8216;var_5&#8217;, &#8216;type&#8217;: &#8216;discrete&#8217;, &#8216;domain&#8217;: (0,1,2,3)}]</dd>
+</dl>
+<ul class="simple">
+<li>Discrete domain</li>
+</ul>
+<dl class="docutils">
+<dt>space =[ {&#8216;name&#8217;: &#8216;var_3&#8217;, &#8216;type&#8217;: &#8216;discrete&#8217;, &#8216;domain&#8217;: (0,1,2,3)}]</dt>
+<dd>{&#8216;name&#8217;: &#8216;var_3&#8217;, &#8216;type&#8217;: &#8216;discrete&#8217;, &#8216;domain&#8217;: (-10,10)}]</dd>
+</dl>
+<ul class="simple">
+<li>Mixed domain</li>
+</ul>
+<dl class="docutils">
+<dt>space =[{&#8216;name&#8217;: &#8216;var_1&#8217;, &#8216;type&#8217;: &#8216;continuous&#8217;, &#8216;domain&#8217;:(-1,1), &#8216;dimensionality&#8217; :1},</dt>
+<dd>{&#8216;name&#8217;: &#8216;var_4&#8217;, &#8216;type&#8217;: &#8216;continuous&#8217;, &#8216;domain&#8217;:(-3,1), &#8216;dimensionality&#8217; :2},
+{&#8216;name&#8217;: &#8216;var_3&#8217;, &#8216;type&#8217;: &#8216;discrete&#8217;, &#8216;domain&#8217;: (0,1,2,3)}]</dd>
+</dl>
+<p>Restrictions can be added to the problem. Each restriction is of the form c(x) &lt;= 0 where c(x) is a function of 
+the input variables previously defined in the space. Restrictions should be written as a list
+of dictionaries. For instance, this is an example of an space coupled with a constrain</p>
+<p>space =[ {&#8216;name&#8217;: &#8216;var_1&#8217;, &#8216;type&#8217;: &#8216;continuous&#8217;, &#8216;domain&#8217;:(-1,1), &#8216;dimensionality&#8217; :2}]
+constraints = [ {&#8216;name&#8217;: &#8216;const_1&#8217;, &#8216;constrain&#8217;: &#8216;x[:,0]**2 + x[:,1]**2 - 1&#8217;}]</p>
+<p>If no constrains are provided the hypercube determined by the bounds constraints are used.</p>
+<p>param space: list of dictionaries as indicated above.
+param constraints: list of dictionaries as indicated above (default, none)</p>
+<dl class="staticmethod">
+<dt id="GPyOpt.core.task.space.Design_space.fromConfig">
+<em class="property">static </em><code class="descname">fromConfig</code><span class="sig-paren">(</span><em>space</em>, <em>constraints</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/task/space.html#Design_space.fromConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.task.space.Design_space.fromConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.core.task.space.Design_space.get_bandit">
+<code class="descname">get_bandit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/task/space.html#Design_space.get_bandit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.task.space.Design_space.get_bandit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts the arms of the bandit if any.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.core.task.space.Design_space.get_bounds">
+<code class="descname">get_bounds</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/task/space.html#Design_space.get_bounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.task.space.Design_space.get_bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts the bounds of all the inputs of the domain.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.core.task.space.Design_space.get_continuous_bounds">
+<code class="descname">get_continuous_bounds</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/task/space.html#Design_space.get_continuous_bounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.task.space.Design_space.get_continuous_bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts the bounds of the continuous variables.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.core.task.space.Design_space.get_continuous_dims">
+<code class="descname">get_continuous_dims</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/task/space.html#Design_space.get_continuous_dims"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.task.space.Design_space.get_continuous_dims" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the dimension of the continuous components of the domain.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.core.task.space.Design_space.get_continuous_space">
+<code class="descname">get_continuous_space</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/task/space.html#Design_space.get_continuous_space"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.task.space.Design_space.get_continuous_space" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts the list of dictionaries with continuous components</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.core.task.space.Design_space.get_discrete_dims">
+<code class="descname">get_discrete_dims</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/task/space.html#Design_space.get_discrete_dims"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.task.space.Design_space.get_discrete_dims" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the dimension of the discrete components of the domain.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.core.task.space.Design_space.get_discrete_grid">
+<code class="descname">get_discrete_grid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/task/space.html#Design_space.get_discrete_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.task.space.Design_space.get_discrete_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes a Numpy array with the grid of points that results after crossing the possible outputs of the discrete 
+variables</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.core.task.space.Design_space.get_subspace">
+<code class="descname">get_subspace</code><span class="sig-paren">(</span><em>dims</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/task/space.html#Design_space.get_subspace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.task.space.Design_space.get_subspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts a the subspace according to a list of dimension.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.core.task.space.Design_space.get_variable_indices">
+<code class="descname">get_variable_indices</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/task/space.html#Design_space.get_variable_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.task.space.Design_space.get_variable_indices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.core.task.space.Design_space.has_constrains">
+<code class="descname">has_constrains</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/task/space.html#Design_space.has_constrains"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.task.space.Design_space.has_constrains" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if the problem has constrains.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.core.task.space.Design_space.indicator_constraints">
+<code class="descname">indicator_constraints</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/task/space.html#Design_space.indicator_constraints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.task.space.Design_space.indicator_constraints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return zero if x is within the constrains and zero otherwise.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.core.task.space.Design_space.input_dim">
+<code class="descname">input_dim</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/task/space.html#Design_space.input_dim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.task.space.Design_space.input_dim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts the input dimension of the domain.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="GPyOpt.core.task.space.Design_space.supported_types">
+<code class="descname">supported_types</code><em class="property"> = ['continuous', 'discrete', 'bandit']</em><a class="headerlink" href="#GPyOpt.core.task.space.Design_space.supported_types" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="GPyOpt.core.task.space.bounds_to_space">
+<code class="descclassname">GPyOpt.core.task.space.</code><code class="descname">bounds_to_space</code><span class="sig-paren">(</span><em>bounds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/task/space.html#bounds_to_space"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.task.space.bounds_to_space" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes as input a list of tuples with bounds, and create a dictionary to be processed by the class Design_space. This function
+us used to keep the compatibility with previous versions of GPyOpt in which only bounded continuous optimization was possible
+(and the optimization domain passed as a list of tuples).</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.core.task">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-GPyOpt.core.task" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">GPyOpt.core.task package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.core.task.cost">GPyOpt.core.task.cost module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.core.task.objective">GPyOpt.core.task.objective module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.core.task.space">GPyOpt.core.task.space module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.core.task">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="GPyOpt.core.evaluators.html"
+                        title="previous chapter">GPyOpt.core.evaluators package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="GPyOpt.interface.html"
+                        title="next chapter">GPyOpt.interface package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/GPyOpt.core.task.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.interface.html" title="GPyOpt.interface package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.core.evaluators.html" title="GPyOpt.core.evaluators package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="GPyOpt.html" >GPyOpt package</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="GPyOpt.core.html" >GPyOpt.core package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Javier Gonzalez.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>GPyOpt.models.gpmodel &mdash; GPyOpt  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="GPyOpt  documentation" href="../../../index.html" />
+    <link rel="up" title="GPyOpt.models" href="../models.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../models.html" accesskey="U">GPyOpt.models</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for GPyOpt.models.gpmodel</h1><div class="highlight"><pre>
+<span class="c"># Copyright (c) 2016, the GPyOpt Authors</span>
+<span class="c"># Licensed under the BSD 3-clause license (see LICENSE.txt)</span>
+
+<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">BOModel</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">GPy</span>
+
+<div class="viewcode-block" id="GPModel"><a class="viewcode-back" href="../../../GPyOpt.models.html#GPyOpt.models.gpmodel.GPModel">[docs]</a><span class="k">class</span> <span class="nc">GPModel</span><span class="p">(</span><span class="n">BOModel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    General class for handling a Gaussian Process in GPyOpt. </span>
+
+<span class="sd">    :param kernel: GPy kernel to use in the GP model.</span>
+<span class="sd">    :param noise_var: value of the noise variance if known.</span>
+<span class="sd">    :param exact_feval: whether noiseless evaluations are available. IMPORTANT to make the optimization work well in noiseless scenarios (default, False).</span>
+<span class="sd">    :param normalize_Y: normalization of the outputs to the interval [0,1] (default, True). </span>
+<span class="sd">    :param optimizer: optimizer of the model. Check GPy for details.</span>
+<span class="sd">    :param max_iters: maximum number of iterations used to optimize the parameters of the model.</span>
+<span class="sd">    :param optimize_restarts: number of restarts in the optimization.</span>
+<span class="sd">    :param sparse: whether to use a sparse GP (default, False). This is useful when many observations are available.</span>
+<span class="sd">    :param num_inducing: number of inducing points if a sparse GP is used.  </span>
+<span class="sd">    :param verbose: print out the model messages (default, False).</span>
+
+<span class="sd">    .. Note:: This model does Maximum likelihood estimation of the hyper-parameters.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="n">analytical_gradient_prediction</span> <span class="o">=</span> <span class="bp">True</span>  <span class="c"># --- Needed in all models to check is the gradients of acquisitions are computable.</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">noise_var</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">exact_feval</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">normalize_Y</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="s">&#39;bfgs&#39;</span><span class="p">,</span> <span class="n">max_iters</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">optimize_restarts</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sparse</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">num_inducing</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>  <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="o">=</span> <span class="n">kernel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noise_var</span> <span class="o">=</span> <span class="n">noise_var</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exact_feval</span> <span class="o">=</span> <span class="n">exact_feval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalize_Y</span> <span class="o">=</span> <span class="n">normalize_Y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimize_restarts</span> <span class="o">=</span> <span class="n">optimize_restarts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_iters</span> <span class="o">=</span> <span class="n">max_iters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sparse</span> <span class="o">=</span> <span class="n">sparse</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_inducing</span> <span class="o">=</span> <span class="n">num_inducing</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">None</span>
+        
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="GPModel.fromConfig"><a class="viewcode-back" href="../../../GPyOpt.models.html#GPyOpt.models.gpmodel.GPModel.fromConfig">[docs]</a>    <span class="k">def</span> <span class="nf">fromConfig</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">GPModel</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
+        </div>
+    <span class="k">def</span> <span class="nf">_create_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates the model given some input data X and Y.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c"># --- define kernel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> 
+            <span class="n">kern</span> <span class="o">=</span> <span class="n">GPy</span><span class="o">.</span><span class="n">kern</span><span class="o">.</span><span class="n">Matern32</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">variance</span><span class="o">=</span><span class="mf">1.</span><span class="p">)</span> <span class="c">#+ GPy.kern.Bias(self.input_dim)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">kern</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="o">=</span> <span class="bp">None</span>
+        
+        <span class="c"># --- define model</span>
+        <span class="n">noise_var</span> <span class="o">=</span> <span class="n">Y</span><span class="o">.</span><span class="n">var</span><span class="p">()</span><span class="o">*</span><span class="mf">0.01</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_var</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_var</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sparse</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">GPy</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">GPRegression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="n">kern</span><span class="p">,</span> <span class="n">noise_var</span><span class="o">=</span><span class="n">noise_var</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">GPy</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">SparseGPRegression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="n">kern</span><span class="p">,</span> <span class="n">num_inducing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_inducing</span><span class="p">)</span>
+
+        <span class="c"># --- restrict variance if exact evaluations of the objective</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exact_feval</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">Gaussian_noise</span><span class="o">.</span><span class="n">constrain_fixed</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">warning</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">Gaussian_noise</span><span class="o">.</span><span class="n">constrain_positive</span><span class="p">(</span><span class="n">warning</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            
+<div class="viewcode-block" id="GPModel.updateModel"><a class="viewcode-back" href="../../../GPyOpt.models.html#GPyOpt.models.gpmodel.GPModel.updateModel">[docs]</a>    <span class="k">def</span> <span class="nf">updateModel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_all</span><span class="p">,</span> <span class="n">Y_all</span><span class="p">,</span> <span class="n">X_new</span><span class="p">,</span> <span class="n">Y_new</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates the model with new observations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize_Y</span><span class="p">:</span>
+            <span class="n">Y_all</span> <span class="o">=</span> <span class="p">(</span><span class="n">Y_all</span> <span class="o">-</span> <span class="n">Y_all</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="o">/</span><span class="p">(</span><span class="n">Y_all</span><span class="o">.</span><span class="n">std</span><span class="p">())</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_model</span><span class="p">(</span><span class="n">X_all</span><span class="p">,</span> <span class="n">Y_all</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">set_XY</span><span class="p">(</span><span class="n">X_all</span><span class="p">,</span> <span class="n">Y_all</span><span class="p">)</span>
+            
+        <span class="c"># --- update the model maximizing the marginal likelihood.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize_restarts</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">max_iters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_iters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">optimize_restarts</span><span class="p">(</span><span class="n">num_restarts</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">optimize_restarts</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">max_iters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_iters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GPModel.predict"><a class="viewcode-back" href="../../../GPyOpt.models.html#GPyOpt.models.gpmodel.GPModel.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Predictions with the model. Returns posterior means and standard deviations at X. Note that this is different in GPy where the variances are given. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">ndim</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span> <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="bp">None</span><span class="p">,:]</span>
+        <span class="n">m</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="mf">1e-10</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">m</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GPModel.get_fmin"><a class="viewcode-back" href="../../../GPyOpt.models.html#GPyOpt.models.gpmodel.GPModel.get_fmin">[docs]</a>    <span class="k">def</span> <span class="nf">get_fmin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the location where the posterior mean is takes its minimal value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">X</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    </div>
+<div class="viewcode-block" id="GPModel.predict_withGradients"><a class="viewcode-back" href="../../../GPyOpt.models.html#GPyOpt.models.gpmodel.GPModel.predict_withGradients">[docs]</a>    <span class="k">def</span> <span class="nf">predict_withGradients</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the mean, standard deviation, mean gradient and standard deviation gradient at X.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">ndim</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span> <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="bp">None</span><span class="p">,:]</span>
+        <span class="n">m</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="mf">1e-10</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+        <span class="n">dmdx</span><span class="p">,</span> <span class="n">dvdx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predictive_gradients</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">dmdx</span> <span class="o">=</span> <span class="n">dmdx</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">dsdx</span> <span class="o">=</span> <span class="n">dvdx</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">m</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="n">dmdx</span><span class="p">,</span> <span class="n">dsdx</span>
+</div>
+<div class="viewcode-block" id="GPModel.copy"><a class="viewcode-back" href="../../../GPyOpt.models.html#GPyOpt.models.gpmodel.GPModel.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Makes a safe copy of the model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">copied_model</span> <span class="o">=</span> <span class="n">GPModel</span><span class="p">(</span><span class="n">kernel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">kern</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> 
+                            <span class="n">noise_var</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">noise_var</span><span class="p">,</span> 
+                            <span class="n">exact_feval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exact_feval</span><span class="p">,</span> 
+                            <span class="n">normalize_Y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">normalize_Y</span><span class="p">,</span> 
+                            <span class="n">optimizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="p">,</span> 
+                            <span class="n">max_iters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_iters</span><span class="p">,</span> 
+                            <span class="n">optimize_restarts</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">optimize_restarts</span><span class="p">,</span> 
+                            <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span> 
+
+        <span class="n">copied_model</span><span class="o">.</span><span class="n">_create_model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">X</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">Y</span><span class="p">)</span>
+        <span class="n">copied_model</span><span class="o">.</span><span class="n">updateModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">X</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">Y</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">copied_model</span>
+</div>
+<div class="viewcode-block" id="GPModel.get_model_parameters"><a class="viewcode-back" href="../../../GPyOpt.models.html#GPyOpt.models.gpmodel.GPModel.get_model_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">get_model_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a 2D numpy array with the parameters of the model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">[:])</span>
+</div>
+<div class="viewcode-block" id="GPModel.get_model_parameters_names"><a class="viewcode-back" href="../../../GPyOpt.models.html#GPyOpt.models.gpmodel.GPModel.get_model_parameters_names">[docs]</a>    <span class="k">def</span> <span class="nf">get_model_parameters_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list with the names of the parameters of the model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">parameter_names</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="GPModel_MCMC"><a class="viewcode-back" href="../../../GPyOpt.models.html#GPyOpt.models.gpmodel.GPModel_MCMC">[docs]</a><span class="k">class</span> <span class="nc">GPModel_MCMC</span><span class="p">(</span><span class="n">BOModel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    General class for handling a Gaussian Process in GPyOpt. </span>
+
+<span class="sd">    :param kernel: GPy kernel to use in the GP model.</span>
+<span class="sd">    :param noise_var: value of the noise variance if known.</span>
+<span class="sd">    :param exact_feval: whether noiseless evaluations are available. IMPORTANT to make the optimization work well in noiseless scenarios (default, False).</span>
+<span class="sd">    :param normalize_Y: normalization of the outputs to the interval [0,1] (default, True). </span>
+<span class="sd">    :param n_samples: number of MCMC samples.</span>
+<span class="sd">    :param n_burnin: number of samples not used.</span>
+<span class="sd">    :param subsample_interval: sub-sample interval in the MCMC.</span>
+<span class="sd">    :param step_size: step-size in the MCMC.</span>
+<span class="sd">    :param leapfrog_steps: ??</span>
+<span class="sd">    :param verbose: print out the model messages (default, False).</span>
+
+<span class="sd">    .. Note:: This model does MCMC over the hyperparameters.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">MCMC_sampler</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">analytical_gradient_prediction</span> <span class="o">=</span> <span class="bp">True</span> <span class="c"># --- Needed in all models to check is the gradients of acquisitions are computable.</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">noise_var</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">exact_feval</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">normalize_Y</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">n_samples</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">n_burnin</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">subsample_interval</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">step_size</span> <span class="o">=</span> <span class="mf">1e-1</span><span class="p">,</span> <span class="n">leapfrog_steps</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="o">=</span> <span class="n">kernel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noise_var</span> <span class="o">=</span> <span class="n">noise_var</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exact_feval</span> <span class="o">=</span> <span class="n">exact_feval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalize_Y</span> <span class="o">=</span> <span class="n">normalize_Y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">=</span> <span class="n">n_samples</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subsample_interval</span> <span class="o">=</span> <span class="n">subsample_interval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_burnin</span> <span class="o">=</span> <span class="n">n_burnin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step_size</span> <span class="o">=</span> <span class="n">step_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">leapfrog_steps</span> <span class="o">=</span> <span class="n">leapfrog_steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">None</span>
+        
+    <span class="k">def</span> <span class="nf">_create_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates the model given some input data X and Y.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c"># --- define kernel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> 
+            <span class="n">kern</span> <span class="o">=</span> <span class="n">GPy</span><span class="o">.</span><span class="n">kern</span><span class="o">.</span><span class="n">RBF</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">variance</span><span class="o">=</span><span class="mf">1.</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">kern</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="o">=</span> <span class="bp">None</span>
+        
+        <span class="c"># --- define model</span>
+        <span class="n">noise_var</span> <span class="o">=</span> <span class="n">Y</span><span class="o">.</span><span class="n">var</span><span class="p">()</span><span class="o">*</span><span class="mf">0.01</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_var</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_var</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">GPy</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">GPRegression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="n">kern</span><span class="p">,</span> <span class="n">noise_var</span><span class="o">=</span><span class="n">noise_var</span><span class="p">)</span>
+        
+        <span class="c"># --- Define prior on the hyper-parameters for the kernel (for integrated acquisitions)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">kern</span><span class="o">.</span><span class="n">set_prior</span><span class="p">(</span><span class="n">GPy</span><span class="o">.</span><span class="n">priors</span><span class="o">.</span><span class="n">Gamma</span><span class="o">.</span><span class="n">from_EV</span><span class="p">(</span><span class="mf">2.</span><span class="p">,</span><span class="mf">4.</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">likelihood</span><span class="o">.</span><span class="n">variance</span><span class="o">.</span><span class="n">set_prior</span><span class="p">(</span><span class="n">GPy</span><span class="o">.</span><span class="n">priors</span><span class="o">.</span><span class="n">Gamma</span><span class="o">.</span><span class="n">from_EV</span><span class="p">(</span><span class="mf">2.</span><span class="p">,</span><span class="mf">4.</span><span class="p">))</span>
+
+        <span class="c"># --- Restrict variance if exact evaluations of the objective</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exact_feval</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">Gaussian_noise</span><span class="o">.</span><span class="n">constrain_fixed</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">warning</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">Gaussian_noise</span><span class="o">.</span><span class="n">constrain_positive</span><span class="p">(</span><span class="n">warning</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            
+<div class="viewcode-block" id="GPModel_MCMC.updateModel"><a class="viewcode-back" href="../../../GPyOpt.models.html#GPyOpt.models.gpmodel.GPModel_MCMC.updateModel">[docs]</a>    <span class="k">def</span> <span class="nf">updateModel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_all</span><span class="p">,</span> <span class="n">Y_all</span><span class="p">,</span> <span class="n">X_new</span><span class="p">,</span> <span class="n">Y_new</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates the model with new observations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize_Y</span><span class="p">:</span>
+            <span class="n">Y_all</span> <span class="o">=</span> <span class="p">(</span><span class="n">Y_all</span> <span class="o">-</span> <span class="n">Y_all</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="o">/</span><span class="p">(</span><span class="n">Y_all</span><span class="o">.</span><span class="n">std</span><span class="p">())</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_model</span><span class="p">(</span><span class="n">X_all</span><span class="p">,</span> <span class="n">Y_all</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">set_XY</span><span class="p">(</span><span class="n">X_all</span><span class="p">,</span> <span class="n">Y_all</span><span class="p">)</span>
+            
+        <span class="c"># update the model generating hmc samples</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">max_iters</span> <span class="o">=</span> <span class="mi">200</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">param_array</span><span class="p">[:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">param_array</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">param_array</span><span class="o">.</span><span class="n">size</span><span class="p">)</span><span class="o">*</span><span class="mf">0.01</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hmc</span> <span class="o">=</span> <span class="n">GPy</span><span class="o">.</span><span class="n">inference</span><span class="o">.</span><span class="n">mcmc</span><span class="o">.</span><span class="n">HMC</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">stepsize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">step_size</span><span class="p">)</span>
+        <span class="n">ss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hmc</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">num_samples</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_burnin</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsample_interval</span><span class="p">,</span> <span class="n">hmc_iters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">leapfrog_steps</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hmc_samples</span> <span class="o">=</span> <span class="n">ss</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">n_burnin</span><span class="p">::</span><span class="bp">self</span><span class="o">.</span><span class="n">subsample_interval</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="GPModel_MCMC.predict"><a class="viewcode-back" href="../../../GPyOpt.models.html#GPyOpt.models.gpmodel.GPModel_MCMC.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Predictions with the model for all the MCMC samples. Returns posterior means and standard deviations at X. Note that this is different in GPy where the variances are given. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">ndim</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span> <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="bp">None</span><span class="p">,:]</span>
+        <span class="n">ps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">param_array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">means</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">stds</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hmc_samples</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_fixes_</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">s</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_fixes_</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_trigger_params_changed</span><span class="p">()</span>
+            <span class="n">m</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="n">means</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+            <span class="n">stds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="mf">1e-10</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">param_array</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">ps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_trigger_params_changed</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">means</span><span class="p">,</span> <span class="n">stds</span>
+</div>
+<div class="viewcode-block" id="GPModel_MCMC.get_fmin"><a class="viewcode-back" href="../../../GPyOpt.models.html#GPyOpt.models.gpmodel.GPModel_MCMC.get_fmin">[docs]</a>    <span class="k">def</span> <span class="nf">get_fmin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the location where the posterior mean is takes its minimal value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">param_array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">fmins</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hmc_samples</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_fixes_</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">s</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_fixes_</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_trigger_params_changed</span><span class="p">()</span>
+            <span class="n">fmins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">X</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">param_array</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">ps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_trigger_params_changed</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">fmins</span>
+    </div>
+<div class="viewcode-block" id="GPModel_MCMC.predict_withGradients"><a class="viewcode-back" href="../../../GPyOpt.models.html#GPyOpt.models.gpmodel.GPModel_MCMC.predict_withGradients">[docs]</a>    <span class="k">def</span> <span class="nf">predict_withGradients</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the mean, standard deviation, mean gradient and standard deviation gradient at X for all the MCMC samples.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">ndim</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span> <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="bp">None</span><span class="p">,:]</span>
+        <span class="n">ps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">param_array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">means</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">stds</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">dmdxs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">dsdxs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hmc_samples</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_fixes_</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">s</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_fixes_</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_trigger_params_changed</span><span class="p">()</span>
+            <span class="n">m</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="mf">1e-10</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">))</span>
+            <span class="n">dmdx</span><span class="p">,</span> <span class="n">dvdx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predictive_gradients</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="n">dmdx</span> <span class="o">=</span> <span class="n">dmdx</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">dsdx</span> <span class="o">=</span> <span class="n">dvdx</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">std</span><span class="p">)</span>
+            <span class="n">means</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+            <span class="n">stds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">std</span><span class="p">)</span>
+            <span class="n">dmdxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dmdx</span><span class="p">)</span>
+            <span class="n">dsdxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dsdx</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">param_array</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">ps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_trigger_params_changed</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">means</span><span class="p">,</span> <span class="n">stds</span><span class="p">,</span> <span class="n">dmdxs</span><span class="p">,</span> <span class="n">dsdxs</span>
+</div>
+<div class="viewcode-block" id="GPModel_MCMC.copy"><a class="viewcode-back" href="../../../GPyOpt.models.html#GPyOpt.models.gpmodel.GPModel_MCMC.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Makes a safe copy of the model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">copied_model</span> <span class="o">=</span> <span class="n">GPModel</span><span class="p">(</span> <span class="n">kernel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">kern</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> 
+                                <span class="n">noise_var</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_var</span> <span class="p">,</span> 
+                                <span class="n">exact_feval</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exact_feval</span><span class="p">,</span> 
+                                <span class="n">normalize_Y</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize_Y</span><span class="p">,</span> 
+                                <span class="n">n_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">,</span> 
+                                <span class="n">n_burnin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_burnin</span><span class="p">,</span> 
+                                <span class="n">subsample_interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsample_interval</span><span class="p">,</span> 
+                                <span class="n">step_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_size</span><span class="p">,</span> 
+                                <span class="n">leapfrog_steps</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">leapfrog_steps</span><span class="p">,</span> 
+                                <span class="n">verbose</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span> 
+
+        <span class="n">copied_model</span><span class="o">.</span><span class="n">_create_model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">X</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">Y</span><span class="p">)</span>
+        <span class="n">copied_model</span><span class="o">.</span><span class="n">updateModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">X</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">Y</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">copied_model</span>
+</div>
+<div class="viewcode-block" id="GPModel_MCMC.get_model_parameters"><a class="viewcode-back" href="../../../GPyOpt.models.html#GPyOpt.models.gpmodel.GPModel_MCMC.get_model_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">get_model_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a 2D numpy array with the parameters of the model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">[:])</span>
+</div>
+<div class="viewcode-block" id="GPModel_MCMC.get_model_parameters_names"><a class="viewcode-back" href="../../../GPyOpt.models.html#GPyOpt.models.gpmodel.GPModel_MCMC.get_model_parameters_names">[docs]</a>    <span class="k">def</span> <span class="nf">get_model_parameters_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list with the names of the parameters of the model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">parameter_names</span><span class="p">()</span>
+
+
+
+
+
+    </div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../models.html" >GPyOpt.models</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Javier Gonzalez.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

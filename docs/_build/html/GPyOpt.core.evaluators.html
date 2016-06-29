@@ -1,0 +1,292 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>GPyOpt.core.evaluators package &mdash; GPyOpt  documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="GPyOpt  documentation" href="index.html" />
+    <link rel="up" title="GPyOpt.core package" href="GPyOpt.core.html" />
+    <link rel="next" title="GPyOpt.core.task package" href="GPyOpt.core.task.html" />
+    <link rel="prev" title="GPyOpt.core package" href="GPyOpt.core.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.core.task.html" title="GPyOpt.core.task package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.core.html" title="GPyOpt.core package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="GPyOpt.html" >GPyOpt package</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="GPyOpt.core.html" accesskey="U">GPyOpt.core package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="gpyopt-core-evaluators-package">
+<h1>GPyOpt.core.evaluators package<a class="headerlink" href="#gpyopt-core-evaluators-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-GPyOpt.core.evaluators.base">
+<span id="gpyopt-core-evaluators-base-module"></span><h2>GPyOpt.core.evaluators.base module<a class="headerlink" href="#module-GPyOpt.core.evaluators.base" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.core.evaluators.base.EvaluatorBase">
+<em class="property">class </em><code class="descclassname">GPyOpt.core.evaluators.base.</code><code class="descname">EvaluatorBase</code><span class="sig-paren">(</span><em>acquisition</em>, <em>batch_size</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/evaluators/base.html#EvaluatorBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.evaluators.base.EvaluatorBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Base class for the evaluator of the function. This class handles both sequential and batch evaluators.</p>
+<dl class="method">
+<dt id="GPyOpt.core.evaluators.base.EvaluatorBase.compute_batch">
+<code class="descname">compute_batch</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/evaluators/base.html#EvaluatorBase.compute_batch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.evaluators.base.EvaluatorBase.compute_batch" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.core.evaluators.batch_local_penalization">
+<span id="gpyopt-core-evaluators-batch-local-penalization-module"></span><h2>GPyOpt.core.evaluators.batch_local_penalization module<a class="headerlink" href="#module-GPyOpt.core.evaluators.batch_local_penalization" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.core.evaluators.batch_local_penalization.LocalPenalization">
+<em class="property">class </em><code class="descclassname">GPyOpt.core.evaluators.batch_local_penalization.</code><code class="descname">LocalPenalization</code><span class="sig-paren">(</span><em>acquisition</em>, <em>batch_size</em>, <em>normalize_Y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/evaluators/batch_local_penalization.html#LocalPenalization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.evaluators.batch_local_penalization.LocalPenalization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.core.evaluators.base.EvaluatorBase" title="GPyOpt.core.evaluators.base.EvaluatorBase"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.core.evaluators.base.EvaluatorBase</span></code></a></p>
+<p>Class for the batch method on &#8216;Batch Bayesian optimization via local penalization&#8217; (Gonzalez et al., 2016).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>acquisition</strong> &#8211; acquisition function to be used to compute the batch.</li>
+<li><strong>size</strong> (<em>batch</em>) &#8211; the number of elements in the batch.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Normalize_Y:</th><td class="field-body"><p class="first last">whether to normalize the outputs.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="GPyOpt.core.evaluators.batch_local_penalization.LocalPenalization.compute_batch">
+<code class="descname">compute_batch</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/evaluators/batch_local_penalization.html#LocalPenalization.compute_batch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.evaluators.batch_local_penalization.LocalPenalization.compute_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the elements of the batch sequentially by penalizing the acquisition.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="GPyOpt.core.evaluators.batch_local_penalization.estimate_L">
+<code class="descclassname">GPyOpt.core.evaluators.batch_local_penalization.</code><code class="descname">estimate_L</code><span class="sig-paren">(</span><em>model</em>, <em>bounds</em>, <em>storehistory=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/evaluators/batch_local_penalization.html#estimate_L"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.evaluators.batch_local_penalization.estimate_L" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate the Lipschitz constant of f by taking maximizing the norm of the expectation of the gradient of <em>f</em>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.core.evaluators.batch_predictive">
+<span id="gpyopt-core-evaluators-batch-predictive-module"></span><h2>GPyOpt.core.evaluators.batch_predictive module<a class="headerlink" href="#module-GPyOpt.core.evaluators.batch_predictive" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.core.evaluators.batch_predictive.Predictive">
+<em class="property">class </em><code class="descclassname">GPyOpt.core.evaluators.batch_predictive.</code><code class="descname">Predictive</code><span class="sig-paren">(</span><em>acquisition</em>, <em>batch_size</em>, <em>normalize_Y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/evaluators/batch_predictive.html#Predictive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.evaluators.batch_predictive.Predictive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.core.evaluators.base.EvaluatorBase" title="GPyOpt.core.evaluators.base.EvaluatorBase"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.core.evaluators.base.EvaluatorBase</span></code></a></p>
+<p>Class a predictive batch method. Computes the element of the batch Sequentially by predicting outputs of the function with the mean of the GP.
+The model is updated after every fantasized evaluation is collected.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>acquisition</strong> &#8211; acquisition function to be used to compute the batch.</li>
+<li><strong>size</strong> (<em>batch</em>) &#8211; the number of elements in the batch.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Normalize_Y:</th><td class="field-body"><p class="first last">whether to normalize the outputs.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="GPyOpt.core.evaluators.batch_predictive.Predictive.compute_batch">
+<code class="descname">compute_batch</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/evaluators/batch_predictive.html#Predictive.compute_batch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.evaluators.batch_predictive.Predictive.compute_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the elements of the batch sequentially by using predictions from the model.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.core.evaluators.batch_random">
+<span id="gpyopt-core-evaluators-batch-random-module"></span><h2>GPyOpt.core.evaluators.batch_random module<a class="headerlink" href="#module-GPyOpt.core.evaluators.batch_random" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.core.evaluators.batch_random.RandomBatch">
+<em class="property">class </em><code class="descclassname">GPyOpt.core.evaluators.batch_random.</code><code class="descname">RandomBatch</code><span class="sig-paren">(</span><em>acquisition</em>, <em>batch_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/evaluators/batch_random.html#RandomBatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.evaluators.batch_random.RandomBatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.core.evaluators.base.EvaluatorBase" title="GPyOpt.core.evaluators.base.EvaluatorBase"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.core.evaluators.base.EvaluatorBase</span></code></a></p>
+<p>Class for a random batch method. The first element of the batch is selected by optimizing the acquisition in a standard way. The remaining elements are
+selected uniformly random in the domain of the objective.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>acquisition</strong> &#8211; acquisition function to be used to compute the batch.</li>
+<li><strong>size</strong> (<em>batch</em>) &#8211; the number of elements in the batch.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Normalize_Y:</th><td class="field-body"><p class="first last">whether to normalize the outputs.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="GPyOpt.core.evaluators.batch_random.RandomBatch.compute_batch">
+<code class="descname">compute_batch</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/evaluators/batch_random.html#RandomBatch.compute_batch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.evaluators.batch_random.RandomBatch.compute_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds to the first location batch_size-1 randomly selected elements.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.core.evaluators.sequential">
+<span id="gpyopt-core-evaluators-sequential-module"></span><h2>GPyOpt.core.evaluators.sequential module<a class="headerlink" href="#module-GPyOpt.core.evaluators.sequential" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.core.evaluators.sequential.Sequential">
+<em class="property">class </em><code class="descclassname">GPyOpt.core.evaluators.sequential.</code><code class="descname">Sequential</code><span class="sig-paren">(</span><em>acquisition</em>, <em>batch_size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/evaluators/sequential.html#Sequential"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.evaluators.sequential.Sequential" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.core.evaluators.base.EvaluatorBase" title="GPyOpt.core.evaluators.base.EvaluatorBase"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.core.evaluators.base.EvaluatorBase</span></code></a></p>
+<p>Class for standard Sequential Bayesian optimization methods.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>acquisition</strong> &#8211; acquisition function to be used to compute the batch.</li>
+<li><strong>size</strong> (<em>batch</em>) &#8211; it is 1 by default since this class is only used for sequential methods.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="GPyOpt.core.evaluators.sequential.Sequential.compute_batch">
+<code class="descname">compute_batch</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/evaluators/sequential.html#Sequential.compute_batch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.evaluators.sequential.Sequential.compute_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Selects the new location to evaluate the objective.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.core.evaluators">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-GPyOpt.core.evaluators" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="GPyOpt.core.evaluators.select_evaluator">
+<code class="descclassname">GPyOpt.core.evaluators.</code><code class="descname">select_evaluator</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/core/evaluators.html#select_evaluator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.core.evaluators.select_evaluator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">GPyOpt.core.evaluators package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.core.evaluators.base">GPyOpt.core.evaluators.base module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.core.evaluators.batch_local_penalization">GPyOpt.core.evaluators.batch_local_penalization module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.core.evaluators.batch_predictive">GPyOpt.core.evaluators.batch_predictive module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.core.evaluators.batch_random">GPyOpt.core.evaluators.batch_random module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.core.evaluators.sequential">GPyOpt.core.evaluators.sequential module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.core.evaluators">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="GPyOpt.core.html"
+                        title="previous chapter">GPyOpt.core package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="GPyOpt.core.task.html"
+                        title="next chapter">GPyOpt.core.task package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/GPyOpt.core.evaluators.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.core.task.html" title="GPyOpt.core.task package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.core.html" title="GPyOpt.core package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="GPyOpt.html" >GPyOpt package</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="GPyOpt.core.html" >GPyOpt.core package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Javier Gonzalez.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

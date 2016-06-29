@@ -1,0 +1,426 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>GPyOpt.models package &mdash; GPyOpt  documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="GPyOpt  documentation" href="index.html" />
+    <link rel="up" title="GPyOpt package" href="GPyOpt.html" />
+    <link rel="next" title="GPyOpt.objective_examples package" href="GPyOpt.objective_examples.html" />
+    <link rel="prev" title="GPyOpt.methods package" href="GPyOpt.methods.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.objective_examples.html" title="GPyOpt.objective_examples package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.methods.html" title="GPyOpt.methods package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="GPyOpt.html" accesskey="U">GPyOpt package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="gpyopt-models-package">
+<h1>GPyOpt.models package<a class="headerlink" href="#gpyopt-models-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-GPyOpt.models.base">
+<span id="gpyopt-models-base-module"></span><h2>GPyOpt.models.base module<a class="headerlink" href="#module-GPyOpt.models.base" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.models.base.BOModel">
+<em class="property">class </em><code class="descclassname">GPyOpt.models.base.</code><code class="descname">BOModel</code><a class="reference internal" href="_modules/GPyOpt/models/base.html#BOModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.base.BOModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>The abstract Model for Bayesian Optimization</p>
+<dl class="attribute">
+<dt id="GPyOpt.models.base.BOModel.MCMC_sampler">
+<code class="descname">MCMC_sampler</code><em class="property"> = False</em><a class="headerlink" href="#GPyOpt.models.base.BOModel.MCMC_sampler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="GPyOpt.models.base.BOModel.analytical_gradient_prediction">
+<code class="descname">analytical_gradient_prediction</code><em class="property"> = False</em><a class="headerlink" href="#GPyOpt.models.base.BOModel.analytical_gradient_prediction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.base.BOModel.get_fmin">
+<code class="descname">get_fmin</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/base.html#BOModel.get_fmin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.base.BOModel.get_fmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the minimum of the current model.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.base.BOModel.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/base.html#BOModel.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.base.BOModel.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the predicted mean and std at X.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.base.BOModel.predict_withGradients">
+<code class="descname">predict_withGradients</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/base.html#BOModel.predict_withGradients"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.base.BOModel.predict_withGradients" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the gradients of the predicted mean and variance at X.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.base.BOModel.updateModel">
+<code class="descname">updateModel</code><span class="sig-paren">(</span><em>X_all</em>, <em>Y_all</em>, <em>X_new</em>, <em>Y_new</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/base.html#BOModel.updateModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.base.BOModel.updateModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Augment the dataset of the model</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.models.gpmodel">
+<span id="gpyopt-models-gpmodel-module"></span><h2>GPyOpt.models.gpmodel module<a class="headerlink" href="#module-GPyOpt.models.gpmodel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.models.gpmodel.GPModel">
+<em class="property">class </em><code class="descclassname">GPyOpt.models.gpmodel.</code><code class="descname">GPModel</code><span class="sig-paren">(</span><em>kernel=None</em>, <em>noise_var=None</em>, <em>exact_feval=False</em>, <em>normalize_Y=True</em>, <em>optimizer='bfgs'</em>, <em>max_iters=1000</em>, <em>optimize_restarts=5</em>, <em>sparse=False</em>, <em>num_inducing=10</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/gpmodel.html#GPModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.gpmodel.GPModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.models.base.BOModel" title="GPyOpt.models.base.BOModel"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.models.base.BOModel</span></code></a></p>
+<p>General class for handling a Gaussian Process in GPyOpt.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>kernel</strong> &#8211; GPy kernel to use in the GP model.</li>
+<li><strong>noise_var</strong> &#8211; value of the noise variance if known.</li>
+<li><strong>exact_feval</strong> &#8211; whether noiseless evaluations are available. IMPORTANT to make the optimization work well in noiseless scenarios (default, False).</li>
+<li><strong>normalize_Y</strong> &#8211; normalization of the outputs to the interval [0,1] (default, True).</li>
+<li><strong>optimizer</strong> &#8211; optimizer of the model. Check GPy for details.</li>
+<li><strong>max_iters</strong> &#8211; maximum number of iterations used to optimize the parameters of the model.</li>
+<li><strong>optimize_restarts</strong> &#8211; number of restarts in the optimization.</li>
+<li><strong>sparse</strong> &#8211; whether to use a sparse GP (default, False). This is useful when many observations are available.</li>
+<li><strong>num_inducing</strong> &#8211; number of inducing points if a sparse GP is used.</li>
+<li><strong>verbose</strong> &#8211; print out the model messages (default, False).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This model does Maximum likelihood estimation of the hyper-parameters.</p>
+</div>
+<dl class="attribute">
+<dt id="GPyOpt.models.gpmodel.GPModel.analytical_gradient_prediction">
+<code class="descname">analytical_gradient_prediction</code><em class="property"> = True</em><a class="headerlink" href="#GPyOpt.models.gpmodel.GPModel.analytical_gradient_prediction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.gpmodel.GPModel.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/gpmodel.html#GPModel.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.gpmodel.GPModel.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a safe copy of the model.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="GPyOpt.models.gpmodel.GPModel.fromConfig">
+<em class="property">static </em><code class="descname">fromConfig</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/gpmodel.html#GPModel.fromConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.gpmodel.GPModel.fromConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.gpmodel.GPModel.get_fmin">
+<code class="descname">get_fmin</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/gpmodel.html#GPModel.get_fmin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.gpmodel.GPModel.get_fmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the location where the posterior mean is takes its minimal value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.gpmodel.GPModel.get_model_parameters">
+<code class="descname">get_model_parameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/gpmodel.html#GPModel.get_model_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.gpmodel.GPModel.get_model_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a 2D numpy array with the parameters of the model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.gpmodel.GPModel.get_model_parameters_names">
+<code class="descname">get_model_parameters_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/gpmodel.html#GPModel.get_model_parameters_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.gpmodel.GPModel.get_model_parameters_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list with the names of the parameters of the model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.gpmodel.GPModel.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/gpmodel.html#GPModel.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.gpmodel.GPModel.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predictions with the model. Returns posterior means and standard deviations at X. Note that this is different in GPy where the variances are given.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.gpmodel.GPModel.predict_withGradients">
+<code class="descname">predict_withGradients</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/gpmodel.html#GPModel.predict_withGradients"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.gpmodel.GPModel.predict_withGradients" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the mean, standard deviation, mean gradient and standard deviation gradient at X.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.gpmodel.GPModel.updateModel">
+<code class="descname">updateModel</code><span class="sig-paren">(</span><em>X_all</em>, <em>Y_all</em>, <em>X_new</em>, <em>Y_new</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/gpmodel.html#GPModel.updateModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.gpmodel.GPModel.updateModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the model with new observations.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="GPyOpt.models.gpmodel.GPModel_MCMC">
+<em class="property">class </em><code class="descclassname">GPyOpt.models.gpmodel.</code><code class="descname">GPModel_MCMC</code><span class="sig-paren">(</span><em>kernel=None</em>, <em>noise_var=None</em>, <em>exact_feval=False</em>, <em>normalize_Y=True</em>, <em>n_samples=10</em>, <em>n_burnin=100</em>, <em>subsample_interval=10</em>, <em>step_size=0.1</em>, <em>leapfrog_steps=20</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/gpmodel.html#GPModel_MCMC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.gpmodel.GPModel_MCMC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.models.base.BOModel" title="GPyOpt.models.base.BOModel"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.models.base.BOModel</span></code></a></p>
+<p>General class for handling a Gaussian Process in GPyOpt.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>kernel</strong> &#8211; GPy kernel to use in the GP model.</li>
+<li><strong>noise_var</strong> &#8211; value of the noise variance if known.</li>
+<li><strong>exact_feval</strong> &#8211; whether noiseless evaluations are available. IMPORTANT to make the optimization work well in noiseless scenarios (default, False).</li>
+<li><strong>normalize_Y</strong> &#8211; normalization of the outputs to the interval [0,1] (default, True).</li>
+<li><strong>n_samples</strong> &#8211; number of MCMC samples.</li>
+<li><strong>n_burnin</strong> &#8211; number of samples not used.</li>
+<li><strong>subsample_interval</strong> &#8211; sub-sample interval in the MCMC.</li>
+<li><strong>step_size</strong> &#8211; step-size in the MCMC.</li>
+<li><strong>leapfrog_steps</strong> &#8211; <p>??</p>
+</li>
+<li><strong>verbose</strong> &#8211; print out the model messages (default, False).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This model does MCMC over the hyperparameters.</p>
+</div>
+<dl class="attribute">
+<dt id="GPyOpt.models.gpmodel.GPModel_MCMC.MCMC_sampler">
+<code class="descname">MCMC_sampler</code><em class="property"> = True</em><a class="headerlink" href="#GPyOpt.models.gpmodel.GPModel_MCMC.MCMC_sampler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="GPyOpt.models.gpmodel.GPModel_MCMC.analytical_gradient_prediction">
+<code class="descname">analytical_gradient_prediction</code><em class="property"> = True</em><a class="headerlink" href="#GPyOpt.models.gpmodel.GPModel_MCMC.analytical_gradient_prediction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.gpmodel.GPModel_MCMC.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/gpmodel.html#GPModel_MCMC.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.gpmodel.GPModel_MCMC.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a safe copy of the model.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.gpmodel.GPModel_MCMC.get_fmin">
+<code class="descname">get_fmin</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/gpmodel.html#GPModel_MCMC.get_fmin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.gpmodel.GPModel_MCMC.get_fmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the location where the posterior mean is takes its minimal value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.gpmodel.GPModel_MCMC.get_model_parameters">
+<code class="descname">get_model_parameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/gpmodel.html#GPModel_MCMC.get_model_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.gpmodel.GPModel_MCMC.get_model_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a 2D numpy array with the parameters of the model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.gpmodel.GPModel_MCMC.get_model_parameters_names">
+<code class="descname">get_model_parameters_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/gpmodel.html#GPModel_MCMC.get_model_parameters_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.gpmodel.GPModel_MCMC.get_model_parameters_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list with the names of the parameters of the model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.gpmodel.GPModel_MCMC.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/gpmodel.html#GPModel_MCMC.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.gpmodel.GPModel_MCMC.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predictions with the model for all the MCMC samples. Returns posterior means and standard deviations at X. Note that this is different in GPy where the variances are given.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.gpmodel.GPModel_MCMC.predict_withGradients">
+<code class="descname">predict_withGradients</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/gpmodel.html#GPModel_MCMC.predict_withGradients"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.gpmodel.GPModel_MCMC.predict_withGradients" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the mean, standard deviation, mean gradient and standard deviation gradient at X for all the MCMC samples.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.gpmodel.GPModel_MCMC.updateModel">
+<code class="descname">updateModel</code><span class="sig-paren">(</span><em>X_all</em>, <em>Y_all</em>, <em>X_new</em>, <em>Y_new</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/gpmodel.html#GPModel_MCMC.updateModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.gpmodel.GPModel_MCMC.updateModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the model with new observations.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.models.rfmodel">
+<span id="gpyopt-models-rfmodel-module"></span><h2>GPyOpt.models.rfmodel module<a class="headerlink" href="#module-GPyOpt.models.rfmodel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.models.rfmodel.RFModel">
+<em class="property">class </em><code class="descclassname">GPyOpt.models.rfmodel.</code><code class="descname">RFModel</code><span class="sig-paren">(</span><em>bootstrap=True</em>, <em>criterion='mse'</em>, <em>max_depth=None</em>, <em>max_features='auto'</em>, <em>max_leaf_nodes=None</em>, <em>min_samples_leaf=1</em>, <em>min_samples_split=2</em>, <em>min_weight_fraction_leaf=0.0</em>, <em>n_estimators=500</em>, <em>n_jobs=1</em>, <em>oob_score=False</em>, <em>random_state=None</em>, <em>verbose=0</em>, <em>warm_start=False</em>, <em>normalize_Y=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/rfmodel.html#RFModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.rfmodel.RFModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.models.base.BOModel" title="GPyOpt.models.base.BOModel"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.models.base.BOModel</span></code></a></p>
+<p>General class for handling a Ramdom Forest in GPyOpt.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The model has beed wrapper &#8216;as it is&#8217; from  Scikit-learn. Check</p>
+</div>
+<p><a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html">http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html</a>
+for further details.</p>
+<dl class="attribute">
+<dt id="GPyOpt.models.rfmodel.RFModel.analytical_gradient_prediction">
+<code class="descname">analytical_gradient_prediction</code><em class="property"> = False</em><a class="headerlink" href="#GPyOpt.models.rfmodel.RFModel.analytical_gradient_prediction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.rfmodel.RFModel.get_fmin">
+<code class="descname">get_fmin</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/rfmodel.html#RFModel.get_fmin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.rfmodel.RFModel.get_fmin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.rfmodel.RFModel.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/rfmodel.html#RFModel.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.rfmodel.RFModel.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predictions with the model. Returns posterior means and standard deviations at X.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.rfmodel.RFModel.updateModel">
+<code class="descname">updateModel</code><span class="sig-paren">(</span><em>X_all</em>, <em>Y_all</em>, <em>X_new</em>, <em>Y_new</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/rfmodel.html#RFModel.updateModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.rfmodel.RFModel.updateModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the model with new observations.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.models.warpedgpmodel">
+<span id="gpyopt-models-warpedgpmodel-module"></span><h2>GPyOpt.models.warpedgpmodel module<a class="headerlink" href="#module-GPyOpt.models.warpedgpmodel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.models.warpedgpmodel.WarpedGPModel">
+<em class="property">class </em><code class="descclassname">GPyOpt.models.warpedgpmodel.</code><code class="descname">WarpedGPModel</code><span class="sig-paren">(</span><em>kernel=None</em>, <em>noise_var=None</em>, <em>exact_feval=False</em>, <em>normalize_Y=True</em>, <em>optimizer='bfgs'</em>, <em>max_iters=1000</em>, <em>optimize_restarts=5</em>, <em>warping_function=None</em>, <em>warping_terms=3</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/warpedgpmodel.html#WarpedGPModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.warpedgpmodel.WarpedGPModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.models.base.BOModel" title="GPyOpt.models.base.BOModel"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.models.base.BOModel</span></code></a></p>
+<dl class="attribute">
+<dt id="GPyOpt.models.warpedgpmodel.WarpedGPModel.analytical_gradient_prediction">
+<code class="descname">analytical_gradient_prediction</code><em class="property"> = False</em><a class="headerlink" href="#GPyOpt.models.warpedgpmodel.WarpedGPModel.analytical_gradient_prediction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.warpedgpmodel.WarpedGPModel.get_fmin">
+<code class="descname">get_fmin</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/warpedgpmodel.html#WarpedGPModel.get_fmin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.warpedgpmodel.WarpedGPModel.get_fmin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.warpedgpmodel.WarpedGPModel.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/warpedgpmodel.html#WarpedGPModel.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.warpedgpmodel.WarpedGPModel.predict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.models.warpedgpmodel.WarpedGPModel.updateModel">
+<code class="descname">updateModel</code><span class="sig-paren">(</span><em>X_all</em>, <em>Y_all</em>, <em>X_new</em>, <em>Y_new</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models/warpedgpmodel.html#WarpedGPModel.updateModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.warpedgpmodel.WarpedGPModel.updateModel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.models">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-GPyOpt.models" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="GPyOpt.models.select_model">
+<code class="descclassname">GPyOpt.models.</code><code class="descname">select_model</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/models.html#select_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.models.select_model" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">GPyOpt.models package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.models.base">GPyOpt.models.base module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.models.gpmodel">GPyOpt.models.gpmodel module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.models.rfmodel">GPyOpt.models.rfmodel module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.models.warpedgpmodel">GPyOpt.models.warpedgpmodel module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.models">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="GPyOpt.methods.html"
+                        title="previous chapter">GPyOpt.methods package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="GPyOpt.objective_examples.html"
+                        title="next chapter">GPyOpt.objective_examples package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/GPyOpt.models.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.objective_examples.html" title="GPyOpt.objective_examples package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.methods.html" title="GPyOpt.methods package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="GPyOpt.html" >GPyOpt package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Javier Gonzalez.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

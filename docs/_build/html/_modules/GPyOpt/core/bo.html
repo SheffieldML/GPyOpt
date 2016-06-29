@@ -1,0 +1,407 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>GPyOpt.core.bo &mdash; GPyOpt  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="GPyOpt  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for GPyOpt.core.bo</h1><div class="highlight"><pre>
+<span class="c"># Copyright (c) 2016, the GPyOpt Authors</span>
+<span class="c"># Licensed under the BSD 3-clause license (see LICENSE.txt)</span>
+
+<span class="kn">import</span> <span class="nn">GPyOpt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">..util.general</span> <span class="kn">import</span> <span class="n">best_value</span><span class="p">,</span> <span class="n">reshape</span>
+<span class="kn">from</span> <span class="nn">..core.task.cost</span> <span class="kn">import</span> <span class="n">CostModel</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">..plotting.plots_bo</span> <span class="kn">import</span> <span class="n">plot_acquisition</span><span class="p">,</span> <span class="n">plot_convergence</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<div class="viewcode-block" id="BO"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.bo.BO">[docs]</a><span class="k">class</span> <span class="nc">BO</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Runner of Bayesian optimization loop. This class wraps the optimization loop around the different handlers.</span>
+<span class="sd">    :param model: GPyOpt model class.</span>
+<span class="sd">    :param space: GPyOpt space class.</span>
+<span class="sd">    :param objective: GPyOpt objective class.</span>
+<span class="sd">    :param acquisition: GPyOpt acquisition class.</span>
+<span class="sd">    :param evaluator: GPyOpt evaluator class.</span>
+<span class="sd">    :param X_init: 2d numpy array containing the initial inputs (one per row) of the model.</span>
+<span class="sd">    :param Y_init: 2d numpy array containing the initial outputs (one per row) of the model.</span>
+<span class="sd">    :param cost: GPyOpt cost class (default, none).</span>
+<span class="sd">    :param normalize_Y: whether to normalize the outputs before performing any optimization (default, True).</span>
+<span class="sd">    :param model_update_interval: interval of collected observations after which the model is updated (default, 1).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">space</span><span class="p">,</span> <span class="n">objective</span><span class="p">,</span> <span class="n">acquisition</span><span class="p">,</span> <span class="n">evaluator</span><span class="p">,</span> <span class="n">X_init</span><span class="p">,</span> <span class="n">Y_init</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cost</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">normalize_Y</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">model_update_interval</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">space</span> <span class="o">=</span> <span class="n">space</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">objective</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span> <span class="o">=</span> <span class="n">acquisition</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span> <span class="o">=</span> <span class="n">evaluator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalize_Y</span> <span class="o">=</span> <span class="n">normalize_Y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_update_interval</span> <span class="o">=</span> <span class="n">model_update_interval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X_init</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Y</span> <span class="o">=</span> <span class="n">Y_init</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cost</span> <span class="o">=</span> <span class="n">CostModel</span><span class="p">(</span><span class="n">cost</span><span class="p">)</span>
+        
+
+<div class="viewcode-block" id="BO.run_optimization"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.bo.BO.run_optimization">[docs]</a>    <span class="k">def</span> <span class="nf">run_optimization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_iter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">max_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>  <span class="n">eps</span> <span class="o">=</span> <span class="mf">1e-8</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">save_models_parameters</span><span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">report_file</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">evaluations_file</span><span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">models_file</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Runs Bayesian Optimization for a number &#39;max_iter&#39; of iterations (after the initial exploration data)</span>
+
+<span class="sd">        :param max_iter: exploration horizon, or number of acquisitions. If nothing is provided optimizes the current acquisition.  </span>
+<span class="sd">        :param max_time: maximum exploration horizon in seconds.</span>
+<span class="sd">        :param eps: minimum distance between two consecutive x&#39;s to keep running the model.</span>
+<span class="sd">        :param verbosity: flag to print the optimization results after each iteration (default, True).</span>
+<span class="sd">        :param report_file: filename of the file where the results of the optimization are saved (default, None).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># --- Save the options to print and save the results</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">=</span> <span class="n">verbosity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_models_parameters</span> <span class="o">=</span> <span class="n">save_models_parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">report_file</span> <span class="o">=</span> <span class="n">report_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluations_file</span> <span class="o">=</span> <span class="n">evaluations_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models_file</span> <span class="o">=</span> <span class="n">models_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_parameters_iterations</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># --- Check if we can save the model parameters in each iteration</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_models_parameters</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">GPyOpt</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">GPModel</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">GPyOpt</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">GPModel_MCMC</span><span class="p">):</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&#39;Models printout after each iteration is only available for GP and GP_MCMC models&#39;</span><span class="p">)</span> 
+                <span class="bp">self</span><span class="o">.</span><span class="n">save_models_parameters</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c"># --- Setting up stop conditions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eps</span> <span class="o">=</span> <span class="n">eps</span> 
+        <span class="k">if</span>  <span class="p">(</span><span class="n">max_iter</span> <span class="o">==</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">max_time</span> <span class="o">==</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">max_iter</span> <span class="o">==</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">max_time</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_time</span> <span class="o">=</span> <span class="n">max_time</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">max_iter</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">max_time</span> <span class="o">==</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span> <span class="o">=</span> <span class="n">max_iter</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>     
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span> <span class="o">=</span> <span class="n">max_iter</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_time</span> <span class="o">=</span> <span class="n">max_time</span>     
+            
+        <span class="c"># --- Initial function evaluation and model fitting</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">,</span> <span class="n">cost_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost</span><span class="o">.</span><span class="n">cost_type</span> <span class="o">==</span> <span class="s">&#39;evaluation_time&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cost</span><span class="o">.</span><span class="n">update_cost_model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">cost_values</span><span class="p">)</span>
+        
+        <span class="c"># --- Initialize iterations and running time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_zero</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cum_time</span>  <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_acquisitions</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">suggested_sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Y_new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span>
+
+        <span class="c"># --- Initialize time cost of the evaluations</span>
+        <span class="k">while</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_time</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">cum_time</span><span class="p">):</span>
+            <span class="c"># --- Update model</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_update_model</span><span class="p">()</span>
+            <span class="k">except</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinAlgError</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="c"># --- Update and optimize acquisition and compute the exploration level in the next evaluation</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">suggested_sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_next_evaluations</span><span class="p">()</span>
+            
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">num_acquisitions</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_distance_last_evaluations</span><span class="p">()</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">eps</span><span class="p">)):</span> 
+                <span class="k">break</span>
+
+            <span class="c"># --- Augment X</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">suggested_sample</span><span class="p">))</span>
+            
+            <span class="c"># --- Evaluate *f* in X, augment Y and update cost function (if needed)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_objective</span><span class="p">()</span>
+
+            <span class="c"># --- Update current evaluation time and function evaluations</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cum_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_zero</span>  
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_acquisitions</span> <span class="o">+=</span> <span class="mi">1</span>
+                
+   
+        <span class="c"># --- Stop messages and execution time   </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_compute_results</span><span class="p">()</span>
+
+        <span class="c"># --- Print the desired result in files</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">report_file</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_report</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">report_file</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluations_file</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_evaluations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluations_file</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">models_file</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>  
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_models</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models_file</span><span class="p">)</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">_print_convergence</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prints the reason why the optimization stopped.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># --- Print stopping reason</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span><span class="p">:</span> 
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_acquisitions</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_iter</span><span class="p">):</span>        
+                <span class="k">print</span><span class="p">(</span><span class="s">&#39;   ** Maximum number of iterations reached **&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_distance_last_evaluations</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_iter</span><span class="p">):</span> 
+                <span class="k">print</span><span class="p">(</span><span class="s">&#39;   ** Two equal location selected **&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_time</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">cum_time</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_iter</span><span class="p">):</span>               
+                <span class="k">print</span><span class="p">(</span><span class="s">&#39;   ** Evaluation time reached **&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mi">0</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_iter</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&#39;** GPyOpt Bayesian Optimization class initialized successfully **&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">initial_iter</span> <span class="o">=</span> <span class="bp">False</span>  
+
+
+
+<div class="viewcode-block" id="BO.evaluate_objective"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.bo.BO.evaluate_objective">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Evaluates the objective</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Y_new</span><span class="p">,</span> <span class="n">cost_new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">suggested_sample</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cost</span><span class="o">.</span><span class="n">update_cost_model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">suggested_sample</span><span class="p">,</span> <span class="n">cost_new</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">Y_new</span><span class="p">))</span>
+</div>
+    <span class="k">def</span> <span class="nf">_compute_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the optimum and its value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Y_best</span> <span class="o">=</span> <span class="n">best_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">),:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fx_opt</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_distance_last_evaluations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the distance between the last two evaluations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">sum</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">2</span><span class="p">,:])</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>  
+
+
+    <span class="k">def</span> <span class="nf">_compute_next_evaluations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the location of the new evaluation (optimizes the acquisition in the standard case). </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span><span class="o">.</span><span class="n">compute_batch</span><span class="p">()</span> 
+        
+    <span class="k">def</span> <span class="nf">_update_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates the model and saves the parameters (if available).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_acquisitions</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">model_update_interval</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize_Y</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">updateModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,(</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="o">.</span><span class="n">std</span><span class="p">()),</span><span class="bp">self</span><span class="o">.</span><span class="n">suggested_sample</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">Y_new</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">updateModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">suggested_sample</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">Y_new</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_save_model_parameter_values</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_save_model_parameter_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_parameters_iterations</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_parameters_iterations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_model_parameters</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_parameters_iterations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">model_parameters_iterations</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_model_parameters</span><span class="p">()))</span>
+
+<div class="viewcode-block" id="BO.plot_acquisition"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.bo.BO.plot_acquisition">[docs]</a>    <span class="k">def</span> <span class="nf">plot_acquisition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;        </span>
+<span class="sd">        Plots the model and the acquisition function.</span>
+<span class="sd">            if self.input_dim = 1: Plots data, mean and variance in one plot and the acquisition function in another plot</span>
+<span class="sd">            if self.input_dim = 2: as before but it separates the mean and variance of the model in two different plots</span>
+<span class="sd">        :param filename: name of the file where the plot is saved</span>
+<span class="sd">        &quot;&quot;&quot;</span>  
+        <span class="k">return</span> <span class="n">plot_acquisition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span><span class="o">.</span><span class="n">space</span><span class="o">.</span><span class="n">get_bounds</span><span class="p">(),</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">X</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">Y</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span><span class="o">.</span><span class="n">acquisition_function</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">suggested_sample</span><span class="p">,</span>
+                                <span class="n">filename</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="BO.plot_convergence"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.bo.BO.plot_convergence">[docs]</a>    <span class="k">def</span> <span class="nf">plot_convergence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Makes twp plots to evaluate the convergence of the model:</span>
+<span class="sd">            plot 1: Iterations vs. distance between consecutive selected x&#39;s</span>
+<span class="sd">            plot 2: Iterations vs. the mean of the current model in the selected sample.</span>
+<span class="sd">        :param filename: name of the file where the plot is saved</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">plot_convergence</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">Y_best</span><span class="p">,</span><span class="n">filename</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="BO.get_evaluations"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.bo.BO.get_evaluations">[docs]</a>    <span class="k">def</span> <span class="nf">get_evaluations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="BO.save_report"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.bo.BO.save_report">[docs]</a>    <span class="k">def</span> <span class="nf">save_report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">report_file</span><span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Saves a report with the main resutls of the optimization.</span>
+<span class="sd"> </span>
+<span class="sd">        :param report_file: name of the file in which the results of the optimization are saved.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">report_file</span><span class="p">,</span><span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">file</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">GPyOpt</span>
+            <span class="kn">import</span> <span class="nn">time</span>
+ 
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;-----------------------------&#39;</span> <span class="o">+</span> <span class="s">&#39; GPyOpt Report file &#39;</span> <span class="o">+</span> <span class="s">&#39;-----------------------------------</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;GPyOpt Version &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">GPyOpt</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Date and time:               &#39;</span> <span class="o">+</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%c</span><span class="s">&quot;</span><span class="p">)</span><span class="o">+</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_acquisitions</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span><span class="p">:</span> 
+                <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Optimization completed:      &#39;</span> <span class="o">+</span><span class="s">&#39;YES, &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;[]&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39; samples collected.</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+                <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Number initial samples:      &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_design_numdata</span><span class="p">)</span> <span class="o">+</span><span class="s">&#39; </span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Optimization completed:      &#39;</span> <span class="o">+</span><span class="s">&#39;NO,&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;[]&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39; samples collected.</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+                <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Number initial samples:      &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_design_numdata</span><span class="p">)</span> <span class="o">+</span><span class="s">&#39; </span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Tolerance:                   &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;.</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Optimization time:           &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cum_time</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;[]&#39;</span><span class="p">)</span> <span class="o">+</span><span class="s">&#39; seconds.</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>   
+
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>           
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;--------------------------------&#39;</span> <span class="o">+</span> <span class="s">&#39; Problem set up &#39;</span> <span class="o">+</span> <span class="s">&#39;------------------------------------</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>   
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Problem name:                &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective_name</span> <span class="o">+</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>            
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Problem dimension:           &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="o">.</span><span class="n">dimensionality</span><span class="p">)</span> <span class="o">+</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>    
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Number continuous variables  &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="o">.</span><span class="n">get_continuous_dims</span><span class="p">())</span> <span class="p">)</span> <span class="o">+</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span> 
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Number discrete variables    &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="o">.</span><span class="n">get_discrete_dims</span><span class="p">()))</span> <span class="o">+</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span> 
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Number bandits               &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="o">.</span><span class="n">get_bandit</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span> 
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Noiseless evaluations:       &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exact_feval</span><span class="p">)</span> <span class="o">+</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>         
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Cost used:                   &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost</span><span class="o">.</span><span class="n">cost_type</span> <span class="o">+</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span> 
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Constrains:                  &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constrains</span><span class="o">==</span><span class="bp">True</span><span class="p">)</span> <span class="o">+</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>            
+
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;------------------------------&#39;</span> <span class="o">+</span> <span class="s">&#39; Optimization set up &#39;</span> <span class="o">+</span> <span class="s">&#39;---------------------------------</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span> 
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Normalized outputs:          &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">normalize_Y</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>  
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Model type:                  &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_type</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;[]&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>  
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Model update interval:       &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_update_interval</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>  
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Acquisition type:            &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acquisition_type</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;[]&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span> 
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Acquisition optimizer:       &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acquisition_optimizer</span><span class="o">.</span><span class="n">optimizer_name</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;[]&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span> 
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Evaluator type (batch size): &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluator_type</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;[]&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39; (&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Cores used:                  &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_cores</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;---------------------------------&#39;</span> <span class="o">+</span> <span class="s">&#39; Summary &#39;</span> <span class="o">+</span> <span class="s">&#39;------------------------------------------</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Value at minimum:            &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;[]&#39;</span><span class="p">)</span> <span class="o">+</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span> 
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Best found minimum location: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">),:])</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;[]&#39;</span><span class="p">)</span> <span class="o">+</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span> 
+    
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;----------------------------------------------------------------------------------------------</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="nb">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="BO.save_evaluations"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.bo.BO.save_evaluations">[docs]</a>    <span class="k">def</span> <span class="nf">save_evaluations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluations_file</span><span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Saves a report with the results of the iterations of the optimization</span>
+
+<span class="sd">        :param evaluations_file: name of the file in which the results are saved.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+
+        <span class="n">iterations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">))[:,</span><span class="bp">None</span><span class="p">]</span>
+        <span class="n">results</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">iterations</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">))</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Iteration&#39;</span><span class="p">,</span> <span class="s">&#39;Y&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span> 
+            <span class="n">header</span> <span class="o">+=</span> <span class="p">[</span><span class="s">&#39;var_&#39;</span> <span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)]</span> 
+
+        <span class="n">df_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">columns</span> <span class="o">=</span> <span class="n">header</span><span class="p">)</span>
+        <span class="n">df_results</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">evaluations_file</span><span class="p">,</span><span class="n">index</span> <span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">sep</span><span class="o">=</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BO.save_models"><a class="viewcode-back" href="../../../GPyOpt.core.html#GPyOpt.core.bo.BO.save_models">[docs]</a>    <span class="k">def</span> <span class="nf">save_models</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">models_file</span><span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Saves a report with the results of the iterations of the optimization</span>
+
+<span class="sd">        :param iterations_file: name of the file in which the results are saved.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+        <span class="n">iterations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">model_parameters_iterations</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">))[:,</span><span class="bp">None</span><span class="p">]</span>
+        <span class="n">results</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">iterations</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">model_parameters_iterations</span><span class="p">))</span>
+
+        <span class="n">header</span>  <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Iteration&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_model_parameters_names</span><span class="p">()</span>
+        <span class="n">df_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">columns</span> <span class="o">=</span> <span class="n">header</span><span class="p">)</span>
+        <span class="n">df_results</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">models_file</span><span class="p">,</span><span class="n">index</span> <span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Javier Gonzalez.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

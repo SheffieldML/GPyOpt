@@ -1,0 +1,464 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>GPyOpt.acquisitions package &mdash; GPyOpt  documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="GPyOpt  documentation" href="index.html" />
+    <link rel="up" title="GPyOpt package" href="GPyOpt.html" />
+    <link rel="next" title="GPyOpt.core package" href="GPyOpt.core.html" />
+    <link rel="prev" title="GPyOpt package" href="GPyOpt.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.core.html" title="GPyOpt.core package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.html" title="GPyOpt package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="GPyOpt.html" accesskey="U">GPyOpt package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="gpyopt-acquisitions-package">
+<h1>GPyOpt.acquisitions package<a class="headerlink" href="#gpyopt-acquisitions-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-GPyOpt.acquisitions.EI">
+<span id="gpyopt-acquisitions-ei-module"></span><h2>GPyOpt.acquisitions.EI module<a class="headerlink" href="#module-GPyOpt.acquisitions.EI" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.acquisitions.EI.AcquisitionEI">
+<em class="property">class </em><code class="descclassname">GPyOpt.acquisitions.EI.</code><code class="descname">AcquisitionEI</code><span class="sig-paren">(</span><em>model</em>, <em>space</em>, <em>optimizer=None</em>, <em>cost_withGradients=None</em>, <em>jitter=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/acquisitions/EI.html#AcquisitionEI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.acquisitions.EI.AcquisitionEI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.acquisitions.base.AcquisitionBase" title="GPyOpt.acquisitions.base.AcquisitionBase"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.acquisitions.base.AcquisitionBase</span></code></a></p>
+<p>Expected improvement acquisition function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> &#8211; GPyOpt class of model</li>
+<li><strong>space</strong> &#8211; GPyOpt class of domain</li>
+<li><strong>optimizer</strong> &#8211; optimizer of the acquisition. Should be a GPyOpt optimizer</li>
+<li><strong>cost_withGradients</strong> &#8211; function</li>
+<li><strong>jitter</strong> &#8211; positive value to make the acquisition more explorative.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">allows to compute the Improvement per unit of cost</p>
+</div>
+<dl class="attribute">
+<dt id="GPyOpt.acquisitions.EI.AcquisitionEI.analytical_gradient_prediction">
+<code class="descname">analytical_gradient_prediction</code><em class="property"> = True</em><a class="headerlink" href="#GPyOpt.acquisitions.EI.AcquisitionEI.analytical_gradient_prediction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="GPyOpt.acquisitions.EI.AcquisitionEI.fromConfig">
+<em class="property">static </em><code class="descname">fromConfig</code><span class="sig-paren">(</span><em>model</em>, <em>space</em>, <em>optimizer</em>, <em>cost_withGradients</em>, <em>config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/acquisitions/EI.html#AcquisitionEI.fromConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.acquisitions.EI.AcquisitionEI.fromConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.acquisitions.EI_mcmc">
+<span id="gpyopt-acquisitions-ei-mcmc-module"></span><h2>GPyOpt.acquisitions.EI_mcmc module<a class="headerlink" href="#module-GPyOpt.acquisitions.EI_mcmc" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.acquisitions.EI_mcmc.AcquisitionEI_MCMC">
+<em class="property">class </em><code class="descclassname">GPyOpt.acquisitions.EI_mcmc.</code><code class="descname">AcquisitionEI_MCMC</code><span class="sig-paren">(</span><em>model</em>, <em>space</em>, <em>optimizer=None</em>, <em>cost_withGradients=None</em>, <em>jitter=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/acquisitions/EI_mcmc.html#AcquisitionEI_MCMC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.acquisitions.EI_mcmc.AcquisitionEI_MCMC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.acquisitions.EI.AcquisitionEI" title="GPyOpt.acquisitions.EI.AcquisitionEI"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.acquisitions.EI.AcquisitionEI</span></code></a></p>
+<p>Integrated Expected improvement acquisition function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> &#8211; GPyOpt class of model</li>
+<li><strong>space</strong> &#8211; GPyOpt class of domain</li>
+<li><strong>optimizer</strong> &#8211; optimizer of the acquisition. Should be a GPyOpt optimizer</li>
+<li><strong>cost_withGradients</strong> &#8211; function</li>
+<li><strong>jitter</strong> &#8211; positive value to make the acquisition more explorative</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">allows to compute the Improvement per unit of cost</p>
+</div>
+<dl class="attribute">
+<dt id="GPyOpt.acquisitions.EI_mcmc.AcquisitionEI_MCMC.analytical_gradient_prediction">
+<code class="descname">analytical_gradient_prediction</code><em class="property"> = True</em><a class="headerlink" href="#GPyOpt.acquisitions.EI_mcmc.AcquisitionEI_MCMC.analytical_gradient_prediction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.acquisitions.LCB">
+<span id="gpyopt-acquisitions-lcb-module"></span><h2>GPyOpt.acquisitions.LCB module<a class="headerlink" href="#module-GPyOpt.acquisitions.LCB" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.acquisitions.LCB.AcquisitionLCB">
+<em class="property">class </em><code class="descclassname">GPyOpt.acquisitions.LCB.</code><code class="descname">AcquisitionLCB</code><span class="sig-paren">(</span><em>model</em>, <em>space</em>, <em>optimizer=None</em>, <em>cost_withGradients=None</em>, <em>exploration_weight=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/acquisitions/LCB.html#AcquisitionLCB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.acquisitions.LCB.AcquisitionLCB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.acquisitions.base.AcquisitionBase" title="GPyOpt.acquisitions.base.AcquisitionBase"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.acquisitions.base.AcquisitionBase</span></code></a></p>
+<p>GP-Lower Confidence Bound acquisition function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> &#8211; GPyOpt class of model</li>
+<li><strong>space</strong> &#8211; GPyOpt class of domain</li>
+<li><strong>optimizer</strong> &#8211; optimizer of the acquisition. Should be a GPyOpt optimizer</li>
+<li><strong>cost_withGradients</strong> &#8211; function</li>
+<li><strong>jitter</strong> &#8211; positive value to make the acquisition more explorative</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">does not allow to be used with cost</p>
+</div>
+<dl class="attribute">
+<dt id="GPyOpt.acquisitions.LCB.AcquisitionLCB.analytical_gradient_prediction">
+<code class="descname">analytical_gradient_prediction</code><em class="property"> = True</em><a class="headerlink" href="#GPyOpt.acquisitions.LCB.AcquisitionLCB.analytical_gradient_prediction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.acquisitions.LCB_mcmc">
+<span id="gpyopt-acquisitions-lcb-mcmc-module"></span><h2>GPyOpt.acquisitions.LCB_mcmc module<a class="headerlink" href="#module-GPyOpt.acquisitions.LCB_mcmc" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.acquisitions.LCB_mcmc.AcquisitionLCB_MCMC">
+<em class="property">class </em><code class="descclassname">GPyOpt.acquisitions.LCB_mcmc.</code><code class="descname">AcquisitionLCB_MCMC</code><span class="sig-paren">(</span><em>model</em>, <em>space</em>, <em>optimizer=None</em>, <em>cost_withGradients=None</em>, <em>exploration_weight=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/acquisitions/LCB_mcmc.html#AcquisitionLCB_MCMC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.acquisitions.LCB_mcmc.AcquisitionLCB_MCMC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.acquisitions.LCB.AcquisitionLCB" title="GPyOpt.acquisitions.LCB.AcquisitionLCB"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.acquisitions.LCB.AcquisitionLCB</span></code></a></p>
+<p>Integrated GP-Lower Confidence Bound acquisition function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> &#8211; GPyOpt class of model</li>
+<li><strong>space</strong> &#8211; GPyOpt class of domain</li>
+<li><strong>optimizer</strong> &#8211; optimizer of the acquisition. Should be a GPyOpt optimizer</li>
+<li><strong>cost_withGradients</strong> &#8211; function</li>
+<li><strong>exploration_weight</strong> &#8211; positive parameter to control exploration / exploitation</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">allows to compute the Improvement per unit of cost</p>
+</div>
+<dl class="attribute">
+<dt id="GPyOpt.acquisitions.LCB_mcmc.AcquisitionLCB_MCMC.analytical_gradient_prediction">
+<code class="descname">analytical_gradient_prediction</code><em class="property"> = True</em><a class="headerlink" href="#GPyOpt.acquisitions.LCB_mcmc.AcquisitionLCB_MCMC.analytical_gradient_prediction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.acquisitions.LP">
+<span id="gpyopt-acquisitions-lp-module"></span><h2>GPyOpt.acquisitions.LP module<a class="headerlink" href="#module-GPyOpt.acquisitions.LP" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.acquisitions.LP.AcquisitionLP">
+<em class="property">class </em><code class="descclassname">GPyOpt.acquisitions.LP.</code><code class="descname">AcquisitionLP</code><span class="sig-paren">(</span><em>model</em>, <em>space</em>, <em>optimizer</em>, <em>acquisition</em>, <em>transform='none'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/acquisitions/LP.html#AcquisitionLP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.acquisitions.LP.AcquisitionLP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.acquisitions.base.AcquisitionBase" title="GPyOpt.acquisitions.base.AcquisitionBase"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.acquisitions.base.AcquisitionBase</span></code></a></p>
+<p>Class for Local Penalization acquisition. Used for batch design.
+:param model: model of the class GPyOpt
+:param space: design space of the class GPyOpt.
+:param optimizer: optimizer of the class GPyOpt.
+:param acquisition: acquisition function of the class GPyOpt
+:param transform: transformation applied to the acquisition (default, none).</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">irrespective of the transformation applied the penalized acquisition is always mapped again to the log space.</p>
+</div>
+<p>This way gradients can be computed additively and are more stable.</p>
+<dl class="method">
+<dt id="GPyOpt.acquisitions.LP.AcquisitionLP.acquisition_function">
+<code class="descname">acquisition_function</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/acquisitions/LP.html#AcquisitionLP.acquisition_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.acquisitions.LP.AcquisitionLP.acquisition_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the value of the acquisition function at x.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.acquisitions.LP.AcquisitionLP.acquisition_function_withGradients">
+<code class="descname">acquisition_function_withGradients</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/acquisitions/LP.html#AcquisitionLP.acquisition_function_withGradients"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.acquisitions.LP.AcquisitionLP.acquisition_function_withGradients" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the acquisition function and its its gradient at x.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="GPyOpt.acquisitions.LP.AcquisitionLP.analytical_gradient_prediction">
+<code class="descname">analytical_gradient_prediction</code><em class="property"> = True</em><a class="headerlink" href="#GPyOpt.acquisitions.LP.AcquisitionLP.analytical_gradient_prediction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.acquisitions.LP.AcquisitionLP.d_acquisition_function">
+<code class="descname">d_acquisition_function</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/acquisitions/LP.html#AcquisitionLP.d_acquisition_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.acquisitions.LP.AcquisitionLP.d_acquisition_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the gradient of the acquisition function at x.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.acquisitions.LP.AcquisitionLP.update_batches">
+<code class="descname">update_batches</code><span class="sig-paren">(</span><em>X_batch</em>, <em>L</em>, <em>Min</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/acquisitions/LP.html#AcquisitionLP.update_batches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.acquisitions.LP.AcquisitionLP.update_batches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the batches internally and pre-computes the</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.acquisitions.MPI">
+<span id="gpyopt-acquisitions-mpi-module"></span><h2>GPyOpt.acquisitions.MPI module<a class="headerlink" href="#module-GPyOpt.acquisitions.MPI" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.acquisitions.MPI.AcquisitionMPI">
+<em class="property">class </em><code class="descclassname">GPyOpt.acquisitions.MPI.</code><code class="descname">AcquisitionMPI</code><span class="sig-paren">(</span><em>model</em>, <em>space</em>, <em>optimizer=None</em>, <em>cost_withGradients=None</em>, <em>jitter=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/acquisitions/MPI.html#AcquisitionMPI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.acquisitions.MPI.AcquisitionMPI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.acquisitions.base.AcquisitionBase" title="GPyOpt.acquisitions.base.AcquisitionBase"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.acquisitions.base.AcquisitionBase</span></code></a></p>
+<p>Maximum probability of improvement acquisition function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> &#8211; GPyOpt class of model</li>
+<li><strong>space</strong> &#8211; GPyOpt class of domain</li>
+<li><strong>optimizer</strong> &#8211; optimizer of the acquisition. Should be a GPyOpt optimizer</li>
+<li><strong>cost_withGradients</strong> &#8211; function</li>
+<li><strong>jitter</strong> &#8211; positive value to make the acquisition more explorative</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">allows to compute the Improvement per unit of cost</p>
+</div>
+<dl class="attribute">
+<dt id="GPyOpt.acquisitions.MPI.AcquisitionMPI.analytical_gradient_prediction">
+<code class="descname">analytical_gradient_prediction</code><em class="property"> = True</em><a class="headerlink" href="#GPyOpt.acquisitions.MPI.AcquisitionMPI.analytical_gradient_prediction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="GPyOpt.acquisitions.MPI.AcquisitionMPI.fromConfig">
+<em class="property">static </em><code class="descname">fromConfig</code><span class="sig-paren">(</span><em>model</em>, <em>space</em>, <em>optimizer</em>, <em>cost_withGradients</em>, <em>config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/acquisitions/MPI.html#AcquisitionMPI.fromConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.acquisitions.MPI.AcquisitionMPI.fromConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.acquisitions.MPI_mcmc">
+<span id="gpyopt-acquisitions-mpi-mcmc-module"></span><h2>GPyOpt.acquisitions.MPI_mcmc module<a class="headerlink" href="#module-GPyOpt.acquisitions.MPI_mcmc" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.acquisitions.MPI_mcmc.AcquisitionMPI_MCMC">
+<em class="property">class </em><code class="descclassname">GPyOpt.acquisitions.MPI_mcmc.</code><code class="descname">AcquisitionMPI_MCMC</code><span class="sig-paren">(</span><em>model</em>, <em>space</em>, <em>optimizer=None</em>, <em>cost_withGradients=None</em>, <em>jitter=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/acquisitions/MPI_mcmc.html#AcquisitionMPI_MCMC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.acquisitions.MPI_mcmc.AcquisitionMPI_MCMC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#GPyOpt.acquisitions.MPI.AcquisitionMPI" title="GPyOpt.acquisitions.MPI.AcquisitionMPI"><code class="xref py py-class docutils literal"><span class="pre">GPyOpt.acquisitions.MPI.AcquisitionMPI</span></code></a></p>
+<p>Integrated Maximum Probability of Improvement acquisition function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> &#8211; GPyOpt class of model</li>
+<li><strong>space</strong> &#8211; GPyOpt class of domain</li>
+<li><strong>optimizer</strong> &#8211; optimizer of the acquisition. Should be a GPyOpt optimizer</li>
+<li><strong>cost_withGradients</strong> &#8211; function</li>
+<li><strong>jitter</strong> &#8211; positive value to make the acquisition more explorative</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">allows to compute the Improvement per unit of cost</p>
+</div>
+<dl class="attribute">
+<dt id="GPyOpt.acquisitions.MPI_mcmc.AcquisitionMPI_MCMC.analytical_gradient_prediction">
+<code class="descname">analytical_gradient_prediction</code><em class="property"> = True</em><a class="headerlink" href="#GPyOpt.acquisitions.MPI_mcmc.AcquisitionMPI_MCMC.analytical_gradient_prediction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.acquisitions.base">
+<span id="gpyopt-acquisitions-base-module"></span><h2>GPyOpt.acquisitions.base module<a class="headerlink" href="#module-GPyOpt.acquisitions.base" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GPyOpt.acquisitions.base.AcquisitionBase">
+<em class="property">class </em><code class="descclassname">GPyOpt.acquisitions.base.</code><code class="descname">AcquisitionBase</code><span class="sig-paren">(</span><em>model</em>, <em>space</em>, <em>optimizer</em>, <em>cost_withGradients=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/acquisitions/base.html#AcquisitionBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.acquisitions.base.AcquisitionBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Base class for acquisition functions in Bayesian Optimization</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> &#8211; GPyOpt class of model</li>
+<li><strong>space</strong> &#8211; GPyOpt class of domain</li>
+<li><strong>optimizer</strong> &#8211; optimizer of the acquisition. Should be a GPyOpt optimizer</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="GPyOpt.acquisitions.base.AcquisitionBase.acquisition_function">
+<code class="descname">acquisition_function</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/acquisitions/base.html#AcquisitionBase.acquisition_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.acquisitions.base.AcquisitionBase.acquisition_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an acquisition and weights it so the domain and cost are taken into account.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.acquisitions.base.AcquisitionBase.acquisition_function_withGradients">
+<code class="descname">acquisition_function_withGradients</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/acquisitions/base.html#AcquisitionBase.acquisition_function_withGradients"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.acquisitions.base.AcquisitionBase.acquisition_function_withGradients" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an acquisition and it gradient and weights it so the domain and cost are taken into account.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="GPyOpt.acquisitions.base.AcquisitionBase.analytical_gradient_prediction">
+<code class="descname">analytical_gradient_prediction</code><em class="property"> = False</em><a class="headerlink" href="#GPyOpt.acquisitions.base.AcquisitionBase.analytical_gradient_prediction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="GPyOpt.acquisitions.base.AcquisitionBase.fromDict">
+<em class="property">static </em><code class="descname">fromDict</code><span class="sig-paren">(</span><em>model</em>, <em>space</em>, <em>optimizer</em>, <em>cost_withGradients</em>, <em>config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/acquisitions/base.html#AcquisitionBase.fromDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.acquisitions.base.AcquisitionBase.fromDict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="GPyOpt.acquisitions.base.AcquisitionBase.optimize">
+<code class="descname">optimize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/acquisitions/base.html#AcquisitionBase.optimize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.acquisitions.base.AcquisitionBase.optimize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimizes the acquisition function (uses a flag from the model to use gradients or not).</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-GPyOpt.acquisitions">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-GPyOpt.acquisitions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="GPyOpt.acquisitions.select_acquisition">
+<code class="descclassname">GPyOpt.acquisitions.</code><code class="descname">select_acquisition</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GPyOpt/acquisitions.html#select_acquisition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GPyOpt.acquisitions.select_acquisition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Acquisition selector</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">GPyOpt.acquisitions package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.acquisitions.EI">GPyOpt.acquisitions.EI module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.acquisitions.EI_mcmc">GPyOpt.acquisitions.EI_mcmc module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.acquisitions.LCB">GPyOpt.acquisitions.LCB module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.acquisitions.LCB_mcmc">GPyOpt.acquisitions.LCB_mcmc module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.acquisitions.LP">GPyOpt.acquisitions.LP module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.acquisitions.MPI">GPyOpt.acquisitions.MPI module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.acquisitions.MPI_mcmc">GPyOpt.acquisitions.MPI_mcmc module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.acquisitions.base">GPyOpt.acquisitions.base module</a></li>
+<li><a class="reference internal" href="#module-GPyOpt.acquisitions">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="GPyOpt.html"
+                        title="previous chapter">GPyOpt package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="GPyOpt.core.html"
+                        title="next chapter">GPyOpt.core package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/GPyOpt.acquisitions.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.core.html" title="GPyOpt.core package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="GPyOpt.html" title="GPyOpt package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">GPyOpt  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="GPyOpt.html" >GPyOpt package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Javier Gonzalez.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>
