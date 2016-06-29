@@ -39,8 +39,6 @@ The problem definition should be a .py file. This is an example of a file that c
 ``myfunc.py``
 
 ```python
-import numpy as np
-
 def myfunc(x,y):
     return (4-2.1*x**2 + x**4/3)*x**2 + x*y + (-4 +4*y**2)*y**2
 ```
