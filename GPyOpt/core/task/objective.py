@@ -55,6 +55,8 @@ class SingleObjective(Objective):
             except:
                 if not hasattr(self, 'parallel_error'):
                     print('Error in parallel computation. Fall back to single process!')
+                else:
+                    self.parallel_error = True
                 f_evals, cost_evals = self._eval_func(x)        
         return f_evals, cost_evals 
 
@@ -99,7 +101,7 @@ class SingleObjective(Objective):
         cost_evals = np.ones((x.shape[0],1))
         i = 0
         for (p,c) in pipe:
-            f_evals[i::self.n_procs] = p.recv()
+            f_evals[i::self.n_procs] = p.recv()[0] # throw away costs
             i += 1
         return f_evals, cost_evals 
 
