@@ -10,7 +10,7 @@ The GPyOpt reference manual has been written using [Jupyter](http://jupyter.org/
 
 Locally, we recommend to star the reference manual using
 
-```
+```bash
 $ cd GPyOpt/manual
 $ jypyter notebook index
 ```
