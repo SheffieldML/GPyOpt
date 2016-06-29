@@ -16,7 +16,7 @@ With GPyOpt you can:
 
 Among other functionalities, with GPyOpt you can design experiments in parallel, use cost models and mix different types of variables in your designs. Many users already use GpyOpt for research purposes.
 
-## Open Code & and License
+## Open Code & License
 
 GPyOpt is a free open-source software that runs under 3-BSD license.
 
