@@ -12,19 +12,18 @@ GPyOpt is very easy to use and has been developed in a way that can be by for bo
 
 This is an example of how to use GPyOpt in the Python console. The following code defines the problem, runs the optimisation for 15 iterations and visualize the results.
 
-
 ```python
 # --- Load GPyOpt
-$ from GPyOpt import BayesianOptimization
+from GPyOpt import BayesianOptimization
 
 # --- Define your problem
-$ def f(x): return (6*x-2)**2\np.sin(12*x-4)
-$ bounds = [(0,1)]
+def f(x): return (6*x-2)**2\np.sin(12*x-4)
+bounds = [(0,1)]
 
 # --- Solve your problem
-$ myBopt = BayesianOptimization(f=f, bounds=bounds)
-$ myBopt.run_optimization(max_iter=15)
-$ myBopt.plot_acquisition()
+myBopt = BayesianOptimization(f=f, bounds=bounds)
+myBopt.run_optimization(max_iter=15)
+myBopt.plot_acquisition()
 ````
 
 <center> <img  src="../img/bo_example.png" style="width:500px" align="middle"></center>
@@ -36,7 +35,7 @@ You can also solve your problems via the Linux console. To start, create a direc
 
 The problem definition should be a .py file. This is an example of a file that contains the Branin function.
 
-```branin.py```
+``branin.py``
 
 ```python
 import numpy as np
@@ -47,7 +46,7 @@ def branin(x,y):
 
 In a json file, configure the parameters of the optimization. Details of the different options can be found in the reference manual. This is an exmaple of a json file that configures the optimization to solve the above defined problem. 
 
-``config.json```
+``config.json``
 
 ```json
 {
@@ -81,14 +80,14 @@ In a json file, configure the parameters of the optimization. Details of the dif
 
 Now you just need to run the optimization by doing 
 
-```
-gpyopt.py ..\myproblem\config.json
+```bash
+$ gpyopt.py ..\myproblem\config.json
 ```
 
 Once the the optimisation has finished three new files should appear in your folder folder:
 
-- ```Evaluations_date_hour.txt:``` containing the locations and values of the function evaluations.
-- ```Models_date_hour.txt```: containing the parameters of all the models used.
+- ```Evaluations.txt:``` containing the locations and values of the function evaluations.
+- ```Models.txt```: containing the parameters of all the models used.
 
 
 
