@@ -1,7 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'jekyll'
-gem 'sass'
-gem 'compass'
-gem 'coffee-script'
-gem 'foreman'
+gem 'execjs'
+gem 'therubyracer'
+gem 'github-pages'
+gem 'jekyll-paginate'
