@@ -15,11 +15,11 @@ We are very proud of using GPyOpt not only for research but also to create a com
 
 
 *Gaussian process summer school (organized by [Neil Lawrence](http://inverseprobability.com/), [Javier Gonzalez]((http://javiergonzalezh.github.io/)) and the [SheffieldML group](http://sheffieldml.github.io/) in Sheffield in September 2015. GPy and GPyOpt was used for the hands-on labs!*
-<center> <img  src="./img/gpss_2015.jpg" style="width:550px" align="middle"></center>
+<center> <img  src="../img/gpss_2015.jpg" style="width:550px" align="middle"></center>
 
 
 *Course in Bayesian Optimization based on GPyOpt delivered on October 27-30th, 2015 at the University of Pereira Colombia (organized by Javier Gonzalez and  [Mauricio Alvarez](href= https://sites.google.com/site/maalvarezl)).*
-<center> <img  src="./img/bo_pereira.jpg" style="width:550px" align="middle"></center>
+<center> <img  src="../img/bo_pereira.jpg" style="width:550px" align="middle"></center>
 
 
 

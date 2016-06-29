@@ -10,7 +10,7 @@ subtitle: GPyOpt installation manual for users and developers
 
 GPyOpt (and GPy) requires the newest version (0.16) of scipy. We strongly recommend using the anaconda Python distribution. With anaconda you can update scipy and install GPyOpt is using [pip](https://pip.pypa.io/en/stable/installing/). Ubuntu users can do:
 
-```
+```bash
 $ conda update scipy
 $ pip install gpyopt
 ```
@@ -22,7 +22,7 @@ We have also been successful installing GPyOpt in OS and Windows machines. If yo
 
 In you have problems installing GPyOpt with pip try to install it from source doing:
 
-```
+```bash
 $ git clone https://github.com/SheffieldML/GPyOpt.git
 $ cd GPyOpt
 $ git checkout devel
@@ -43,13 +43,13 @@ Other dependencies are optional. All of them are also pip installable and includ
 
 Most developers are using Ubuntu. To install the required packages:
 
-```
+```bash
 $ sudo apt-get install python-numpy python-scipy python-matplotlib
 ```
 
 To procced just clone this git repository and add it to your path:
 
-```
+```bash
 $ git clone git@github.com:SheffieldML/GPyOpt.git ~/SheffieldML
 $ echo 'PYTHONPATH=$PYTHONPATH:~/SheffieldML' >> ~/.bashrc
 ```
@@ -59,12 +59,12 @@ If you want to incorporate your changes to the repo, make a pull request but be 
 
 If you want send a pull request, please ensure that your changes pass the unittest. First, ensure that nose is installed. Otherwise do
 
-```
+```bash
 $ pip install nose
 ```
 and run the nosetest from the root directory of the repository.
 
-```
+```bash
 $ nosetests -v GPyOpt/testing
 ```
 
