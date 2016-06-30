@@ -57,7 +57,8 @@ class SingleObjective(Objective):
                     print('Error in parallel computation. Fall back to single process!')
                 else:
                     self.parallel_error = True
-                f_evals, cost_evals = self._eval_func(x)        
+                f_evals, cost_evals = self._eval_func(x)     
+
         return f_evals, cost_evals 
 
 

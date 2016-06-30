@@ -174,15 +174,20 @@ class BayesianOptimization(BO):
 
         # --- CHOOSE the cost model
         self.cost = CostModel(cost_withGradients)
-
+        
         # --- CHOOSE initial design
         self.X = X
         self.Y = Y
         self.initial_design_type  = initial_design_type
+
+
         if initial_design_numdata==None: 
             self.initial_design_numdata = 5
-        else: 
+        elif initial_design_numdata >0:
             self.initial_design_numdata = initial_design_numdata
+        else:
+            raise Exception('At least one initial point is needed to start the optimization')
+        
         self._init_design_chooser()
 
         # --- CHOOSE the model type. If an instance of a GPyOpt model is passed (possibly user defined), it is used.
@@ -357,7 +362,6 @@ class BayesianOptimization(BO):
         if self.X is None:
             self.X = initial_design(self.initial_design_type, self.space, self.initial_design_numdata)
             self.Y, _ = self.objective.evaluate(self.X)
-
         # Case 2
         elif self.X is not None and self.Y is None:
             self.Y, _ = self.objective.evaluate(self.X)

@@ -94,6 +94,7 @@ class BO(object):
         self.suggested_sample = self.X
         self.Y_new = self.Y
 
+
         # --- Initialize time cost of the evaluations
         while (self.max_time > self.cum_time):
             # --- Update model

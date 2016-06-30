@@ -52,11 +52,8 @@ class Predictive(EvaluatorBase):
         while k<self.batch_size:
             X = np.vstack((X,X_new))       # update the sample within the batch
             Y = np.vstack((Y,model_local.predict(X_new)[0]))
-            print((X,Y))
             model_local.updateModel(X,Y,None,None)
-            print((model_local.model.X, model_local.model.Y))
 
-            print(X)
             try: # this exception is included in case two equal points are selected in a batch, in this case the method stops
                 batchBO = BO(model_local, space_local, objective_local, acquisition_local, collection_method, X_init=X.copy(), Y_init=Y.copy(), normalize_Y = self.normalize_Y)  
             except np.linalg.linalg.LinAlgError:

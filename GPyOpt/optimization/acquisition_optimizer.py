@@ -237,14 +237,6 @@ class BanditAcqOptimizer(AcquOptimizer):
         else:
             import sys
             sys.exit('All locations of the design space have been sampled.')
-            #print('All locations of the design space have been sampled.')
-            #raise SystemExit
-        
-
-        # --- Previous approach: do not remove those already sampled
-        # pref_f = f(arms)
-        # x_min = arms[np.argmin(pref_f)]
-        # f_min = f(x_min)
 
         return np.atleast_2d(x_min), f_min
 

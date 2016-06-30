@@ -119,7 +119,6 @@ class Opt_CMA(Optimizer):
             lB = np.asarray(self.space.get_bounds())[:,0]
             uB = np.asarray(self.space.get_bounds())[:,1]
             x = cma.fmin(CMA_f_wrapper(f), (uB + lB) * 0.5, 0.6, options={"bounds":[lB, uB], "verbose":-1})[0]
-            print(x)
             return np.atleast_2d(x), f(np.atleast_2d(x))
         except:
             print("Cannot find cma library, please install it to use this option.")
