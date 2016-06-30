@@ -64,17 +64,18 @@ class BayesianOptimization(BO):
     :param batch_size: size of the batch in which the objective is evaluated (default, 1).
     :param num_cores: number of cores used to evaluate the objective (default, 1).
     :param verbosity: prints the models and other options during the optimization.
+    :param maximize: when True -f maximization of f is done by minimizing -f (default, False).
     :param **kwargs: extra parameters. Can be used to tune the current optimization setup or to use deprecated options in this package release. 
 
 
     .. Note::   The parameters bounds, kernel, numdata_initial_design, type_initial_design, model_optimize_interval, acquisition, acquisition_par
-                model_optimize_restarts, sparseGP, num_inducing and normalize can still be used but will be deprecited in the next version.
+                model_optimize_restarts, sparseGP, num_inducing and normalize can still be used but will be deprecated in the next version.
     """
 
     def __init__(self, f, domain = None, constrains = None, cost_withGradients = None, model_type = 'GP', X = None, Y = None, 
     	initial_design_numdata = None, initial_design_type='random', acquisition_type ='EI', normalize_Y = True, 
         exact_feval = False, acquisition_optimizer_type = 'lbfgs', model_update_interval=1, evaluator_type = 'sequential', 
-        batch_size = 1, num_cores = 1, verbosity= True, verbosity_model = False, bounds=None, **kwargs):
+        batch_size = 1, num_cores = 1, verbosity= True, verbosity_model = False, bounds=None, maximize=False, **kwargs):
 
 
         ## ******************************  NOTE  *************************************************************************************
@@ -163,7 +164,8 @@ class BayesianOptimization(BO):
         self.space = Design_space(self.domain, self.constrains)
 
         # --- CHOOSE objective function
-        self.f = f
+        self.maximize = maximize
+        self.f = self._sign(f)
         if 'objective_name' in self.kwargs: self.objective_name = kwargs['objective_name']
         else: self.objective_name = 'no_name'  
         self.batch_size = batch_size
@@ -347,7 +349,6 @@ class BayesianOptimization(BO):
         else:
             raise Exception('Invalid acquisition selected.')
 
-
     def _init_design_chooser(self):
         """
         Initializes the choice of X and Y based on the selected initial design and number of points selected.
@@ -451,6 +452,10 @@ class BayesianOptimization(BO):
             print('WARNING: "acqu_optimize_method" will be deprecated in the next version!')
         super(BayesianOptimization, self).run_optimization(max_iter = max_iter, max_time = max_time,  eps = eps, verbosity=verbosity, save_models_parameters = save_models_parameters, report_file = report_file, evaluations_file= evaluations_file, models_file=models_file)
 
-
+    def _sign(self,f):
+        if self.maximize:
+            f_copy = f
+            def f(x):return -f_copy(x)
+        return f
 
     
