@@ -232,13 +232,14 @@ class BanditAcqOptimizer(AcquOptimizer):
                 
             x_min = arms[index[k],:]
             f_min = f(x_min)
-            
-        else:
-            print('All locations of the design space have been sampled.')
-            #break
-        
-        self.pulled_arms = np.vstack((self.pulled_arms, x_min))
+            #self.pulled_arms = np.vstack((self.pulled_arms, x_min))
 
+        else:
+            import sys
+            sys.exit('All locations of the design space have been sampled.')
+            #print('All locations of the design space have been sampled.')
+            #raise SystemExit
+        
 
         # --- Previous approach: do not remove those already sampled
         # pref_f = f(arms)

@@ -98,6 +98,7 @@ class BO(object):
         while (self.max_time > self.cum_time):
             # --- Update model
             try:
+                self._update_pulled_arms() # only used in bandit problems
                 self._update_model()
             except np.linalg.linalg.LinAlgError:
                 break
@@ -194,6 +195,13 @@ class BO(object):
                 self.model.updateModel(self.X, self.Y,self.suggested_sample,self.Y_new)
 
         self._save_model_parameter_values()
+
+    def _update_pulled_arms(self):
+        '''
+        Only used in bandits problems: updates the current pulled arms
+        '''
+        if isinstance(self.acquisition_optimizer,GPyOpt.optimization.BanditAcqOptimizer):
+            self.acquisition_optimizer.pulled_arms = self.X
 
     def _save_model_parameter_values(self):
         if self.model_parameters_iterations == None:
