@@ -187,10 +187,10 @@ class BO(object):
         
     def _update_model(self):
         """
-        Updates the model and saves the parameters (if available).
+        Updates the model (when more than one observation is available) and saves the parameters (if available).
         """
         if (self.num_acquisitions%self.model_update_interval)==0:
-            if self.normalize_Y:
+            if self.normalize_Y and self.Y.shape[0] >1: 
                 self.model.updateModel(self.X,(self.Y-self.Y.mean())/(self.Y.std()),self.suggested_sample,self.Y_new)
             else:
                 self.model.updateModel(self.X, self.Y,self.suggested_sample,self.Y_new)
