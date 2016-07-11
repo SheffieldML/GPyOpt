@@ -61,7 +61,7 @@ class BO(object):
 
         # --- Check if we can save the model parameters in each iteration
         if self.save_models_parameters == True:
-            if not isinstance(self.model, GPyOpt.models.GPModel) or isinstance(self.model, GPyOpt.models.GPModel_MCMC):
+            if not (isinstance(self.model, GPyOpt.models.GPModel) or isinstance(self.model, GPyOpt.models.GPModel_MCMC)):
                 print('Models printout after each iteration is only available for GP and GP_MCMC models') 
                 self.save_models_parameters = False
 
