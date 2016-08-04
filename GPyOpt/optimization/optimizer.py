@@ -109,6 +109,14 @@ class Opt_CMA(Optimizer):
         super(Opt_CMA, self).__init__(space)
         self.maxiter = maxiter
         assert self.space.has_types['continuous']
+
+    def optimize(self, x0=None, f=None, df=None, f_df=None):
+        """
+        :param x0: initial point for a local optimizer.
+        :param f: function to optimize.
+        :param df: gradient of the function to optimize.
+        :param f_df: returns both the function to optimize and its gradient.
+        """
         try:
             import cma 
             import numpy as np
@@ -121,7 +129,7 @@ class Opt_CMA(Optimizer):
             x = cma.fmin(CMA_f_wrapper(f), (uB + lB) * 0.5, 0.6, options={"bounds":[lB, uB], "verbose":-1})[0]
             return np.atleast_2d(x), f(np.atleast_2d(x))
         except:
-            print("Cannot find cma library, please install it to use this option.")
+            print("CMA does not work in problems of dimension 1.")
 
 
 
