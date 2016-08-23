@@ -201,8 +201,9 @@ class BO(object):
         '''
         Only used in bandits problems: updates the current pulled arms
         '''
-        if isinstance(self.acquisition_optimizer,GPyOpt.optimization.BanditAcqOptimizer):
-            self.acquisition_optimizer.pulled_arms = self.X
+        if self.modular_optimization == False:
+            if isinstance(self.acquisition_optimizer,GPyOpt.optimization.BanditAcqOptimizer):
+                self.acquisition_optimizer.pulled_arms = self.X
 
     def _save_model_parameter_values(self):
         if self.model_parameters_iterations == None:

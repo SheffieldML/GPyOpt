@@ -77,6 +77,7 @@ class BayesianOptimization(BO):
         exact_feval = False, acquisition_optimizer_type = 'lbfgs', model_update_interval=1, evaluator_type = 'sequential', 
         batch_size = 1, num_cores = 1, verbosity= True, verbosity_model = False, bounds=None, maximize=False, **kwargs):
 
+        self.modular_optimization == False
 
         ## ******************************  NOTE  *************************************************************************************
         ## --- This part of the code ensures the compatibility with the previous version. It will be deprecated in the next release

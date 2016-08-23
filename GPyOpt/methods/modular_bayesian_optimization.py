@@ -23,6 +23,7 @@ class ModularBayesianOptimization(BO):
     def __init__(self, model, space, objective, acquisition, evaluator, X_init, Y_init=None, cost = None, normalize_Y = True, model_update_interval = 1):
 
         self.initial_iter = True
+        self.modular_optimization = True
         
         # --- Create optimization space
         super(ModularBayesianOptimization ,self).__init__(  model                  = model, 
