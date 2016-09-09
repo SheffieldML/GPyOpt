@@ -134,7 +134,7 @@ def get_quantiles(acquisition_par, fmin, m, s):
         s[s<1e-10] = 1e-10
     elif s< 1e-10:
         s = 1e-10
-    u = (fmin-m+acquisition_par)/s
+    u = (fmin-m-acquisition_par)/s
     phi = np.exp(-0.5 * u**2) / np.sqrt(2*np.pi)
     Phi = 0.5 * erfc(-u / np.sqrt(2))
     return (phi, Phi, u)
