@@ -73,7 +73,7 @@ class BayesianOptimization(BO):
     """
 
     def __init__(self, f, domain = None, constrains = None, cost_withGradients = None, model_type = 'GP', X = None, Y = None,
-    	initial_design_numdata = None, initial_design_type='random', acquisition_type ='EI', normalize_Y = True,
+    	initial_design_numdata = 5, initial_design_type='random', acquisition_type ='EI', normalize_Y = True,
         exact_feval = False, acquisition_optimizer_type = 'lbfgs', model_update_interval=1, evaluator_type = 'sequential',
         batch_size = 1, num_cores = 1, verbosity= True, verbosity_model = False, bounds=None, maximize=False, **kwargs):
 
@@ -180,15 +180,7 @@ class BayesianOptimization(BO):
         self.X = X
         self.Y = Y
         self.initial_design_type  = initial_design_type
-
-
-        if initial_design_numdata==None:
-            self.initial_design_numdata = 5
-        elif initial_design_numdata >0:
-            self.initial_design_numdata = initial_design_numdata
-        else:
-            raise Exception('At least one initial point is needed to start the optimization')
-
+        self.initial_design_numdata = initial_design_numdata
         self._init_design_chooser()
 
         # --- CHOOSE the model type. If an instance of a GPyOpt model is passed (possibly user defined), it is used.
