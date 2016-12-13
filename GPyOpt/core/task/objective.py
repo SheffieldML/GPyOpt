@@ -12,7 +12,7 @@ class Objective(object):
     """
     General class to handle the objective function internally.
     """
-    
+
     def evaluate(self, x):
         raise NotImplementedError()
 
@@ -21,7 +21,7 @@ class SingleObjective(Objective):
     """
     Class to handle problems with one single objective function.
 
-    param func: objective function. 
+    param func: objective function.
     param batch_size: size of the batches (default, 1)
     param num_cores: number of cores to use in the process of evaluating the objective (default, 1).
     param objective_name: name of the objective function.
@@ -32,17 +32,16 @@ class SingleObjective(Objective):
     contain a location (in the case of the inputs) or a function evaluation (in the case of the outputs).
     """
 
-    
-    def __init__(self, func, num_cores = 1, objective_name = 'no_name', batch_type = 'synchronous', unfold_args=False, space = None):
+
+    def __init__(self, func, num_cores = 1, objective_name = 'no_name', batch_type = 'synchronous', space = None):
         self.func  = func
         self.n_procs = num_cores
         self.num_evaluations = 0
         self.space = space
-        self.unfold_args = unfold_args
         self.objective_name = objective_name
-        
 
-    def evaluate(self, x):       
+
+    def evaluate(self, x):
         """
         Performs the evaluation of the objective at x.
         """
@@ -57,46 +56,41 @@ class SingleObjective(Objective):
                     print('Error in parallel computation. Fall back to single process!')
                 else:
                     self.parallel_error = True
-                f_evals, cost_evals = self._eval_func(x)     
+                f_evals, cost_evals = self._eval_func(x)
 
-        return f_evals, cost_evals 
+        return f_evals, cost_evals
 
 
     def _eval_func(self, x):
         """
-        Performs sequential evaluations of the function at x (single location or batch). The computing time of each 
+        Performs sequential evaluations of the function at x (single location or batch). The computing time of each
         evaluation is also provided.
         """
         cost_evals = []
         f_evals     = np.empty(shape=[0, 1])
-        
+
         for i in range(x.shape[0]):
             st_time    = time.time()
-            if self.unfold_args:
-                args_indices = self.space.get_variable_indices()
-                args = [x[i,args_indices[j,0]:args_indices[j,1]] for j in range(args_indices.shape[0])]
-                rlt = self.func(*args)
-            else:
-                rlt = self.func(np.atleast_2d(x[i]))
+            rlt = self.func(np.atleast_2d(x[i]))
             f_evals     = np.vstack([f_evals,rlt])
-            cost_evals += [time.time()-st_time]  
-        return f_evals, cost_evals 
+            cost_evals += [time.time()-st_time]
+        return f_evals, cost_evals
 
 
-    def _syncronous_batch_evaluation(self,x):   
+    def _syncronous_batch_evaluation(self,x):
         """
         Evaluates the function a x, where x can be a single location or a batch. The evaluation is performed in parallel
         according to the number of accessible cores.
         """
         from multiprocessing import Process, Pipe
-        
+
         # --- parallel evaluation of the function
         divided_samples = [x[i::self.n_procs] for i in range(self.n_procs)]
         pipe = [Pipe() for i in range(self.n_procs)]
         proc = [Process(target=spawn(self._eval_func),args=(c,k)) for k,(p,c) in zip(divided_samples,pipe)]
         [p.start() for p in proc]
-        [p.join() for p in proc] 
-        
+        [p.join() for p in proc]
+
         # --- time of evaluation is set to constant (=1). This is one of the hypothesis of synchronous batch methods.
         f_evals = np.zeros((x.shape[0],1))
         cost_evals = np.ones((x.shape[0],1))
@@ -104,20 +98,12 @@ class SingleObjective(Objective):
         for (p,c) in pipe:
             f_evals[i::self.n_procs] = p.recv()[0] # throw away costs
             i += 1
-        return f_evals, cost_evals 
+        return f_evals, cost_evals
 
-    def _asyncronous_batch_evaluation(self,x):   
+    def _asyncronous_batch_evaluation(self,x):
 
         """
-        Performs the evaluation of the function at x while other evaluations are pending. 
+        Performs the evaluation of the function at x while other evaluations are pending.
         """
         ### --- TODO
         pass
-
-
- 
-
-
-
-
-

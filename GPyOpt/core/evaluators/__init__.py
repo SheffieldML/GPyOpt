@@ -4,7 +4,6 @@
 from .base import EvaluatorBase
 from .sequential import Sequential
 from .batch_random import RandomBatch
-from .batch_predictive import Predictive
 from .batch_local_penalization import LocalPenalization
 
 def select_evaluator(name):
@@ -12,8 +11,6 @@ def select_evaluator(name):
         return Sequential
     elif name == 'random':
         return RandomBatch
-    elif name == 'predictive':
-        return Predictive
     elif name == 'local_penalization':
         return LocalPenalization
     else:
