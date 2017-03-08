@@ -114,10 +114,13 @@ class SingleObjective(Objective):
         ### --- TODO
         pass
 
-
- 
-
-
-
-
-
+class ScoopObjective(SingleObjective):
+    def _syncronous_batch_evaluation(self,x):   
+        """
+            Use Scoop to use multiprocessing through networks.
+        """
+        
+        import scoop.futures
+        f_evals = np.array(scoop.futures.map(self.func, np.array([[row] for row in x])))
+        cost_evals = np.ones((x.shape[0],1))
+        return f_evals, cost_evals 
