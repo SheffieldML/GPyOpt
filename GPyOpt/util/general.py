@@ -13,14 +13,14 @@ def compute_integrated_acquisition(acquisition,x):
     :param acquisition: acquisition function with GpyOpt model type GP_MCMC.
     :param x: location where the acquisition is evaluated.
     '''
-    
-    acqu_x = 0 
 
-    for i in range(acquisition.model.num_hmc_samples): 
+    acqu_x = 0
+
+    for i in range(acquisition.model.num_hmc_samples):
         acquisition.model.model.kern[:] = acquisition.model.hmc_samples[i,:]
         acqu_x += acquisition.acquisition_function(x)
 
-    acqu_x = acqu_x/acquisition.model.num_hmc_samples   
+    acqu_x = acqu_x/acquisition.model.num_hmc_samples
     return acqu_x
 
 
@@ -32,16 +32,16 @@ def compute_integrated_acquisition_withGradients(acquisition,x):
     :param x: location where the acquisition is evaluated.
     '''
 
-    acqu_x = 0 
-    d_acqu_x = 0 
+    acqu_x = 0
+    d_acqu_x = 0
 
     for i in range(acquisition.model.num_hmc_samples):
         acquisition.model.model.kern[:] = acquisition.model.hmc_samples[i,:]
         acqu_x += acquisition.acquisition_function(x)
         d_acqu_x += acquisition.acquisition_function(x)
 
-    acqu_x = acqu_x/acquisition.model.num_hmc_samples  
-    d_acqu_x = acqu_x/acquisition.model.num_hmc_samples 
+    acqu_x = acqu_x/acquisition.model.num_hmc_samples
+    d_acqu_x = acqu_x/acquisition.model.num_hmc_samples
 
     return acqu_x, d_acqu_x
 
@@ -81,7 +81,7 @@ def multigrid(bounds, Ngrid):
     '''
     if len(bounds)==1:
         return np.linspace(bounds[0][0], bounds[0][1], Ngrid).reshape(Ngrid, 1)
-    xx = np.meshgrid(*[np.linspace(b[0], b[1], Ngrid) for b in bounds]) 
+    xx = np.meshgrid(*[np.linspace(b[0], b[1], Ngrid) for b in bounds])
     return np.vstack([x.flatten(order='F') for x in xx]).T
 
 
@@ -128,7 +128,7 @@ def get_quantiles(acquisition_par, fmin, m, s):
     :param acquisition_par: parameter of the acquisition function
     :param fmin: current minimum.
     :param m: vector of means.
-    :param s: vector of standard deviations. 
+    :param s: vector of standard deviations.
     '''
     if isinstance(s, np.ndarray):
         s[s<1e-10] = 1e-10
@@ -173,9 +173,37 @@ def evaluate_function(f,X):
     for i in range(num_data):
         time_zero = time.time()
         Y_eval[i,:] = f(X[i,:])
-        Y_time[i,:] = time.time() - time_zero 
+        Y_time[i,:] = time.time() - time_zero
     return Y_eval, Y_time
 
 
 
+def values_to_array(input_values):
+    '''
+    Transforms a values of int, float and tuples to a column vector numpy array
+    '''
+    if type(input_values)==tuple:
+        values = np.array(input_values).reshape(-1,1)
+    elif type(input_values) == np.ndarray:
+        values = np.atleast_2d(input_values)
+    elif type(input_values)==int or type(input_values)==float or type(np.int64):
+        values = np.atleast_2d(np.array(input_values))
+    else:
+        print('Type to transform not recognized')
+    return values
 
+
+def merge_values(values1,values2):
+    '''
+    Merges two numpy arrays by calculating all possible combinations of rows
+    '''
+    array1 = values_to_array(values1)
+    array2 = values_to_array(values2)
+
+    merged_array = np.empty((0,array1.shape[1]+array2.shape[1]))
+    for row_array1 in array1:
+        for row_array2 in array2:
+            merged_row = np.hstack((row_array1,row_array2))
+            merged_array = np.vstack((merged_array,merged_row))
+
+    return merged_array

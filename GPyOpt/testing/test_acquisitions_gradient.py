@@ -32,16 +32,16 @@ class TestAcquisitionsGradients(unittest.TestCase):
 
 	def setUp(self):
 		np.random.seed(1)
-		self.tolerance 	= 0.01  #Tolerance for difference between true and approximated gradients
-		objective 		= GPyOpt.objective_examples.experiments1d.forrester()   
+		self.tolerance 	= 0.05  #Tolerance for difference between true and approximated gradients
+		objective 		= GPyOpt.objective_examples.experiments1d.forrester()
 		self.feasible_region =  GPyOpt.Design_space(space = [{'name': 'var_1', 'type': 'continuous', 'domain': objective.bounds[0]}])
 		n_inital_design = 10
 		X 				= samples_multidimensional_uniform(objective.bounds,n_inital_design)
 		Y 				= objective.f(X)
 		self.X_test 	= samples_multidimensional_uniform(objective.bounds,n_inital_design)
-		
+
 		self.model = GPyOpt.models.GPModel()
-		self.model._create_model(X,Y) 
+		self.model._create_model(X,Y)
 		self.model.model.optimize_restarts(10,verbose=False)
 		self.model.model.Gaussian_noise.constrain_fixed(1e-6, warning=False)
 
