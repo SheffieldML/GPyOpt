@@ -2,6 +2,7 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 from .objective import SingleObjective
+from .objective import ScoopObjective
 from . import space
 from . import cost
 from .cost import CostModel

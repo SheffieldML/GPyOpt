@@ -35,7 +35,7 @@ class AcquisitionMPI_MCMC(AcquisitionMPI):
         f_acqu = 0
         for m,s,fmin in zip(means, stds, fmins):
             _, Phi, _ = get_quantiles(self.jitter, fmin, m, s)    
-            f_acqu = Phi
+            f_acqu += Phi
         return f_acqu/(len(means))
 
     def _compute_acq_withGradients(self, x):
@@ -44,18 +44,13 @@ class AcquisitionMPI_MCMC(AcquisitionMPI):
         """
         means, stds, dmdxs, dsdxs = self.model.predict_withGradients(x)
         fmins = self.model.get_fmin()
-        f_acqu = None
-        df_acqu = None
+        f_acqu = 0
+        df_acqu = 0
         for m, s, fmin, dmdx, dsdx in zip(means, stds, fmins, dmdxs, dsdxs):
             phi, Phi, u = get_quantiles(self.jitter, fmin, m, s)    
-            f_acqu =  Phi        
-            df = -(phi/s)* (dmdx + dsdx * u)
-            if f_acqu is None:
-                f_acqu = f        
-                df_acqu = df
-            else:
-                f_acqu += f
-                df_acqu += df
+            f, df =  Phi, -(phi/s)* (dmdx + dsdx * u)
+            f_acqu += f
+            df_acqu += df
         return f_acqu/(len(means)), df_acqu/(len(means))
         
 
