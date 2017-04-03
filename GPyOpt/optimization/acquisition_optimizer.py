@@ -192,7 +192,7 @@ class ContAcqOptimizer(AcquOptimizer):
         ## --- Standard method: runs a local optimizer at all the acquisition evaluation
             x_min = None
             f_min = np.Inf
-            for i in self.samples.shape[0]:
+            for i in range(self.samples.shape[0]):
                 if self.search:
                     if self.f_df == None: fp_dfp = None # -- In case no gradients are available
                     x1, f1 = self.optimizer.optimize(self.samples[i], f =fp, df=None, f_df=fp_dfp)
