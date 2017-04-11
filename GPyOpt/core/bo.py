@@ -280,8 +280,11 @@ class BO(object):
             file.write('Normalized outputs:          ' + str(self.normalize_Y) + '\n')  
             file.write('Model type:                  ' + str(self.model_type).strip('[]') + '\n')  
             file.write('Model update interval:       ' + str(self.model_update_interval) + '\n')  
-            file.write('Acquisition type:            ' + str(self.acquisition_type).strip('[]') + '\n') 
-            file.write('Acquisition optimizer:       ' + str(self.acquisition_optimizer.optimizer_name).strip('[]') + '\n') 
+            file.write('Acquisition type:            ' + str(self.acquisition_type).strip('[]') + '\n')
+            if hasattr(self, 'acquisition_optimizer') and hasattr(self.acquisition_optimizer, 'optimizer_name'):
+                file.write('Acquisition optimizer:       ' + str(self.acquisition_optimizer.optimizer_name).strip('[]') + '\n')
+            else:
+                file.write('Acquisition optimizer:       None\n')
             file.write('Evaluator type (batch size): ' + str(self.evaluator_type).strip('[]') + ' (' + str(self.batch_size) + ')' + '\n')
             file.write('Cores used:                  ' + str(self.num_cores) + '\n')
 
