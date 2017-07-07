@@ -79,6 +79,10 @@ class ContAcqOptimizer(AcquOptimizer):
 
     def __init__(self, space, optimizer='lbfgs', n_samples=5000, fast=True, random=True, search=True, **kwargs):
         super(ContAcqOptimizer, self).__init__(space)
+
+        # sampling for continuous variables
+        self.sampler = kwargs.get('cont_sampler', None)
+        
         self.n_samples          = n_samples
         self.fast               = fast
         self.random             = random
@@ -87,7 +91,7 @@ class ContAcqOptimizer(AcquOptimizer):
         self.kwargs             = kwargs
         self.all_dims           = list(range(space.model_dimensionality))
         self.unfix_dimensions()
-
+        
 
     def unfix_dimensions(self):
         '''
@@ -125,10 +129,15 @@ class ContAcqOptimizer(AcquOptimizer):
 
 
     def generate_initial_points(self):
-        if self.random:
-            self.samples = samples_multidimensional_uniform(self.free_bounds,self.n_samples)
-        else:
-            self.samples = multigrid(self.free_bounds, self.n_samples)
+
+        # if customized sampler is not provided, use one of the defaults
+        if self.sampler is None:
+            if self.random:
+                self.sampler = samples_multidimensional_uniform
+            else:
+                self.sampler = multigrid
+                
+        self.samples = self.sampler(self.free_bounds, self.n_samples)
 
 
     def _expand_vector(self,x):

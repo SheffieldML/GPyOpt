@@ -39,7 +39,8 @@ class Opt_lbfgs(Optimizer):
     '''
     Wrapper for l-bfgs-b to use the true or the approximate gradients. 
     '''
-    def __init__(self, space, maxiter=1000):
+    # kwargs included to allow transmission of customized functions
+    def __init__(self, space, maxiter=1000, **kwargs):
         super(Opt_lbfgs, self).__init__(space)
         self.maxiter = maxiter
         assert self.space.has_types['continuous']
@@ -72,7 +73,8 @@ class Opt_DIRECT(Optimizer):
     of the function. Only requires f and the box constrains to work.
 
     '''
-    def __init__(self, space, maxiter=1000):
+    # kwargs included to allow transmission of customized functions
+    def __init__(self, space, maxiter=1000, **kwargs):
         super(Opt_DIRECT, self).__init__(space)
         self.maxiter = maxiter
         assert self.space.has_types['continuous']
@@ -105,7 +107,8 @@ class Opt_CMA(Optimizer):
     an stochastic search based on multivariate Gaussian samples. Only requires f and the box constrains to work.
 
     '''
-    def __init__(self, space, maxiter=1000):
+    # kwargs included to allow transmission of customized functions
+    def __init__(self, space, maxiter=1000, **kwargs):
         super(Opt_CMA, self).__init__(space)
         self.maxiter = maxiter
         assert self.space.has_types['continuous']

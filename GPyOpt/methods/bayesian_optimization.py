@@ -84,6 +84,9 @@ class BayesianOptimization(BO):
         self.model_update_interval = model_update_interval
         self.kwargs = kwargs
 
+        # --- Get customized sampling function for initializing continuous variables
+        self.cont_sampler = kwargs.get('cont_sampler', None)
+        
         # --- CHOOSE design space (still allows to pass a list of tuples in the continuous case)
         if not hasattr(self,'domain'):
             if domain == None and 'bounds' in self.kwargs:
@@ -130,7 +133,8 @@ class BayesianOptimization(BO):
 
         # --- CHOOSE the acquisition optimizer_type
         self.acquisition_optimizer_type = acquisition_optimizer_type
-        self.acquisition_optimizer = AcquisitionOptimizer(self.space, self.acquisition_optimizer_type, current_X = self.X)  ## more arguments may come here
+        # last argument added to AcquisitionOptimizer instantiation to allow for customized sampling of continuous domains
+        self.acquisition_optimizer = AcquisitionOptimizer(self.space, self.acquisition_optimizer_type, current_X = self.X, cont_sampler=self.cont_sampler)  ## more arguments may come here
 
         # --- CHOOSE acquisition function. If an instance of an acquisition is passed (possibly user defined), it is used.
         self.acquisition_type = acquisition_type
