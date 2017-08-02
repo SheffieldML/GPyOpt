@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 from setuptools import setup
 
 if sys.version_info[0] < 3:
@@ -10,7 +11,7 @@ else:
     import builtins
 
 # allows detecting that an import happens during build process
-builtins.__GPYPOT_SETUP__ = True
+builtins.__GPYOPT_SETUP__ = True
 from GPyOpt.__version__ import __version__
 
 
