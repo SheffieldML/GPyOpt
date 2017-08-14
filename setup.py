@@ -2,14 +2,24 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 from setuptools import setup
+
+if sys.version_info[0] < 3:
+    import __builtin__ as builtins
+else:
+    import builtins
+
+# allows detecting that an import happens during build process
+builtins.__GPYOPT_SETUP__ = True
 from GPyOpt.__version__ import __version__
+
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(name = 'GPyOpt',
-      version = __version__,
+      version =__version__,
       author = read('AUTHORS.txt'),
       author_email = "j.h.gonzalez@sheffield.ac.uk",
       description = ("The Bayesian Optimization Toolbox"),
