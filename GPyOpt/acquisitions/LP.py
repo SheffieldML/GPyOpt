@@ -83,7 +83,7 @@ class AcquisitionLP(AcquisitionBase):
             fval = np.log(fval+1e-50)
         
         fval = -fval
-        if X_batch!=None:
+        if X_batch is not None:
             h_vals = self._hammer_function(x, X_batch, r_x0, s_x0)
             fval += -h_vals.sum(axis=-1)
         return fval
