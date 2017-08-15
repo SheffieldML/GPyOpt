@@ -51,7 +51,7 @@ class BayesianOptimization(BO):
         - 'LCB_MCMC', integrated GP-Lower confidence bound (requires GP_MCMC model).
     :param normalize_Y: whether to normalize the outputs before performing any optimization (default, True).
     :exact_feval: whether the outputs are exact (default, False).
-    :acquisition_optimizer_type: type of acquisition function to use.
+    :acquisition_optimizer_type: type of optimizer for the acquisition function to use.
         - 'lbfgs': L-BFGS.
         - 'DIRECT': Dividing Rectangles.
         - 'CMA': covariance matrix adaptation.
