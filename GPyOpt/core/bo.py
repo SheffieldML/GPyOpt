@@ -219,7 +219,7 @@ class BO(object):
                 self.acquisition_optimizer.pulled_arms = self.X
 
     def _save_model_parameter_values(self):
-        if self.model_parameters_iterations == None:
+        if np.any(self.model_parameters_iterations) == None:
             self.model_parameters_iterations = self.model.get_model_parameters()
         else:
             self.model_parameters_iterations = np.vstack((self.model_parameters_iterations,self.model.get_model_parameters()))
