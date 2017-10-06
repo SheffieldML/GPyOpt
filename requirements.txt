@@ -1,0 +1,15 @@
+cycler>=0.10.0
+decorator>=4.0.10
+GPy>=1.5.6
+matplotlib>=1.5.3
+numpy>=1.11.2
+paramz>=0.7.0
+#pyparsing==2.1.10
+python-dateutil>=2.6.0
+#pytz==2016.7
+scipy>=0.18.1
+six>=1.10.0
+mock>=2.0.0
+PyDOE >= 0.3.0
+sobol_seq >=0.1
+nose
