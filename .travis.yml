@@ -6,7 +6,6 @@ notifications:
     on_failure: always
 
 os:
-- osx
 - linux
 
 python:
