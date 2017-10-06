@@ -26,7 +26,7 @@ class AcquisitionLCB(AcquisitionBase):
         self.exploration_weight = exploration_weight
 
         if cost_withGradients is not None:
-            print('The set cost function is ignored! LBC acquisition does not make sense with cost.')  
+            print('The set cost function is ignored! LCB acquisition does not make sense with cost.')  
 
     def _compute_acq(self, x):
         """

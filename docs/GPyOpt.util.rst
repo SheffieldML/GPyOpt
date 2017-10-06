@@ -1,29 +1,45 @@
-GPyOpt.util package
-===================
+GpyOpt\.util package
+====================
 
 Submodules
 ----------
 
-GPyOpt.util.general module
+GpyOpt\.util\.arguments\_manager module
+---------------------------------------
+
+.. automodule:: GpyOpt.util.arguments_manager
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+GpyOpt\.util\.duplicate\_manager module
+---------------------------------------
+
+.. automodule:: GpyOpt.util.duplicate_manager
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+GpyOpt\.util\.general module
+----------------------------
+
+.. automodule:: GpyOpt.util.general
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+GpyOpt\.util\.io module
+-----------------------
+
+.. automodule:: GpyOpt.util.io
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+GpyOpt\.util\.stats module
 --------------------------
 
-.. automodule:: GPyOpt.util.general
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-GPyOpt.util.io module
----------------------
-
-.. automodule:: GPyOpt.util.io
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-GPyOpt.util.stats module
-------------------------
-
-.. automodule:: GPyOpt.util.stats
+.. automodule:: GpyOpt.util.stats
     :members:
     :undoc-members:
     :show-inheritance:
@@ -32,7 +48,7 @@ GPyOpt.util.stats module
 Module contents
 ---------------
 
-.. automodule:: GPyOpt.util
+.. automodule:: GpyOpt.util
     :members:
     :undoc-members:
     :show-inheritance:

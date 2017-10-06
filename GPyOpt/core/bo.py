@@ -4,8 +4,10 @@
 import GPyOpt
 import numpy as np
 import time
-from ..util.general import best_value, reshape
+from ..util.general import best_value
+from ..util.duplicate_manager import DuplicateManager
 from ..core.task.cost import CostModel
+from ..optimization.acquisition_optimizer import ContextManager
 try:
     from ..plotting.plots_bo import plot_acquisition, plot_convergence
 except:
@@ -24,10 +26,11 @@ class BO(object):
     :param cost: GPyOpt cost class (default, none).
     :param normalize_Y: whether to normalize the outputs before performing any optimization (default, True).
     :param model_update_interval: interval of collected observations after which the model is updated (default, 1).
+    :param de_duplication: GPyOpt DuplicateManager class. Avoids re-evaluating the objective at previous, pending or infeasible locations (default, False).
     """
 
 
-    def __init__(self, model, space, objective, acquisition, evaluator, X_init, Y_init=None, cost = None, normalize_Y = True, model_update_interval = 1):
+    def __init__(self, model, space, objective, acquisition, evaluator, X_init, Y_init=None, cost = None, normalize_Y = True, model_update_interval = 1, de_duplication = False):
         self.model = model
         self.space = space
         self.objective = objective
@@ -38,9 +41,11 @@ class BO(object):
         self.X = X_init
         self.Y = Y_init
         self.cost = CostModel(cost)
+        self.normalization_type = 'stats' ## not added in the API
+        self.de_duplication = de_duplication
 
 
-    def run_optimization(self, max_iter = 0, max_time = np.inf,  eps = 1e-8, context_value = None, verbosity = True, save_models_parameters= True, report_file = None, evaluations_file= None, models_file=None):
+    def run_optimization(self, max_iter = 0, max_time = np.inf,  eps = 1e-8, context = None, verbosity = True, save_models_parameters= True, report_file = None, evaluations_file = None, models_file=None):
         """
         Runs Bayesian Optimization for a number 'max_iter' of iterations (after the initial exploration data)
 
@@ -58,11 +63,7 @@ class BO(object):
         self.evaluations_file = evaluations_file
         self.models_file = models_file
         self.model_parameters_iterations = None
-        self.context_value = context_value
-
-        # --- Update context is available
-        if self.context_value is not None:
-            self.space.update_context(self.context_value)
+        self.context = context
 
         # --- Check if we can save the model parameters in each iteration
         if self.save_models_parameters == True:
@@ -72,13 +73,13 @@ class BO(object):
 
         # --- Setting up stop conditions
         self.eps = eps
-        if  (max_iter == None) and (max_time == None):
+        if  (max_iter is None) and (max_time is None):
             self.max_iter = 0
             self.max_time = np.inf
-        elif (max_iter == None) and (max_time != None):
+        elif (max_iter is None) and (max_time is not None):
             self.max_iter = np.inf
             self.max_time = max_time
-        elif (max_iter != None) and (max_time == None):
+        elif (max_iter is not None) and (max_time is None):
             self.max_iter = max_iter
             self.max_time = np.inf
         else:
@@ -102,16 +103,14 @@ class BO(object):
         while (self.max_time > self.cum_time):
             # --- Update model
             try:
-                self._update_pulled_arms() # only used in bandit problems
-                self._update_model()
+                self._update_model(self.normalization_type)
             except np.linalg.linalg.LinAlgError:
                 break
 
-            # --- Update and optimize acquisition and compute the exploration level in the next evaluation
-            self.suggested_sample = self._compute_next_evaluations()
-
             if not ((self.num_acquisitions < self.max_iter) and (self._distance_last_evaluations() > self.eps)):
                 break
+
+            self.suggested_sample = self._compute_next_evaluations()
 
             # --- Augment X
             self.X = np.vstack((self.X,self.suggested_sample))
@@ -128,13 +127,18 @@ class BO(object):
         self._compute_results()
 
         # --- Print the desired result in files
-        if self.report_file != None:
+        if self.report_file is not None:
             self.save_report(self.report_file)
-        if self.evaluations_file != None:
+        if self.evaluations_file is not None:
             self.save_evaluations(self.evaluations_file)
-        if self.models_file != None:
+        if self.models_file is not None:
             self.save_models(self.models_file)
 
+    def next_location(self):
+        """
+        Returns the location of the next evaluation without evaluating the objective
+        """
+        return self._compute_next_evaluations()
 
     def _print_convergence(self):
         """
@@ -155,7 +159,6 @@ class BO(object):
             if self.initial_iter:
                 print('** GPyOpt Bayesian Optimization class initialized successfully **')
                 self.initial_iter = False
-
 
 
     def evaluate_objective(self):
@@ -182,26 +185,43 @@ class BO(object):
         return np.sqrt(sum((self.X[self.X.shape[0]-1,:]-self.X[self.X.shape[0]-2,:])**2))
 
 
-    def _compute_next_evaluations(self):
+    def _compute_next_evaluations(self, pending_zipped_X=None, ignored_zipped_X=None):
         """
         Computes the location of the new evaluation (optimizes the acquisition in the standard case).
+        :param pending_zipped_X: matrix of input configurations that are in a pending state (i.e., do not have an evaluation yet).
+        :param ignored_zipped_X: matrix of input configurations that the user black-lists, i.e., those configurations will not be suggested again.
+        :return:
         """
+
+        ## --- Update the context if any
+        self.acquisition.optimizer.context_manager = ContextManager(self.space, self.context)
+
+        ### --- Activate de_duplication
+        if self.de_duplication:
+            duplicate_manager = DuplicateManager(space=self.space, zipped_X=self.X, pending_zipped_X=pending_zipped_X, ignored_zipped_X=ignored_zipped_X)
+        else:
+            duplicate_manager = None
+
         ### We zip the value in case there are categorical variables
-        return self.space.zip_inputs(self.evaluator.compute_batch())
+        return self.space.zip_inputs(self.evaluator.compute_batch(duplicate_manager=duplicate_manager, context_manager= self.acquisition.optimizer.context_manager))
 
 
-    def _update_model(self):
+    def _update_model(self, normalization_type = 'stats'):
         """
         Updates the model (when more than one observation is available) and saves the parameters (if available).
         """
         if (self.num_acquisitions%self.model_update_interval)==0:
 
             ### --- input that goes into the model (is unziped in case there are categorical variables)
-            X_inmodel = self.space.unzip_inptus(self.X)
+            X_inmodel = self.space.unzip_inputs(self.X)
 
-            ### --- output that goes into the model
-            if self.normalize_Y and self.Y.shape[0] >1:
-                Y_inmodel = (self.Y-self.Y.mean())/(self.Y.std())
+            ### --- Output that goes into the model
+            ### --- Only normalize with at least two elements and non null sdev
+            if self.normalize_Y and (self.Y.shape[0]>1) and (self.Y.std()>0):
+                if normalization_type == 'stats':
+                    Y_inmodel = (self.Y-self.Y.mean())/(self.Y.std())
+                elif normalization_type == 'maxmin':
+                    Y_inmodel = (self.Y - self.Y.min())/(self.Y.max()-self.Y.min())
             else:
                 Y_inmodel =self.Y
 
@@ -210,16 +230,8 @@ class BO(object):
         ### --- Save parameters of the model
         self._save_model_parameter_values()
 
-    def _update_pulled_arms(self):
-        '''
-        Only used in bandits problems: updates the current pulled arms
-        '''
-        if self.modular_optimization == False:
-            if isinstance(self.acquisition_optimizer,GPyOpt.optimization.BanditAcqOptimizer):
-                self.acquisition_optimizer.pulled_arms = self.X
-
     def _save_model_parameter_values(self):
-        if self.model_parameters_iterations == None:
+        if self.model_parameters_iterations is None:
             self.model_parameters_iterations = self.model.get_model_parameters()
         else:
             self.model_parameters_iterations = np.vstack((self.model_parameters_iterations,self.model.get_model_parameters()))
@@ -237,7 +249,7 @@ class BO(object):
                                 self.model.model.X,
                                 self.model.model.Y,
                                 self.acquisition.acquisition_function,
-                                self.suggested_sample,
+                                self.next_location(),
                                 filename)
 
 
@@ -295,6 +307,12 @@ class BO(object):
             file.write('Model update interval:       ' + str(self.model_update_interval) + '\n')
             file.write('Acquisition type:            ' + str(self.acquisition_type).strip('[]') + '\n')
             file.write('Acquisition optimizer:       ' + str(self.acquisition_optimizer.optimizer_name).strip('[]') + '\n')
+
+            file.write('Acquisition type:            ' + str(self.acquisition_type).strip('[]') + '\n')
+            if hasattr(self, 'acquisition_optimizer') and hasattr(self.acquisition_optimizer, 'optimizer_name'):
+                file.write('Acquisition optimizer:       ' + str(self.acquisition_optimizer.optimizer_name).strip('[]') + '\n')
+            else:
+                file.write('Acquisition optimizer:       None\n')
             file.write('Evaluator type (batch size): ' + str(self.evaluator_type).strip('[]') + ' (' + str(self.batch_size) + ')' + '\n')
             file.write('Cores used:                  ' + str(self.num_cores) + '\n')
 

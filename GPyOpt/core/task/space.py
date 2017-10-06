@@ -3,7 +3,12 @@
 
 import numpy as np
 import itertools
+from copy import deepcopy
+
+from .variables import BanditVariable, DiscreteVariable, CategoricalVariable, ContinuousVariable, create_variable
+from ..errors import InvalidConfigError
 from ...util.general import values_to_array, merge_values
+
 
 class Design_space(object):
     """
@@ -41,29 +46,41 @@ class Design_space(object):
 
     If no constrains are provided the hypercube determined by the bounds constraints are used.
 
+    Note about the internal representation of the vatiables: for variables in which the dimaensionality
+    has been specified in the domain, a subindex is internally asigned. For instance if the variables
+    is called 'var1' and has dimensionality 3, the first three positions in the internal representation
+    of the domain will be occupied by variables 'var1_1', 'var1_2' and 'var1_3'. If no dimensionality
+    is added, the internal naming remains the same. For instance, in the example above 'var3'
+    should be fixed its original name.
+
+
+
     param space: list of dictionaries as indicated above.
     param constraints: list of dictionaries as indicated above (default, none)
 
     """
 
-    supported_types = ['continuous', 'discrete', 'bandit','categorical','context']
+    supported_types = ['continuous', 'discrete', 'bandit','categorical']
 
-    def __init__(self, space, constraints=None):
+    def __init__(self, space, constraints=None, store_noncontinuous = False):
 
         ## --- Complete and expand attributes
-        self._complete_attributes(space)
-        self.space_expanded = self._expand_attributes(self.space)
-        self._compute_variable_indices()
-        self._update_values_noncontinuous()
+        self.store_noncontinuous = store_noncontinuous
+        self.config_space = space
+
+        ## --- Transform input config space into the objects used to run the optimization
+        self._translate_space(self.config_space)
+        self._expand_space()
+        self._compute_variables_indices()
+        self._create_variables_dic()
 
         ## -- Compute raw and model dimensionalities
         self.objective_dimensionality = len(self.space_expanded)
-        self.model_input_dims = [d['dimensionality_in_model'] for d in self.space_expanded]
+        self.model_input_dims = [v.dimensionality_in_model for v in self.space_expanded]
         self.model_dimensionality = sum(self.model_input_dims)
 
         ## -- Checking constraints
         self.constraints = constraints
-
 
     @staticmethod
     def fromConfig(space, constraints):
@@ -76,135 +93,151 @@ class Design_space(object):
             d['domain'] = literal_eval(d['domain'])
         return Design_space(space, None if len(constraints)==0 else constraints)
 
+    def _expand_config_space(self):
+        """
+        Expands the config input space into a list of diccionaries, one for each variable_dic
+        in which the dimensionality is always one.
 
-    def _complete_attributes(self, space):
+        Example: It would transform
+        config_space =[ {'name': 'var_1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality':1},
+                        {'name': 'var_2', 'type': 'continuous', 'domain':(-3,1), 'dimensionality':2},
+
+        into
+
+        config_expande_space =[ {'name': 'var_1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality':1},
+                      {'name': 'var_2', 'type': 'continuous', 'domain':(-3,1), 'dimensionality':1},
+                      {'name': 'var_2_1', 'type': 'continuous', 'domain':(-3,1), 'dimensionality':1}]
+
         """
-        Creates an internal dictionary where all the missing elements are completed.
+        self.config_space_expanded = []
+
+        for variable in self.config_space:
+            variable_dic = variable.copy()
+            if 'dimensionality' in variable_dic.keys():
+                dimensionality = variable_dic['dimensionality']
+                variable_dic['dimensionality'] = 1
+                variables_set = [variable_dic.copy() for d in range(dimensionality)]
+                k=1
+                for variable in variables_set:
+                    variable['name'] = variable['name'] + '_'+str(k)
+                    k+=1
+                self.config_space_expanded += variables_set
+            else:
+                self.config_space_expanded += [variable_dic]
+
+    def _compute_variables_indices(self):
         """
-        from copy import deepcopy
+        Computes and saves the index location of each variable (as a list) in the objectives
+        space and in the model space. If no categorical variables are available, these two are
+        equivalent.
+        """
+
+        counter_objective = 0
+        counter_model     = 0
+
+        for variable in self.space_expanded:
+            variable.set_index_in_objective([counter_objective])
+            counter_objective +=1
+
+            if variable.type is not 'categorical':
+                variable.set_index_in_model([counter_model])
+                counter_model +=1
+            else:
+                num_categories = len(variable.domain)
+                variable.set_index_in_model(list(range(counter_model,counter_model + num_categories)))
+                counter_model +=num_categories
+
+
+    def find_variable(self,variable_name):
+        if variable_name not in self.name_to_variable.keys():
+            raise InvalidVariableNameError('Name of variable not in the input domain')
+        else:
+            return self.name_to_variable[variable_name]
+
+    def _create_variables_dic(self):
+        """
+        Returns the variable by passing its name
+        """
+        self.name_to_variable = {}
+        for variable in self.space_expanded:
+            self.name_to_variable[variable.name] = variable
+
+    def _translate_space(self, space):
+        """
+        Translates a list of dictionaries into internal list of variables
+        """
         self.space = []
         self.dimensionality = 0
-        self.has_types = d = {type: False for type in self.supported_types}
+        self.has_types = d = {t: False for t in self.supported_types}
 
-        ### --- Complete attributes
-        for i in range(len(space)):
-            d_out = deepcopy(space[i])
-            if 'name' not in d_out:
-                d_out['name'] = 'var_'+str(i+1)
-            if 'type' not in d_out:
-                d_out['type'] = 'continuous'
-            if 'domain' not in d_out:
-                raise Exception('Domain attribute cannot be missing!')
-            if 'dimensionality' not in d_out:
-                if d_out['domain'] == 'bandit':
-                    dims = np.array([len (a) for a in d_out['domain']])
-                    assert np.all(dims==dims[0]), 'The dimensionalities of the bandit variable '+d_out['name']+' have to be the same!'
-                    d_out['dimensionality'] = len(d_out['domain'][0])
-                else:
-                    d_out['dimensionality'] = 1
-            if 'parents' not in d_out:
-                d['parents']= 'none'
+        for i, d in enumerate(space):
+            descriptor = deepcopy(d)
+            descriptor['name'] = descriptor.get('name', 'var_' + str(i))
+            descriptor['type'] = descriptor.get('type', 'continuous')
+            if 'domain' not in descriptor:
+                raise InvalidConfigError('Domain attribute is missing for variable ' + descriptor['name'])
+            variable = create_variable(descriptor)
+            self.space.append(variable)
+            self.dimensionality += variable.dimensionality
+            self.has_types[variable.type] = True
 
-            self.dimensionality += d_out['dimensionality']
-            self.space.append(d_out)
-            self.has_types[d_out['type']] = True
-
-
-    def _expand_attributes(self, space):
+    def _expand_space(self):
         """
-        Creates and internal dictionary where the attributes with dimensionality larger than one are expanded. This
-        dictionary is the one that is used internally to do the optimization.
+        Creates an internal list where the variables with dimensionality larger than one are expanded.
+        This list is the one that is used internally to do the optimization.
         """
-        space_expanded = []
 
-        ### -- Add terms with multiple dimensionalities
-        for d in space:
-            d_new = []
-            for i in range(d['dimensionality']):
-                dd = d.copy()
-                dd['dimensionality'] = 1
-                dd['name'] = dd['name']+'_'+str(i+1)
-                d_new += [dd]
-            space_expanded += d_new
+        ## --- Expand the config space
+        self._expand_config_space()
 
-        new_space_expanded = []
-
-        ### --- Expand the bandits if any
-        for d in space_expanded:
-            if d['type']=='bandit':
-                d_new = []
-                for i in range(d['domain'].shape[1]):
-                    dd = d.copy()
-                    dd['name'] = dd['name']+'_'+str(i+1)
-                    dd['domain'] = d['domain'][:,i]
-                    d_new +=[dd]
-                new_space_expanded +=d_new
-            else:
-                new_space_expanded +=[d]
-
-        ### --- Add model dimensionalities an internal idx_discrete
-        for d in new_space_expanded:
-            ### --- Internal IDs
-            d['idx'] = 'idx' + str(i)
-
-            ### --- Model dimensionalities
-            if d['type']=='categorical':
-                d['dimensionality_in_model'] = len(d['domain'])
-            else:
-                d['dimensionality_in_model'] = 1
-
-        return new_space_expanded
-
+        ## --- Expand the space
+        self.space_expanded = []
+        for variable in self.space:
+            self.space_expanded += variable.expand()
 
     def objective_to_model(self, x_objective):
         ''' This function serves as interface between objective input vectors and
         model input vectors'''
 
-        x_model = np.empty((1,0))
+        x_model = []
+
         for k in range(self.objective_dimensionality):
-            d = self.space_expanded[k]
+            variable = self.space_expanded[k]
+            new_entry = variable.objective_to_model(x_objective[0,k])
+            x_model += new_entry
 
-            ### ---Handle separately the case for the discrete variables
-            if d['type'] == 'categorical':
-                new_entry = np.zeros((1,d['dimensionality_in_model']))
-                new_entry[0,int(x_objective[0,k])] = 1
-            else:
-                new_entry = np.atleast_2d(x_objective[0,k])
-
-            x_model = np.hstack((x_model,new_entry))
         return x_model
 
-    def unzip_inptus(self,X):
-        Z = np.empty((0,self.model_dimensionality))
-        for k in range(X.shape[0]):
-            Z = np.vstack((Z,self.objective_to_model(X[k,:][None,:])))
-        return Z
+    def unzip_inputs(self,X):
+        if self._has_bandit():
+            Z = X
+        else:
+            Z = []
+            for k in range(X.shape[0]):
+                Z.append(self.objective_to_model(X[k,:][None,:]))
+        return np.atleast_2d(Z)
 
     def zip_inputs(self,X):
-        Z = np.empty((0,self.objective_dimensionality))
-        for k in range(X.shape[0]):
-            Z = np.vstack((Z,self.model_to_objective(X[k,:][None,:])))
-        return Z
+        if self._has_bandit():
+            Z = X
+        else:
+            Z = []
+            for k in range(X.shape[0]):
+                Z.append(self.model_to_objective(X[k,:][None,:]))
+        return np.atleast_2d(Z)
 
     def model_to_objective(self, x_model):
         ''' This function serves as interface between model input vectors and
             objective input vectors
         '''
         idx_model = 0
-        x_objective = np.empty((1,0))
+        x_objective = []
 
         for idx_obj in range(self.objective_dimensionality):
-            d = self.space_expanded[idx_obj]
-            vardim = d['dimensionality_in_model']
-            original_entry = x_model[0,idx_model:(idx_model+vardim)]
-
-            ### ---Handle separately the case for the discrete variables
-            if d['type'] == 'categorical':
-                new_entry = np.dot(np.atleast_2d(np.array(range(vardim))),np.atleast_2d(original_entry).T)
-            else:
-                new_entry = np.atleast_2d(x_model[0,idx_model])
-            idx_model += vardim
-            x_objective = np.hstack((x_objective,new_entry))
+            variable = self.space_expanded[idx_obj]
+            new_entry = variable.model_to_objective(x_model, idx_model)
+            x_objective += new_entry
+            idx_model += variable.dimensionality_in_model
 
         return x_objective
 
@@ -215,7 +248,7 @@ class Design_space(object):
         discre varaibles are in place, the restrictions should reflect this fact (TODO: implement the
         mapping of constraints defined on the objective to constrains defined on the model).
         """
-        return self.constraints != None
+        return self.constraints is not None
 
 
     def get_bounds(self):
@@ -224,130 +257,45 @@ class Design_space(object):
         """
         bounds = []
 
-        for d in self.space_expanded:
-            if d['type']=='continuous' or d['type']=='context' :
-                bounds += [d['domain']]
-
-            if d['type']=='bandit' or d['type']=='discrete':
-                bounds += [(min(d['domain']),max(d['domain']))]
-
-            if d['type'] == 'categorical':
-                bounds += [(0,1)]*d['dimensionality_in_model']
+        for variable in self.space_expanded:
+            bounds += variable.get_bounds()
 
         return bounds
 
-    def _compute_variable_indices(self):
-        '''
-        Computes lists of indices of the different types of variables in the model.
-        '''
-        self.idx_continuous = []
-        self.idx_context = []
-        self.idx_discrete = []
-        self.idx_categorical = []
-        self.idx_bandits = []
-        self.idx_noncontinuous = []
+    def _has_continuous(self):
+        return any(v.is_continuous() for v in self.space)
 
-        k = 0
-        for d in self.space_expanded:
-            if d['type']=='continuous':
-                self.idx_continuous += [k]
-                k+= 1
+    def _has_bandit(self):
+        return any(v.is_bandit() for v in self.space)
 
-            elif d['type']=='context' :
-                self.idx_context += [k]
-                k+= 1
-
-            elif d['type']=='discrete':
-                self.idx_discrete += [k]
-                k+= 1
-
-            elif d['type'] == 'categorical':
-                self.idx_categorical += list(range(k,k+d['dimensionality_in_model']))
-                k+=d['dimensionality_in_model']
-
-            elif d['type']=='bandit':
-                self.idx_bandits += [k]
-                k+= 1
-
-        self.idx_noncontinuous = list(np.sort(self.idx_context + self.idx_discrete + self.idx_categorical+ self.idx_bandits))
-
-    def _update_values_noncontinuous(self):
-        '''
-        Computes a numpy array with all possible combinations that the non continuous
-        variables can show
-        '''
-        self.values_noncontinuous = None
-
-        for d in self.space:
-            for dim in range(d['dimensionality']):
-                ### --- Extract the new values
-                if d['type'] == 'discrete':
-                    new_values = d['domain']
-
-                elif d['type'] == 'categorical':
-                    new_values = np.eye(len(d['domain']))
-
-                elif d['type'] == 'context':
-                    new_values = d['value']
-
-                elif d['type'] == 'bandit':
-                    new_values = d['domain']
-
-                ### --- Augment the possible values
-                if d['type'] != 'continuous':
-                    if self.values_noncontinuous == None:
-                        self.values_noncontinuous = values_to_array(new_values)
-                    else:
-                        self.values_noncontinuous = merge_values(self.values_noncontinuous,new_values)
-
-
-    def update_context(self,vals):
-        vals = np.atleast_2d(np.array(vals))
-        num_vals_assigned=0
-
-        for d in self.space:
-            if d['type'] == 'context':
-                d['value'] = vals[0,num_vals_assigned]
-                num_vals_assigned += 1
-        if vals.shape[1] != num_vals_assigned:
-            print("The number of context values must coincide with the number of contextual variables in the original space definition (withot the multipicity).")
-        else:
-            self.space_expanded = self._expand_attributes(self.space)
-            self._update_values_noncontinuous()
-
-
-
-    def get_subspace(self,dims):
+    def get_subspace(self, dims):
         '''
         Extracts subspace from the reference of a list of variables in the inputs
         of the model.
         '''
         subspace = []
         k = 0
-        for d in self.space_expanded:
+        for variable in self.space_expanded:
             if k in dims:
-                subspace += [d]
-            if d['type']=='categorical':
-                k += len(d['domain'])
-            else:
-                k +=1
+                subspace.append(variable)
+            k += variable.dimensionality_in_model
         return subspace
 
 
     def indicator_constraints(self,x):
         """
-        Return zero if x is within the constrains and zero otherwise.
+        Returns array of ones and zeros indicating if x is within the constrains
         """
         x = np.atleast_2d(x)
         I_x = np.ones((x.shape[0],1))
-        if self.constraints != None:
+        if self.constraints is not None:
             for d in self.constraints:
                 try:
-                    exec('constrain =  lambda x:' + d['constrain'],globals())
+                    exec('constrain = lambda x:' + d['constrain'], globals())
                     ind_x = (constrain(x)<0)*1
                     I_x *= ind_x.reshape(x.shape[0],1)
                 except:
-                    print('Fail to compile the constraint: '+str(d))
+                    print('Fail to compile the constraint: ' + str(d))
                     raise
         return I_x
 
@@ -372,8 +320,8 @@ class Design_space(object):
         """
         bounds = []
         for d in self.space:
-            if d['type']=='continuous':
-                bounds.extend([d['domain']]*d['dimensionality'])
+            if d.type == 'continuous':
+                bounds.extend([d.domain]*d.dimensionality)
         return bounds
 
 
@@ -383,7 +331,7 @@ class Design_space(object):
         """
         continuous_dims = []
         for i in range(self.dimensionality):
-            if self.space_expanded[i]['type']=='continuous':
+            if self.space_expanded[i].type == 'continuous':
                 continuous_dims += [i]
         return continuous_dims
 
@@ -392,7 +340,7 @@ class Design_space(object):
         """
         Extracts the list of dictionaries with continuous components
         """
-        return [d for d in self.space if d['type']=='continuous']
+        return [d for d in self.space if d.type == 'continuous']
 
 
     ###
@@ -407,8 +355,8 @@ class Design_space(object):
         """
         sets_grid = []
         for d in self.space:
-            if d['type']=='discrete':
-                sets_grid.extend([d['domain']]*d['dimensionality'])
+            if d.type == 'discrete':
+                sets_grid.extend([d.domain]*d.dimensionality)
         return np.array(list(itertools.product(*sets_grid)))
 
 
@@ -418,7 +366,7 @@ class Design_space(object):
         """
         discrete_dims = []
         for i in range(self.dimensionality):
-            if self.space_expanded[i]['type']=='discrete':
+            if self.space_expanded[i].type == 'discrete':
                 discrete_dims += [i]
         return discrete_dims
 
@@ -427,7 +375,7 @@ class Design_space(object):
         """
         Extracts the list of dictionaries with continuous components
         """
-        return [d for d in self.space if d['type']=='discrete']
+        return [d for d in self.space if d.type == 'discrete']
 
 
     ###
@@ -441,13 +389,9 @@ class Design_space(object):
         """
         arms_bandit = []
         for d in self.space:
-            if d['type']=='bandit':
-                arms_bandit += tuple(map(tuple, d['domain']))
+            if d.type == 'bandit':
+                arms_bandit += tuple(map(tuple, d.domain))
         return np.asarray(arms_bandit)
-
-
-
-
 
 
 

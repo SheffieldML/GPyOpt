@@ -5,6 +5,7 @@ from .base import EvaluatorBase
 from .sequential import Sequential
 from .batch_random import RandomBatch
 from .batch_local_penalization import LocalPenalization
+from .batch_thompson import ThompsonBatch
 
 def select_evaluator(name):
     if name == 'sequential':
@@ -13,5 +14,7 @@ def select_evaluator(name):
         return RandomBatch
     elif name == 'local_penalization':
         return LocalPenalization
+    elif name == 'thompson_sampling':
+        return ThompsonBatch
     else:
         raise Exception('Invalid acquisition evaluator selected.')

@@ -3,6 +3,7 @@
 
 from .base import EvaluatorBase
 
+
 class Sequential(EvaluatorBase):
     """
     Class for standard Sequential Bayesian optimization methods.
@@ -14,10 +15,9 @@ class Sequential(EvaluatorBase):
     def __init__(self, acquisition, batch_size=1):
         super(Sequential, self).__init__(acquisition, batch_size)
 
-    def compute_batch(self):
+    def compute_batch(self, duplicate_manager=None,context_manager=None):
         """
         Selects the new location to evaluate the objective.
         """
-        return self.acquisition.optimize()
-
-
+        x, _ = self.acquisition.optimize(duplicate_manager=duplicate_manager)
+        return x

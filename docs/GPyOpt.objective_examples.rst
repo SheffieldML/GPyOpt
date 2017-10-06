@@ -1,29 +1,29 @@
-GPyOpt.objective_examples package
-=================================
+GpyOpt\.objective\_examples package
+===================================
 
 Submodules
 ----------
 
-GPyOpt.objective_examples.experiments1d module
-----------------------------------------------
+GpyOpt\.objective\_examples\.experiments1d module
+-------------------------------------------------
 
-.. automodule:: GPyOpt.objective_examples.experiments1d
+.. automodule:: GpyOpt.objective_examples.experiments1d
     :members:
     :undoc-members:
     :show-inheritance:
 
-GPyOpt.objective_examples.experiments2d module
-----------------------------------------------
+GpyOpt\.objective\_examples\.experiments2d module
+-------------------------------------------------
 
-.. automodule:: GPyOpt.objective_examples.experiments2d
+.. automodule:: GpyOpt.objective_examples.experiments2d
     :members:
     :undoc-members:
     :show-inheritance:
 
-GPyOpt.objective_examples.experimentsNd module
-----------------------------------------------
+GpyOpt\.objective\_examples\.experimentsNd module
+-------------------------------------------------
 
-.. automodule:: GPyOpt.objective_examples.experimentsNd
+.. automodule:: GpyOpt.objective_examples.experimentsNd
     :members:
     :undoc-members:
     :show-inheritance:
@@ -32,7 +32,7 @@ GPyOpt.objective_examples.experimentsNd module
 Module contents
 ---------------
 
-.. automodule:: GPyOpt.objective_examples
+.. automodule:: GpyOpt.objective_examples
     :members:
     :undoc-members:
     :show-inheritance:

@@ -5,6 +5,8 @@ from .base import BOModel
 from .gpmodel import GPModel, GPModel_MCMC
 from .rfmodel import RFModel
 from .warpedgpmodel import WarpedGPModel
+from .input_warped_gpmodel import InputWarpedGPModel
+#from . import gpykernels
 
 def select_model(name):
     if name == 'GP':

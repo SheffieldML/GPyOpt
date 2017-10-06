@@ -13,7 +13,7 @@ class alpine1:
     '''
 
     def __init__(self,input_dim, bounds=None, sd=None):
-        if bounds == None: 
+        if bounds is  None: 
             self.bounds = bounds  =[(-10,10)]*input_dim
         else: 
             self.bounds = bounds
@@ -44,7 +44,7 @@ class alpine2:
     :param sd: standard deviation, to generate noisy evaluations of the function.
     '''
     def __init__(self,input_dim, bounds=None, sd=None):
-        if bounds == None: 
+        if bounds is  None: 
             self.bounds = bounds  =[(1,10)]*input_dim
         else: 
             self.bounds = bounds
@@ -77,7 +77,7 @@ class gSobol:
         self.a = a
         self.input_dim = len(self.a)
 
-        if bounds == None: 
+        if bounds is  None: 
             self.bounds =[(-4,6)]*self.input_dim
         else: 
             self.bounds = bounds
@@ -107,7 +107,7 @@ class ackley:
     def __init__(self, input_dim, bounds=None,sd=None):
         self.input_dim = input_dim
 
-        if bounds == None: 
+        if bounds is  None: 
             self.bounds =[(-32.768,32.768)]*self.input_dim
         else: 
             self.bounds = bounds
