@@ -1,5 +1,4 @@
-
-sudo: false
+language: python
 
 notifications:
   email:
@@ -10,32 +9,16 @@ os:
 - osx
 - linux
 
-addons:
-  apt_packages:
-    - pandoc
-
-env:
-  - PYTHON_VERSION=2.7
-  - PYTHON_VERSION=3.3
-  - PYTHON_VERSION=3.4
-  - PYTHON_VERSION=3.5
-
-before_install:
-- wget https://github.com/mzwiessele/travis_scripts/raw/master/download_miniconda.sh
-- wget https://github.com/mzwiessele/travis_scripts/raw/master/install_retry.sh
-- source download_miniconda.sh
-- echo $PATH
-
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+# command to install dependencies
 install:
-- echo $PATH
-- source install_retry.sh
-- pip install codecov
-- pip install pypandoc
-- pip install git+git://github.com/BRML/climin.git
-- pip install GPy
-- python setup.py develop
-
-
+  - pip install -r requirements.txt
+  - pip install .
+# command to run tests
 script:
 - coverage run travis_tests.py
 
