@@ -2,16 +2,19 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 import GPyOpt
+import collections
 import numpy as np
 import time
 from ..util.general import best_value
 from ..util.duplicate_manager import DuplicateManager
+from ..core.errors import InvalidConfigError
 from ..core.task.cost import CostModel
 from ..optimization.acquisition_optimizer import ContextManager
 try:
     from ..plotting.plots_bo import plot_acquisition, plot_convergence
 except:
     pass
+
 
 class BO(object):
     """
@@ -44,6 +47,23 @@ class BO(object):
         self.normalization_type = 'stats' ## not added in the API
         self.de_duplication = de_duplication
 
+    def suggest_next_locations(self, context = None, pending_X = None, ignored_X = None):
+        """
+        Run a single optimization step and return the next locations to evaluate the objective.
+        Number of suggested locations equals to batch_size.
+
+        :param context: fixes specified variables to a particular context (values) for the optimization run (default, None).
+        :param pending_X: matrix of input configurations that are in a pending state (i.e., do not have an evaluation yet) (default, None).
+        :param ignored_X: matrix of input configurations that the user black-lists, i.e., those configurations will not be suggested again (default, None).
+        """
+        self.model_parameters_iterations = None
+        self.num_acquisitions = 0
+        self.context = context
+        self._update_model(self.normalization_type)
+
+        suggested_locations = self._compute_next_evaluations(pending_zipped_X = pending_X, ignored_zipped_X = ignored_X)
+
+        return suggested_locations
 
     def run_optimization(self, max_iter = 0, max_time = np.inf,  eps = 1e-8, context = None, verbosity = True, save_models_parameters= True, report_file = None, evaluations_file = None, models_file=None):
         """
@@ -54,7 +74,11 @@ class BO(object):
         :param eps: minimum distance between two consecutive x's to keep running the model.
         :param verbosity: flag to print the optimization results after each iteration (default, True).
         :param report_file: filename of the file where the results of the optimization are saved (default, None).
+        :param context: fixes specified variables to a particular context (values) for the optimization run (default, None).
         """
+
+        if self.objective is None:
+            raise InvalidConfigError("Cannot run the optimization loop without the objective function")
 
         # --- Save the options to print and save the results
         self.verbosity = verbosity
@@ -134,11 +158,6 @@ class BO(object):
         if self.models_file is not None:
             self.save_models(self.models_file)
 
-    def next_location(self):
-        """
-        Returns the location of the next evaluation without evaluating the objective
-        """
-        return self._compute_next_evaluations()
 
     def _print_convergence(self):
         """
@@ -249,7 +268,7 @@ class BO(object):
                                 self.model.model.X,
                                 self.model.model.Y,
                                 self.acquisition.acquisition_function,
-                                self.next_location(),
+                                self.suggest_next_locations(),
                                 filename)
 
 

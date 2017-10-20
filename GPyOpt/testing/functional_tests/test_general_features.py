@@ -119,7 +119,7 @@ class TestAcquisitions(BaseTestCase):
         input_dim = 5
         f_bounds = (-5,5)
         self.f_inits = samples_multidimensional_uniform([f_bounds]*input_dim,n_inital_design)
-        self.f_inits = self.f_inits.reshape(1, input_dim, self.f_inits.shape[-1])
+        self.f_inits = self.f_inits.reshape(input_dim, self.f_inits.shape[-1])
 
         self.problem_config = {
             'objective': GPyOpt.objective_examples.experimentsNd.gSobol(np.ones(input_dim)).f,
@@ -129,6 +129,11 @@ class TestAcquisitions(BaseTestCase):
 
     def test_run(self):
         self.check_configs()
+
+    def test_run_in_steps(self):
+        # update intervals feature is not applicable to single step evaluations
+        self.methods_configs = [mc for mc in self.methods_configs if mc['name'] != 'update_intervals']
+        self.check_configs_in_steps()
 
 
 if __name__=='main':

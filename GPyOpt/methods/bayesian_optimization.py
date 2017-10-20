@@ -95,12 +95,16 @@ class BayesianOptimization(BO):
 
         # --- CHOOSE objective function
         self.maximize = maximize
-        self.f = self._sign(f)
         if 'objective_name' in kwargs: self.objective_name = kwargs['objective_name']
         else: self.objective_name = 'no_name'
         self.batch_size = batch_size
         self.num_cores = num_cores
-        self.objective = SingleObjective(self.f, self.batch_size, self.num_cores,self.objective_name)
+        if f is not None:
+            self.f = self._sign(f)
+            self.objective = SingleObjective(self.f, self.batch_size, self.num_cores,self.objective_name)
+        else:
+            self.f = None
+            self.objective = None
 
         # --- CHOOSE the cost model
         self.cost = CostModel(cost_withGradients)
@@ -152,20 +156,17 @@ class BayesianOptimization(BO):
         self.evaluator = self._evaluator_chooser()
 
         # --- Create optimization space
-        super(BayesianOptimization,self).__init__(	model                  = self.model,
-                									space                  = self.space,
-                									objective              = self.objective,
-                									acquisition            = self.acquisition,
+        super(BayesianOptimization,self).__init__(  model                  = self.model,
+                                                    space                  = self.space,
+                                                    objective              = self.objective,
+                                                    acquisition            = self.acquisition,
                                                     evaluator              = self.evaluator,
-                									X_init                 = self.X,
+                                                    X_init                 = self.X,
                                                     Y_init                 = self.Y,
                                                     cost                   = self.cost,
-                									normalize_Y            = self.normalize_Y,
-                									model_update_interval  = self.model_update_interval,
+                                                    normalize_Y            = self.normalize_Y,
+                                                    model_update_interval  = self.model_update_interval,
                                                     de_duplication         = self.de_duplication)
-
-        # --- Initialize everything
-        self.run_optimization(max_iter=0,verbosity=self.verbosity)
 
     def _model_chooser(self):
         return self.problem_config.model_creator(self.model_type, self.exact_feval,self.space)
@@ -180,6 +181,11 @@ class BayesianOptimization(BO):
         """
         Initializes the choice of X and Y based on the selected initial design and number of points selected.
         """
+
+        # If objective function was not provided, we require some initial sample data
+        if self.f is None and (self.X is None or self.Y is None):
+            raise InvalidConfigError("Initial data for both X and Y is required when objective function is not provided")
+
         # Case 1:
         if self.X is None:
             self.X = initial_design(self.initial_design_type, self.space, self.initial_design_numdata)

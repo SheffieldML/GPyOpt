@@ -3,7 +3,7 @@
 
 from .base import BOModel
 import numpy as np
-import GPy
+
 
 class RFModel(BOModel):
     """

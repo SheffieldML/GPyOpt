@@ -21,6 +21,9 @@ class TestOptimizationWithContext(unittest.TestCase):
         context_manager = ContextManager(space, context)
         x0              = np.array([[0,0,0,0,0]])
 
+        # initialize the model in a least intrusive way possible
+        bo.suggest_next_locations()
+
         f = bo.acquisition.acquisition_function
         f_df = bo.acquisition.acquisition_function_withGradients
         self.problem_with_context = OptimizationWithContext(x0=x0, f=f, df=None, f_df=f_df, context_manager=context_manager)

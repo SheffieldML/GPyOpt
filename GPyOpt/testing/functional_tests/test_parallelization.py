@@ -140,7 +140,7 @@ class TestAcquisitions(BaseTestCase):
         input_dim = 5
         f_bounds = (-5,5)
         self.f_inits = samples_multidimensional_uniform([f_bounds]*input_dim,n_inital_design)
-        self.f_inits = self.f_inits.reshape(1, input_dim, self.f_inits.shape[-1])
+        self.f_inits = self.f_inits.reshape(input_dim, self.f_inits.shape[-1])
 
         self.problem_config = {
             'objective': GPyOpt.objective_examples.experimentsNd.gSobol(np.ones(input_dim)).f,
@@ -149,11 +149,11 @@ class TestAcquisitions(BaseTestCase):
             'cost_withGradients': None}
 
     def test_run(self):
-        self.methods_configs = [mc for mc in self.methods_configs if mc['evaluator_type'] not in ['local_penalization','thompson_sampling']]
+        self.methods_configs = self.get_method_configs_by_evaluators(['local_penalization','thompson_sampling'], include=False)
         self.check_configs()
 
     def test_thompson_sampling(self):
-        self.methods_configs = [mc for mc in self.methods_configs if mc['evaluator_type'] == "thompson_sampling"]
+        self.methods_configs = self.get_method_configs_by_evaluators(['thompson_sampling'], include=True)
         self.check_configs(mock_model = MockModelVectorValuedPredict())
 
     def test_local_penalization(self):
@@ -162,15 +162,44 @@ class TestAcquisitions(BaseTestCase):
         gpy_model.Y = np.zeros(self.f_inits.shape[1])
         gpy_model.predictive_gradients.side_effect = lambda X: (np.zeros((X.shape[0], X.shape[1], 1)), np.zeros(X.shape))
 
-        self.methods_configs = [mc for mc in self.methods_configs if mc['evaluator_type'] == 'local_penalization']
+        self.methods_configs = self.get_method_configs_by_evaluators(['local_penalization'], include=True)
         self.check_configs(mock_gpy_model = gpy_model)
 
     def test_invalid_mode_type(self):
-        self.methods_configs = [mc for mc in self.methods_configs if mc['evaluator_type'] == 'local_penalization']
+        self.methods_configs = self.get_method_configs_by_evaluators(['local_penalization'], include=True)
         self.methods_configs[0]['model_type'] = 'RF'
 
         self.assertRaises(GPyOpt.core.errors.InvalidConfigError, lambda : self.check_configs())
 
+    def test_run_in_steps(self):
+        self.methods_configs = self.get_method_configs_by_evaluators(['random'], include=True)
+        method_config = self.methods_configs[0]
+        original_result = self.load_result_file(method_config['name'])
+        num_steps = int((original_result.shape[0] - self.f_inits.shape[1]) / method_config['batch_size'])
+
+        self.methods_configs = [method_config]
+        self.check_configs_in_steps(init_num_steps = num_steps)
+
+    def test_local_penalization_in_steps(self):
+        gpy_model = Mock()
+        gpy_model.X = np.zeros(self.f_inits.shape[1:])
+        gpy_model.Y = np.zeros(self.f_inits.shape[1])
+        gpy_model.predictive_gradients.side_effect = lambda X: (np.zeros((X.shape[0], X.shape[1], 1)), np.zeros(X.shape))
+
+        self.methods_configs = self.get_method_configs_by_evaluators(['local_penalization'], include=True)
+        method_config = self.methods_configs[0]
+        original_result = self.load_result_file(method_config['name'])
+        num_steps = int((original_result.shape[0] - self.f_inits.shape[1]) / method_config['batch_size'])
+
+        self.check_configs_in_steps(mock_gpy_model = gpy_model, init_num_steps = num_steps)
+
+    def get_method_configs_by_evaluators(self, evaluators, include=True):
+        '''
+        Return the sublist of method configs filtered by evaluator types
+        :param evaluators: list of evaluators
+        :param include: return entries that match the list provided if true, entries that do not match otherwise
+        '''
+        return [mc for mc in self.methods_configs if (include and mc['evaluator_type'] in evaluators) or (not include and mc['evaluator_type'] not in evaluators)]
 
 if __name__=='main':
     unittest.main()

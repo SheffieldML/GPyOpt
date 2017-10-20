@@ -99,7 +99,7 @@ class TestAcquisitions(BaseTestCase):
         f_bounds = (-5,5)
         np.random.seed(1)
         self.f_inits = samples_multidimensional_uniform([f_bounds]*input_dim,n_inital_design)
-        self.f_inits = self.f_inits.reshape(1, input_dim, self.f_inits.shape[-1])
+        self.f_inits = self.f_inits.reshape(input_dim, self.f_inits.shape[-1])
 
         self.problem_config = {
             'objective': GPyOpt.objective_examples.experimentsNd.gSobol(np.ones(input_dim)).f,
@@ -109,6 +109,9 @@ class TestAcquisitions(BaseTestCase):
 
     def test_run(self):
         self.check_configs()
+
+    def test_run_in_steps(self):
+        self.check_configs_in_steps()
 
 
 if __name__=='main':
