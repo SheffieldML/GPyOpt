@@ -1,10 +1,10 @@
-GpyOpt\.testing package
+GPyOpt\.testing package
 =======================
 
 Module contents
 ---------------
 
-.. automodule:: GpyOpt.testing
+.. automodule:: GPyOpt.testing
     :members:
     :undoc-members:
     :show-inheritance:

@@ -1,69 +1,69 @@
-GpyOpt\.acquisitions package
+GPyOpt\.acquisitions package
 ============================
 
 Submodules
 ----------
 
-GpyOpt\.acquisitions\.EI module
+GPyOpt\.acquisitions\.EI module
 -------------------------------
 
-.. automodule:: GpyOpt.acquisitions.EI
+.. automodule:: GPyOpt.acquisitions.EI
     :members:
     :undoc-members:
     :show-inheritance:
 
-GpyOpt\.acquisitions\.EI\_mcmc module
+GPyOpt\.acquisitions\.EI\_mcmc module
 -------------------------------------
 
-.. automodule:: GpyOpt.acquisitions.EI_mcmc
+.. automodule:: GPyOpt.acquisitions.EI_mcmc
     :members:
     :undoc-members:
     :show-inheritance:
 
-GpyOpt\.acquisitions\.LCB module
+GPyOpt\.acquisitions\.LCB module
 --------------------------------
 
-.. automodule:: GpyOpt.acquisitions.LCB
+.. automodule:: GPyOpt.acquisitions.LCB
     :members:
     :undoc-members:
     :show-inheritance:
 
-GpyOpt\.acquisitions\.LCB\_mcmc module
+GPyOpt\.acquisitions\.LCB\_mcmc module
 --------------------------------------
 
-.. automodule:: GpyOpt.acquisitions.LCB_mcmc
+.. automodule:: GPyOpt.acquisitions.LCB_mcmc
     :members:
     :undoc-members:
     :show-inheritance:
 
-GpyOpt\.acquisitions\.LP module
+GPyOpt\.acquisitions\.LP module
 -------------------------------
 
-.. automodule:: GpyOpt.acquisitions.LP
+.. automodule:: GPyOpt.acquisitions.LP
     :members:
     :undoc-members:
     :show-inheritance:
 
-GpyOpt\.acquisitions\.MPI module
+GPyOpt\.acquisitions\.MPI module
 --------------------------------
 
-.. automodule:: GpyOpt.acquisitions.MPI
+.. automodule:: GPyOpt.acquisitions.MPI
     :members:
     :undoc-members:
     :show-inheritance:
 
-GpyOpt\.acquisitions\.MPI\_mcmc module
+GPyOpt\.acquisitions\.MPI\_mcmc module
 --------------------------------------
 
-.. automodule:: GpyOpt.acquisitions.MPI_mcmc
+.. automodule:: GPyOpt.acquisitions.MPI_mcmc
     :members:
     :undoc-members:
     :show-inheritance:
 
-GpyOpt\.acquisitions\.base module
+GPyOpt\.acquisitions\.base module
 ---------------------------------
 
-.. automodule:: GpyOpt.acquisitions.base
+.. automodule:: GPyOpt.acquisitions.base
     :members:
     :undoc-members:
     :show-inheritance:
@@ -72,7 +72,7 @@ GpyOpt\.acquisitions\.base module
 Module contents
 ---------------
 
-.. automodule:: GpyOpt.acquisitions
+.. automodule:: GPyOpt.acquisitions
     :members:
     :undoc-members:
     :show-inheritance:

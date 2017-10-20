@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# GpyOpt documentation build configuration file, created by
-# sphinx-quickstart on Fri Oct  6 16:12:59 2017.
+# GPyOpt documentation build configuration file, created by
+# sphinx-quickstart on Fri Oct 20 15:53:53 2017.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -48,7 +48,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'GpyOpt'
+project = 'GPyOpt'
 copyright = '2017, Author'
 author = 'Author'
 
@@ -117,7 +117,7 @@ html_sidebars = {
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'GpyOptdoc'
+htmlhelp_basename = 'GPyOptdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -144,7 +144,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'GpyOpt.tex', 'GpyOpt Documentation',
+    (master_doc, 'GPyOpt.tex', 'GPyOpt Documentation',
      'Author', 'manual'),
 ]
 
@@ -154,7 +154,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'gpyopt', 'GpyOpt Documentation',
+    (master_doc, 'gpyopt', 'GPyOpt Documentation',
      [author], 1)
 ]
 
@@ -165,8 +165,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'GpyOpt', 'GpyOpt Documentation',
-     author, 'GpyOpt', 'One line description of project.',
+    (master_doc, 'GPyOpt', 'GPyOpt Documentation',
+     author, 'GPyOpt', 'One line description of project.',
      'Miscellaneous'),
 ]
 

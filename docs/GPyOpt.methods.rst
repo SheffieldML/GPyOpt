@@ -1,21 +1,21 @@
-GpyOpt\.methods package
+GPyOpt\.methods package
 =======================
 
 Submodules
 ----------
 
-GpyOpt\.methods\.bayesian\_optimization module
+GPyOpt\.methods\.bayesian\_optimization module
 ----------------------------------------------
 
-.. automodule:: GpyOpt.methods.bayesian_optimization
+.. automodule:: GPyOpt.methods.bayesian_optimization
     :members:
     :undoc-members:
     :show-inheritance:
 
-GpyOpt\.methods\.modular\_bayesian\_optimization module
+GPyOpt\.methods\.modular\_bayesian\_optimization module
 -------------------------------------------------------
 
-.. automodule:: GpyOpt.methods.modular_bayesian_optimization
+.. automodule:: GPyOpt.methods.modular_bayesian_optimization
     :members:
     :undoc-members:
     :show-inheritance:
@@ -24,7 +24,7 @@ GpyOpt\.methods\.modular\_bayesian\_optimization module
 Module contents
 ---------------
 
-.. automodule:: GpyOpt.methods
+.. automodule:: GPyOpt.methods
     :members:
     :undoc-members:
     :show-inheritance:

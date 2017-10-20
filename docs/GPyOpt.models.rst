@@ -1,45 +1,45 @@
-GpyOpt\.models package
+GPyOpt\.models package
 ======================
 
 Submodules
 ----------
 
-GpyOpt\.models\.base module
+GPyOpt\.models\.base module
 ---------------------------
 
-.. automodule:: GpyOpt.models.base
+.. automodule:: GPyOpt.models.base
     :members:
     :undoc-members:
     :show-inheritance:
 
-GpyOpt\.models\.gpmodel module
+GPyOpt\.models\.gpmodel module
 ------------------------------
 
-.. automodule:: GpyOpt.models.gpmodel
+.. automodule:: GPyOpt.models.gpmodel
     :members:
     :undoc-members:
     :show-inheritance:
 
-GpyOpt\.models\.input\_warped\_gpmodel module
+GPyOpt\.models\.input\_warped\_gpmodel module
 ---------------------------------------------
 
-.. automodule:: GpyOpt.models.input_warped_gpmodel
+.. automodule:: GPyOpt.models.input_warped_gpmodel
     :members:
     :undoc-members:
     :show-inheritance:
 
-GpyOpt\.models\.rfmodel module
+GPyOpt\.models\.rfmodel module
 ------------------------------
 
-.. automodule:: GpyOpt.models.rfmodel
+.. automodule:: GPyOpt.models.rfmodel
     :members:
     :undoc-members:
     :show-inheritance:
 
-GpyOpt\.models\.warpedgpmodel module
+GPyOpt\.models\.warpedgpmodel module
 ------------------------------------
 
-.. automodule:: GpyOpt.models.warpedgpmodel
+.. automodule:: GPyOpt.models.warpedgpmodel
     :members:
     :undoc-members:
     :show-inheritance:
@@ -48,7 +48,7 @@ GpyOpt\.models\.warpedgpmodel module
 Module contents
 ---------------
 
-.. automodule:: GpyOpt.models
+.. automodule:: GPyOpt.models
     :members:
     :undoc-members:
     :show-inheritance:

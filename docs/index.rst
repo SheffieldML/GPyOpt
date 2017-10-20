@@ -1,16 +1,16 @@
-.. GpyOpt documentation master file, created by
-   sphinx-quickstart on Fri Oct  6 16:12:59 2017.
+.. GPyOpt documentation master file, created by
+   sphinx-quickstart on Fri Oct 20 15:53:53 2017.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to GpyOpt's documentation!
+Welcome to GPyOpt's documentation!
 ==================================
 
 .. toctree::
    :maxdepth: 4
    :caption: Contents:
 
-   GpyOpt
+   GPyOpt
 
 
 Indices and tables

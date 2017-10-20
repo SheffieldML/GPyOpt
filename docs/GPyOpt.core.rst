@@ -1,4 +1,4 @@
-GpyOpt\.core package
+GPyOpt\.core package
 ====================
 
 Subpackages
@@ -6,24 +6,24 @@ Subpackages
 
 .. toctree::
 
-    GpyOpt.core.evaluators
-    GpyOpt.core.task
+    GPyOpt.core.evaluators
+    GPyOpt.core.task
 
 Submodules
 ----------
 
-GpyOpt\.core\.bo module
+GPyOpt\.core\.bo module
 -----------------------
 
-.. automodule:: GpyOpt.core.bo
+.. automodule:: GPyOpt.core.bo
     :members:
     :undoc-members:
     :show-inheritance:
 
-GpyOpt\.core\.errors module
+GPyOpt\.core\.errors module
 ---------------------------
 
-.. automodule:: GpyOpt.core.errors
+.. automodule:: GPyOpt.core.errors
     :members:
     :undoc-members:
     :show-inheritance:
@@ -32,7 +32,7 @@ GpyOpt\.core\.errors module
 Module contents
 ---------------
 
-.. automodule:: GpyOpt.core
+.. automodule:: GPyOpt.core
     :members:
     :undoc-members:
     :show-inheritance:

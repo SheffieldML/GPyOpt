@@ -1,4 +1,4 @@
-GpyOpt package
+GPyOpt package
 ==============
 
 Subpackages
@@ -6,21 +6,20 @@ Subpackages
 
 .. toctree::
 
-    GpyOpt.acquisitions
-    GpyOpt.core
-    GpyOpt.interface
-    GpyOpt.methods
-    GpyOpt.models
-    GpyOpt.objective_examples
-    GpyOpt.optimization
-    GpyOpt.plotting
-    GpyOpt.testing
-    GpyOpt.util
+    GPyOpt.acquisitions
+    GPyOpt.core
+    GPyOpt.interface
+    GPyOpt.methods
+    GPyOpt.models
+    GPyOpt.objective_examples
+    GPyOpt.optimization
+    GPyOpt.plotting
+    GPyOpt.util
 
 Module contents
 ---------------
 
-.. automodule:: GpyOpt
+.. automodule:: GPyOpt
     :members:
     :undoc-members:
     :show-inheritance:

@@ -1,29 +1,29 @@
-GpyOpt\.optimization package
+GPyOpt\.optimization package
 ============================
 
 Submodules
 ----------
 
-GpyOpt\.optimization\.acquisition\_optimizer module
+GPyOpt\.optimization\.acquisition\_optimizer module
 ---------------------------------------------------
 
-.. automodule:: GpyOpt.optimization.acquisition_optimizer
+.. automodule:: GPyOpt.optimization.acquisition_optimizer
     :members:
     :undoc-members:
     :show-inheritance:
 
-GpyOpt\.optimization\.anchor\_points\_generator module
+GPyOpt\.optimization\.anchor\_points\_generator module
 ------------------------------------------------------
 
-.. automodule:: GpyOpt.optimization.anchor_points_generator
+.. automodule:: GPyOpt.optimization.anchor_points_generator
     :members:
     :undoc-members:
     :show-inheritance:
 
-GpyOpt\.optimization\.optimizer module
+GPyOpt\.optimization\.optimizer module
 --------------------------------------
 
-.. automodule:: GpyOpt.optimization.optimizer
+.. automodule:: GPyOpt.optimization.optimizer
     :members:
     :undoc-members:
     :show-inheritance:
@@ -32,7 +32,7 @@ GpyOpt\.optimization\.optimizer module
 Module contents
 ---------------
 
-.. automodule:: GpyOpt.optimization
+.. automodule:: GPyOpt.optimization
     :members:
     :undoc-members:
     :show-inheritance:

@@ -1,37 +1,37 @@
-GpyOpt\.core\.task package
+GPyOpt\.core\.task package
 ==========================
 
 Submodules
 ----------
 
-GpyOpt\.core\.task\.cost module
+GPyOpt\.core\.task\.cost module
 -------------------------------
 
-.. automodule:: GpyOpt.core.task.cost
+.. automodule:: GPyOpt.core.task.cost
     :members:
     :undoc-members:
     :show-inheritance:
 
-GpyOpt\.core\.task\.objective module
+GPyOpt\.core\.task\.objective module
 ------------------------------------
 
-.. automodule:: GpyOpt.core.task.objective
+.. automodule:: GPyOpt.core.task.objective
     :members:
     :undoc-members:
     :show-inheritance:
 
-GpyOpt\.core\.task\.space module
+GPyOpt\.core\.task\.space module
 --------------------------------
 
-.. automodule:: GpyOpt.core.task.space
+.. automodule:: GPyOpt.core.task.space
     :members:
     :undoc-members:
     :show-inheritance:
 
-GpyOpt\.core\.task\.variables module
+GPyOpt\.core\.task\.variables module
 ------------------------------------
 
-.. automodule:: GpyOpt.core.task.variables
+.. automodule:: GPyOpt.core.task.variables
     :members:
     :undoc-members:
     :show-inheritance:
@@ -40,7 +40,7 @@ GpyOpt\.core\.task\.variables module
 Module contents
 ---------------
 
-.. automodule:: GpyOpt.core.task
+.. automodule:: GPyOpt.core.task
     :members:
     :undoc-members:
     :show-inheritance:

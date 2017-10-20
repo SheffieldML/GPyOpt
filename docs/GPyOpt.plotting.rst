@@ -1,13 +1,13 @@
-GpyOpt\.plotting package
+GPyOpt\.plotting package
 ========================
 
 Submodules
 ----------
 
-GpyOpt\.plotting\.plots\_bo module
+GPyOpt\.plotting\.plots\_bo module
 ----------------------------------
 
-.. automodule:: GpyOpt.plotting.plots_bo
+.. automodule:: GPyOpt.plotting.plots_bo
     :members:
     :undoc-members:
     :show-inheritance:
@@ -16,7 +16,7 @@ GpyOpt\.plotting\.plots\_bo module
 Module contents
 ---------------
 
-.. automodule:: GpyOpt.plotting
+.. automodule:: GPyOpt.plotting
     :members:
     :undoc-members:
     :show-inheritance:
