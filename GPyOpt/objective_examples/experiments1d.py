@@ -11,7 +11,7 @@ class function1d:
 	:param bounds: the box constraints to define the domain in which the function is optimized.
 	'''
 	def plot(self,bounds=None):
-		if bounds == None: bounds = self.bounds
+		if bounds is  None: bounds = self.bounds
 		X = np.arange(bounds[0][0], bounds[0][1], 0.01)
 		Y = self.f(X)
 		plt.plot(X, Y, lw=2)

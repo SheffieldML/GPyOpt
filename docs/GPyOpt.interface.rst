@@ -1,35 +1,35 @@
-GPyOpt.interface package
-========================
+GPyOpt\.interface package
+=========================
 
 Submodules
 ----------
 
-GPyOpt.interface.config_parser module
--------------------------------------
+GPyOpt\.interface\.config\_parser module
+----------------------------------------
 
 .. automodule:: GPyOpt.interface.config_parser
     :members:
     :undoc-members:
     :show-inheritance:
 
-GPyOpt.interface.driver module
-------------------------------
+GPyOpt\.interface\.driver module
+--------------------------------
 
 .. automodule:: GPyOpt.interface.driver
     :members:
     :undoc-members:
     :show-inheritance:
 
-GPyOpt.interface.func_loader module
------------------------------------
+GPyOpt\.interface\.func\_loader module
+--------------------------------------
 
 .. automodule:: GPyOpt.interface.func_loader
     :members:
     :undoc-members:
     :show-inheritance:
 
-GPyOpt.interface.output module
-------------------------------
+GPyOpt\.interface\.output module
+--------------------------------
 
 .. automodule:: GPyOpt.interface.output
     :members:

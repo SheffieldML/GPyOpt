@@ -1,5 +1,5 @@
-GPyOpt.core package
-===================
+GPyOpt\.core package
+====================
 
 Subpackages
 -----------
@@ -12,10 +12,18 @@ Subpackages
 Submodules
 ----------
 
-GPyOpt.core.bo module
----------------------
+GPyOpt\.core\.bo module
+-----------------------
 
 .. automodule:: GPyOpt.core.bo
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+GPyOpt\.core\.errors module
+---------------------------
+
+.. automodule:: GPyOpt.core.errors
     :members:
     :undoc-members:
     :show-inheritance:

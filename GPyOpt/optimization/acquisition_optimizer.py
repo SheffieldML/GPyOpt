@@ -1,22 +1,22 @@
 # Copyright (c) 2016, the GPyOpt Authors
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
-from .optimizer import select_optimizer
-from ..util.general import multigrid, samples_multidimensional_uniform
-import numpy as np
+from .optimizer import OptLbfgs, OptDirect, OptCma, apply_optimizer, choose_optimizer
+from ..util.general import round_optimum
+from .anchor_points_generator import ObjectiveAnchorPointsGenerator, ThompsonSamplingAnchorPointsGenerator
 from ..core.task.space import Design_space
+import numpy as np
 
 
-def AcquisitionOptimizer(space, optimizer='lbfgs', current_X = None, **kwargs):
+max_objective_anchor_points_logic = "max_objective"
+thompson_sampling_anchor_points_logic = "thompsom_sampling"
+sobol_design_type = "sobol"
+random_design_type = "random"
+
+
+class AcquisitionOptimizer(object):
     """
-    Chooser for the type of acquisition optimizer to use. The decision is based on the type of input space and
-    whether it contains discrete, continuous, bandit variables or a mix of them. If the problem is defined for
-    a mix of discrete and continuous variables the optimization is done as follows:
-        - All possible combinations of the values of the discrete variables are computed.
-        - For each combination the problem is solved for the remaining continuous variables.
-        - The arg min of all the sub-problems is taken.
-    Note that this may be slow in cases with many discrete variables. In the bandits settings not optimization is 
-    carried out. Since the space is finite the argmin is computed.
+    General class for acquisition optimizers defined in domains with mix of discrete, continuous, bandit variables
 
     :param space: design space class from GPyOpt.
     :param optimizer: optimizer to use. Can be selected among:
@@ -24,114 +24,27 @@ def AcquisitionOptimizer(space, optimizer='lbfgs', current_X = None, **kwargs):
         - 'DIRECT': Dividing Rectangles.
         - 'CMA': covariance matrix adaptation.
     """
-    
-    if space.has_types['bandit'] and (space.has_types['continuous'] or space.has_types['discrete']):
-        raise Exception('Not possible to combine bandits with other variable types.)')
 
-    elif space.has_types['bandit']:
-        return BanditAcqOptimizer(space, current_X, **kwargs)
+    def __init__(self, space, optimizer='lbfgs', **kwargs):
 
-    elif space.has_types['continuous'] and not space.has_types['discrete']:
-        return ContAcqOptimizer(space, optimizer=optimizer, **kwargs)
+        self.space              = space
+        self.optimizer_name     = optimizer
+        self.kwargs             = kwargs
 
-    elif space.has_types['continuous'] and  space.has_types['discrete']:
-        return MixedAcqOptimizer(space, optimizer=optimizer, **kwargs)
+        ### -- save extra options than can be passed to the optimizer
+        if 'model' in self.kwargs:
+            self.model = self.kwargs['model']
 
-    elif not space.has_types['continuous'] and space.has_types['discrete']:
-        return BanditAcqOptimizer(space, current_X, **kwargs)
-
-
-class AcquOptimizer(object):
-    """
-    Base class for the optimizers of the acquisition functions.
-
-    :param space: design space class from GPyOpt.
-    """
-    
-    def __init__(self, space):
-        self.space = space
-        
-    def optimize(self, f=None, df=None, f_df=None):
-        """
-        :param f: function to optimize.
-        :param df: gradient of the function to optimize.
-        :param f_df: returns both the function to optimize and its gradient.
-        """
-        return None, None
-
-class ContAcqOptimizer(AcquOptimizer):
-    """
-    General class for acquisition optimizers defined in continuous domains 
-
-    :param space: design space class from GPyOpt.
-    :param optimizer: optimizer to use. Can be selected among:
-        - 'lbfgs': L-BFGS.
-        - 'DIRECT': Dividing Rectangles.
-        - 'CMA': covariance matrix adaptation.
-    :param n_samples: number of initial points in which the acquisition is evaluated.
-    :param fast: whether just a local optimizer should be run starting in the best location (default, True). If False a local search is performed
-            for each point and the best of all is taken.
-    :param ramdom: whether the initial samples are taken randomly (or in a grid if False). Note that, if False, n_samples represent the number
-            of points user per dimension.
-    :param search: whether to do local search or not.
-    """
-
-    
-    def __init__(self, space, optimizer='lbfgs', n_samples=5000, fast=True, random=True, search=True, **kwargs):
-        super(ContAcqOptimizer, self).__init__(space)
-        
-        self.n_samples = n_samples
-        self.fast= fast
-        self.random = random
-        self.search = search
-        self.optimizer_name = optimizer
-        self.kwargs = kwargs
-        self.optimizer = select_optimizer(self.optimizer_name)(space, **kwargs)
-        self.free_dims = list(range(space.dimensionality))
-        self.bounds = self.space.get_bounds()
-        self.subspace = self.space
-
-        if self.random:
-            self.samples = samples_multidimensional_uniform(self.bounds,self.n_samples)
+        if 'anchor_points_logic' in self.kwargs:
+            self.type_anchor_points_logic = self.kwargs['type_anchor_points_logic']
         else:
-            self.samples = multigrid(self.bounds, self.n_samples)
+            self.type_anchor_points_logic = max_objective_anchor_points_logic
+
+        ## -- Context handler: takes
+        self.context_manager = ContextManager(space)
 
 
-    def fix_dimensions(self, dims=None, values=None):
-        '''
-        Fix the values of some of the dimensions. Once this this done the optimization is carried out only across the not fixed dimensions.
-
-        :param dims: list of the indexes of the dimensions to fix.
-        :param values: list of the values at which the selected dimensions should be fixed.
-        ''' 
-        self.fixed_dims = dims
-        self.fixed_values = np.atleast_2d(values)
-        
-        # -- restore to initial values
-        self.free_dims = list(range(self.space.dimensionality))
-        self.bounds = self.space.get_bounds()
-
-        # -- change free dimensions and remove bounds from fixed dimensions
-        for idx in self.fixed_dims[::-1]: # need to reverse the order to start removing from the back, otherwise dimensions dont' match
-            self.free_dims.remove(idx)
-            del self.bounds[idx]
-
-        # -- take only the fixed components of the random samples
-        self.samples = self.samples[:,np.array(self.free_dims)] # take only the component of active dims
-        self.subspace = self.space.get_subspace(self.free_dims)
-        self.optimizer = select_optimizer(self.optimizer_name)(Design_space(self.subspace), **self.kwargs)
-
-    def _expand_vector(self,x):
-        '''
-        Takes a value x in the subspace of not fixed dimensions and expands it with the values of the fixed ones.
-        '''
-        xx = np.zeros((x.shape[0],self.space.dimensionality)) 
-        xx[:,np.array(self.free_dims)]  = x  
-        if self.space.dimensionality != len(self.free_dims):
-            xx[:,np.array(self.fixed_dims)] = self.fixed_values
-        return xx
-
-    def optimize(self, f=None, df=None, f_df=None):
+    def optimize(self, f=None, df=None, f_df=None, duplicate_manager=None):
         """
         Optimizes the input function.
 
@@ -144,146 +57,70 @@ class ContAcqOptimizer(AcquOptimizer):
         self.df = df
         self.f_df = f_df
 
-        def fp(x):
-            '''
-            Wrapper of *f*: takes an input x with size of the not fixed dimensions expands it and evaluates the entire function.
-            '''
-            x = np.atleast_2d(x)
-            xx = self._expand_vector(x)        
-            if x.shape[0]==1:
-                return self.f(xx)[0]
-            else:
-                return self.f(xx)
+        ## --- Update the optimizer, in case context has beee passed.
+        self.optimizer = choose_optimizer(self.optimizer_name, self.context_manager.noncontext_bounds)
 
-        def fp_dfp(x):
-            '''
-            Wrapper of the derivative of *f*: takes an input x with size of the not fixed dimensions expands it and evaluates the gradient of the entire function.
-            '''
-            x = np.atleast_2d(x)
-            xx = self._expand_vector(x)        
-            
-            fp_xx , dfp_xx = f_df(xx)
-            dfp_xx = dfp_xx[:,np.array(self.free_dims)]
-            return fp_xx, dfp_xx
+        ## --- Selecting the anchor points and removing duplicates
+        if self.type_anchor_points_logic == max_objective_anchor_points_logic:
+            anchor_points_generator = ObjectiveAnchorPointsGenerator(self.space, random_design_type, f)
+        elif self.type_anchor_points_logic == thompson_sampling_anchor_points_logic:
+            anchor_points_generator = ThompsonSamplingAnchorPointsGenerator(self.space, sobol_design_type, self.model)
 
-        ## --- The optimization is done here
+        ## -- Select the anchor points (with context)
+        anchor_points = anchor_points_generator.get(duplicate_manager=duplicate_manager, context_manager=self.context_manager)
 
-        ## --- Fast method: only runs a local optimizer at the best found evaluation
-        if self.fast:
-            pred_fp = fp(self.samples)
-            x0 =  self.samples[np.argmin(pred_fp)]
-            if self.search:
-                if self.f_df == None: fp_dfp = None  # -- In case no gradients are available 
-                x_min, f_min = self.optimizer.optimize(x0, f =fp, df=None, f_df=fp_dfp)
-                return self._expand_vector(x_min), f_min
-            else:
-                return self._expand_vector(np.atleast_2d(x0)), pred_fp
-        else:
-        ## --- Standard method: runs a local optimizer at all the acquisition evaluation
-            x_min = None
-            f_min = np.Inf
-            for i in self.samples.shape[0]:
-                if self.search:
-                    if self.f_df == None: fp_dfp = None # -- In case no gradients are available 
-                    x1, f1 = self.optimizer.optimize(self.samples[i], f =fp, df=None, f_df=fp_dfp)
-                else:
-                    x1, f1 = self.samples[i], fp(self.samples[i])
-                if f1<f_min:
-                    x_min = x1
-                    f_min = f1
-            return self._expand_vector(x_min), f_min
-        
+        ## --- Applying local optimizers at the anchor points and update bounds of the optimizer (according to the context)
+        optimized_points = [apply_optimizer(self.optimizer, a, f=f, df=None, f_df=f_df, duplicate_manager=duplicate_manager, context_manager=self.context_manager, space = self.space) for a in anchor_points]
+        x_min, fx_min = min(optimized_points, key=lambda t:t[1])
 
-class BanditAcqOptimizer(AcquOptimizer):
+        #x_min, fx_min = min([apply_optimizer(self.optimizer, a, f=f, df=None, f_df=f_df, duplicate_manager=duplicate_manager, context_manager=self.context_manager, space = self.space) for a in anchor_points], key=lambda t:t[1])
+
+        return x_min, fx_min
+
+
+class ContextManager(object):
     """
-    General class for acquisition optimizers defined on bandits
-
+    class to handle the context variable in the optimizer
     :param space: design space class from GPyOpt.
-    :param current_X: numpy array containing the arms of the bandit that hasn't been pulled yet.
+    :param context: dictionary of variables and their contex values
     """
 
-    def __init__(self, space, current_X, **kwargs):
-        super(BanditAcqOptimizer, self).__init__(space)
-        self.space = space
-        self.pulled_arms = current_X
+    def __init__ (self, space, context = None):
+        self.space              = space
+        self.all_index          = list(range(space.model_dimensionality))
+        self.all_index_obj      = list(range(len(self.space.config_space_expanded)))
+        self.context_index      = []
+        self.context_value      = []
+        self.context_index_obj  = []
+        self.nocontext_index_obj= self.all_index_obj
+        self.noncontext_bounds  = self.space.get_bounds()[:]
+        self.noncontext_index   = self.all_index[:]
 
-    def optimize(self, f=None, df=None, f_df=None):
-        """
-        Optimization of the acquisition. Since it is a bandit it just takes the argmin of the outputs.
+        if context is not None:
 
-        :param f: function to optimize.
-        :param df: gradient of the function to optimize.
-        :param f_df: returns both the function to optimize and its gradient.
-        """
+            ## -- Update new context
+            for context_variable in context.keys():
+                variable = self.space.find_variable(context_variable)
+                self.context_index += variable.index_in_model
+                self.context_index_obj += variable.index_in_objective
+                self.context_value += variable.objective_to_model(context[context_variable])
 
-        # --- Get all potential arms
-        if self.space.has_types['discrete']:
-            arms = self.space.get_discrete_grid()
-        else:
-            arms = self.space.get_bandit()
+            ## --- Get bounds and index for non context
+            self.noncontext_index = [idx for idx in self.all_index if idx not in self.context_index]
+            self.noncontext_bounds = [self.noncontext_bounds[idx] for idx in  self.noncontext_index]
 
-        if arms.shape[0] > self.pulled_arms.shape[0]:
-            # --- remove select best arm not yet sampled
-            pref_f = f(arms)
-            index = np.argsort(pref_f.flatten())
-            k=0
-            while any((self.pulled_arms[:]==arms[index[k],:].flatten()).all(1)):
-                k +=1 
-                
-            x_min = arms[index[k],:]
-            f_min = f(x_min)
-            #self.pulled_arms = np.vstack((self.pulled_arms, x_min))
-
-        else:
-            import sys
-            sys.exit('All locations of the design space have been sampled.')
-
-        return np.atleast_2d(x_min), f_min
-
-
-class MixedAcqOptimizer(AcquOptimizer):
-    """
-    General class for acquisition optimizers defined on mixed domains of continuous and discrete variables. 
-
-    :param space: design space class from GPyOpt.
-    :param optimizer: optimizer to use. Can be selected among:
-        - 'lbfgs': L-BFGS.
-        - 'DIRECT': Dividing Rectangles.
-        - 'CMA': covariance matrix adaptation.
-    :param n_samples: number of initial points in which the acquisition is evaluated.
-    :param fast: whether just a local optimizer should be run starting in the best location (default, True). If False a local search is performed
-            for each point and the best of all is taken.
-    :param ramdom: whether the initial samples are taken randomly (or in a grid if False). Note that, if False, n_samples represent the number
-            of points user per dimension.
-    :param search: whether to do local search or not.
-    """
-
-    def __init__(self, space, optimizer='lbfgs', n_samples=1000, fast=True, random=True, search=True, **kwargs):
-        super(MixedAcqOptimizer, self).__init__(space)
-
-        self.space = space
-        self.mixed_optimizer = ContAcqOptimizer(space, n_samples=n_samples, fast=fast, random=random, search=search, optimizer=optimizer, **kwargs)
-        self.discrete_dims = self.space.get_discrete_dims()
-        self.discrete_values = self.space.get_discrete_grid()
-
-    def optimize(self, f=None, df=None, f_df=None):
-        """
-        Optimization of the acquisition. 
-
-        :param f: function to optimize.
-        :param df: gradient of the function to optimize.
-        :param f_df: returns both the function to optimize and its gradient.
-        """
-        num_discrete = self.discrete_values.shape[0]
-        partial_x_min  = np.zeros((num_discrete,self.space.dimensionality))
-        partial_f_min  = np.zeros((num_discrete,1))
-        
-        for i in range(num_discrete):
-            self.mixed_optimizer.fix_dimensions(dims=self.discrete_dims, values=self.discrete_values[i,:])
-            partial_x_min[i,:] , partial_f_min[i,:] = self.mixed_optimizer.optimize(f, df, f_df)
-
-        return np.atleast_2d(partial_x_min[np.argmin(partial_f_min)]), np.atleast_2d(min(partial_f_min))
+            ## update non context index in objective
+            self.nocontext_index_obj = [idx for idx in self.all_index_obj if idx not in self.context_index_obj]
 
 
 
-
+    def _expand_vector(self,x):
+        '''
+        Takes a value x in the subspace of not fixed dimensions and expands it with the values of the fixed ones.
+        :param x: input vector to be expanded by adding the context values
+        '''
+        x = np.atleast_2d(x)
+        x_expanded = np.zeros((x.shape[0],self.space.model_dimensionality))
+        x_expanded[:,np.array(self.noncontext_index).astype(int)]  = x
+        x_expanded[:,np.array(self.context_index).astype(int)]  = self.context_value
+        return x_expanded

@@ -14,7 +14,6 @@ Subpackages
     GPyOpt.objective_examples
     GPyOpt.optimization
     GPyOpt.plotting
-    GPyOpt.testing
     GPyOpt.util
 
 Module contents

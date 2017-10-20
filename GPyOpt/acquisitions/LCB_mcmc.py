@@ -20,8 +20,7 @@ class AcquisitionLCB_MCMC(AcquisitionLCB):
     analytical_gradient_prediction = True
     
     def __init__(self, model, space, optimizer=None, cost_withGradients=None, exploration_weight=2):
-        super(AcquisitionLCB_MCMC, self).__init__(model, space, optimizer,exploration_weight)
-        
+        super(AcquisitionLCB_MCMC, self).__init__(model, space, optimizer,cost_withGradients,exploration_weight)
         assert self.model.MCMC_sampler, 'Samples from the hyper-parameters are needed to compute the integrated GP-LCB'
 
     def _compute_acq(self,x):

@@ -26,10 +26,8 @@ class BOModel(with_metaclass(abc.ABCMeta, object)):
     def predict_withGradients(self, X):
         "Get the gradients of the predicted mean and variance at X."
         return
-    
+
     @abc.abstractmethod
     def get_fmin(self):
         "Get the minimum of the current model."
         return
-
-    

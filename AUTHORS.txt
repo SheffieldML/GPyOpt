@@ -1,3 +1,16 @@
+-Aki Vehtari
+-Alan Saul
+-Andreas Damianou
+-Andrei Paleyes
+-Fela Winkelmolen
+-Huibin Shen
+-James Hensman
 -Javier Gonzalez
+-Jordan Massiah
+-Josh Fass
+-Neil Lawrence
+-Rasmus Berg Palm
+-Rodolphe Jenatton
+-Simon Kamronn
 -Zhenwen Dai
--see also GPy authors
+-see also GPy and GPyOpt contributors in GitHub

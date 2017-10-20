@@ -3,15 +3,15 @@
 
 from .base import BOModel
 import numpy as np
-import GPy
+
 
 class RFModel(BOModel):
     """
     General class for handling a Ramdom Forest in GPyOpt.
 
-    .. Note:: The model has beed wrapper 'as it is' from  Scikit-learn. Check 
+    .. Note:: The model has beed wrapper 'as it is' from  Scikit-learn. Check
     http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html
-    for further details.  
+    for further details.
     """
 
     analytical_gradient_prediction = False
@@ -20,7 +20,7 @@ class RFModel(BOModel):
            max_features='auto', max_leaf_nodes=None, min_samples_leaf=1,
            min_samples_split=2, min_weight_fraction_leaf=0.0,
            n_estimators=500, n_jobs=1, oob_score=False, random_state=None,
-           verbose=0, warm_start=False, normalize_Y=True):
+           verbose=0, warm_start=False):
 
         self.bootstrap = bootstrap
         self.criterion = criterion
@@ -36,7 +36,6 @@ class RFModel(BOModel):
         self.random_state = random_state
         self.verbose = verbose
         self.warm_start = warm_start
-        self.normalize_Y = normalize_Y
 
         self.model = None
 
@@ -47,53 +46,51 @@ class RFModel(BOModel):
         from sklearn.ensemble import RandomForestRegressor
         self.X = X
         self.Y = Y
-        self.model = RandomForestRegressor(bootstrap = self.bootstrap, 
-                                           criterion = self.criterion, 
-                                           max_depth = self.max_depth, 
-                                           max_features = self.max_features, 
-                                           max_leaf_nodes = self.max_leaf_nodes, 
+        self.model = RandomForestRegressor(bootstrap = self.bootstrap,
+                                           criterion = self.criterion,
+                                           max_depth = self.max_depth,
+                                           max_features = self.max_features,
+                                           max_leaf_nodes = self.max_leaf_nodes,
                                            min_samples_leaf = self.min_samples_leaf,
-                                           min_samples_split = self.min_samples_split, 
+                                           min_samples_split = self.min_samples_split,
                                            min_weight_fraction_leaf = self.min_weight_fraction_leaf,
-                                           n_estimators = self.n_estimators, 
-                                           n_jobs = self.n_jobs, 
-                                           oob_score = self.oob_score, 
-                                           random_state = self.random_state, 
-                                           verbose = self.verbose, 
+                                           n_estimators = self.n_estimators,
+                                           n_jobs = self.n_jobs,
+                                           oob_score = self.oob_score,
+                                           random_state = self.random_state,
+                                           verbose = self.verbose,
                                            warm_start = self.warm_start)
-        
+
         #self.model = RandomForestRegressor()
         self.model.fit(X,Y.flatten())
-        
-        
+
+
     def updateModel(self, X_all, Y_all, X_new, Y_new):
         """
         Updates the model with new observations.
         """
         self.X = X_all
         self.Y = Y_all
-        if self.normalize_Y:
-            Y_all = (Y_all - Y_all.mean())/(Y_all.std())
-        if self.model is None: self._create_model(X_all, Y_all)
-        else: 
+        if self.model is None:
+            self._create_model(X_all, Y_all)
+        else:
             self.model.fit(X_all, Y_all.flatten())
-                 
+
     def predict(self, X):
         """
-        Predictions with the model. Returns posterior means and standard deviations at X. 
+        Predictions with the model. Returns posterior means and standard deviations at X.
         """
         X = np.atleast_2d(X)
         m = np.empty(shape=(0,1))
         s = np.empty(shape=(0,1))
-        
+
         for k in range(X.shape[0]):
             preds = []
             for pred in self.model.estimators_:
-                preds.append(pred.predict(X[k,:])[0])               
+                preds.append(pred.predict(X[k,:])[0])
             m = np.vstack((m ,np.array(preds).mean()))
-            s = np.vstack((s ,np.array(preds).std()))   
+            s = np.vstack((s ,np.array(preds).std()))
         return m, s
-    
+
     def get_fmin(self):
         return self.model.predict(self.X).min()
-    

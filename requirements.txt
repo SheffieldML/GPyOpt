@@ -1,6 +1,6 @@
 cycler>=0.10.0
 decorator>=4.0.10
-GPy>=1.5.6
+GPy>=1.8
 matplotlib>=1.5.3
 numpy>=1.11.2
 paramz>=0.7.0

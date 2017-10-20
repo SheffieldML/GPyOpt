@@ -54,7 +54,7 @@ class rosenbrock(function2d):
     '''
     def __init__(self,bounds=None,sd=None):
         self.input_dim = 2
-        if bounds == None: self.bounds = [(-0.5,3),(-1.5,2)]
+        if bounds is  None: self.bounds = [(-0.5,3),(-1.5,2)]
         else: self.bounds = bounds
         self.min = [(0, 0)]
         self.fmin = 0
@@ -85,7 +85,7 @@ class beale(function2d):
     '''
     def __init__(self,bounds=None,sd=None):
         self.input_dim = 2
-        if bounds == None: self.bounds = [(-1,1),(-1,1)]
+        if bounds is  None: self.bounds = [(-1,1),(-1,1)]
         else: self.bounds = bounds
         self.min = [(0, 0)]
         self.fmin = 0
@@ -116,7 +116,7 @@ class dropwave(function2d):
     '''
     def __init__(self,bounds=None,sd=None):
         self.input_dim = 2
-        if bounds == None: self.bounds = [(-1,1),(-1,1)]
+        if bounds is  None: self.bounds = [(-1,1),(-1,1)]
         else: self.bounds = bounds
         self.min = [(0, 0)]
         self.fmin = 0
@@ -147,7 +147,7 @@ class cosines(function2d):
     '''
     def __init__(self,bounds=None,sd=None):
         self.input_dim = 2
-        if bounds == None: self.bounds = [(0,1),(0,1)]
+        if bounds is  None: self.bounds = [(0,1),(0,1)]
         else: self.bounds = bounds
         self.min = [(0.31426205,  0.30249864)]
         self.fmin = -1.59622468
@@ -180,7 +180,7 @@ class branin(function2d):
     '''
     def __init__(self,bounds=None,a=None,b=None,c=None,r=None,s=None,t=None,sd=None):
         self.input_dim = 2
-        if bounds == None: self.bounds = [(-5,10),(1,15)]
+        if bounds is  None: self.bounds = [(-5,10),(1,15)]
         else: self.bounds = bounds
         if a==None: self.a = 1
         else: self.a = a           
@@ -225,7 +225,7 @@ class goldstein(function2d):
     '''
     def __init__(self,bounds=None,sd=None):
         self.input_dim = 2
-        if bounds == None: self.bounds = [(-2,2),(-2,2)]
+        if bounds is  None: self.bounds = [(-2,2),(-2,2)]
         else: self.bounds = bounds
         self.min = [(0,-1)]
         self.fmin = 3
@@ -265,7 +265,7 @@ class sixhumpcamel(function2d):
     '''
     def __init__(self,bounds=None,sd=None):
         self.input_dim = 2
-        if bounds == None: self.bounds = [(-2,2),(-1,1)]
+        if bounds is  None: self.bounds = [(-2,2),(-1,1)]
         else: self.bounds = bounds
         self.min = [(0.0898,-0.7126),(-0.0898,0.7126)]
         self.fmin = -1.0316
@@ -302,7 +302,7 @@ class mccormick(function2d):
     '''
     def __init__(self,bounds=None,sd=None):
         self.input_dim = 2
-        if bounds == None: self.bounds = [(-1.5,4),(-3,4)]
+        if bounds is  None: self.bounds = [(-1.5,4),(-3,4)]
         else: self.bounds = bounds
         self.min = [(-0.54719,-1.54719)]
         self.fmin = -1.9133
@@ -339,7 +339,7 @@ class powers(function2d):
     '''
     def __init__(self,bounds=None,sd=None):
         self.input_dim = 2
-        if bounds == None: self.bounds = [(-1,1),(-1,1)]
+        if bounds is  None: self.bounds = [(-1,1),(-1,1)]
         else: self.bounds = bounds
         self.min = [(0,0)]
         self.fmin = 0
@@ -365,7 +365,7 @@ class powers(function2d):
 class eggholder:
     def __init__(self,bounds=None,sd=None):
         self.input_dim = 2
-        if bounds == None: self.bounds = [(-512,512),(-512,512)]
+        if bounds is  None: self.bounds = [(-512,512),(-512,512)]
         else: self.bounds = bounds
         self.min = [(512,404.2319)]
         self.fmin = -959.6407

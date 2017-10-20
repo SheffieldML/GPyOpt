@@ -1,11 +1,11 @@
-GPyOpt.plotting package
-=======================
+GPyOpt\.plotting package
+========================
 
 Submodules
 ----------
 
-GPyOpt.plotting.plots_bo module
--------------------------------
+GPyOpt\.plotting\.plots\_bo module
+----------------------------------
 
 .. automodule:: GPyOpt.plotting.plots_bo
     :members:
