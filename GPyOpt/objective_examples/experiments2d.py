@@ -13,36 +13,53 @@ from ..util.general import reshape
 
 class function2d:
     '''
-    This is a benchmark of bi-dimensional functions interesting to optimize. 
-
+    This is a benchmark of bi-dimensional functions interesting to optimize.
     '''
-    
-    def plot(self):
+    def plot(self, ax=None, plt_type='contourf'):
         bounds = self.bounds
-        x1 = np.linspace(bounds[0][0], bounds[0][1], 100)
-        x2 = np.linspace(bounds[1][0], bounds[1][1], 100)
+        x1 = np.arange(bounds[0][0], bounds[0][1], 0.01)
+        x2 = np.arange(bounds[1][0], bounds[1][1], 0.01)
+        n_grid = len(x1)
         X1, X2 = np.meshgrid(x1, x2)
-        X = np.hstack((X1.reshape(100*100,1),X2.reshape(100*100,1)))
+        X = np.hstack((X1.reshape(n_grid ** 2, 1),
+                       X2.reshape(n_grid ** 2, 1)))
         Y = self.f(X)
-        
-        #fig = plt.figure()
-        #ax = fig.gca(projection='3d')
-        #ax.plot_surface(X1, X2, Y.reshape((100,100)), rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
-        #ax.zaxis.set_major_locator(LinearLocator(10))
-        #ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
-        #ax.set_title(self.name)    
-            
-        plt.figure()    
-        plt.contourf(X1, X2, Y.reshape((100,100)),100)
-        if (len(self.min)>1):    
-            plt.plot(np.array(self.min)[:,0], np.array(self.min)[:,1], 'w.', markersize=20, label=u'Observations')
+
+        if ax is None:
+            fig = plt.figure()
+            ax = fig.add_subplot(1, 1, 1)
+            call_show = True
         else:
-            plt.plot(self.min[0][0], self.min[0][1], 'w.', markersize=20, label=u'Observations')
-        plt.colorbar()
-        plt.xlabel('X1')
-        plt.ylabel('X2')
-        plt.title(self.name)
-        plt.show()
+            call_show = False
+
+        if plt_type.lower() == 'contourf':
+            im = ax.contourf(X1, X2, Y.reshape((n_grid, n_grid)),
+                             label='f(x)')
+            ax.figure.colorbar(im, ax=ax)
+        elif plt_type.lower() == 'contour':
+            ax.contour(X1, X2, Y.reshape((n_grid, n_grid)),
+                       label='f(x)')
+        else:
+            raise NotImplementedError("No such plot_type, options are"
+                                      "'contourf' or 'contour'")
+
+        if (len(self.min) > 1):
+            ax.scatter(np.array(self.min)[:, 0],
+                       np.array(self.min)[:, 1],
+                       color='k', marker='X',
+                       label=u'Minima')
+        else:
+            ax.scatter(self.min[0][0],
+                       self.min[0][1],
+                       color='k', marker='X',
+                       label=u'Minimum')
+        ax.set_xlabel('X1')
+        ax.set_ylabel('X2')
+        if ax.title.get_text != '':
+            ax.set_title(self.name)
+        if call_show:
+            plt.show()
+        return
 
 
 class rosenbrock(function2d):
