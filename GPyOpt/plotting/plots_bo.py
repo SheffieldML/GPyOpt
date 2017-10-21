@@ -134,7 +134,8 @@ def plot_acquisition(bounds, input_dim, model, Xdata, Ydata,
 
 
 def plot_convergence(Xdata, best_Y, filename=None, fig=None):
-    '''Plots to evaluate the convergence of standard Bayesian optimization
+    '''
+    Plots to evaluate the convergence of standard Bayesian optimization
     algorithms.
 
     Args:
@@ -145,6 +146,8 @@ def plot_convergence(Xdata, best_Y, filename=None, fig=None):
         filename: (optional) Location to save resulting figure
         fig: (optional) The figure on which to plot the results.
             Creates two axes on the figure
+
+    Returns: None
     '''
     # Distances between consecutive x's
     aux = (Xdata[1:, :] - Xdata[:-1, :]) ** 2
