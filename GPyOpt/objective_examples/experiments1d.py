@@ -45,10 +45,7 @@ class forrester(function1d):
     def __init__(self, sd=0):
         self.input_dim = 1
         self.name = 'forrester'
-        if sd is None:
-            self.sd = 0
-        else:
-            self.sd = sd
+        self.sd = sd
         self.min = 0.78  # approx
         self.fmin = -6  # approx
         self.bounds = [(0, 1)]
