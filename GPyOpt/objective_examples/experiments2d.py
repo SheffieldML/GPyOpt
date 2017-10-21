@@ -61,7 +61,7 @@ class function2d:
         ax.set_xlim(x1[0], x1[-1])
         ax.set_ylim(x2[0], x2[-1])
         ax.legend()
-        if ax.title.get_text == '':
+        if ax.title.get_text() == '':
             ax.set_title(self.name)
         if call_show:
             plt.show()
