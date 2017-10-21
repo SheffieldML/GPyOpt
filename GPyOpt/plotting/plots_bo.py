@@ -160,6 +160,7 @@ def plot_convergence(Xdata, best_Y, filename=None, fig=None):
     else:
         ax1 = fig.add_subplot(1, 2, 1)
         ax2 = fig.add_subplot(1, 2, 2)
+        call_show = False
 
     ax1.plot(distances, '-ro')
     ax1.set_xlabel('Iteration')
@@ -172,7 +173,7 @@ def plot_convergence(Xdata, best_Y, filename=None, fig=None):
     ax2.set_title('Value of the best selected sample')
     ax2.set_xlabel('Iteration')
     ax2.set_ylabel('f(x)')
-    ax1.grid(True)
+    ax2.grid(True)
 
     if filename is not None:
         fig.savefig(filename)
