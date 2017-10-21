@@ -255,12 +255,13 @@ class BO(object):
         else:
             self.model_parameters_iterations = np.vstack((self.model_parameters_iterations,self.model.get_model_parameters()))
 
-    def plot_acquisition(self,filename=None):
+    def plot_acquisition(self,filename=None, fig=None):
         """
         Plots the model and the acquisition function.
             if self.input_dim = 1: Plots data, mean and variance in one plot and the acquisition function in another plot
             if self.input_dim = 2: as before but it separates the mean and variance of the model in two different plots
-        :param filename: name of the file where the plot is saved
+        :param filename: (optional) name of the file where the plot is saved
+        :param fig: (optional) The figure to plot on.
         """
         return plot_acquisition(self.acquisition.space.get_bounds(),
                                 self.model.model.X.shape[1],
@@ -269,7 +270,7 @@ class BO(object):
                                 self.model.model.Y,
                                 self.acquisition.acquisition_function,
                                 self.suggest_next_locations(),
-                                filename)
+                                filename=filename, fig=fig)
 
 
     def plot_convergence(self,filename=None):
