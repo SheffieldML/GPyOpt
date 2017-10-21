@@ -102,6 +102,7 @@ def plot_acquisition(bounds, input_dim, model, Xdata, Ydata,
                      cmap='viridis', label='m(x)')
         ax1.set_xlim(x[0], x[-1])
         ax1.set_ylim(y[0], y[-1])
+
         ax1.plot(Xdata[:, 0], Xdata[:, 1], 'r.',
                  markersize=10, label=u'Observations')
 
