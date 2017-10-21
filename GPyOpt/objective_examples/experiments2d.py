@@ -44,17 +44,18 @@ class function2d:
                                       "'contourf' or 'contour'")
 
         if (len(self.min) > 1):
-            ax.scatter(np.array(self.min)[:, 0],
-                       np.array(self.min)[:, 1],
-                       color='k', marker='X',
-                       label=u'Minima')
+            ax.plot(np.array(self.min)[:, 0],
+                    np.array(self.min)[:, 1],
+                    color='k', linestyle='', marker='X', label=u'Minima')
         else:
-            ax.scatter(self.min[0][0],
-                       self.min[0][1],
-                       color='k', marker='X',
-                       label=u'Minimum')
+            ax.plot(np.array(self.min[0][0]),
+                    np.array(self.min[0][1]),
+                    color='k', linestyle='', marker='X', label=u'Minimum')
         ax.set_xlabel('X1')
         ax.set_ylabel('X2')
+        ax.set_xlim(x1[0], x1[-1])
+        ax.set_ylim(x2[0], x2[-1])
+        ax.legend()
         if ax.title.get_text != '':
             ax.set_title(self.name)
         if call_show:

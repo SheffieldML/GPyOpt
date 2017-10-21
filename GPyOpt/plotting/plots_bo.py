@@ -100,10 +100,10 @@ def plot_acquisition(bounds, input_dim, model, Xdata, Ydata,
 
         ax1.contourf(x, y, m.reshape(n_grid, n_grid),
                      cmap='viridis', label='m(x)')
+        ax1.set_xlim(x[0], x[-1])
+        ax1.set_ylim(y[0], y[-1])
         ax1.plot(Xdata[:, 0], Xdata[:, 1], 'r.',
                  markersize=10, label=u'Observations')
-
-        ax1.axis('auto')
 
         # ---------- Posterior std (axis 1) ----------------
         ax2.set_title('Posterior std')
@@ -112,8 +112,8 @@ def plot_acquisition(bounds, input_dim, model, Xdata, Ydata,
                  markersize=10, label=u'Observations')
         ax2.contourf(x, y, std.reshape(n_grid, n_grid),
                      cmap='viridis')
-
-        ax2.axis('auto')
+        ax2.set_xlim(x[0], x[-1])
+        ax2.set_ylim(y[0], y[-1])
 
         # ---------- Acquisition Function (axis 1) ----------------
         ax3.set_title('Acquisition function')
@@ -121,9 +121,10 @@ def plot_acquisition(bounds, input_dim, model, Xdata, Ydata,
         ax3.plot(suggested_sample[:, 0], suggested_sample[:, 1],
                  'rX', markersize=10, label='next sample')
         ax3.contourf(x, y, acqu.reshape(n_grid, n_grid))
+        ax3.set_xlim(x[0], x[-1])
+        ax3.set_ylim(y[0], y[-1])
 
         ax3.legend()
-        ax3.axis('auto')
 
         if filename is not None:
             fig.savefig(filename)
