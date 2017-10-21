@@ -17,7 +17,9 @@ def plot_acquisition(bounds, input_dim, model, Xdata, Ydata,
     Plots of the model and the acquisition function in 1D and 2D examples.
     '''
     if fig is None:
-        call_show = True  # Whether or not to call plt.show at the end
+        # Whether or not to call plt.show() at the end.  plt.show() will
+        # still not be called if a filename is supplied.
+        call_show = True
         fig = plt.figure()
     else:
         call_show = False
@@ -117,38 +119,54 @@ def plot_acquisition(bounds, input_dim, model, Xdata, Ydata,
 
         if filename is not None:
             fig.savefig(filename)
-        if call_show:
+        elif call_show:
             plt.show()
         return
 
 
-# TODO: Update this function
-def plot_convergence(Xdata,best_Y, filename = None):
+def plot_convergence(Xdata, best_Y, filename=None, fig=None):
     '''
-    Plots to evaluate the convergence of standard Bayesian optimization algorithms
+    Plots to evaluate the convergence of standard Bayesian optimization
+    algorithms.
+
+    Args:
+        Xdata: Historical data points at which we evaulated the function
+        best_Y: Historical running optimum
+
+    KwArgs:
+        filename: Location to save resulting figure
+        fig: The figure on which to plot the results.  2 axes will be created.
+
+    Returns: None
     '''
-    n = Xdata.shape[0]
-    aux = (Xdata[1:n,:]-Xdata[0:n-1,:])**2
+    # Distances between consecutive x's
+    aux = (Xdata[1:, :] - Xdata[:-1, :]) ** 2
     distances = np.sqrt(aux.sum(axis=1))
 
-    ## Distances between consecutive x's
-    plt.figure(figsize=(10,5))
-    plt.subplot(1, 2, 1)
-    plt.plot(list(range(n-1)), distances, '-ro')
-    plt.xlabel('Iteration')
-    plt.ylabel('d(x[n], x[n-1])')
-    plt.title('Distance between consecutive x\'s')
-    grid(True)
-
-    # Estimated m(x) at the proposed sampling points
-    plt.subplot(1, 2, 2)
-    plt.plot(list(range(n)),best_Y,'-o')
-    plt.title('Value of the best selected sample')
-    plt.xlabel('Iteration')
-    plt.ylabel('Best y')
-    grid(True)
-
-    if filename!=None:
-        savefig(filename)
+    if fig is None:
+        fig = plt.figure()
+        ax1 = fig.add_subplot(1, 2, 1)
+        ax2 = fig.add_subplot(1, 2, 2)
+        call_show = True
     else:
+        ax1 = fig.add_subplot(1, 2, 1)
+        ax2 = fig.add_subplot(1, 2, 2)
+
+    ax1.plot(distances, '-ro')
+    ax1.set_xlabel('Iteration')
+    ax1.set_ylabel('d(x[n], x[n-1])')
+    ax1.set_title('Distance between consecutive x\'s')
+    ax1.grid(True)
+
+    # Estimated f(x) at the proposed sampling points
+    ax2.plot(best_Y, '-o')
+    ax2.set_title('Value of the best selected sample')
+    ax2.set_xlabel('Iteration')
+    ax2.set_ylabel('f(x)')
+    ax1.grid(True)
+
+    if filename is not None:
+        fig.savefig(filename)
+    elif call_show:
         plt.show()
+    return

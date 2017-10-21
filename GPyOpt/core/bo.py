@@ -273,14 +273,14 @@ class BO(object):
                                 filename=filename, fig=fig)
 
 
-    def plot_convergence(self,filename=None):
+    def plot_convergence(self,filename=None,fig=None):
         """
         Makes twp plots to evaluate the convergence of the model:
             plot 1: Iterations vs. distance between consecutive selected x's
             plot 2: Iterations vs. the mean of the current model in the selected sample.
         :param filename: name of the file where the plot is saved
         """
-        return plot_convergence(self.X,self.Y_best,filename)
+        return plot_convergence(self.X,self.Y_best,filename=filename,fig=fig)
 
     def get_evaluations(self):
         return self.X.copy(), self.Y.copy()
