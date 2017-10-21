@@ -5,9 +5,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def _normalize_acqu(acqu):
-    acqu_normalized = max(acqu) - acqu
-    return acqu_normalized / max(acqu_normalized)
+def _normalize_acqu(acqu, m, pct95):
+    acqu_normalized = acqu / min(acqu)
+    factor = max(m + pct95) - min(m - pct95)  # Max spread
+    acqu_normalized = 0.2 * factor * acqu_normalized - abs(
+        min(m - pct95)) - 0.25 * factor
+    return acqu_normalized
 
 
 def plot_acquisition(bounds, input_dim, model, Xdata, Ydata,
@@ -31,39 +34,43 @@ def plot_acquisition(bounds, input_dim, model, Xdata, Ydata,
 
         # Need column vectors for acquisition_function and predict
         x_grid = x_grid[:, np.newaxis]
-        acqu = _normalize_acqu(acquisition_function(x_grid))
 
-        # acqu_normalized = (-acqu - min(-acqu)) / (max(-acqu - min(-acqu)))
         m, v = model.predict(x_grid)  # Mean and variance from GPy model
-        x_grid, m, v = x_grid[:, 0], m[:, 0], v[:, 0]  # Convert to 1D arrays
         std = np.sqrt(v)
         pct95 = 1.96 * std  # 95th percentile distance from mean range
 
+        # Do some crazy normalization to make this look nice on the plot
+        acqu = _normalize_acqu(acquisition_function(x_grid), m, pct95)[:, 0]
+
+        # Convert to 1D arrays
+        x_grid, m, pct95 = x_grid[:, 0], m[:, 0], pct95[:, 0]
+
         # Plot the mean and 95pct confidence intervals of the GP
-        ax.plot(x_grid, m, 'k-', lw=1, alpha=0.6)
+        ax.plot(x_grid, m, 'k-', lw=1, alpha=0.6, label='m(x)')
         ax.fill_between(x_grid, m - pct95, m + pct95, color='k', alpha=0.2)
 
         # The points that were evaluated
-        ax.plot(Xdata, Ydata, 'r.', markersize=10)
+        ax.plot(Xdata, Ydata, 'b.', markersize=10, label='Evaluated Points')
 
         # Vertical line at next point to evaluate
-        ax.axvline(x=suggested_sample[-1], color='r')
+        ax.scatter(x=suggested_sample[-1],
+                   y=_normalize_acqu(
+                       acquisition_function(suggested_sample[-1]), m, pct95),
+                   color='g', marker='X', label='Next Sample')
 
         # Plot the acquisition function
-        factor = max(m + pct95) - min(m - pct95)  # Max spread
-        ax.plot(x_grid, 0.2 * factor * acqu -
-                abs(min(m - pct95)) - 0.25 * factor,
-                'r-', lw=2, label='Acquisition (arbitrary units)')
+        ax.plot(x_grid, acqu, 'r-', lw=2,
+                label='Acquisition Function')
+        ax.fill_between(x_grid, np.ones_like(x_grid) * min(acqu),
+                        acqu, alpha=0.3, color='r')
         ax.set_xlabel('x')
         ax.set_ylabel('f(x)')
-        ax.set_ylim(min(m - pct95) - 0.25 * factor,
-                    max(m + pct95) + 0.05 * factor)
-        ax.axvline(x=suggested_sample[-1], color='r')
         ax.legend()
+        ax.set_title('Mean and acquisition functions')
 
         if filename is not None:
             ax.figure.savefig(filename)
-        if call_show:
+        elif call_show:
             plt.show()
         return
 
@@ -74,9 +81,10 @@ def plot_acquisition(bounds, input_dim, model, Xdata, Ydata,
         xx, yy = np.meshgrid(x, y)
         X = np.hstack((xx.flatten()[:, np.newaxis],
                        yy.flatten()[:, np.newaxis]))
-        acqu = _normalize_acqu(acquisition_function(X))
         m, v = model.predict(X)
         std = np.sqrt(v)  # Standard deviation
+        pct95 = 1.96 * std
+        acqu = _normalize_acqu(acquisition_function(X), m, pct95)
 
         ax1 = fig.add_subplot(1, 3, 1)
         ax2 = fig.add_subplot(1, 3, 2)
@@ -125,8 +133,7 @@ def plot_acquisition(bounds, input_dim, model, Xdata, Ydata,
 
 
 def plot_convergence(Xdata, best_Y, filename=None, fig=None):
-    '''
-    Plots to evaluate the convergence of standard Bayesian optimization
+    '''Plots to evaluate the convergence of standard Bayesian optimization
     algorithms.
 
     Args:
@@ -134,10 +141,12 @@ def plot_convergence(Xdata, best_Y, filename=None, fig=None):
         best_Y: Historical running optimum
 
     KwArgs:
-        filename: Location to save resulting figure
-        fig: The figure on which to plot the results.  2 axes will be created.
+        filename: (optional) Location to save resulting figure
+        fig: (optional) The figure on which to plot the results.
+            Creates two axes on the figure
 
     Returns: None
+
     '''
     # Distances between consecutive x's
     aux = (Xdata[1:, :] - Xdata[:-1, :]) ** 2
