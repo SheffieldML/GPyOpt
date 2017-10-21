@@ -75,9 +75,9 @@ def plot_acquisition(bounds, input_dim, model, Xdata, Ydata,
         return
 
     elif input_dim == 2:
-        n_grid = 200
-        x = np.linspace(bounds[0][0], bounds[0][1], n_grid)
-        y = np.linspace(bounds[1][0], bounds[1][1], n_grid)
+        x = np.arange(bounds[0][0], bounds[0][1], 0.01)
+        y = np.arange(bounds[1][0], bounds[1][1], 0.01)
+        n_grid = len(x)
         xx, yy = np.meshgrid(x, y)
         X = np.hstack((xx.flatten()[:, np.newaxis],
                        yy.flatten()[:, np.newaxis]))
@@ -98,8 +98,8 @@ def plot_acquisition(bounds, input_dim, model, Xdata, Ydata,
         # ---------- Posterior mean (axis 1) ----------------
         ax1.set_title('Posterior mean')
 
-        ax1.contourf(x, y, m.reshape(n_grid, n_grid), 100,
-                     cmap='viridis')
+        ax1.contourf(x, y, m.reshape(n_grid, n_grid),
+                     cmap='viridis', label='m(x)')
         ax1.plot(Xdata[:, 0], Xdata[:, 1], 'r.',
                  markersize=10, label=u'Observations')
 
@@ -110,7 +110,7 @@ def plot_acquisition(bounds, input_dim, model, Xdata, Ydata,
 
         ax2.plot(Xdata[:, 0], Xdata[:, 1], 'r.',
                  markersize=10, label=u'Observations')
-        ax2.contourf(x, y, std.reshape(n_grid, n_grid), 100,
+        ax2.contourf(x, y, std.reshape(n_grid, n_grid),
                      cmap='viridis')
 
         ax2.axis('auto')
@@ -120,7 +120,7 @@ def plot_acquisition(bounds, input_dim, model, Xdata, Ydata,
 
         ax3.plot(suggested_sample[:, 0], suggested_sample[:, 1],
                  'rX', markersize=10, label='next sample')
-        ax3.contourf(x, y, acqu.reshape(n_grid, n_grid), 100)
+        ax3.contourf(x, y, acqu.reshape(n_grid, n_grid))
 
         ax3.legend()
         ax3.axis('auto')
