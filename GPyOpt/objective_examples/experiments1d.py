@@ -23,6 +23,7 @@ class function1d:
                 call_show = True
             else:
                 call_show = False
+
         X = np.arange(*bounds[0], step=0.01)
         Y = self.f(X)
 
