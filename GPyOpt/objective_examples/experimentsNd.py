@@ -24,6 +24,7 @@ class alpine1:
         assert X.shape[1] == self.input_dim,\
             'Wrong input dimension! {0}'.format(X.shape)
         fval = (X * np.sin(X) + 0.1 * X).sum(axis=1)
+        fval = fval.reshape(-1, 1)
         noise = np.random.normal(0, self.sd, size=fval.shape)
         return fval + noise
 
@@ -49,8 +50,42 @@ class alpine2:
             'Wrong input dimension! {0}'.format(X.shape)
         fval = (np.cumprod(np.sqrt(X), axis=1)[:, self.input_dim - 1] *
                 np.cumprod(np.sin(X), axis=1)[:, self.input_dim - 1])
+        fval = fval.reshape(-1, 1)
         noise = np.random.normal(0, self.sd, size=fval.shape)
         return -fval + noise
+
+
+class gSobol:
+    '''
+    gSolbol function (https://www.sfu.ca/~ssurjano/gfunc.html)
+    '''
+    def __init__(self, a, bounds=None, sd=0):
+        self.a = a
+        self.input_dim = len(self.a)
+
+        if bounds is None:
+            self.bounds = [(0, 1)] * self.input_dim
+        else:
+            self.bounds = bounds
+
+        assert np.all(self.a > 0), 'Must have a > 0, a = {0}'.format(a)
+
+        self.min = np.array([[0.5] * self.input_dim])
+        self.fmin = np.prod(a / (1 + a))
+
+        # What is S_coef for?
+        self.S_coef = ((1 / (3 * ((1 + self.a)**2))) /
+                       (np.prod(1 + 1 / (3 * ((1 + self.a)**2))) - 1))
+        self.sd = sd
+        return
+
+    def f(self, X):
+        assert X.shape[1] == self.input_dim,\
+            'Wrong input dimension! {0}'.format(X.shape)
+        fval = np.prod((np.abs(4 * X - 2) + self.a) / (1 + self.a), axis=1)
+        fval = fval.reshape(-1, 1)
+        noise = np.random.normal(0, self.sd, size=fval.shape)
+        return fval + noise
 
 
 class ackley:
@@ -80,5 +115,6 @@ class ackley:
                             np.sqrt(np.linalg.norm(X, axis=1))) -
                 np.exp((1. / self.input_dim) * np.sum(np.cos(c * X), axis=1)) +
                 + a + np.e)
+        fval = fval.reshape(-1, 1)
         noise = np.random.normal(0, self.sd, size=fval.shape)
         return fval + noise

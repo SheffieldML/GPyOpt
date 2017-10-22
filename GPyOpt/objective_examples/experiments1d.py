@@ -60,5 +60,6 @@ class forrester(function1d):
     def f(self, X):
         '''Evaluate the function at the points given by np.array X'''
         fval = ((6 * X - 2) ** 2) * np.sin(12 * X - 4)
+        fval = fval.reshape(-1, 1)
         noise = np.random.normal(0, self.sd, size=fval.shape)
         return fval + noise

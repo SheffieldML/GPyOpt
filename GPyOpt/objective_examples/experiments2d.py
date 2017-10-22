@@ -99,6 +99,7 @@ class rosenbrock(function2d):
         x1 = X[:, 0]
         x2 = X[:, 1]
         fval = 100 * (x2 - x1 ** 2) ** 2 + (1 - x1) ** 2
+        fval = fval.reshape(-1, 1)
         noise = np.random.normal(0, self.sd, size=fval.shape)
         return fval + noise
 
@@ -127,6 +128,7 @@ class beale(function2d):
         fval = (1.5 - x1 + x1 * x2) ** 2 +\
                (2.25 - x1 + x1 * (x2 ** 2)) ** 2 +\
                (2.625 - x1 + x1 * (x2 ** 3)) ** 2
+        fval = fval.reshape(-1, 1)
         noise = np.random.normal(0, self.sd, size=fval.shape)
         return fval + noise
 
@@ -157,6 +159,7 @@ class dropwave(function2d):
         x2 = X[:, 1]
         fval = -(1 + np.cos(12 * np.sqrt(x1 ** 2 + x2 ** 2))) / (
             0.5 * (x1 ** 2 + x2 ** 2) + 2)
+        fval = fval.reshape(-1, 1)
         noise = np.random.normal(0, self.sd, size=fval.shape)
         return fval + noise
 
@@ -187,7 +190,8 @@ class cosines(function2d):
         u = 1.6 * x1 - 0.5
         v = 1.6 * x2 - 0.5
         fval = -(1 - (u ** 2 + v ** 2 - 0.3 * np.cos(3 * np.pi * u) -
-                    0.3 * np.cos(3 * np.pi * v)))
+                      0.3 * np.cos(3 * np.pi * v)))
+        fval = fval.reshape(-1, 1)
         noise = np.random.normal(0, self.sd, size=fval.shape)
         return fval + noise
 
@@ -226,6 +230,7 @@ class branin(function2d):
         x2 = X[:, 1]
         fval = (a * (x2 - b * x1 ** 2 + c * x1 - r) ** 2 +
                 s * (1 - t) * np.cos(x1) + s)
+        fval = fval.reshape(-1, 1)
         noise = np.random.normal(0, self.sd, size=fval.shape)
         return fval + noise
 
@@ -264,6 +269,7 @@ class goldstein(function2d):
         fact2 = 30 + fact2a * fact2b
 
         fval = fact1 * fact2
+        fval = fval.reshape(-1, 1)
         noise = np.random.normal(0, self.sd, size=fval.shape)
         return fval + noise
 
@@ -297,6 +303,7 @@ class sixhumpcamel(function2d):
         term2 = x1 * x2
         term3 = (-4 + 4 * x2**2) * x2**2
         fval = term1 + term2 + term3
+        fval = fval.reshape(-1, 1)
         noise = np.random.normal(0, self.sd, size=fval.shape)
         return fval + noise
 
@@ -329,6 +336,7 @@ class mccormick(function2d):
         term3 = -1.5 * x1
         term4 = 2.5 * x2
         fval = term1 + term2 + term3 + term4 + 1
+        fval = fval.reshape(-1, 1)
         noise = np.random.normal(0, self.sd, size=fval.shape)
         return fval + noise
 
@@ -356,6 +364,7 @@ class powers(function2d):
         x1 = X[:, 0]
         x2 = X[:, 1]
         fval = abs(x1)**2 + abs(x2)**3
+        fval = fval.reshape(-1, 1)
         noise = np.random.normal(0, self.sd, size=fval.shape)
         return fval + noise
 
@@ -382,5 +391,6 @@ class eggholder(function2d):
         fval = -(x2 + 47) * np.sin(np.sqrt(
             abs(x2 + x1 / 2 + 47))) + -x1 * np.sin(
                 np.sqrt(abs(x1 - (x2 + 47))))
+        fval = fval.reshape(-1, 1)
         noise = np.random.normal(0, self.sd, size=fval.shape)
         return fval + noise
