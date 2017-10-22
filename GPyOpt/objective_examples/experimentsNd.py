@@ -4,7 +4,7 @@
 import numpy as np
 
 
-class alpine1:
+class alpine1(object):
     '''
     Alpine1 function
     '''
@@ -29,7 +29,7 @@ class alpine1:
         return fval + noise
 
 
-class alpine2:
+class alpine2(object):
     '''
     Alpine2 function
     '''
@@ -55,7 +55,7 @@ class alpine2:
         return -fval + noise
 
 
-class gSobol:
+class gSobol(object):
     '''
     gSolbol function (https://www.sfu.ca/~ssurjano/gfunc.html)
     '''
@@ -88,7 +88,7 @@ class gSobol:
         return fval + noise
 
 
-class ackley:
+class ackley(object):
     '''
     Ackley function (https://www.sfu.ca/~ssurjano/ackley.html)
     '''

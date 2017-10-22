@@ -9,7 +9,7 @@ except:
 import numpy as np
 
 
-class function2d:
+class function2d(object):
     '''
     This is a benchmark of bi-dimensional functions interesting to optimize.
     '''

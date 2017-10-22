@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-class function1d:
+class function1d(object):
     '''
     This is a benchmark of unidimensional functions interesting to optimize.
     '''
