@@ -1,6 +1,8 @@
 import unittest
 import numpy as np
 
+from matplotlib import pyplot as plt
+
 from GPyOpt.objective_examples.experiments1d import forrester
 from GPyOpt.objective_examples.experiments2d import rosenbrock, beale,\
     dropwave, cosines, branin, goldstein, sixhumpcamel, mccormick, powers,\
@@ -20,9 +22,13 @@ class TestExampleFunctions(unittest.TestCase):
     assert that, e.g. F = forrester(); F.f(F.min) == F.fmin.
     '''
     def setUp(self):
+        self.fig = plt.figure()
+        self.ax = self.fig.add_subplot(1, 1, 1)
         return
 
     def tearDown(self):
+        # Could perhaps save these somewhere?  Or just inspect manually?
+        # plt.show()
         return
 
     def _check_minimizer(self, fcls):
@@ -69,66 +75,77 @@ class TestExampleFunctions(unittest.TestCase):
         fcls = forrester()
         self._check_minimizer(fcls)
         self._evaluate_1d(fcls)
+        fcls.plot(ax=self.ax)
         return
 
     def test_experiments2d_rosenbrock(self):
         fcls = rosenbrock()
         self._check_minimizer(fcls)
         self._evaluate_2d(fcls)
+        fcls.plot(ax=self.ax)
         return
 
     def test_experiments2d_beale(self):
         fcls = beale()
         self._check_minimizer(fcls)
         self._evaluate_2d(fcls)
+        fcls.plot(ax=self.ax)
         return
 
     def test_experiments2d_dropwave(self):
         fcls = dropwave()
         self._check_minimizer(fcls)
         self._evaluate_2d(fcls)
+        fcls.plot(ax=self.ax)
         return
 
     def test_experiments2d_cosines(self):
         fcls = cosines()
         self._check_minimizer(fcls)
         self._evaluate_2d(fcls)
+        fcls.plot(ax=self.ax)
         return
 
     def test_experiments2d_branin(self):
         fcls = branin()
         self._check_minimizer(fcls)
         self._evaluate_2d(fcls)
+        fcls.plot(ax=self.ax)
         return
 
     def test_experiments2d_goldstein(self):
         fcls = goldstein()
         self._check_minimizer(fcls)
         self._evaluate_2d(fcls)
+        fcls.plot(ax=self.ax)
         return
 
     def test_experiments2d_sixhumpcamel(self):
         fcls = sixhumpcamel()
         self._check_minimizer(fcls)
         self._evaluate_2d(fcls)
+        fcls.plot(ax=self.ax)
         return
 
     def test_experiments2d_mccormick(self):
         fcls = mccormick()
         self._check_minimizer(fcls)
         self._evaluate_2d(fcls)
+        fcls.plot(ax=self.ax)
         return
 
     def test_experiments2d_powers(self):
         fcls = powers()
         self._check_minimizer(fcls)
         self._evaluate_2d(fcls)
+        fcls.plot(ax=self.ax)
         return
 
     def test_experiments2d_eggholder(self):
         fcls = eggholder()
         self._check_minimizer(fcls)
         self._evaluate_2d(fcls)
+        fcls.plot(ax=self.ax)
         return
 
     def test_experimentsNd_alpine1(self):

@@ -19,11 +19,16 @@ class function2d:
 
     def plot(self, ax=None, plt_type='contourf'):
         bounds = self.bounds
-        x1 = np.arange(bounds[0][0], bounds[0][1], 0.01)
-        x2 = np.arange(bounds[1][0], bounds[1][1], 0.01)
-        n_grid = len(x1)
-        X1, X2 = np.meshgrid(x1, x2)
-        X = np.hstack((X1.reshape(n_grid**2, 1), X2.reshape(n_grid**2, 1)))
+        x1 = np.arange(*bounds[0], 0.01)
+        if len(x1) > 1000:
+            x1 = np.linspace(*bounds[0], 1000)
+
+        x2 = np.arange(*bounds[1], 0.01)
+        if len(x2) > 1000:
+            x2 = np.linspace(*bounds[1], 1000)
+
+        xx1, xx2 = np.meshgrid(x1, x2)
+        X = np.dstack((xx1, xx2)).reshape(-1, 2)
         Y = self.f(X)
 
         if ax is None:
@@ -33,37 +38,32 @@ class function2d:
         else:
             call_show = False
 
+        # The Y.reshape call looks like the parameters are "backwards".
+        # But, it is specifying the shape [n x m] where n will be the
+        # length of the y-axis, and m is that of the x-axis.
         if plt_type.lower() == 'contourf':
-            im = ax.contourf(X1, X2, Y.reshape((n_grid, n_grid)), label='f(x)')
+            im = ax.contourf(xx1, xx2, Y.reshape((len(x2), len(x1))), 100,
+                             label='f(x)')
             ax.figure.colorbar(im, ax=ax)
         elif plt_type.lower() == 'contour':
-            ax.contour(X1, X2, Y.reshape((n_grid, n_grid)), label='f(x)')
+            im = ax.contour(xx1, xx2, Y.reshape((len(x2), len(x1))),
+                            label='f(x)')
         else:
             raise NotImplementedError("No such plot_type, options are"
                                       "'contourf' or 'contour'")
 
         if (len(self.min) > 1):
-            ax.plot(
-                np.array(self.min)[:, 0],
-                np.array(self.min)[:, 1],
-                color='k',
-                linestyle='',
-                marker='X',
-                label=u'Minima')
+            ax.plot(np.array(self.min)[:, 0], np.array(self.min)[:, 1],
+                    color='k', linestyle='', marker='X', label=u'Minima')
         else:
-            ax.plot(
-                np.array(self.min[0][0]),
-                np.array(self.min[0][1]),
-                color='k',
-                linestyle='',
-                marker='X',
-                label=u'Minimum')
+            ax.plot(np.array(self.min[0][0]), np.array(self.min[0][1]),
+                    color='k', linestyle='', marker='X', label=u'Minimum')
         ax.set_xlabel('X1')
         ax.set_ylabel('X2')
         ax.set_xlim(x1[0], x1[-1])
         ax.set_ylim(x2[0], x2[-1])
         ax.legend()
-        if ax.title.get_text == '':
+        if ax.title.get_text() == '':
             ax.set_title(self.name)
         if call_show:
             plt.show()
@@ -173,7 +173,7 @@ class cosines(function2d):
             self.bounds = bounds
 
         self.min = np.array([[0.31426205, 0.30249864]])
-        self.fmin = 1.59622468
+        self.fmin = -1.59622468
         self.name = 'Cosines'
         self.sd = sd
         return
@@ -186,8 +186,8 @@ class cosines(function2d):
         x2 = X[:, 1]
         u = 1.6 * x1 - 0.5
         v = 1.6 * x2 - 0.5
-        fval = 1 - (u ** 2 + v ** 2 - 0.3 * np.cos(3 * np.pi * u) -
-                    0.3 * np.cos(3 * np.pi * v))
+        fval = -(1 - (u ** 2 + v ** 2 - 0.3 * np.cos(3 * np.pi * u) -
+                    0.3 * np.cos(3 * np.pi * v)))
         noise = np.random.normal(0, self.sd, size=fval.shape)
         return fval + noise
 
@@ -364,7 +364,7 @@ class eggholder(function2d):
     def __init__(self, bounds=None, sd=0):
         super(eggholder, self).__init__()
         if bounds is None:
-            self.bounds = [(-512., 512.), (-512., 512.)]
+            self.bounds = [(-515., 515.), (-515., 515.)]
         else:
             self.bounds = bounds
 
