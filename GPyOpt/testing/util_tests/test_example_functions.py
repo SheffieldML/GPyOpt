@@ -5,8 +5,7 @@ from GPyOpt.objective_examples.experiments1d import forrester
 from GPyOpt.objective_examples.experiments2d import rosenbrock, beale,\
     dropwave, cosines, branin, goldstein, sixhumpcamel, mccormick, powers,\
     eggholder
-from GPyOpt.objective_examples.experimentsNd import alpine1, alpine2, gSobol,\
-    ackley
+from GPyOpt.objective_examples.experimentsNd import alpine1, alpine2, ackley
 
 
 class TestExampleFunctions(unittest.TestCase):
@@ -123,21 +122,19 @@ class TestExampleFunctions(unittest.TestCase):
         return
 
     def test_experimentsNd_alpine1(self):
-        fcls = alpine1()
+        fcls = alpine1(2)
         self._check_minimizer(fcls)
+        self._evaluate_2d(fcls)
         return
 
     def test_experimentsNd_alpine2(self):
-        fcls = alpine2()
+        fcls = alpine2(2)
         self._check_minimizer(fcls)
-        return
-
-    def test_experimentsNd_gSobol(self):
-        fcls = gSobol()
-        self._check_minimizer(fcls)
+        self._evaluate_2d(fcls)
         return
 
     def test_experimentsNd_ackley(self):
-        fcls = ackley()
+        fcls = ackley(2)
         self._check_minimizer(fcls)
+        self._evaluate_2d(fcls)
         return
