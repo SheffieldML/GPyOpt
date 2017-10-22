@@ -28,12 +28,17 @@ class TestExampleFunctions(unittest.TestCase):
     def _check_minimizer(self, fcls):
         '''Checks that the function wrapped by the class fcls correctly
         states it's minimum value and location'''
-        xmin = fcls.min
+        xmin = np.atleast_2d(fcls.min)
         fmin = fcls.fmin
         f_xmin = fcls.f(xmin)
         assert np.allclose(fmin, f_xmin, 1e-3, 1e-3),\
             'Incorrect minimizer! f(x_min) = {0}, but fmin = {1}'.format(
                 f_xmin, fmin)
+        for i in range(xmin.shape[0]):
+            xmin_i = xmin[i]
+            for j, xmin_ij in enumerate(xmin_i):
+                assert xmin_ij >= fcls.bounds[j][0], 'minimizer not in bounds!'
+                assert xmin_ij <= fcls.bounds[j][1], 'minimizer not in bounds!'
         return
 
     def _evaluate_1d(self, fcls):
@@ -47,7 +52,12 @@ class TestExampleFunctions(unittest.TestCase):
         '''Evaluates a 2d function wrapped by fcls on it's domain'''
         assert fcls.input_dim == 2, 'Function is not 2D!'
         x = np.arange(*fcls.bounds[0], 0.01)
+        if len(x) > 1000:  # To ensure the meshgrid doesn't explode memory
+            x = np.linspace(*fcls.bounds[0], 1000)
+
         y = np.arange(*fcls.bounds[1], 0.01)
+        if len(y) > 1000:
+            y = np.linspace(*fcls.bounds[1], 1000)
 
         # This produces a N x 2 vector from the cartesian product
         # of x and y https://stackoverflow.com/questions/11144513/

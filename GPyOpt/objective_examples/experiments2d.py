@@ -364,7 +364,7 @@ class eggholder(function2d):
     def __init__(self, bounds=None, sd=0):
         super(eggholder, self).__init__()
         if bounds is None:
-            self.bounds = [(-5.12, 5.12), (-5.12, 5.12)]
+            self.bounds = [(-512., 512.), (-512., 512.)]
         else:
             self.bounds = bounds
 
