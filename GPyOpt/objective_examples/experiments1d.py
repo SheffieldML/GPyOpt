@@ -23,7 +23,7 @@ class function1d:
                 call_show = True
             else:
                 call_show = False
-        X = np.arange(bounds[0][0], bounds[0][1], 0.01)
+        X = np.arange(*bounds[0], step=0.01)
         Y = self.f(X)
 
         ax.plot(X, Y, lw=2, label='f')

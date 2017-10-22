@@ -19,13 +19,13 @@ class function2d:
 
     def plot(self, ax=None, plt_type='contourf'):
         bounds = self.bounds
-        x1 = np.arange(*bounds[0], 0.01)
+        x1 = np.arange(*bounds[0], step=0.01)
         if len(x1) > 1000:
-            x1 = np.linspace(*bounds[0], 1000)
+            x1 = np.linspace(*bounds[0], num=1000)
 
-        x2 = np.arange(*bounds[1], 0.01)
+        x2 = np.arange(*bounds[1], step=0.01)
         if len(x2) > 1000:
-            x2 = np.linspace(*bounds[1], 1000)
+            x2 = np.linspace(*bounds[1], num=1000)
 
         xx1, xx2 = np.meshgrid(x1, x2)
         X = np.dstack((xx1, xx2)).reshape(-1, 2)

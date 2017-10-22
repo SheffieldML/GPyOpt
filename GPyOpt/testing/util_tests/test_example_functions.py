@@ -50,20 +50,20 @@ class TestExampleFunctions(unittest.TestCase):
     def _evaluate_1d(self, fcls):
         '''Evaluates a 1d function wrapped by fcls on it's domain'''
         assert fcls.input_dim == 1, 'Function is not 1D!'
-        x = np.arange(*fcls.bounds[0], 0.01)
+        x = np.arange(*fcls.bounds[0], step=0.01)
         fx = fcls.f(x)  # Evaluate the function and let errors through
         return fx
 
     def _evaluate_2d(self, fcls):
         '''Evaluates a 2d function wrapped by fcls on it's domain'''
         assert fcls.input_dim == 2, 'Function is not 2D!'
-        x = np.arange(*fcls.bounds[0], 0.01)
+        x = np.arange(*fcls.bounds[0], step=0.01)
         if len(x) > 1000:  # To ensure the meshgrid doesn't explode memory
-            x = np.linspace(*fcls.bounds[0], 1000)
+            x = np.linspace(*fcls.bounds[0], num=1000)
 
-        y = np.arange(*fcls.bounds[1], 0.01)
+        y = np.arange(*fcls.bounds[1], step=0.01)
         if len(y) > 1000:
-            y = np.linspace(*fcls.bounds[1], 1000)
+            y = np.linspace(*fcls.bounds[1], num=1000)
 
         # This produces a N x 2 vector from the cartesian product
         # of x and y https://stackoverflow.com/questions/11144513/
