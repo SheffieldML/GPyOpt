@@ -49,16 +49,16 @@ class forrester(function1d):
             self.sd = 0
         else:
             self.sd = sd
-        self.min = 0.78  # approx
-        self.fmin = -6  # approx
+
         self.bounds = [(0, 1)]
 
+        # Approximate minimizer and minimum
+        self.min = np.array([0.757276])
+        self.fmin = np.array([-6.02074])
+        return
+
     def f(self, X):
-        X = X.reshape((len(X), 1))
-        n = X.shape[0]
+        '''Evaluate the function at the points given by np.array X'''
         fval = ((6 * X - 2) ** 2) * np.sin(12 * X - 4)
-        if self.sd == 0:
-            noise = np.zeros(n).reshape(n, 1)
-        else:
-            noise = np.random.normal(0, self.sd, n).reshape(n, 1)
-        return fval.reshape(n, 1) + noise
+        noise = np.random.normal(0, self.sd, size=fval.shape)
+        return fval + noise

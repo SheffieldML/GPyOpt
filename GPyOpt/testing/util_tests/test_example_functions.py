@@ -1,4 +1,5 @@
 import unittest
+import numpy as np
 
 from GPyOpt.objective_examples.experiments1d import forrester
 from GPyOpt.objective_examples.experiments2d import rosenbrock, beale,\
@@ -28,62 +29,97 @@ class TestExampleFunctions(unittest.TestCase):
     def _check_minimizer(self, fcls):
         '''Checks that the function wrapped by the class fcls correctly
         states it's minimum value and location'''
-        assert fcls.f(fcls.min) == fcls.fmin, 'Incorrect minimizer!'
+        xmin = fcls.min
+        fmin = fcls.fmin
+        f_xmin = fcls.f(xmin)
+        assert np.allclose(fmin, f_xmin, 1e-3, 1e-3),\
+            'Incorrect minimizer! f(x_min) = {0}, but fmin = {1}'.format(
+                f_xmin, fmin)
         return
+
+    def _evaluate_1d(self, fcls):
+        '''Evaluates a 1d function wrapped by fcls on it's domain'''
+        assert fcls.input_dim == 1, 'Function is not 1D!'
+        x = np.arange(*fcls.bounds[0], 0.01)
+        fx = fcls.f(x)  # Evaluate the function and let errors through
+        return fx
+
+    def _evaluate_2d(self, fcls):
+        '''Evaluates a 2d function wrapped by fcls on it's domain'''
+        assert fcls.input_dim == 2, 'Function is not 2D!'
+        x = np.arange(*fcls.bounds[0], 0.01)
+        y = np.arange(*fcls.bounds[1], 0.01)
+
+        # This produces a N x 2 vector from the cartesian product
+        # of x and y https://stackoverflow.com/questions/11144513/
+        X = np.dstack(np.meshgrid(x, y)).reshape(-1, 2)
+        fx = fcls.f(X)
+        return fx
 
     def test_experiments1d_forrester(self):
         fcls = forrester()
         self._check_minimizer(fcls)
+        self._evaluate_1d(fcls)
         return
 
     def test_experiments2d_rosenbrock(self):
         fcls = rosenbrock()
         self._check_minimizer(fcls)
+        self._evaluate_2d(fcls)
         return
 
     def test_experiments2d_beale(self):
         fcls = beale()
         self._check_minimizer(fcls)
+        self._evaluate_2d(fcls)
         return
 
     def test_experiments2d_dropwave(self):
         fcls = dropwave()
         self._check_minimizer(fcls)
+        self._evaluate_2d(fcls)
         return
 
     def test_experiments2d_cosines(self):
         fcls = cosines()
         self._check_minimizer(fcls)
+        self._evaluate_2d(fcls)
         return
 
     def test_experiments2d_branin(self):
         fcls = branin()
         self._check_minimizer(fcls)
+        self._evaluate_2d(fcls)
         return
 
     def test_experiments2d_goldstein(self):
         fcls = goldstein()
         self._check_minimizer(fcls)
+        self._evaluate_2d(fcls)
         return
 
     def test_experiments2d_sixhumpcamel(self):
         fcls = sixhumpcamel()
         self._check_minimizer(fcls)
+        self._evaluate_2d(fcls)
         return
 
     def test_experiments2d_mccormick(self):
         fcls = mccormick()
         self._check_minimizer(fcls)
+        self._evaluate_2d(fcls)
         return
 
     def test_experiments2d_powers(self):
         fcls = powers()
         self._check_minimizer(fcls)
+        self._evaluate_2d(fcls)
         return
 
     def test_experiments2d_eggholder(self):
         fcls = eggholder()
         self._check_minimizer(fcls)
+        self._evaluate_2d(fcls)
         return
 
     def test_experimentsNd_alpine1(self):
