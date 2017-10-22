@@ -17,12 +17,16 @@ class function2d:
     '''
     def plot(self, ax=None, plt_type='contourf'):
         bounds = self.bounds
-        x1 = np.arange(bounds[0][0], bounds[0][1], 0.01)
-        x2 = np.arange(bounds[1][0], bounds[1][1], 0.01)
-        n_grid = len(x1)
-        X1, X2 = np.meshgrid(x1, x2)
-        X = np.hstack((X1.reshape(n_grid ** 2, 1),
-                       X2.reshape(n_grid ** 2, 1)))
+        x1 = np.arange(*bounds[0], step=0.01)
+        if len(x1) > 1000:
+            x1 = np.linspace(*bounds[0], num=1000)
+
+        x2 = np.arange(*bounds[1], step=0.01)
+        if len(x2) > 1000:
+            x2 = np.linspace(*bounds[1], num=1000)
+
+        xx1, xx2 = np.meshgrid(x1, x2)
+        X = np.dstack((xx1, xx2)).reshape(-1, 2)
         Y = self.f(X)
 
         if ax is None:
@@ -32,24 +36,25 @@ class function2d:
         else:
             call_show = False
 
+        # The Y.reshape call looks like the parameters are "backwards".
+        # But, it is specifying the shape [n x m] where n will be the
+        # length of the y-axis, and m is that of the x-axis.
         if plt_type.lower() == 'contourf':
-            im = ax.contourf(X1, X2, Y.reshape((n_grid, n_grid)),
+            im = ax.contourf(xx1, xx2, Y.reshape((len(x2), len(x1))), 100,
                              label='f(x)')
             ax.figure.colorbar(im, ax=ax)
         elif plt_type.lower() == 'contour':
-            ax.contour(X1, X2, Y.reshape((n_grid, n_grid)),
-                       label='f(x)')
+            im = ax.contour(xx1, xx2, Y.reshape((len(x2), len(x1))),
+                            label='f(x)')
         else:
             raise NotImplementedError("No such plot_type, options are"
                                       "'contourf' or 'contour'")
 
         if (len(self.min) > 1):
-            ax.plot(np.array(self.min)[:, 0],
-                    np.array(self.min)[:, 1],
+            ax.plot(np.array(self.min)[:, 0], np.array(self.min)[:, 1],
                     color='k', linestyle='', marker='X', label=u'Minima')
         else:
-            ax.plot(np.array(self.min[0][0]),
-                    np.array(self.min[0][1]),
+            ax.plot(np.array(self.min[0][0]), np.array(self.min[0][1]),
                     color='k', linestyle='', marker='X', label=u'Minimum')
         ax.set_xlabel('X1')
         ax.set_ylabel('X2')
