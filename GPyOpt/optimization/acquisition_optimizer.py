@@ -48,8 +48,9 @@ class AcquOptimizer(object):
     :param space: design space class from GPyOpt.
     """
     
-    def __init__(self, space):
+    def __init__(self, space, optimizer):
         self.space = space
+        self.optimizer_name = optimizer
         
     def optimize(self, f=None, df=None, f_df=None):
         """
@@ -78,35 +79,26 @@ class ContAcqOptimizer(AcquOptimizer):
 
     
     def __init__(self, space, optimizer='lbfgs', n_samples=5000, fast=True, random=True, search=True, **kwargs):
-        super(ContAcqOptimizer, self).__init__(space)
+        super(ContAcqOptimizer, self).__init__(space, optimizer)
         
         self.n_samples = n_samples
         self.fast= fast
         self.random = random
         self.search = search
-        self.optimizer_name = optimizer
         self.kwargs = kwargs
         self.optimizer = select_optimizer(self.optimizer_name)(space, **kwargs)
         self.free_dims = list(range(space.dimensionality))
         self.bounds = self.space.get_bounds()
         self.subspace = self.space
 
-        if self.random:
-            self.samples = samples_multidimensional_uniform(self.bounds,self.n_samples)
-        else:
-            self.samples = multigrid(self.bounds, self.n_samples)
-
-
-    def fix_dimensions(self, dims=None, values=None):
+    def prepare_fix_dimensions(self, dims=None):
         '''
-        Fix the values of some of the dimensions. Once this this done the optimization is carried out only across the not fixed dimensions.
+        Prepare fixing the values of some of the dimensions.
 
         :param dims: list of the indexes of the dimensions to fix.
-        :param values: list of the values at which the selected dimensions should be fixed.
         ''' 
         self.fixed_dims = dims
-        self.fixed_values = np.atleast_2d(values)
-        
+
         # -- restore to initial values
         self.free_dims = list(range(self.space.dimensionality))
         self.bounds = self.space.get_bounds()
@@ -116,9 +108,22 @@ class ContAcqOptimizer(AcquOptimizer):
             self.free_dims.remove(idx)
             del self.bounds[idx]
 
-        # -- take only the fixed components of the random samples
-        self.samples = self.samples[:,np.array(self.free_dims)] # take only the component of active dims
         self.subspace = self.space.get_subspace(self.free_dims)
+
+        # -- sample only the free components
+        if self.random:
+            self.samples = samples_multidimensional_uniform(self.bounds, self.n_samples)
+        else:
+            self.samples = multigrid(self.bounds, self.n_samples)
+
+    def fix_dimensions(self, values=None):
+        '''
+        Fix the values of some of the dimensions. Once this this done the optimization is carried out only across the not fixed dimensions.
+
+        :param values: list of the values at which the selected dimensions should be fixed.
+        ''' 
+        self.fixed_values = np.atleast_2d(values)
+
         self.optimizer = select_optimizer(self.optimizer_name)(Design_space(self.subspace), **self.kwargs)
 
     def _expand_vector(self,x):
@@ -203,7 +208,7 @@ class BanditAcqOptimizer(AcquOptimizer):
     """
 
     def __init__(self, space, current_X, **kwargs):
-        super(BanditAcqOptimizer, self).__init__(space)
+        super(BanditAcqOptimizer, self).__init__(space, optimizer)
         self.space = space
         self.pulled_arms = current_X
 
@@ -259,7 +264,7 @@ class MixedAcqOptimizer(AcquOptimizer):
     """
 
     def __init__(self, space, optimizer='lbfgs', n_samples=1000, fast=True, random=True, search=True, **kwargs):
-        super(MixedAcqOptimizer, self).__init__(space)
+        super(MixedAcqOptimizer, self).__init__(space, optimizer)
 
         self.space = space
         self.mixed_optimizer = ContAcqOptimizer(space, n_samples=n_samples, fast=fast, random=random, search=search, optimizer=optimizer, **kwargs)
@@ -277,9 +282,11 @@ class MixedAcqOptimizer(AcquOptimizer):
         num_discrete = self.discrete_values.shape[0]
         partial_x_min  = np.zeros((num_discrete,self.space.dimensionality))
         partial_f_min  = np.zeros((num_discrete,1))
-        
+
+        self.mixed_optimizer.prepare_fix_dimensions(dims=self.discrete_dims)
+
         for i in range(num_discrete):
-            self.mixed_optimizer.fix_dimensions(dims=self.discrete_dims, values=self.discrete_values[i,:])
+            self.mixed_optimizer.fix_dimensions(values=self.discrete_values[i,:])
             partial_x_min[i,:] , partial_f_min[i,:] = self.mixed_optimizer.optimize(f, df, f_df)
 
         return np.atleast_2d(partial_x_min[np.argmin(partial_f_min)]), np.atleast_2d(min(partial_f_min))
