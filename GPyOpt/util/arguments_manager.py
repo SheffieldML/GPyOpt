@@ -115,8 +115,6 @@ class ArgumentsManager(object):
         # --- Initialize RF: values taken from default in scikit-learn
         # --------
         elif model_type =='RF':
-            #if 'verbosity_model' in self.kwargs: self.verbosity = self.kwargs['verbosity']
-            #else: self.verbosity = False
             return RFModel(verbose=verbosity_model)
 
         # --------
