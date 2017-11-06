@@ -19,7 +19,7 @@ import numpy as np
 
 # --- Define your problem
 def f(x): return (6*x-2)**2*np.sin(12*x-4)
-bounds = [{'name': 'var_1', 'type': 'continuous', 'domain': (-1,1)}]
+bounds = [{'name': 'var_1', 'type': 'continuous', 'domain': (0,1)}]
 
 # --- Solve your problem
 myBopt = BayesianOptimization(f=f, bounds=bounds)
