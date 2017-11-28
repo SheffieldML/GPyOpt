@@ -101,7 +101,7 @@ class BayesianOptimization(BO):
         self.num_cores = num_cores
         if f is not None:
             self.f = self._sign(f)
-            self.objective = SingleObjective(self.f, self.batch_size, self.num_cores,self.objective_name)
+            self.objective = SingleObjective(self.f, self.batch_size,self.objective_name)
         else:
             self.f = None
             self.objective = None

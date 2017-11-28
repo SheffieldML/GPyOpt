@@ -75,7 +75,7 @@ class ArgumentsManager(object):
             raise Exception('Invalid acquisition selected.')
 
 
-    def model_creator(self,model_type, exact_feval, space):
+    def model_creator(self, model_type, exact_feval, space):
         """
         Model chooser from the available options. Extra parameters can be passed via **kwargs.
         """
@@ -103,38 +103,37 @@ class ArgumentsManager(object):
         # --------
         # --- Initialize GP model with MCMC on the parameters
         # --------
-        elif self.model_type == 'GP_MCMC':
-            self.n_samples = self.kwargs.get('n_samples',10)
-            self.n_burnin = self.kwargs.get('n_burnin',100)
-            self.subsample_interval = self.kwargs.get('subsample_interval',10)
-            self.step_size = self.kwargs.get('step_size',1e-1)
-            self.leapfrog_steps = self.kwargs.get('leapfrog_steps',20)
-            return  GPModel_MCMC(self.kernel, self.noise_var, self.exact_feval, self.n_samples, self.n_burnin, self.subsample_interval, self.step_size, self.leapfrog_steps, self.verbosity_model)
+        elif model_type == 'GP_MCMC':
+            n_samples = self.kwargs.get('n_samples',10)
+            n_burnin = self.kwargs.get('n_burnin',100)
+            subsample_interval = self.kwargs.get('subsample_interval',10)
+            step_size = self.kwargs.get('step_size',1e-1)
+            leapfrog_steps = self.kwargs.get('leapfrog_steps',20)
+            return  GPModel_MCMC(kernel, noise_var, exact_feval, n_samples, n_burnin, subsample_interval, step_size, leapfrog_steps, verbosity_model)
 
         # --------
         # --- Initialize RF: values taken from default in scikit-learn
         # --------
-        elif self.model_type =='RF':
-            if 'verbosity_model' in self.kwargs: self.verbosity = self.kwargs['verbosity']
-            else: self.verbosity = False
-            return RFModel(verbose=self.verbosity_model)
+        elif model_type =='RF':
+            return RFModel(verbose=verbosity_model)
 
         # --------
         # --- Initialize WapedGP in the outputs
         # --------
-        elif self.model_type =='warpedGP':
+        elif model_type =='warpedGP':
             return WarpedGPModel()
 
         # --------
         # --- Initialize WapedGP in the inputs
         # --------
-        elif self.model_type == 'input_warped_GP':
+        elif model_type == 'input_warped_GP':
             if 'input_warping_function_type' in self.kwargs:
                 if self.kwargs['input_warping_function_type'] != "kumar_warping":
                     print("Only support kumar_warping for input!")
 
             # Only support Kumar warping now, setting it to None will use default Kumar warping
-            self.input_warping_function = None
-            return InputWarpedGPModel(self.space, self.input_warping_function, self.kernel, self.noise_var,
-                                      self.exact_feval, self.model_optimizer_type, self.max_iters,
-                                      self.optimize_restarts, self.verbosity_model, ARD=self.ARD)
+            input_warping_function = None
+            optimize_restarts = self.kwargs.get('optimize_restarts',5)
+            return InputWarpedGPModel(space, input_warping_function, kernel, noise_var,
+                                      exact_feval, model_optimizer_type, max_iters,
+                                      optimize_restarts, verbosity_model, ARD)
