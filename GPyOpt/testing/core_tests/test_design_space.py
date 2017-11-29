@@ -88,7 +88,7 @@ class TestDesignSpace(unittest.TestCase):
         design_space = Design_space(space, constraints=constraints)
 
         self.assertEqual(len(design_space.space_expanded), 2)
-        self.assertTrue(design_space.has_constrains())
+        self.assertTrue(design_space.has_constraints())
 
     def test_bounds(self):
         space = [

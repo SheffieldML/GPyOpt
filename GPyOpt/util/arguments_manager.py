@@ -89,13 +89,16 @@ class ArgumentsManager(object):
         noise_var = self.kwargs.get('noise_var',None)
         model_optimizer_type = self.kwargs.get('model_optimizer_type','lbfgs')
         max_iters = self.kwargs.get('max_iters',1000)
+        optimize_restarts = self.kwargs.get('optimize_restarts',5)
 
         # --------
         # --- Initialize GP model with MLE on the parameters
         # --------
         if model_type == 'GP' or model_type == 'sparseGP':
-            if model_type == 'GP': sparse = False
-            if model_type == 'sparseGP': sparse = True
+            if model_type == 'GP':
+                sparse = False
+            if model_type == 'sparseGP':
+                sparse = True
             optimize_restarts = self.kwargs.get('optimize_restarts',5)
             num_inducing = self.kwargs.get('num_inducing',10)
             return GPModel(kernel, noise_var, exact_feval, model_optimizer_type, max_iters, optimize_restarts, sparse, num_inducing, verbosity_model, ARD)
@@ -109,7 +112,7 @@ class ArgumentsManager(object):
             subsample_interval = self.kwargs.get('subsample_interval',10)
             step_size = self.kwargs.get('step_size',1e-1)
             leapfrog_steps = self.kwargs.get('leapfrog_steps',20)
-            return  GPModel_MCMC(kernel, noise_var, exact_feval, n_samples, n_burnin, subsample_interval, step_size, leapfrog_steps, verbosity_model)
+            return GPModel_MCMC(kernel, noise_var, exact_feval, n_samples, n_burnin, subsample_interval, step_size, leapfrog_steps, verbosity_model)
 
         # --------
         # --- Initialize RF: values taken from default in scikit-learn

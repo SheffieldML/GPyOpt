@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 
 from GPyOpt.core.task.space import Design_space
-from GPyOpt.util.general import initial_design
+from GPyOpt.experiment_design import initial_design
 from GPyOpt.util.duplicate_manager import DuplicateManager
 
 class TestDuplicateManager(unittest.TestCase):

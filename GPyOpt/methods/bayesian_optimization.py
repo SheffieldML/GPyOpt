@@ -7,7 +7,7 @@ from ..core.errors import InvalidConfigError
 from ..core.task.space import Design_space, bounds_to_space
 from ..core.task.objective import SingleObjective
 from ..core.task.cost import CostModel
-from ..util.general import initial_design
+from ..experiment_design import initial_design
 from ..util.arguments_manager import ArgumentsManager
 from ..core.evaluators import Sequential, RandomBatch, LocalPenalization, ThompsonBatch
 from ..models.gpmodel import GPModel, GPModel_MCMC

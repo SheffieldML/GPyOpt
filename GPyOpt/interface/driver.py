@@ -108,7 +108,7 @@ class BODriver(object):
         acq = self._get_acquisition(model, space)
         acq_eval = self._get_acq_evaluator(acq)
                 
-        from ..util.stats import initial_design
+        from ..experiment_design import initial_design
         X_init = initial_design(self.config['initialization']['type'], space, self.config['initialization']['num-eval'])
 
         from ..methods import ModularBayesianOptimization

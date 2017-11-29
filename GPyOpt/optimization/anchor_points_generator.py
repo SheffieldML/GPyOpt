@@ -2,7 +2,7 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 import numpy as np
-from ..util.general import initial_design
+from ..experiment_design import initial_design
 from ..core.errors import FullyExploredOptimizationDomainError
 from ..core.task.space import Design_space
 

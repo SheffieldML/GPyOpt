@@ -75,7 +75,7 @@ class TestInputWarpedGP(BaseTestCase):
 
 
         feasible_region = GPyOpt.Design_space(space = self.problem_config['domain'], constraints = self.problem_config['constrains'])
-        self.f_inits = GPyOpt.util.general.initial_design('random', feasible_region, 5)
+        self.f_inits = GPyOpt.experiment_design.initial_design('random', feasible_region, 5)
         self.f_inits = self.f_inits.reshape(n_inital_design, input_dim)
 
     def test_run(self):

@@ -6,86 +6,6 @@ from scipy.special import erfc
 import time
 from ..core.errors import InvalidConfigError
 
-def initial_design(design, space, init_points_count):
-
-    if space.has_constrains() == False:
-        samples = sample_initial_design(design, space, init_points_count)
-
-    elif space.has_constrains() == True:
-        if design is not 'random':
-            raise InvalidConfigError('Sampling with constrains is not allowed with Latin designs. Please use random design instead')
-
-        samples = np.empty((0,space.dimensionality))
-        while samples.shape[0] < init_points_count:
-            domain_samples = sample_initial_design(design, space, init_points_count)
-            valid_indices = (space.indicator_constraints(domain_samples)==1).flatten()
-            if sum(valid_indices)>0:
-                valid_samples = domain_samples[valid_indices,:]
-                samples = np.vstack((samples,valid_samples))
-    return samples[0:init_points_count,:]
-
-
-def sample_initial_design(design, space, init_points_count):
-    """
-    :param design: the choice of design
-    :param space: variables space
-    :param init_points_count: the number of initial points
-    :Note: discrete dimensions are always added based on uniform samples
-    """
-    if design == 'grid':
-        print('Note: in grid designs the total number of generated points is the smallest closest integer of n^d to the selected amount of points')
-        continuous_dims = len(space.get_continuous_dims())
-        data_per_dimension = iroot(continuous_dims, init_points_count)
-        init_points_count = data_per_dimension**continuous_dims
-    samples = np.empty((init_points_count, space.dimensionality))
-
-    ## -- fill randomly for the non continuous variables
-    for (idx, var) in enumerate(space.space_expanded):
-        if (var.type == 'discrete') or (var.type == 'categorical') :
-            sample_var = np.atleast_2d(np.random.choice(var.domain, init_points_count))
-            samples[:,idx] = sample_var.flatten()
-
-    ## -- sample in the case of bandit variables
-        elif var.type == 'bandit':
-            idx_samples = np.random.randint(var.domain.shape[0],size=init_points_count)
-            samples = var.domain[idx_samples,:]
-
-    ## -- fill the continuous variables with the selected design
-    if design == 'random':
-        X_design = samples_multidimensional_uniform(space.get_continuous_bounds(),init_points_count)
-    else:
-        bounds = space.get_continuous_bounds()
-        lB = np.asarray(bounds)[:,0].reshape(1,len(bounds))
-        uB = np.asarray(bounds)[:,1].reshape(1,len(bounds))
-        diff = uB-lB
-
-        if design == 'latin':
-            from pyDOE import lhs
-            X_design_aux = lhs(len(space.get_continuous_bounds()),init_points_count, criterion='center')
-            I = np.ones((X_design_aux.shape[0],1))
-            X_design = np.dot(I,lB) + X_design_aux*np.dot(I,diff)
-
-        elif design == 'sobol':
-            from sobol_seq import i4_sobol_generate
-            X_design = np.dot(i4_sobol_generate(len(space.get_continuous_bounds()),init_points_count),np.diag(diff.flatten()))[None,:] + lB
-
-        elif design == 'grid':
-            X_design = multigrid(space.get_continuous_bounds(), data_per_dimension)
-
-    if space._has_continuous():
-        samples[:,space.get_continuous_dims()] = X_design
-
-    return samples
-
-
-def iroot(k, n):
-    u, s = n, n+1
-    while u < s:
-        s = u
-        t = (k-1) * s + n // pow(s, k-1)
-        u = t // k
-    return s
-
 def compute_integrated_acquisition(acquisition,x):
     '''
     Used to compute the acquisition function when samples of the hyper-parameters have been generated (used in GP_MCMC model).
@@ -152,17 +72,6 @@ def samples_multidimensional_uniform(bounds,num_data):
     for k in range(0,dim): Z_rand[:,k] = np.random.uniform(low=bounds[k][0],high=bounds[k][1],size=num_data)
     return Z_rand
 
-
-def multigrid(bounds, Ngrid):
-    '''
-    Generates a multidimensional lattice
-    :param bounds: box constrains
-    :param Ngrid: number of points per dimension.
-    '''
-    if len(bounds)==1:
-        return np.linspace(bounds[0][0], bounds[0][1], Ngrid).reshape(Ngrid, 1)
-    xx = np.meshgrid(*[np.linspace(b[0], b[1], Ngrid) for b in bounds])
-    return np.vstack([x.flatten(order='F') for x in xx]).T
 
 def reshape(x,input_dim):
     '''

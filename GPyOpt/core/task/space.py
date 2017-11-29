@@ -241,7 +241,7 @@ class Design_space(object):
 
         return x_objective
 
-    def has_constrains(self):
+    def has_constraints(self):
         """
         Checks if the problem has constrains. Note that the coordinates of the constrains are defined
         in terms of the model inputs and not in terms of the objective inputs. This means that if bandit or
@@ -262,7 +262,10 @@ class Design_space(object):
 
         return bounds
 
-    def _has_continuous(self):
+    def has_continuous(self):
+        """
+        Returns `true` if the space contains at least one continuous variable, and `false` otherwise
+        """
         return any(v.is_continuous() for v in self.space)
 
     def _has_bandit(self):

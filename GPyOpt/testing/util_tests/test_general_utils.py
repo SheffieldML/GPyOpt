@@ -4,7 +4,7 @@ from numpy.testing import assert_array_less
 
 from GPyOpt.core.errors import InvalidConfigError
 from GPyOpt.core.task.space import Design_space
-from GPyOpt.util.general import initial_design
+from GPyOpt.experiment_design import initial_design
 
 class TestInitialDesign(unittest.TestCase):
     def setUp(self):

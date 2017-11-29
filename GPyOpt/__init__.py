@@ -4,9 +4,6 @@
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-import matplotlib as mpl
-mpl.use('Agg')
-
 from GPyOpt.core.task.space import Design_space
 from . import core
 from . import methods
@@ -18,6 +15,5 @@ from . import acquisitions
 from . import optimization
 from . import objective_examples
 from . import objective_examples as fmodels
-
 
 from .__version__ import __version__
