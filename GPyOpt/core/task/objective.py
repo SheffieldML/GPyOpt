@@ -46,17 +46,10 @@ class SingleObjective(Objective):
         Performs the evaluation of the objective at x.
         """
 
-        if self.n_procs == 1:
+        if self.n_procs == 1 or x.shape[0] == 1:
             f_evals, cost_evals = self._eval_func(x)
         else:
-            try:
-                f_evals, cost_evals = self._syncronous_batch_evaluation(x)
-            except:
-                if not hasattr(self, 'parallel_error'):
-                    print('Error in parallel computation. Fall back to single process!')
-                else:
-                    self.parallel_error = True
-                f_evals, cost_evals = self._eval_func(x)
+            f_evals, cost_evals = self._syncronous_batch_evaluation(x)
 
         return f_evals, cost_evals
 
@@ -82,22 +75,16 @@ class SingleObjective(Objective):
         Evaluates the function a x, where x can be a single location or a batch. The evaluation is performed in parallel
         according to the number of accessible cores.
         """
-        from multiprocessing import Process, Pipe
+        from joblib import Parallel, delayed
 
         # --- parallel evaluation of the function
         divided_samples = [x[i::self.n_procs] for i in range(self.n_procs)]
-        pipe = [Pipe() for i in range(self.n_procs)]
-        proc = [Process(target=spawn(self._eval_func),args=(c,k)) for k,(p,c) in zip(divided_samples,pipe)]
-        [p.start() for p in proc]
-        [p.join() for p in proc]
 
-        # --- time of evaluation is set to constant (=1). This is one of the hypothesis of synchronous batch methods.
-        f_evals = np.zeros((x.shape[0],1))
-        cost_evals = np.ones((x.shape[0],1))
-        i = 0
-        for (p,c) in pipe:
-            f_evals[i::self.n_procs] = p.recv()[0] # throw away costs
-            i += 1
+        results = Parallel(n_jobs=self.n_procs)([delayed(self._eval_func)(args) for args in divided_samples])
+
+        f_evals = np.vstack([res[0] for res in results])
+        cost_evals = np.hstack([res[1] for res in results])
+
         return f_evals, cost_evals
 
     def _asyncronous_batch_evaluation(self,x):
