@@ -12,6 +12,7 @@ six>=1.10.0
 mock>=2.0.0
 PyDOE >= 0.3.0
 sobol_seq >=0.1
+joblib>=0.11
 
 # For tests
 nose
