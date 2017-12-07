@@ -3,11 +3,6 @@
 
 import time
 import numpy as np
-from ...util.general import get_d_moments
-import GPy
-import GPyOpt
-import sys
-import functools
 
 class Objective(object):
     """
@@ -76,10 +71,11 @@ class SingleObjective(Objective):
         Evaluates the function a x, where x can be a single location or a batch. The evaluation is performed in parallel
         according to the number of accessible cores.
         """
+        from sys import version_info
         # --- parallel evaluation of the function
         divided_samples = [x[i::self.n_procs] for i in range(self.n_procs)]
 
-        if sys.version_info.major < 3:
+        if version_info.major < 3:
             from multiprocess import Pool
             p = Pool(processes=self.n_procs)
             results = p.map(self._eval_func, divided_samples)
