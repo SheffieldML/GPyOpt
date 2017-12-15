@@ -39,7 +39,7 @@ class TestAcquisitions(BaseTestCase):
 
 
         self.methods_configs = [
-                    {   'name': 'constrains',
+                    {   'name'                       : 'constraints',
                         'model_type'                 : model_type,
                         'initial_design_numdata'     : initial_design_numdata,
                         'initial_design_type'        : initial_design_type,
@@ -67,12 +67,12 @@ class TestAcquisitions(BaseTestCase):
             'objective': GPyOpt.objective_examples.experiments2d.sixhumpcamel().f,
             'domain':      [{'name': 'var_1', 'type': 'continuous', 'domain': (-1,1)},
                             {'name': 'var_2', 'type': 'continuous', 'domain': (-1.5,1.5)}],
-            'constrains':  [{'name': 'constr_1', 'constrain': '-x[:,1] -.5 + abs(x[:,0]) - np.sqrt(1-x[:,0]**2)'},
-                            {'name': 'constr_2', 'constrain': 'x[:,1] +.5 - abs(x[:,0]) - np.sqrt(1-x[:,0]**2)'}],
+            'constraints':  [{'name': 'constr_1', 'constraint': '-x[:,1] -.5 + abs(x[:,0]) - np.sqrt(1-x[:,0]**2)'},
+                             {'name': 'constr_2', 'constraint': 'x[:,1] +.5 - abs(x[:,0]) - np.sqrt(1-x[:,0]**2)'}],
             'cost_withGradients': None}
 
 
-        feasible_region = GPyOpt.Design_space(space = self.problem_config['domain'], constraints = self.problem_config['constrains'])
+        feasible_region = GPyOpt.Design_space(space = self.problem_config['domain'], constraints = self.problem_config['constraints'])
         self.f_inits = GPyOpt.experiment_design.initial_design('random', feasible_region, 5)
         self.f_inits = self.f_inits.reshape(n_inital_design, input_dim)
 

@@ -25,7 +25,7 @@ class BayesianOptimization(BO):
     Main class to initialize a Bayesian Optimization method.
     :param f: function to optimize. It should take 2-dimensional numpy arrays as input and return 2-dimensional outputs (one evaluation per row).
     :param domain: list of dictionaries containing the description of the inputs variables (See GPyOpt.core.space.Design_space class for details).
-    :param constrains: list of dictionaries containing the description of the problem constrains (See GPyOpt.core.space.Design_space class for details).
+    :param constraints: list of dictionaries containing the description of the problem constraints (See GPyOpt.core.space.Design_space class for details).
     :cost_withGradients: cost function of the objective. The input can be:
         - a function that returns the cost and the derivatives and any set of points in the domain.
         - 'evaluation_time': a Gaussian process (mean) is used to handle the evaluation cost.
@@ -72,7 +72,7 @@ class BayesianOptimization(BO):
                 model_optimize_restarts, sparseGP, num_inducing and normalize can still be used but will be deprecated in the next version.
     """
 
-    def __init__(self, f, domain = None, constrains = None, cost_withGradients = None, model_type = 'GP', X = None, Y = None,
+    def __init__(self, f, domain = None, constraints = None, cost_withGradients = None, model_type = 'GP', X = None, Y = None,
     	initial_design_numdata = 5, initial_design_type='random', acquisition_type ='EI', normalize_Y = True,
         exact_feval = False, acquisition_optimizer_type = 'lbfgs', model_update_interval=1, evaluator_type = 'sequential',
         batch_size = 1, num_cores = 1, verbosity= True, verbosity_model = False, maximize=False, de_duplication=False, **kwargs):
@@ -89,9 +89,9 @@ class BayesianOptimization(BO):
         self.problem_config = ArgumentsManager(kwargs)
 
         # --- CHOOSE design space
-        self.constrains = constrains
+        self.constraints = constraints
         self.domain = domain
-        self.space = Design_space(self.domain, self.constrains)
+        self.space = Design_space(self.domain, self.constraints)
 
         # --- CHOOSE objective function
         self.maximize = maximize

@@ -39,12 +39,12 @@ class Design_space(object):
 
     Restrictions can be added to the problem. Each restriction is of the form c(x) <= 0 where c(x) is a function of
     the input variables previously defined in the space. Restrictions should be written as a list
-    of dictionaries. For instance, this is an example of an space coupled with a constrain
+    of dictionaries. For instance, this is an example of an space coupled with a constraint
 
     space =[ {'name': 'var_1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality' :2}]
-    constraints = [ {'name': 'const_1', 'constrain': 'x[:,0]**2 + x[:,1]**2 - 1'}]
+    constraints = [ {'name': 'const_1', 'constraint': 'x[:,0]**2 + x[:,1]**2 - 1'}]
 
-    If no constrains are provided the hypercube determined by the bounds constraints are used.
+    If no constraints are provided the hypercube determined by the bounds constraints are used.
 
     Note about the internal representation of the vatiables: for variables in which the dimaensionality
     has been specified in the domain, a subindex is internally asigned. For instance if the variables
@@ -79,7 +79,12 @@ class Design_space(object):
         self.model_input_dims = [v.dimensionality_in_model for v in self.space_expanded]
         self.model_dimensionality = sum(self.model_input_dims)
 
-        ## -- Checking constraints
+        # Because of the misspelling API used to expect "constrain" as a key
+        # This fixes the API but also supports the old form
+        if constraints is not None:
+            for c in constraints:
+                if 'constrain' in c:
+                    c['constraint'] = c['constrain']
         self.constraints = constraints
 
     @staticmethod
@@ -181,6 +186,10 @@ class Design_space(object):
             self.dimensionality += variable.dimensionality
             self.has_types[variable.type] = True
 
+        # Check if there are any bandit and non-bandit variables together in the space
+        if any(v.is_bandit() for v in self.space) and any(not v.is_bandit() for v in self.space):
+            raise InvalidConfigError('Invalid mixed domain configuration. Bandit variables cannot be mixed with other types.')
+
     def _expand_space(self):
         """
         Creates an internal list where the variables with dimensionality larger than one are expanded.
@@ -243,10 +252,10 @@ class Design_space(object):
 
     def has_constraints(self):
         """
-        Checks if the problem has constrains. Note that the coordinates of the constrains are defined
+        Checks if the problem has constraints. Note that the coordinates of the constraints are defined
         in terms of the model inputs and not in terms of the objective inputs. This means that if bandit or
         discre varaibles are in place, the restrictions should reflect this fact (TODO: implement the
-        mapping of constraints defined on the objective to constrains defined on the model).
+        mapping of constraints defined on the objective to constraints defined on the model).
         """
         return self.constraints is not None
 
@@ -287,15 +296,15 @@ class Design_space(object):
 
     def indicator_constraints(self,x):
         """
-        Returns array of ones and zeros indicating if x is within the constrains
+        Returns array of ones and zeros indicating if x is within the constraints
         """
         x = np.atleast_2d(x)
         I_x = np.ones((x.shape[0],1))
         if self.constraints is not None:
             for d in self.constraints:
                 try:
-                    exec('constrain = lambda x:' + d['constrain'], globals())
-                    ind_x = (constrain(x)<0)*1
+                    exec('constraint = lambda x:' + d['constraint'], globals())
+                    ind_x = (constraint(x)<0)*1
                     I_x *= ind_x.reshape(x.shape[0],1)
                 except:
                     print('Fail to compile the constraint: ' + str(d))
@@ -309,6 +318,30 @@ class Design_space(object):
         n_cont = len(self.get_continuous_dims())
         n_disc = len(self.get_discrete_dims())
         return n_cont + n_disc
+
+    def round_optimum(self, x):
+        """
+        Rounds some value x to a feasible value in the design space.
+        x is expected to be a vector or an array with a single row
+        """
+        x = np.array(x)
+        if not ((x.ndim == 1) or (x.ndim == 2 and x.shape[0] == 1)):
+            raise ValueError("Unexpected dimentionality of x. Got {}, expected (1, N) or (N,)".format(x.ndim))
+
+        if x.ndim == 2:
+            x = x[0]
+
+        x_rounded = []
+        value_index = 0
+        for variable in self.space_expanded:
+            var_value = x[value_index : value_index + variable.dimensionality_in_model]
+            var_value_rounded = variable.round(var_value)
+
+            x_rounded.append(var_value_rounded)
+            value_index += variable.dimensionality_in_model
+
+        return np.atleast_2d(np.concatenate(x_rounded))
+
 
 #################### ------ ALL THE REAMINING FUNCIONS ARE REDUNDANT NOW AND SHOULD BE DEPRECATED
 

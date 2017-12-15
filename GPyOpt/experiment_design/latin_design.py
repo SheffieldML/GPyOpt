@@ -12,7 +12,7 @@ class LatinDesign(ExperimentDesign):
     """
     def __init__(self, space):
         if space.has_constraints():
-            raise InvalidConfigError('Sampling with constrains is not allowed by latin design')
+            raise InvalidConfigError('Sampling with constraints is not allowed by latin design')
         super(LatinDesign, self).__init__(space)
 
     def get_samples(self, init_points_count):

@@ -12,7 +12,7 @@ class SobolDesign(ExperimentDesign):
     """
     def __init__(self, space):
         if space.has_constraints():
-            raise InvalidConfigError('Sampling with constrains is not allowed by Sobol design')
+            raise InvalidConfigError('Sampling with constraints is not allowed by Sobol design')
         super(SobolDesign, self).__init__(space)
 
     def get_samples(self, init_points_count):

@@ -13,7 +13,7 @@ class GridDesign(ExperimentDesign):
 
     def __init__(self, space):
         if space.has_constraints():
-            raise InvalidConfigError('Sampling with constrains is not allowed by grid design')
+            raise InvalidConfigError('Sampling with constraints is not allowed by grid design')
         super(GridDesign, self).__init__(space)
 
     def _adjust_init_points_count(self, init_points_count):
@@ -60,7 +60,7 @@ def iroot(k, n):
 def multigrid(bounds, points_count):
     """
     Generates a multidimensional lattice
-    :param bounds: box constrains
+    :param bounds: box constraints
     :param points_count: number of points per dimension.
     """
     if len(bounds)==1:

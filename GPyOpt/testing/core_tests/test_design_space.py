@@ -14,6 +14,17 @@ class TestDesignSpace(unittest.TestCase):
         self.assertIsInstance(design_space.space_expanded[0], BanditVariable)
 
     def test_invalid_bandit_config(self):
+        space = [
+            {'name': 'var_1', 'type': 'continuous', 'domain':(-3,1), 'dimensionality': 2},
+            {'name': 'var_3', 'type': 'discrete', 'domain': (0,1,2,3)},
+            {'name': 'var_4', 'type': 'categorical', 'domain': (2, 4)},
+            {'name': 'var_5', 'type': 'bandit', 'domain': np.array([[-1],[0],[1]])}
+        ]
+
+        with self.assertRaises(InvalidConfigError):
+            design_space = Design_space(space)
+
+    def test_invalid_mixed_config(self):
         space = [{'name': 'var_1', 'type': 'bandit', 'domain': np.array([[-1, 1], [1]])}]
 
         with self.assertRaises(InvalidConfigError):
@@ -63,7 +74,7 @@ class TestDesignSpace(unittest.TestCase):
     def test_dimensionality(self):
         space = [
             {'name': 'var_1', 'type': 'continuous', 'domain':(-3,1), 'dimensionality': 2},
-            {'name': 'var_3', 'type': 'discrete', 'domain': (0,1,2,3)},
+            {'name': 'var_2', 'type': 'discrete', 'domain': (0,1,2,3)},
             {'name': 'var_3', 'type': 'categorical', 'domain': (2, 4)}
         ]
 
@@ -83,7 +94,7 @@ class TestDesignSpace(unittest.TestCase):
 
     def test_create_constraints(self):
         space = [{'name': 'var_1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality': 2}]
-        constraints = [ {'name': 'const_1', 'constrain': 'x[:,0]**2 + x[:,1]**2 - 1'}]
+        constraints = [ {'name': 'const_1', 'constraint': 'x[:,0]**2 + x[:,1]**2 - 1'}]
 
         design_space = Design_space(space, constraints=constraints)
 
@@ -93,9 +104,8 @@ class TestDesignSpace(unittest.TestCase):
     def test_bounds(self):
         space = [
             {'name': 'var_1', 'type': 'continuous', 'domain':(-3,1), 'dimensionality': 1},
-            {'name': 'var_3', 'type': 'discrete', 'domain': (0,1,2,3)},
-            {'name': 'var_3', 'type': 'categorical', 'domain': (2, 4)},
-            {'name': 'var_4', 'type': 'bandit', 'domain': np.array([[-2],[0],[2]])}
+            {'name': 'var_2', 'type': 'discrete', 'domain': (0,1,2,3)},
+            {'name': 'var_3', 'type': 'categorical', 'domain': (2, 4)}
         ]
 
         design_space = Design_space(space)
@@ -105,21 +115,27 @@ class TestDesignSpace(unittest.TestCase):
         self.assertIn((-3, 1), bounds)
         # Discrete variable bound
         self.assertIn((0, 3), bounds)
-        # Bandit variable bound
-        self.assertIn((-2, 2), bounds)
         # Categorical variable bound
         self.assertIn((0, 1), bounds)
+
+    def test_bandit_bounds(self):
+        space = [{'name': 'var_4', 'type': 'bandit', 'domain': np.array([[-2],[0],[2]])}]
+
+        design_space = Design_space(space)
+        bounds = design_space.get_bounds()
+
+        # Bandit variable bound
+        self.assertIn((-2, 2), bounds)
 
     def test_zip_and_unzip(self):
         space = [
             {'name': 'var_1', 'type': 'continuous', 'domain':(-3,1), 'dimensionality': 1},
             {'name': 'var_2', 'type': 'discrete', 'domain': (0,1,2,3), 'dimensionality': 1},
-            {'name': 'var_3', 'type': 'categorical', 'domain': (2, 4, 6)},
-            {'name': 'var_4', 'type': 'bandit', 'domain': np.array([[-2],[0],[2]])}
+            {'name': 'var_3', 'type': 'categorical', 'domain': (2, 4, 6)}
         ]
         X = np.array([
-            [0.0, 1, 2, -2],
-            [1.5, 3, 2, 2]
+            [0.0, 1, 2],
+            [1.5, 3, 2]
         ])
 
         design_space = Design_space(space)
@@ -132,8 +148,7 @@ class TestDesignSpace(unittest.TestCase):
         space = [
             {'name': 'var_1', 'type': 'continuous', 'domain':(-3,1), 'dimensionality': 1},
             {'name': 'var_2', 'type': 'discrete', 'domain': (0,1,2,3), 'dimensionality': 1},
-            {'name': 'var_3', 'type': 'categorical', 'domain': (2, 4, 6)},
-            {'name': 'var_4', 'type': 'bandit', 'domain': np.array([[-2],[0],[2]])}
+            {'name': 'var_3', 'type': 'categorical', 'domain': (2, 4, 6)}
         ]
 
         design_space = Design_space(space)
@@ -150,7 +165,7 @@ class TestDesignSpace(unittest.TestCase):
 
     def test_indicator_constraints(self):
         space = [{'name': 'var_1', 'type': 'continuous', 'domain':(-5, 5), 'dimensionality': 1}]
-        constraints = [ {'name': 'const_1', 'constrain': 'x[:,0]**2 - 1'}]
+        constraints = [ {'name': 'const_1', 'constraint': 'x[:,0]**2 - 1'}]
         x = np.array([[0], [0.5], [4], [-0.2], [-5]])
         expected_indicies = np.array([[1], [1], [0], [1], [0]])
 
@@ -161,7 +176,7 @@ class TestDesignSpace(unittest.TestCase):
 
     def test_invalid_constraint(self):
         space = [{'name': 'var_1', 'type': 'continuous', 'domain':(-5, 5), 'dimensionality': 1}]
-        constraints = [{'name': 'const_1', 'constrain': 'x[:,20]**2 - 1'}]
+        constraints = [{'name': 'const_1', 'constraint': 'x[:,20]**2 - 1'}]
         x = np.array([[0]])
 
         design_space = Design_space(space, constraints=constraints)
@@ -185,7 +200,6 @@ class TestDesignSpace(unittest.TestCase):
         self.assertTrue(any(v for v in subspace if isinstance(v, DiscreteVariable)))
         self.assertTrue(any(v for v in subspace if isinstance(v, CategoricalVariable)))
 
-
     def test_bandit(self):
         X =     np.array([
                 [0, -2, -1],
@@ -202,7 +216,6 @@ class TestDesignSpace(unittest.TestCase):
         self.assertTrue(design_space._has_bandit())
         self.assertTrue(design_space.unzip_inputs(X).all()==X.all())
         self.assertTrue(design_space.zip_inputs(X).all()==X.all())
-
 
     def test_variable_names(self):
         space = [
@@ -221,3 +234,123 @@ class TestDesignSpace(unittest.TestCase):
         for variable in design_space.space_expanded:
             self.assertTrue(variable.name == var_names[k])
             k+=1
+
+    # Generic unit test runner for round_optimum tests
+    # TODO: Refactor to use subtests once we deprecate Python 2: https://stackoverflow.com/a/29384495
+    def assert_round_optimum(self, space, test_cases):
+        design_space = Design_space(space)
+        for test_case in test_cases:
+            rounded = design_space.round_optimum(np.array(test_case['in']))
+            self.assertTrue(np.array_equal(rounded, np.array(test_case['out'])))
+
+    def test_round_optimum_continuous(self):
+        space = [
+            {'name': 'var1', 'type': 'continuous', 'domain': [-1, 1], 'dimensionality': 1}
+        ]
+        test_cases = [
+            {'in': [[1]], 'out': [[1]]},
+            {'in': [[-3]], 'out': [[-1]]},
+            {'in': [[4]], 'out': [[1]]},
+            {'in': [[0.5]], 'out': [[0.5]]}
+        ]
+        self.assert_round_optimum(space, test_cases)
+
+        space = [
+            {'name': 'var1', 'type': 'continuous', 'domain': [-1, 1], 'dimensionality': 2}
+        ]
+        test_cases = [{'in': [[0.5, -2]], 'out': [[0.5, -1]]}]
+        self.assert_round_optimum(space, test_cases)
+
+    def test_round_optimum_discrete(self):
+        space = [
+            {'name': 'var1', 'type': 'discrete', 'domain': (0,1,2,3,6), 'dimensionality': 1}
+        ]
+        test_cases = [
+            {'in': [[1]], 'out': [[1]]},
+            {'in': [[-3]], 'out': [[0]]},
+            {'in': [[4]], 'out': [[3]]},
+            {'in': [[5]], 'out': [[6]]},
+            {'in': [[8]], 'out': [[6]]}
+        ]
+        self.assert_round_optimum(space, test_cases)
+
+        space = [
+            {'name': 'var1', 'type': 'discrete', 'domain': (0,1,2,3,6), 'dimensionality': 2}
+        ]
+        test_cases = [{'in': [[1, 5]], 'out': [[1, 6]]}]
+        self.assert_round_optimum(space, test_cases)
+
+    def test_round_optimum_categorical(self):
+        space = [
+            {'name': 'var1', 'type': 'categorical', 'domain': (0,1,2,3), 'dimensionality': 1}
+        ]
+        test_cases = [
+            {'in': [[1, 0, 0, 0]], 'out': [[1, 0, 0, 0]]},
+            {'in': [[1, 0, 1, 0]], 'out': [[1, 0, 0, 0]]},
+            {'in': [[1, 2, 3, 1]], 'out': [[0, 0, 1, 0]]},
+            {'in': [[-1, -2, -3, 0]], 'out': [[0, 0, 0, 1]]}
+        ]
+        self.assert_round_optimum(space, test_cases)
+
+        space = [
+            {'name': 'var1', 'type': 'categorical', 'domain': (0,1,2,3), 'dimensionality': 2}
+        ]
+        test_cases = [
+            {'in': [[1, 0, 0, 0, 1, 1, 1, 1]], 'out': [[1, 0, 0, 0, 1, 0, 0, 0]]}
+        ]
+        self.assert_round_optimum(space, test_cases)
+
+    def test_round_optimum_mixed_domain(self):
+        space = [
+            {'name': 'var1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality': 1},
+            {'name': 'var2', 'type': 'categorical', 'domain': (0, 1, 2), 'dimensionality': 1},
+            {'name': 'var3', 'type': 'discrete', 'domain': (0, 3, 5), 'dimensionality': 1},
+        ]
+        test_cases = [
+            {'in': [[0, 0, 1, 1, 2]], 'out': [[0, 0, 1, 0, 3]]}
+        ]
+        self.assert_round_optimum(space, test_cases)
+
+    def test_round_optimum_bandit(self):
+        space = [
+            {'name': 'var1', 'type': 'bandit', 'domain': np.array([[-2, 2],[0, 1],[2, 3]])}
+        ]
+        test_cases = [
+            {'in': [[0, -1]], 'out': [[0, 1]]},
+            {'in': [[2, 2]], 'out': [[2, 3]]},
+            {'in': [[1, 1]], 'out': [[0, 1]]},
+            {'in': [[100, 200]], 'out': [[2, 3]]},
+            {'in': [[-3, 2]], 'out': [[-2, 2]]}
+        ]
+        self.assert_round_optimum(space, test_cases)
+
+    def test_round_optimum_shapes(self):
+        space = [{'name': 'var1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality': 1}]
+
+        with self.assertRaises(ValueError):
+            design_space = Design_space(space)
+            design_space.round_optimum([[[0.0]]])
+
+        with self.assertRaises(ValueError):
+            design_space = Design_space(space)
+            design_space.round_optimum(np.array([[[0.0]]]))
+
+        with self.assertRaises(ValueError):
+            design_space = Design_space(space)
+            design_space.round_optimum(np.array([[0.0], [2.0]]))
+
+        # Next couple of tests are intentionally very simple
+        # as they just verify that exception is not thrown for the given input shape
+        design_space = Design_space(space)
+
+        rounded = design_space.round_optimum([0.0])
+        self.assertEqual(rounded[0], 0.0)
+
+        rounded = design_space.round_optimum(np.array([0.0]))
+        self.assertEqual(rounded[0], 0.0)
+
+        rounded = design_space.round_optimum([[0.0]])
+        self.assertEqual(rounded[0], 0.0)
+
+        rounded = design_space.round_optimum(np.array([[0.0]]))
+        self.assertEqual(rounded[0], 0.0)

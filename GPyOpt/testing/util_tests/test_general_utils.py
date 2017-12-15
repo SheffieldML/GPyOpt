@@ -15,6 +15,8 @@ class TestInitialDesign(unittest.TestCase):
         ]
         self.design_space = Design_space(self.space)
 
+        self.bandit_variable = {'name': 'stations', 'type': 'bandit', 'domain': np.array([[1, 1], [2, 2], [3, 3], [4, 4]])}
+
     def assert_samples_against_space(self, samples):
         lower_bound_var1 = self.design_space.name_to_variable['var_1'].domain[0]
         upper_bound_var1 = self.design_space.name_to_variable['var_1'].domain[1]
@@ -59,8 +61,8 @@ class TestInitialDesign(unittest.TestCase):
         self.assertEqual(len(samples), init_points_count)
         self.assert_samples_against_space(samples)
 
-    def test_random_design_with_constrains(self):
-        constraints = [{'name': 'const_1', 'constrain': 'x[:,0]**2 - 1'}]
+    def test_random_design_with_constraints(self):
+        constraints = [{'name': 'const_1', 'constraint': 'x[:,0]**2 - 1'}]
         self.design_space = Design_space(self.space, constraints=constraints)
         initial_points_count = 10
 
@@ -69,8 +71,17 @@ class TestInitialDesign(unittest.TestCase):
         self.assert_samples_against_space(samples)
         self.assertTrue((samples[:,0]**2 - 1 < 0).all())
 
+    def test_random_design_with_bandit_only(self):
+        space = [self.bandit_variable]
+        self.design_space = Design_space(space)
+        initial_points_count = 3
+
+        samples = initial_design('random', self.design_space, initial_points_count)
+
+        self.assertEqual(len(samples), initial_points_count)
+
     def test_nonrandom_designs_with_constrains(self):
-        constraints = [{'name': 'const_1', 'constrain': 'x[:,0]**2 - 1'}]
+        constraints = [{'name': 'const_1', 'constraint': 'x[:,0]**2 - 1'}]
         self.design_space = Design_space(self.space, constraints=constraints)
         initial_points_count = 10
 

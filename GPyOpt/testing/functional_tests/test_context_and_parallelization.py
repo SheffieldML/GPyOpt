@@ -124,12 +124,12 @@ class TestContextAndParallelization(BaseTestCase):
                             {'name': 'var3', 'type': 'continuous', 'domain': (-8,3)},
                             {'name': 'var4', 'type': 'categorical', 'domain': (0,1,2)},
                             {'name': 'var5', 'type': 'discrete', 'domain': (-1,5)}],
-            'constrains':  None,
+            'constraints':  None,
             'cost_withGradients': None,
             'context': {'var1_1':0.3,'var4':1}
             }
 
-        feasible_region = GPyOpt.Design_space(space = self.problem_config['domain'], constraints = self.problem_config['constrains'])
+        feasible_region = GPyOpt.Design_space(space = self.problem_config['domain'], constraints = self.problem_config['constraints'])
         self.f_inits = GPyOpt.experiment_design.initial_design('random', feasible_region, 5)
         self.f_inits = self.f_inits.reshape(n_inital_design, input_dim)
 

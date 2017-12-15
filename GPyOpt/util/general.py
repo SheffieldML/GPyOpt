@@ -63,7 +63,7 @@ def best_guess(f,X):
 def samples_multidimensional_uniform(bounds,num_data):
     '''
     Generates a multidimensional grid uniformly distributed.
-    :param bounds: tuple defining the box constrains.
+    :param bounds: tuple defining the box constraints.
     :num_data: number of data points to generate.
 
     '''
@@ -198,60 +198,3 @@ def merge_values(values1,values2):
             merged_row = np.hstack((row_array1,row_array2))
             merged_array.append(merged_row)
     return np.atleast_2d(merged_array)
-
-def round_optimum(x_opt,domain):
-    """
-    Rounds the some value x_opt to a feasible value in the function domain.
-    """
-
-    x_opt_rounded = x_opt.copy()
-    counter = 0
-
-    for variable in domain:
-        if variable.type == 'continuous':
-            var_dim = 1
-
-        elif variable.type == 'discrete':
-            var_dim = 1
-            x_opt_rounded[0,counter:(counter+var_dim)] = round_discrete(x_opt[0,counter:(counter+var_dim)],variable.domain)
-
-        elif variable.type == 'categorical':
-            var_dim = len(variable.domain)
-            x_opt_rounded[0,counter:(counter+var_dim)] = round_categorical(x_opt[0,counter:(counter+var_dim)])
-
-        elif variable.type == 'bandit':
-            var_dim = variable.domain.shape[1]
-            x_opt_rounded[0,counter:(counter+var_dim)] = round_bandit(x_opt[0,counter:(counter+var_dim)],variable.domain)
-        else:
-            raise Exception('Wrong type of variable')
-
-        counter += var_dim
-    return x_opt_rounded
-
-
-def round_categorical(values):
-    """
-    Rounds a categorical variable by taking setting to one the max of the given vector and to zero the rest of the entries.
-    """
-
-    rounded_values = np.zeros(values.shape)
-    rounded_values[np.argmax(values)] = 1
-    return rounded_values
-
-def round_discrete(value,domain):
-    """
-    Rounds a discrete variable by selecting the closest point in the domain
-    """
-    rounded_value = domain[0]
-
-    for domain_value in domain:
-        if np.abs(domain_value-value)< np.abs(rounded_value-value):
-            rounded_value = domain_value
-    return rounded_value
-
-def round_bandit(value,domain):
-    """
-    Rounds a discrete variable by selecting the closest point in the domain
-    """
-    idx = np.argmin(((domain- value)**2).sum(1))
-    return domain[idx,:]

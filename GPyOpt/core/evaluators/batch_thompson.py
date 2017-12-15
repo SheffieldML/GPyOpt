@@ -4,7 +4,6 @@
 from .base import SamplingBasedBatchEvaluator
 from ...optimization.anchor_points_generator import ThompsonSamplingAnchorPointsGenerator
 from ...optimization.optimizer import OptLbfgs, apply_optimizer, choose_optimizer
-from ...util.general import round_optimum
 import numpy as np
 
 class ThompsonBatch(SamplingBasedBatchEvaluator):
@@ -48,7 +47,7 @@ class ThompsonBatch(SamplingBasedBatchEvaluator):
 
         ### --- Run the local optimizer
         x, _ = apply_optimizer(self.local_optimizer, a, f=self.f, df=None, f_df=self.f_df, duplicate_manager=duplicate_manager, context_manager = self.context_manager, space=self.space)
-        return round_optimum(x, self.space.space_expanded)
+        return self.space.round_optimum(x)
 
     def compute_batch_without_duplicate_logic(self, context_manager=None):
         anchor_points = self.get_anchor_points(context_manager=context_manager)

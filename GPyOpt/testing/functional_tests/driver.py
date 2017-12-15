@@ -21,7 +21,7 @@ def run_eval(problem_config, f_inits, method_config, name = 'run', outpath='.', 
     # Create the Bayesian Optimization Object
     bo = GPyOpt.methods.BayesianOptimization(   f                           = problem_config['objective'],
                                                 domain                      = problem_config['domain'],
-                                                constrains                  = problem_config['constrains'],
+                                                constraints                 = problem_config['constraints'],
                                                 cost_withGradients          = problem_config['cost_withGradients'],
                                                 model_type                  = m_c['model_type'],
                                                 X                           = xs_init.copy(),
@@ -82,7 +82,7 @@ def run_evaluation_in_steps(problem_config, f_inits, method_config, num_steps=5)
         bo = GPyOpt.methods.BayesianOptimization(
                 f                           = None,
                 domain                      = problem_config['domain'],
-                constrains                  = problem_config['constrains'],
+                constraints                 = problem_config['constraints'],
                 cost_withGradients          = problem_config['cost_withGradients'],
                 model_type                  = m_c['model_type'],
                 X                           = X,

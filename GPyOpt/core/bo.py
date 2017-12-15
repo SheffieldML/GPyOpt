@@ -5,6 +5,8 @@ import GPyOpt
 import collections
 import numpy as np
 import time
+import csv
+
 from ..util.general import best_value
 from ..util.duplicate_manager import DuplicateManager
 from ..core.errors import InvalidConfigError
@@ -262,11 +264,18 @@ class BO(object):
             if self.input_dim = 2: as before but it separates the mean and variance of the model in two different plots
         :param filename: name of the file where the plot is saved
         """
+        if self.model.model is None:
+            from copy import deepcopy
+            model_to_plot = deepcopy(self.model)
+            model_to_plot.updateModel(self.X, self.Y, self.X, self.Y)
+        else:
+            model_to_plot = self.model
+
         return plot_acquisition(self.acquisition.space.get_bounds(),
-                                self.model.model.X.shape[1],
-                                self.model.model,
-                                self.model.model.X,
-                                self.model.model.Y,
+                                model_to_plot.model.X.shape[1],
+                                model_to_plot.model,
+                                model_to_plot.model.X,
+                                model_to_plot.model.Y,
                                 self.acquisition.acquisition_function,
                                 self.suggest_next_locations(),
                                 filename)
@@ -317,7 +326,7 @@ class BO(object):
             file.write('Number bandits               ' + str(self.space.get_bandit().shape[0]) +'\n')
             file.write('Noiseless evaluations:       ' + str(self.exact_feval) +'\n')
             file.write('Cost used:                   ' + self.cost.cost_type +'\n')
-            file.write('Constrains:                  ' + str(self.constrains==True) +'\n')
+            file.write('Constraints:                  ' + str(self.constraints==True) +'\n')
 
             file.write('\n')
             file.write('------------------------------' + ' Optimization set up ' + '---------------------------------\n')
@@ -343,33 +352,33 @@ class BO(object):
             file.write('----------------------------------------------------------------------------------------------\n')
             file.close()
 
-    def save_evaluations(self, evaluations_file= None):
+    def _write_csv(self, filename, data):
+        with open(filename, 'w') as csv_file:
+           writer = csv.writer(csv_file, delimiter='\t')
+           writer.writerows(data)
+
+    def save_evaluations(self, evaluations_file = None):
         """
         Saves a report with the results of the iterations of the optimization
 
         :param evaluations_file: name of the file in which the results are saved.
         """
-        import pandas as pd
+        iterations = np.array(range(1, self.Y.shape[0] + 1))[:, None]
+        results = np.hstack((iterations, self.Y, self.X))
+        header = ['Iteration', 'Y'] + ['var_' + str(k) for k in range(1, self.X.shape[1] + 1)]
 
-        iterations = np.array(range(1,self.Y.shape[0]+1))[:,None]
-        results   = np.hstack((iterations,self.Y,self.X))
-        header = ['Iteration', 'Y']
-        for k in range(1,self.X.shape[1]+1):
-            header += ['var_' +str(k)]
+        data = [header] + results.tolist()
+        self._write_csv(evaluations_file, data)
 
-        df_results = pd.DataFrame(results,columns = header)
-        df_results.to_csv(evaluations_file,index =False,sep='\t')
-
-    def save_models(self, models_file= None):
+    def save_models(self, models_file = None):
         """
         Saves a report with the results of the iterations of the optimization
 
-        :param iterations_file: name of the file in which the results are saved.
+        :param models_file: name of the file in which the results are saved.
         """
-        import pandas as pd
         iterations = np.array(range(1,self.model_parameters_iterations.shape[0]+1))[:,None]
-        results   = np.hstack((iterations,self.model_parameters_iterations))
+        results = np.hstack((iterations,self.model_parameters_iterations))
+        header = ['Iteration'] + self.model.get_model_parameters_names()
 
-        header  = ['Iteration'] + self.model.get_model_parameters_names()
-        df_results = pd.DataFrame(results,columns = header)
-        df_results.to_csv(models_file,index =False, sep='\t')
+        data = [header] + results.tolist()
+        self._write_csv(models_file, data)

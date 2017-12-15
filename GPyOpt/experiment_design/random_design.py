@@ -20,7 +20,7 @@ class RandomDesign(ExperimentDesign):
 
     def get_samples_with_constraints(self, init_points_count):
         """
-        Draw random samples and only save those that satisfy constrains
+        Draw random samples and only save those that satisfy constraints
         Finish when required number of samples is generated
         """
         samples = np.empty((0, self.space.dimensionality))
@@ -47,8 +47,10 @@ class RandomDesign(ExperimentDesign):
 
             # sample in the case of bandit variables
             elif isinstance(var, BanditVariable):
+                # Bandit variable is represented by a several adjacent columns in the samples array
                 idx_samples = np.random.randint(var.domain.shape[0], size=init_points_count)
-                samples[:, idx] = var.domain[idx_samples,:]
+                bandit_idx = np.arange(idx, idx + var.domain.shape[1])
+                samples[:, bandit_idx] = var.domain[idx_samples,:]
 
 
     def get_samples_without_constraints(self, init_points_count):
@@ -65,7 +67,7 @@ class RandomDesign(ExperimentDesign):
 def samples_multidimensional_uniform(bounds, points_count):
     """
     Generates a multidimensional grid uniformly distributed.
-    :param bounds: tuple defining the box constrains.
+    :param bounds: tuple defining the box constraints.
     :points_count: number of data points to generate.
     """
     dim = len(bounds)

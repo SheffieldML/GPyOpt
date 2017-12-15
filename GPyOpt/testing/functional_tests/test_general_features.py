@@ -124,7 +124,7 @@ class TestAcquisitions(BaseTestCase):
         self.problem_config = {
             'objective': GPyOpt.objective_examples.experimentsNd.gSobol(np.ones(input_dim)).f,
             'domain': [{'name': 'var_1', 'type': 'continuous', 'domain': f_bounds, 'dimensionality': input_dim}],
-            'constrains': None,
+            'constraints': None,
             'cost_withGradients': None}
 
     def test_run(self):

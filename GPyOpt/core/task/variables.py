@@ -53,13 +53,13 @@ class Variable(object):
         """
         Returns a list of tuples representing bounds of the variable
         """
-        pass
+        raise NotImplementedError()
 
     def get_possible_values(self):
         """
         Returns a list of possible variable values
         """
-        pass
+        raise NotImplementedError()
 
     def set_index_in_objective(self,index):
         """
@@ -67,11 +67,18 @@ class Variable(object):
         """
         self.index_in_objective = index
 
-    def set_index_in_model(self,index):
+    def set_index_in_model(self, index):
         """
         Allows to set the index of this variable in the model space
         """
         self.index_in_model = index
+
+    def round(self, value_array):
+        """
+        Rounds the given value to the variable's domain.
+        Value is assumed to be in a 1x[variable dimentionality] numpy array
+        """
+        raise NotImplementedError()
 
 
 class ContinuousVariable(Variable):
@@ -89,6 +96,24 @@ class ContinuousVariable(Variable):
 
     def get_possible_values(self):
         raise AttributeError("Impossible to produce a list of values for continuous variable " + self.name)
+
+    def round(self, value_array):
+        """
+        If value falls within bounds, just return it
+        otherwise return min or max, whichever is closer to the value
+        Assumes an 1d array with a single element as an input.
+        """
+
+        min_value = self.domain[0]
+        max_value = self.domain[1]
+
+        rounded_value = value_array[0]
+        if rounded_value < min_value:
+            rounded_value = min_value
+        elif rounded_value > max_value:
+            rounded_value = max_value
+
+        return [rounded_value]
 
 
 class BanditVariable(Variable):
@@ -123,6 +148,16 @@ class BanditVariable(Variable):
     def get_possible_values(self):
         return self.domain
 
+    def round(self, value_array):
+        """
+        Rounds a bandit variable by selecting the closest point in the domain
+        Closest here is defined by euclidian distance
+        Assumes an 1d array of the same length as the single variable value
+        """
+        distances = np.linalg.norm(np.array(self.domain) - value_array, axis=1)
+        idx = np.argmin(distances)
+        return [self.domain[idx]]
+
 
 class DiscreteVariable(Variable):
     def __init__(self, name, domain, dimensionality = 1):
@@ -136,6 +171,20 @@ class DiscreteVariable(Variable):
 
     def is_bandit(self):
         return False
+
+    def round(self, value_array):
+        """
+        Rounds a discrete variable by selecting the closest point in the domain
+        Assumes an 1d array with a single element as an input.
+        """
+        value = value_array[0]
+        rounded_value = self.domain[0]
+
+        for domain_value in self.domain:
+            if np.abs(domain_value - value) < np.abs(rounded_value - value):
+                rounded_value = domain_value
+
+        return [rounded_value]
 
 class CategoricalVariable(Variable):
     def __init__(self, name, domain, dimensionality = 1):
@@ -166,6 +215,16 @@ class CategoricalVariable(Variable):
 
     def is_bandit(self):
         return False
+
+    def round(self, value_array):
+        """
+        Rounds a categorical variable by setting to one the max of the given vector and to zero the rest of the entries.
+        Assumes an 1x[number of categories] array (due to one-hot encoding) as an input
+        """
+
+        rounded_values = np.zeros(value_array.shape)
+        rounded_values[np.argmax(value_array)] = 1
+        return rounded_values
 
 
 def create_variable(descriptor):
