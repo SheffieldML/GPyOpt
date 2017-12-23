@@ -2,7 +2,6 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 from .optimizer import OptLbfgs, OptDirect, OptCma, apply_optimizer, choose_optimizer
-from ..util.general import round_optimum
 from .anchor_points_generator import ObjectiveAnchorPointsGenerator, ThompsonSamplingAnchorPointsGenerator
 from ..core.task.space import Design_space
 import numpy as np

@@ -38,6 +38,3 @@ class ModularBayesianOptimization(BO):
                                                             normalize_Y            = normalize_Y,
                                                             model_update_interval  = model_update_interval,
                                                             de_duplication         = de_duplication)
-
-        # --- Initialize everything
-        self.run_optimization(0)

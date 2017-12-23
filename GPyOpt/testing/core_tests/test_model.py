@@ -32,13 +32,20 @@ class TestModels(unittest.TestCase):
         config4 = [
             {'name': 'var_3', 'type': 'discrete', 'domain': (0,1,2,3)},
             {'name': 'var_3', 'type': 'continuous', 'domain': (2, 4), 'dimensionality': 2},
-            {'name': 'var_4', 'type': 'bandit', 'domain': np.array([[-2, -1],[0, 1]])},
-            {'name': 'var_1', 'type': 'continuous', 'domain':(-3,1), 'dimensionality': 1},
+            {'name': 'var_1', 'type': 'continuous', 'domain':(-3,1), 'dimensionality': 1}
         ]
-        warp_ind4 = [0, 1, 2, 5]
+        warp_ind4 = [0, 1, 2, 3]
         space4 = Design_space(config4)
         m4 = InputWarpedGPModel(space4)
         self.assertEqual(m4.warping_indices, warp_ind4)
+
+        config5 = [
+            {'name': 'var_4', 'type': 'bandit', 'domain': np.array([[-2, -1],[0, 1]])}
+        ]
+        warp_ind5 = []
+        space5 = Design_space(config5)
+        m5 = InputWarpedGPModel(space5)
+        self.assertEqual(m5.warping_indices, warp_ind5)
 
     def test_input_warping_model(self):
         config1 = [{'name': 'var_1', 'type': 'continuous', 'domain':(-3,1), 'dimensionality': 2},

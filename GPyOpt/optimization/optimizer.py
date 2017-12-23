@@ -2,7 +2,6 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 import numpy as np
-from ..util.general import round_optimum
 
 
 class Optimizer(object):
@@ -64,7 +63,7 @@ class OptLbfgs(Optimizer):
 class OptDirect(Optimizer):
     '''
     Wrapper for DIRECT optimization method. It works partitioning iteratively the domain
-    of the function. Only requires f and the box constrains to work.
+    of the function. Only requires f and the box constraints to work.
 
     '''
     def __init__(self, bounds, maxiter=1000):
@@ -97,7 +96,7 @@ class OptDirect(Optimizer):
 class OptCma(Optimizer):
     '''
     Wrapper the Covariance Matrix Adaptation Evolutionary strategy (CMA-ES) optimization method. It works generating
-    an stochastic search based on multivariate Gaussian samples. Only requires f and the box constrains to work.
+    an stochastic search based on multivariate Gaussian samples. Only requires f and the box constraints to work.
 
     '''
     def __init__(self, bounds, maxiter=1000):
@@ -157,7 +156,7 @@ def apply_optimizer(optimizer, x0, f=None, df=None, f_df=None, duplicate_manager
 
     ## --- Add context and round according to the type of variables of the design space
     suggested_x_with_context = add_context(optimized_x)
-    suggested_x_with_context_rounded = round_optimum(suggested_x_with_context, space.space_expanded)
+    suggested_x_with_context_rounded = space.round_optimum(suggested_x_with_context)
 
     ## --- Run duplicate_manager
     if duplicate_manager and duplicate_manager.is_unzipped_x_duplicate(suggested_x_with_context_rounded):
