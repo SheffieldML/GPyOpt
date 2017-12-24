@@ -145,7 +145,7 @@ class GPModel(BOModel):
         """
         Returns a list with the names of the parameters of the model
         """
-        return self.model.parameter_names()
+        return self.model.parameter_names_flat().tolist()
 
 
 class GPModel_MCMC(BOModel):
