@@ -48,6 +48,7 @@ class BO(object):
         self.cost = CostModel(cost)
         self.normalization_type = 'stats' ## not added in the API
         self.de_duplication = de_duplication
+        self.model_parameters_iterations = None
 
     def suggest_next_locations(self, context = None, pending_X = None, ignored_X = None):
         """
@@ -370,12 +371,15 @@ class BO(object):
         data = [header] + results.tolist()
         self._write_csv(evaluations_file, data)
 
-    def save_models(self, models_file = None):
+    def save_models(self, models_file):
         """
         Saves a report with the results of the iterations of the optimization
 
-        :param models_file: name of the file in which the results are saved.
+        :param models_file: name of the file or a file buffer, in which the results are saved.
         """
+        if self.model_parameters_iterations is None:
+            raise ValueError("No iterations have been carried out yet and hence no iterations of the BO can be saved")
+
         iterations = np.array(range(1,self.model_parameters_iterations.shape[0]+1))[:,None]
         results = np.hstack((iterations,self.model_parameters_iterations))
         header = ['Iteration'] + self.model.get_model_parameters_names()
