@@ -8,10 +8,7 @@ from pkg_resources import get_distribution, DistributionNotFound
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-try:
-    __version__ = get_distribution('GPyOpt').version
-except DistributionNotFound:
-    __version__ = 'dev'
+__version__ = get_distribution('GPyOpt').version
 
 
 packages = find_packages(exclude=("GPyOpt.testing",))
