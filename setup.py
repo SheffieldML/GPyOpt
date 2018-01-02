@@ -12,7 +12,6 @@ try:
     __version__ = get_distribution('GPyOpt').version
 except DistributionNotFound:
     __version__ = 'dev'
-print('version',__version__)
 
 
 packages = find_packages(exclude=("GPyOpt.testing",))
