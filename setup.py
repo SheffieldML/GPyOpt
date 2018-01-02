@@ -3,10 +3,18 @@
 
 import os
 from setuptools import setup, find_packages
+from pkg_resources import get_distribution, DistributionNotFound
 from GPyOpt.__version__ import __version__
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
+try:
+    __version__ = get_distribution('GPyOpt').version
+except DistributionNotFound:
+    __version__ = 'dev'
+print('version',__version__)
+
 
 packages = find_packages(exclude=("GPyOpt.testing",))
 setup(name = 'GPyOpt',
