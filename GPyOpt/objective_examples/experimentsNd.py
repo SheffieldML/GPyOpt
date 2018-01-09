@@ -28,7 +28,7 @@ class alpine1:
     def f(self,X):
         X = reshape(X,self.input_dim)
         n = X.shape[0]
-        fval = (X*np.sin(X) + 0.1*X).sum(axis=1) 
+        fval = np.abs(X*np.sin(X) + 0.1*X).sum(axis=1) 
         if self.sd ==0:
             noise = np.zeros(n).reshape(n,1)
         else:
