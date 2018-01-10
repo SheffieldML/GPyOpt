@@ -56,7 +56,7 @@ class rosenbrock(function2d):
         self.input_dim = 2
         if bounds is  None: self.bounds = [(-0.5,3),(-1.5,2)]
         else: self.bounds = bounds
-        self.min = [(0, 0)]
+        self.min = [(1, 1)]
         self.fmin = 0
         if sd==None: self.sd = 0
         else: self.sd=sd
