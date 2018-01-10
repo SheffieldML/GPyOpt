@@ -93,6 +93,9 @@ class BayesianOptimization(BO):
         self.domain = domain
         self.space = Design_space(self.domain, self.constrains)
 
+        # --- Get user-defined sample generator function, if applicable
+        self.user_def_dist = kwargs.get('user_def_dist', None)
+
         # --- CHOOSE objective function
         self.maximize = maximize
         if 'objective_name' in kwargs: self.objective_name = kwargs['objective_name']
@@ -135,7 +138,7 @@ class BayesianOptimization(BO):
 
         # This states how the discrete variables are handled (exact search or rounding)
         self.acquisition_optimizer_type = acquisition_optimizer_type
-        self.acquisition_optimizer = AcquisitionOptimizer(self.space, self.acquisition_optimizer_type, model=self.model)  ## more arguments may come here
+        self.acquisition_optimizer = AcquisitionOptimizer(self.space, self.acquisition_optimizer_type, model=self.model, user_def_dist=self.user_def_dist)  ## more arguments may come here
 
         # --- CHOOSE acquisition function. If an instance of an acquisition is passed (possibly user defined), it is used.
         self.acquisition_type = acquisition_type
@@ -188,7 +191,7 @@ class BayesianOptimization(BO):
 
         # Case 1:
         if self.X is None:
-            self.X = initial_design(self.initial_design_type, self.space, self.initial_design_numdata)
+            self.X = initial_design(self.initial_design_type, self.space, self.initial_design_numdata, user_def_dist=self.user_def_dist)
             self.Y, _ = self.objective.evaluate(self.X)
         # Case 2
         elif self.X is not None and self.Y is None:

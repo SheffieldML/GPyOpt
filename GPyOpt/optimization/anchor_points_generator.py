@@ -8,10 +8,11 @@ from ..core.task.space import Design_space
 
 class AnchorPointsGenerator(object):
 
-    def __init__(self, space, design_type, num_samples):
+    def __init__(self, space, design_type, num_samples, user_def_dist=None):
         self.space = space
         self.design_type = design_type
         self.num_samples = num_samples
+        self.user_def_dist = user_def_dist # user-defined sample generator
 
     def get_anchor_point_scores(self, X):
         raise NotImplementedError("get_anchor_point_scores is not implemented in the parent class.")
@@ -28,7 +29,7 @@ class AnchorPointsGenerator(object):
             add_context = lambda x: x
 
         ## --- Generate initial design
-        X = initial_design(self.design_type, space, self.num_samples)
+        X = initial_design(self.design_type, space, self.num_samples, self.user_def_dist)
 
         if unique:
             sorted_design = sorted(list({tuple(x) for x in X}))
@@ -65,14 +66,14 @@ class AnchorPointsGenerator(object):
 
 class ThompsonSamplingAnchorPointsGenerator(AnchorPointsGenerator):
 
-    def __init__(self, space, design_type, model, num_samples=25000):
+    def __init__(self, space, design_type, model, num_samples=25000, user_def_dist=None):
         '''
         From and initial design, it selects the location using (marginal) Thompson sampling
         using the predictive distribution of a model
 
         model: NOTE THAT THE MODEL HERE IS is a GPyOpt model: returns mean and standard deviation
         '''
-        super(ThompsonSamplingAnchorPointsGenerator, self).__init__(space, design_type, num_samples)
+        super(ThompsonSamplingAnchorPointsGenerator, self).__init__(space, design_type, num_samples, user_def_dist)
         self.model = model
 
     def get_anchor_point_scores(self, X):
@@ -84,13 +85,13 @@ class ThompsonSamplingAnchorPointsGenerator(AnchorPointsGenerator):
 
 class ObjectiveAnchorPointsGenerator(AnchorPointsGenerator):
 
-    def __init__(self, space, design_type, objective, num_samples=1000):
+    def __init__(self, space, design_type, objective, num_samples=1000, user_def_dist=None):
         '''
         From an initial design, it selects the locations with the minimum value according to some objective.
         :param model_space: set to true when the samples need to be obtained for the input domain of the model
 
         '''
-        super(ObjectiveAnchorPointsGenerator, self).__init__(space, design_type, num_samples)
+        super(ObjectiveAnchorPointsGenerator, self).__init__(space, design_type, num_samples, user_def_dist)
         self.objective = objective
 
     def get_anchor_point_scores(self, X):
@@ -99,13 +100,13 @@ class ObjectiveAnchorPointsGenerator(AnchorPointsGenerator):
 
 class RandomAnchorPointsGenerator(AnchorPointsGenerator):
 
-    def __init__(self, space, design_type, num_samples=10000):
+    def __init__(self, space, design_type, num_samples=10000, user_def_dist=None):
         '''
         From an initial design, it selects the locations randomly, according to the specified design_type generation scheme.
         :param model_space: set to true when the samples need to be obtained for the input domain of the model
 
         '''
-        super(RandomAnchorPointsGenerator, self).__init__(space, design_type, num_samples)
+        super(RandomAnchorPointsGenerator, self).__init__(space, design_type, num_samples, user_def_dist)
 
     def get_anchor_point_scores(self, X):
 

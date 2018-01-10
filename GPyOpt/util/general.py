@@ -6,10 +6,10 @@ from scipy.special import erfc
 import time
 from ..core.errors import InvalidConfigError
 
-def initial_design(design, space, init_points_count):
+def initial_design(design, space, init_points_count, user_def_dist=None):
 
     if space.has_constrains() == False:
-        samples = sample_initial_design(design, space, init_points_count)
+        samples = sample_initial_design(design, space, init_points_count, user_def_dist)
 
     elif space.has_constrains() == True:
         if design is not 'random':
@@ -17,7 +17,7 @@ def initial_design(design, space, init_points_count):
 
         samples = np.empty((0,space.dimensionality))
         while samples.shape[0] < init_points_count:
-            domain_samples = sample_initial_design(design, space, init_points_count)
+            domain_samples = sample_initial_design(design, space, init_points_count, user_def_dist)
             valid_indices = (space.indicator_constraints(domain_samples)==1).flatten()
             if sum(valid_indices)>0:
                 valid_samples = domain_samples[valid_indices,:]
@@ -25,11 +25,12 @@ def initial_design(design, space, init_points_count):
     return samples[0:init_points_count,:]
 
 
-def sample_initial_design(design, space, init_points_count):
+def sample_initial_design(design, space, init_points_count, user_def_dist=None):
     """
     :param design: the choice of design
     :param space: variables space
     :param init_points_count: the number of initial points
+    :param user_def_dist: user-defined sampling function (default, None)
     :Note: discrete dimensions are always added based on uniform samples
     """
     if design == 'grid':
@@ -37,43 +38,51 @@ def sample_initial_design(design, space, init_points_count):
         continuous_dims = len(space.get_continuous_dims())
         data_per_dimension = iroot(continuous_dims, init_points_count)
         init_points_count = data_per_dimension**continuous_dims
-    samples = np.empty((init_points_count, space.dimensionality))
-
-    ## -- fill randomly for the non continuous variables
-    for (idx, var) in enumerate(space.space_expanded):
-        if (var.type == 'discrete') or (var.type == 'categorical') :
-            sample_var = np.atleast_2d(np.random.choice(var.domain, init_points_count))
-            samples[:,idx] = sample_var.flatten()
-
-    ## -- sample in the case of bandit variables
-        elif var.type == 'bandit':
-            idx_samples = np.random.randint(var.domain.shape[0],size=init_points_count)
-            samples = var.domain[idx_samples,:]
-
-    ## -- fill the continuous variables with the selected design
-    if design == 'random':
-        X_design = samples_multidimensional_uniform(space.get_continuous_bounds(),init_points_count)
     else:
-        bounds = space.get_continuous_bounds()
-        lB = np.asarray(bounds)[:,0].reshape(1,len(bounds))
-        uB = np.asarray(bounds)[:,1].reshape(1,len(bounds))
-        diff = uB-lB
+        data_per_dimension = None
 
-        if design == 'latin':
-            from pyDOE import lhs
-            X_design_aux = lhs(len(space.get_continuous_bounds()),init_points_count, criterion='center')
-            I = np.ones((X_design_aux.shape[0],1))
-            X_design = np.dot(I,lB) + X_design_aux*np.dot(I,diff)
+    if user_def_dist is None:
+        samples = np.empty((init_points_count, space.dimensionality))
 
-        elif design == 'sobol':
-            from sobol_seq import i4_sobol_generate
-            X_design = np.dot(i4_sobol_generate(len(space.get_continuous_bounds()),init_points_count),np.diag(diff.flatten()))[None,:] + lB
+        ## -- fill randomly for the non continuous variables
+        for (idx, var) in enumerate(space.space_expanded):
+            if (var.type == 'discrete') or (var.type == 'categorical'):
+                sample_var = np.atleast_2d(np.random.choice(var.domain, init_points_count))
+                samples[:,idx] = sample_var.flatten()
 
-        elif design == 'grid':
-            X_design = multigrid(space.get_continuous_bounds(), data_per_dimension)
+        ## -- sample in the case of bandit variables
+            elif var.type == 'bandit':
+                idx_samples = np.random.randint(var.domain.shape[0],size=init_points_count)
+                samples = var.domain[idx_samples,:]
 
-    if space._has_continuous():
-        samples[:,space.get_continuous_dims()] = X_design
+        ## -- fill the continuous variables with the selected design
+        if design == 'random':
+            X_design = samples_multidimensional_uniform(space.get_continuous_bounds(),init_points_count)
+        else:
+            bounds = space.get_continuous_bounds()
+            lB = np.asarray(bounds)[:,0].reshape(1,len(bounds))
+            uB = np.asarray(bounds)[:,1].reshape(1,len(bounds))
+            diff = uB-lB
+
+            if design == 'latin':
+                from pyDOE import lhs
+                X_design_aux = lhs(len(space.get_continuous_bounds()),init_points_count, criterion='center')
+                I = np.ones((X_design_aux.shape[0],1))
+                X_design = np.dot(I,lB) + X_design_aux*np.dot(I,diff)
+
+            elif design == 'sobol':
+                from sobol_seq import i4_sobol_generate
+                X_design = np.dot(i4_sobol_generate(len(space.get_continuous_bounds()),init_points_count),np.diag(diff.flatten()))[None,:] + lB
+
+            elif design == 'grid':
+                X_design = multigrid(space.get_continuous_bounds(), data_per_dimension)
+
+        if space._has_continuous():
+            samples[:,space.get_continuous_dims()] = X_design
+
+    else:
+        ## -- draw all samples from a user-defined distribution function
+        samples = np.atleast_2d(user_def_dist(space, init_points_count, data_per_dimension=data_per_dimension))
 
     return samples
 

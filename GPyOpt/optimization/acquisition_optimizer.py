@@ -43,6 +43,9 @@ class AcquisitionOptimizer(object):
         ## -- Context handler: takes
         self.context_manager = ContextManager(space)
 
+        ## -- user-defined sample generator
+        self.user_def_dist = kwargs.get('user_def_dist', None)
+ 
 
     def optimize(self, f=None, df=None, f_df=None, duplicate_manager=None):
         """
@@ -62,9 +65,9 @@ class AcquisitionOptimizer(object):
 
         ## --- Selecting the anchor points and removing duplicates
         if self.type_anchor_points_logic == max_objective_anchor_points_logic:
-            anchor_points_generator = ObjectiveAnchorPointsGenerator(self.space, random_design_type, f)
+            anchor_points_generator = ObjectiveAnchorPointsGenerator(self.space, random_design_type, f, user_def_dist=self.user_def_dist)
         elif self.type_anchor_points_logic == thompson_sampling_anchor_points_logic:
-            anchor_points_generator = ThompsonSamplingAnchorPointsGenerator(self.space, sobol_design_type, self.model)
+            anchor_points_generator = ThompsonSamplingAnchorPointsGenerator(self.space, sobol_design_type, self.model, user_def_dist=self.user_def_dist)
 
         ## -- Select the anchor points (with context)
         anchor_points = anchor_points_generator.get(duplicate_manager=duplicate_manager, context_manager=self.context_manager)
