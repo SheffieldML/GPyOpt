@@ -150,7 +150,7 @@ class BO(object):
             self.num_acquisitions += 1
 
             if verbosity:
-                print("num acquisition: %d, time elapsed: %.2fs" % (
+                print("num acquisition: {}, time elapsed: {:.2f}s".format(
                     self.num_acquisitions, self.cum_time))
 
         # --- Stop messages and execution time
