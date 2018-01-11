@@ -63,7 +63,7 @@ class BayesianOptimization(BO):
         - 'thompson_sampling': batch method using Thompson sampling.
     :param batch_size: size of the batch in which the objective is evaluated (default, 1).
     :param num_cores: number of cores used to evaluate the objective (default, 1).
-    :param verbosity: prints the models and other options during the optimization.
+    :param verbosity: prints the models and other options during the optimization (default, False).
     :param maximize: when True -f maximization of f is done by minimizing -f (default, False).
     :param **kwargs: extra parameters. Can be used to tune the current optimization setup or to use deprecated options in this package release.
 

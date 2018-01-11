@@ -75,7 +75,7 @@ class BO(object):
         :param max_iter: exploration horizon, or number of acquisitions. If nothing is provided optimizes the current acquisition.
         :param max_time: maximum exploration horizon in seconds.
         :param eps: minimum distance between two consecutive x's to keep running the model.
-        :param verbosity: flag to print the optimization results after each iteration (default, True).
+        :param verbosity: flag to print the optimization results after each iteration (default, False).
         :param report_file: filename of the file where the results of the optimization are saved (default, None).
         :param context: fixes specified variables to a particular context (values) for the optimization run (default, None).
         """
