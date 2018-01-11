@@ -68,7 +68,7 @@ class BO(object):
 
         return suggested_locations
 
-    def run_optimization(self, max_iter = 0, max_time = np.inf,  eps = 1e-8, context = None, verbosity = True, save_models_parameters= True, report_file = None, evaluations_file = None, models_file=None):
+    def run_optimization(self, max_iter = 0, max_time = np.inf,  eps = 1e-8, context = None, verbosity=False, save_models_parameters= True, report_file = None, evaluations_file = None, models_file=None):
         """
         Runs Bayesian Optimization for a number 'max_iter' of iterations (after the initial exploration data)
 
@@ -149,6 +149,9 @@ class BO(object):
             self.cum_time = time.time() - self.time_zero
             self.num_acquisitions += 1
 
+            if verbosity:
+                print("num acquisition: {}, time elapsed: {:.2f}s".format(
+                    self.num_acquisitions, self.cum_time))
 
         # --- Stop messages and execution time
         self._compute_results()
@@ -160,7 +163,6 @@ class BO(object):
             self.save_evaluations(self.evaluations_file)
         if self.models_file is not None:
             self.save_models(self.models_file)
-
 
     def _print_convergence(self):
         """
