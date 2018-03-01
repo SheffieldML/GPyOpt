@@ -259,12 +259,13 @@ class BO(object):
         else:
             self.model_parameters_iterations = np.vstack((self.model_parameters_iterations,self.model.get_model_parameters()))
 
-    def plot_acquisition(self,filename=None):
+    def plot_acquisition(self,filename=None, fig=None):
         """
         Plots the model and the acquisition function.
             if self.input_dim = 1: Plots data, mean and variance in one plot and the acquisition function in another plot
             if self.input_dim = 2: as before but it separates the mean and variance of the model in two different plots
-        :param filename: name of the file where the plot is saved
+        :param filename: (optional) name of the file where the plot is saved
+        :param fig: (optional) The figure to plot on.
         """
         if self.model.model is None:
             from copy import deepcopy
@@ -280,17 +281,17 @@ class BO(object):
                                 model_to_plot.model.Y,
                                 self.acquisition.acquisition_function,
                                 self.suggest_next_locations(),
-                                filename)
+                                filename=filename, fig=fig)
 
 
-    def plot_convergence(self,filename=None):
+    def plot_convergence(self,filename=None,fig=None):
         """
         Makes twp plots to evaluate the convergence of the model:
             plot 1: Iterations vs. distance between consecutive selected x's
             plot 2: Iterations vs. the mean of the current model in the selected sample.
         :param filename: name of the file where the plot is saved
         """
-        return plot_convergence(self.X,self.Y_best,filename)
+        return plot_convergence(self.X,self.Y_best,filename=filename,fig=fig)
 
     def get_evaluations(self):
         return self.X.copy(), self.Y.copy()
