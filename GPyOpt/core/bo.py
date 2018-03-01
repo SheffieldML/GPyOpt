@@ -228,29 +228,47 @@ class BO(object):
         ### We zip the value in case there are categorical variables
         return self.space.zip_inputs(self.evaluator.compute_batch(duplicate_manager=duplicate_manager, context_manager= self.acquisition.optimizer.context_manager))
 
+    def _normalize(self, Y, normalization_type='stats'):
+        """Normalize the vector Y."""
+        Y = np.asanyarray(Y)
 
-    def _update_model(self, normalization_type = 'stats'):
+        # Only normalize with non null sdev (divide by zero). For only one
+        # data point both std and ptp return 0.
+        if normalization_type == 'stats':
+            Y_norm = Y - Y.mean()
+            std = Y.std()
+            if std > 0:
+                Y_norm /= std
+        elif normalization_type == 'maxmin':
+            Y_norm = Y - Y.min()
+            y_range = np.ptp(Y)
+            if y_range > 0:
+                Y_norm /= y_range
+                # [0, 1] is a strange range for a zero-mean GP
+                Y_norm = 2 * (Y_norm - 0.5)
+        else:
+            raise ValueError('Unknown normalization type: {}'.format(normalization_type))
+
+        return Y_norm
+
+    def _update_model(self, normalization_type='stats'):
         """
         Updates the model (when more than one observation is available) and saves the parameters (if available).
         """
-        if (self.num_acquisitions%self.model_update_interval)==0:
+        if self.num_acquisitions % self.model_update_interval == 0:
 
-            ### --- input that goes into the model (is unziped in case there are categorical variables)
+            # input that goes into the model (is unziped in case there are categorical variables)
             X_inmodel = self.space.unzip_inputs(self.X)
 
-            ### --- Output that goes into the model
-            ### --- Only normalize with at least two elements and non null sdev
-            if self.normalize_Y and (self.Y.shape[0]>1) and (self.Y.std()>0):
-                if normalization_type == 'stats':
-                    Y_inmodel = (self.Y-self.Y.mean())/(self.Y.std())
-                elif normalization_type == 'maxmin':
-                    Y_inmodel = (self.Y - self.Y.min())/(self.Y.max()-self.Y.min())
+            # Y_inmodel is the output that goes into the model
+            if self.normalize_Y:
+                Y_inmodel = self._normalize(self.Y, normalization_type)
             else:
-                Y_inmodel =self.Y
+                Y_inmodel = self.Y
 
             self.model.updateModel(X_inmodel, Y_inmodel, None, None)
 
-        ### --- Save parameters of the model
+        # Save parameters of the model
         self._save_model_parameter_values()
 
     def _save_model_parameter_values(self):
@@ -269,7 +287,11 @@ class BO(object):
         if self.model.model is None:
             from copy import deepcopy
             model_to_plot = deepcopy(self.model)
-            model_to_plot.updateModel(self.X, self.Y, self.X, self.Y)
+            if self.normalize_Y:
+                Y = self._normalize(self.Y, self.normalization_type)
+            else:
+                Y = self.Y
+            model_to_plot.updateModel(self.X, Y, self.X, Y)
         else:
             model_to_plot = self.model
 
