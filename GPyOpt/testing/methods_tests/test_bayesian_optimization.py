@@ -36,3 +36,12 @@ class TestBayesianOptimization(unittest.TestCase):
         x_ignored = bo_ignored.suggest_next_locations(ignored_X = x_no_ignored)
 
         self.assertFalse(np.isclose(x_ignored, x_no_ignored))
+
+    def test_one_initial_data_point(self):
+        """Make sure BO still works with only one initial data point."""
+        bounds = [{'name': 'var_1', 'type': 'continuous', 'domain': (-1, 1)}]
+        opt = BayesianOptimization(lambda x: x, bounds, initial_design_numdata=1)
+
+        # Make sure run_optimization works
+        opt.run_optimization(max_iter=1)
+        assert len(opt.Y) > 1
