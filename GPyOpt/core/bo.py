@@ -134,7 +134,8 @@ class BO(object):
             except np.linalg.linalg.LinAlgError:
                 break
 
-            if not ((self.num_acquisitions < self.max_iter) and (self._distance_last_evaluations() > self.eps)):
+            if (self.num_acquisitions >= self.max_iter
+                    or (len(self.X) > 1 and self._distance_last_evaluations() <= self.eps)):
                 break
 
             self.suggested_sample = self._compute_next_evaluations()
@@ -199,15 +200,13 @@ class BO(object):
         """
         self.Y_best = best_value(self.Y)
         self.x_opt = self.X[np.argmin(self.Y),:]
-        self.fx_opt = min(self.Y)
-
+        self.fx_opt = np.min(self.Y)
 
     def _distance_last_evaluations(self):
         """
         Computes the distance between the last two evaluations.
         """
-        return np.sqrt(sum((self.X[self.X.shape[0]-1,:]-self.X[self.X.shape[0]-2,:])**2))
-
+        return np.sqrt(np.sum((self.X[-1, :] - self.X[-2, :]) ** 2))
 
     def _compute_next_evaluations(self, pending_zipped_X=None, ignored_zipped_X=None):
         """
