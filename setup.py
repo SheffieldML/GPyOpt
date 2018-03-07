@@ -3,10 +3,11 @@
 
 import os
 from setuptools import setup, find_packages
-from GPyOpt.__version__ import __version__
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
+__version__ = "1.2.1"
 
 packages = find_packages(exclude=("GPyOpt.testing",))
 setup(name = 'GPyOpt',
