@@ -2,149 +2,183 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 import numpy as np
-from pylab import grid
 import matplotlib.pyplot as plt
-from pylab import savefig
-import pylab
 
 
-def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,suggested_sample, filename = None):
+def _normalize_acqu(acqu, m, pct95):
+    acqu_normalized = acqu / min(acqu)
+    factor = max(m + pct95) - min(m - pct95)  # Max spread
+    acqu_normalized = 0.2 * factor * acqu_normalized - abs(
+        min(m - pct95)) - 0.25 * factor
+    return acqu_normalized
+
+
+def plot_acquisition(bounds, input_dim, model, Xdata, Ydata,
+                     acquisition_function, suggested_sample,
+                     filename=None, fig=None):
     '''
     Plots of the model and the acquisition function in 1D and 2D examples.
     '''
+    if fig is None:
+        # Whether or not to call plt.show() at the end.  plt.show() will
+        # still not be called if a filename is supplied.
+        call_show = True
+        fig = plt.figure()
+    else:
+        call_show = False
 
     # Plots in dimension 1
-    if input_dim ==1:
-        # X = np.arange(bounds[0][0], bounds[0][1], 0.001)
-        # X = X.reshape(len(X),1)
-        # acqu = acquisition_function(X)
-        # acqu_normalized = (-acqu - min(-acqu))/(max(-acqu - min(-acqu))) # normalize acquisition
-        # m, v = model.predict(X.reshape(len(X),1))
-        # plt.ioff()
-        # plt.figure(figsize=(10,5))
-        # plt.subplot(2, 1, 1)
-        # plt.plot(X, m, 'b-', label=u'Posterior mean',lw=2)
-        # plt.fill(np.concatenate([X, X[::-1]]), \
-        #         np.concatenate([m - 1.9600 * np.sqrt(v),
-        #                     (m + 1.9600 * np.sqrt(v))[::-1]]), \
-        #         alpha=.5, fc='b', ec='None', label='95% C. I.')
-        # plt.plot(X, m-1.96*np.sqrt(v), 'b-', alpha = 0.5)
-        # plt.plot(X, m+1.96*np.sqrt(v), 'b-', alpha=0.5)
-        # plt.plot(Xdata, Ydata, 'r.', markersize=10, label=u'Observations')
-        # plt.axvline(x=suggested_sample[len(suggested_sample)-1],color='r')
-        # plt.title('Model and observations')
-        # plt.ylabel('Y')
-        # plt.xlabel('X')
-        # plt.legend(loc='upper left')
-        # plt.xlim(*bounds)
-        # grid(True)
-        # plt.subplot(2, 1, 2)
-        # plt.axvline(x=suggested_sample[len(suggested_sample)-1],color='r')
-        # plt.plot(X,acqu_normalized, 'r-',lw=2)
-        # plt.xlabel('X')
-        # plt.ylabel('Acquisition value')
-        # plt.title('Acquisition function')
-        # grid(True)
-        # plt.xlim(*bounds)
-
+    if input_dim == 1:
+        ax = fig.add_subplot(1, 1, 1)
         x_grid = np.arange(bounds[0][0], bounds[0][1], 0.001)
-        x_grid = x_grid.reshape(len(x_grid),1)
-        acqu = acquisition_function(x_grid)
-        acqu_normalized = (-acqu - min(-acqu))/(max(-acqu - min(-acqu)))
-        m, v = model.predict(x_grid)
 
+        # Need column vectors for acquisition_function and predict
+        x_grid = x_grid[:, np.newaxis]
 
-        model.plot_density(bounds[0], alpha=.5)
+        m, v = model.predict(x_grid)  # Mean and variance from GPy model
+        std = np.sqrt(v)
+        pct95 = 1.96 * std  # 95th percentile distance from mean range
 
-        plt.plot(x_grid, m, 'k-',lw=1,alpha = 0.6)
-        plt.plot(x_grid, m-1.96*np.sqrt(v), 'k-', alpha = 0.2)
-        plt.plot(x_grid, m+1.96*np.sqrt(v), 'k-', alpha=0.2)
+        # Do some crazy normalization to make this look nice on the plot
+        acqu = _normalize_acqu(acquisition_function(x_grid), m, pct95)[:, 0]
 
-        plt.plot(Xdata, Ydata, 'r.', markersize=10)
-        plt.axvline(x=suggested_sample[len(suggested_sample)-1],color='r')
-        factor = max(m+1.96*np.sqrt(v))-min(m-1.96*np.sqrt(v))
+        # Convert to 1D arrays
+        x_grid, m, pct95 = x_grid[:, 0], m[:, 0], pct95[:, 0]
 
-        plt.plot(x_grid,0.2*factor*acqu_normalized-abs(min(m-1.96*np.sqrt(v)))-0.25*factor, 'r-',lw=2,label ='Acquisition (arbitrary units)')
-        plt.xlabel('x')
-        plt.ylabel('f(x)')
-        plt.ylim(min(m-1.96*np.sqrt(v))-0.25*factor,  max(m+1.96*np.sqrt(v))+0.05*factor)
-        plt.axvline(x=suggested_sample[len(suggested_sample)-1],color='r')
-        plt.legend(loc='upper left')
+        # Plot the mean and 95pct confidence intervals of the GP
+        ax.plot(x_grid, m, 'k-', lw=1, alpha=0.6, label='m(x)')
+        ax.fill_between(x_grid, m - pct95, m + pct95, color='k', alpha=0.2)
 
+        # The points that were evaluated
+        ax.plot(Xdata, Ydata, 'b.', markersize=10, label='Evaluated Points')
 
-        if filename!=None:
-            savefig(filename)
-        else:
+        # Vertical line at next point to evaluate
+        ax.scatter(x=suggested_sample[-1],
+                   y=_normalize_acqu(
+                       acquisition_function(suggested_sample[-1]), m, pct95),
+                   color='g', marker='X', label='Next Sample')
+
+        # Plot the acquisition function
+        ax.plot(x_grid, acqu, 'r-', lw=2,
+                label='Acquisition Function')
+        ax.fill_between(x_grid, np.ones_like(x_grid) * min(acqu),
+                        acqu, alpha=0.3, color='r')
+        ax.set_xlabel('x')
+        ax.set_ylabel('f(x)')
+        ax.legend()
+        ax.set_title('Mean and acquisition functions')
+
+        if filename is not None:
+            ax.figure.savefig(filename)
+        elif call_show:
             plt.show()
+        return
 
-    if input_dim ==2:
-        X1 = np.linspace(bounds[0][0], bounds[0][1], 200)
-        X2 = np.linspace(bounds[1][0], bounds[1][1], 200)
-        x1, x2 = np.meshgrid(X1, X2)
-        X = np.hstack((x1.reshape(200*200,1),x2.reshape(200*200,1)))
-        acqu = acquisition_function(X)
-        acqu_normalized = (-acqu - min(-acqu))/(max(-acqu - min(-acqu)))
-        acqu_normalized = acqu_normalized.reshape((200,200))
+    elif input_dim == 2:
+        x = np.arange(bounds[0][0], bounds[0][1], 0.01)
+        y = np.arange(bounds[1][0], bounds[1][1], 0.01)
+        n_grid = len(x)
+        xx, yy = np.meshgrid(x, y)
+        X = np.hstack((xx.flatten()[:, np.newaxis],
+                       yy.flatten()[:, np.newaxis]))
         m, v = model.predict(X)
-        plt.figure(figsize=(15,5))
-        plt.subplot(1, 3, 1)
-        plt.contourf(X1, X2, m.reshape(200,200),100)
-        plt.plot(Xdata[:,0], Xdata[:,1], 'r.', markersize=10, label=u'Observations')
-        plt.colorbar()
-        plt.xlabel('X1')
-        plt.ylabel('X2')
-        plt.title('Posterior mean')
-        plt.axis((bounds[0][0],bounds[0][1],bounds[1][0],bounds[1][1]))
-        ##
-        plt.subplot(1, 3, 2)
-        plt.plot(Xdata[:,0], Xdata[:,1], 'r.', markersize=10, label=u'Observations')
-        plt.contourf(X1, X2, np.sqrt(v.reshape(200,200)),100)
-        plt.colorbar()
-        plt.xlabel('X1')
-        plt.ylabel('X2')
-        plt.title('Posterior sd.')
-        plt.axis((bounds[0][0],bounds[0][1],bounds[1][0],bounds[1][1]))
-        ##
-        plt.subplot(1, 3, 3)
-        plt.contourf(X1, X2, acqu_normalized,100)
-        plt.colorbar()
-        plt.plot(suggested_sample[:,0],suggested_sample[:,1],'k.', markersize=10)
-        plt.xlabel('X1')
-        plt.ylabel('X2')
-        plt.title('Acquisition function')
-        plt.axis((bounds[0][0],bounds[0][1],bounds[1][0],bounds[1][1]))
-        if filename!=None:
-            savefig(filename)
-        else:
+        std = np.sqrt(v)  # Standard deviation
+        pct95 = 1.96 * std
+        acqu = _normalize_acqu(acquisition_function(X), m, pct95)
+
+        ax1 = fig.add_subplot(1, 3, 1)
+        ax2 = fig.add_subplot(1, 3, 2)
+        ax3 = fig.add_subplot(1, 3, 3)
+
+        # We could add colorbars to each of the subplots as follows:
+        # im = ax1.contourf(...)
+        # fig.colorbar(im, ax=ax1)
+        # But it makes the whole thing a little busy
+
+        # ---------- Posterior mean (axis 1) ----------------
+        ax1.set_title('Posterior mean')
+
+        ax1.contourf(x, y, m.reshape(n_grid, n_grid),
+                     cmap='viridis', label='m(x)')
+        ax1.set_xlim(x[0], x[-1])
+        ax1.set_ylim(y[0], y[-1])
+
+        ax1.plot(Xdata[:, 0], Xdata[:, 1], 'r.',
+                 markersize=10, label=u'Observations')
+
+        # ---------- Posterior std (axis 1) ----------------
+        ax2.set_title('Posterior std')
+
+        ax2.plot(Xdata[:, 0], Xdata[:, 1], 'r.',
+                 markersize=10, label=u'Observations')
+        ax2.contourf(x, y, std.reshape(n_grid, n_grid),
+                     cmap='viridis')
+        ax2.set_xlim(x[0], x[-1])
+        ax2.set_ylim(y[0], y[-1])
+
+        # ---------- Acquisition Function (axis 1) ----------------
+        ax3.set_title('Acquisition function')
+
+        ax3.plot(suggested_sample[:, 0], suggested_sample[:, 1],
+                 'rX', markersize=10, label='next sample')
+        ax3.contourf(x, y, acqu.reshape(n_grid, n_grid))
+        ax3.set_xlim(x[0], x[-1])
+        ax3.set_ylim(y[0], y[-1])
+
+        ax3.legend()
+
+        if filename is not None:
+            fig.savefig(filename)
+        elif call_show:
             plt.show()
+        return
 
 
-def plot_convergence(Xdata,best_Y, filename = None):
+def plot_convergence(Xdata, best_Y, filename=None, fig=None):
+    '''Plots to evaluate the convergence of standard Bayesian optimization
+    algorithms.
+
+    Args:
+        Xdata: Historical data points at which we evaulated the function
+        best_Y: Historical running optimum
+
+    KwArgs:
+        filename: (optional) Location to save resulting figure
+        fig: (optional) The figure on which to plot the results.
+            Creates two axes on the figure
+
+    Returns: None
+
     '''
-    Plots to evaluate the convergence of standard Bayesian optimization algorithms
-    '''
-    n = Xdata.shape[0]
-    aux = (Xdata[1:n,:]-Xdata[0:n-1,:])**2
+    # Distances between consecutive x's
+    aux = (Xdata[1:, :] - Xdata[:-1, :]) ** 2
     distances = np.sqrt(aux.sum(axis=1))
 
-    ## Distances between consecutive x's
-    plt.figure(figsize=(10,5))
-    plt.subplot(1, 2, 1)
-    plt.plot(list(range(n-1)), distances, '-ro')
-    plt.xlabel('Iteration')
-    plt.ylabel('d(x[n], x[n-1])')
-    plt.title('Distance between consecutive x\'s')
-    grid(True)
-
-    # Estimated m(x) at the proposed sampling points
-    plt.subplot(1, 2, 2)
-    plt.plot(list(range(n)),best_Y,'-o')
-    plt.title('Value of the best selected sample')
-    plt.xlabel('Iteration')
-    plt.ylabel('Best y')
-    grid(True)
-
-    if filename!=None:
-        savefig(filename)
+    if fig is None:
+        fig = plt.figure()
+        ax1 = fig.add_subplot(1, 2, 1)
+        ax2 = fig.add_subplot(1, 2, 2)
+        call_show = True
     else:
+        ax1 = fig.add_subplot(1, 2, 1)
+        ax2 = fig.add_subplot(1, 2, 2)
+        call_show = False
+
+    ax1.plot(distances, '-ro')
+    ax1.set_xlabel('Iteration')
+    ax1.set_ylabel('d(x[n], x[n-1])')
+    ax1.set_title('Distance between consecutive x\'s')
+    ax1.grid(True)
+
+    # Estimated f(x) at the proposed sampling points
+    ax2.plot(best_Y, '-o')
+    ax2.set_title('Value of the best selected sample')
+    ax2.set_xlabel('Iteration')
+    ax2.set_ylabel('f(x)')
+    ax2.grid(True)
+
+    if filename is not None:
+        fig.savefig(filename)
+    elif call_show:
         plt.show()
+    return
