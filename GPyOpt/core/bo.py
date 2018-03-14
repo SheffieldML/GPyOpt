@@ -7,7 +7,7 @@ import numpy as np
 import time
 import csv
 
-from ..util.general import best_value
+from ..util.general import best_value, normalize
 from ..util.duplicate_manager import DuplicateManager
 from ..core.errors import InvalidConfigError
 from ..core.task.cost import CostModel
@@ -228,29 +228,6 @@ class BO(object):
         ### We zip the value in case there are categorical variables
         return self.space.zip_inputs(self.evaluator.compute_batch(duplicate_manager=duplicate_manager, context_manager= self.acquisition.optimizer.context_manager))
 
-    def _normalize(self, Y, normalization_type='stats'):
-        """Normalize the vector Y."""
-        Y = np.asanyarray(Y)
-
-        # Only normalize with non null sdev (divide by zero). For only one
-        # data point both std and ptp return 0.
-        if normalization_type == 'stats':
-            Y_norm = Y - Y.mean()
-            std = Y.std()
-            if std > 0:
-                Y_norm /= std
-        elif normalization_type == 'maxmin':
-            Y_norm = Y - Y.min()
-            y_range = np.ptp(Y)
-            if y_range > 0:
-                Y_norm /= y_range
-                # [0, 1] is a strange range for a zero-mean GP
-                Y_norm = 2 * (Y_norm - 0.5)
-        else:
-            raise ValueError('Unknown normalization type: {}'.format(normalization_type))
-
-        return Y_norm
-
     def _update_model(self, normalization_type='stats'):
         """
         Updates the model (when more than one observation is available) and saves the parameters (if available).
@@ -262,7 +239,7 @@ class BO(object):
 
             # Y_inmodel is the output that goes into the model
             if self.normalize_Y:
-                Y_inmodel = self._normalize(self.Y, normalization_type)
+                Y_inmodel = normalize(self.Y, normalization_type)
             else:
                 Y_inmodel = self.Y
 
@@ -288,7 +265,7 @@ class BO(object):
             from copy import deepcopy
             model_to_plot = deepcopy(self.model)
             if self.normalize_Y:
-                Y = self._normalize(self.Y, self.normalization_type)
+                Y = normalize(self.Y, self.normalization_type)
             else:
                 Y = self.Y
             model_to_plot.updateModel(self.X, Y, self.X, Y)
@@ -303,7 +280,6 @@ class BO(object):
                                 self.acquisition.acquisition_function,
                                 self.suggest_next_locations(),
                                 filename)
-
 
     def plot_convergence(self,filename=None):
         """

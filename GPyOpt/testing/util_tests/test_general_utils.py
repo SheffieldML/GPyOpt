@@ -1,10 +1,14 @@
+from __future__ import division
+
 import numpy as np
 import unittest
-from numpy.testing import assert_array_less
+from numpy.testing import assert_allclose
 
 from GPyOpt.core.errors import InvalidConfigError
 from GPyOpt.core.task.space import Design_space
 from GPyOpt.experiment_design import initial_design
+from GPyOpt.util.general import normalize
+
 
 class TestInitialDesign(unittest.TestCase):
     def setUp(self):
@@ -117,3 +121,51 @@ class TestInitialDesign(unittest.TestCase):
         samples = initial_design('sobol', self.design_space, init_points_count)
         self.assertEqual(len(samples), init_points_count)
         self.assert_samples_against_space(samples)
+
+
+class TestNormalization(unittest.TestCase):
+    """Test the normalize function."""
+    def test_call_error(self):
+        """Test that 2D arrays raise an error"""
+        self.assertRaises(NotImplementedError, normalize, [[1, 2], [3, 4]])
+
+    def test_wrong_type(self):
+        """Test whether wrong normalization types raise errors."""
+        self.assertRaises(ValueError, normalize, [1], normalization_type='wrong')
+
+    def test_std(self):
+        """Test the std normalization."""
+        # Zero-std case
+        y = np.array([1])
+        y_norm = normalize(y, 'stats')
+        assert_allclose(y_norm, y - 1)
+
+        y = np.array([0, 0, 0])
+        y_norm = normalize(y + 1, 'stats')
+        assert_allclose(y_norm, y)
+
+        y = np.array([1, 3])[:, None]
+        y_norm = normalize(y, 'stats')
+        assert_allclose(y_norm, np.array([[-1], [1]]))
+
+        y = np.arange(5)
+        y_norm = normalize(y, 'stats')
+        assert_allclose(y_norm, (y - y.mean()) / y.std())
+
+    def test_minmax(self):
+        # Zero-std case
+        y = np.array([1])
+        y_norm = normalize(y, 'maxmin')
+        assert_allclose(y_norm, y - 1)
+
+        y = np.array([0, 0, 0])
+        y_norm = normalize(y + 1, 'maxmin')
+        assert_allclose(y_norm, y)
+
+        y = np.array([1, 3])[:, None]
+        y_norm = normalize(y, 'maxmin')
+        assert_allclose(y_norm, np.array([[0], [1]]))
+
+        y = np.arange(5)
+        y_norm = normalize(y - 1, 'maxmin')
+        assert_allclose(y_norm, y / 4)
