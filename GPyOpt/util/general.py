@@ -226,6 +226,8 @@ def normalize(Y, normalization_type='stats'):
         y_range = np.ptp(Y)
         if y_range > 0:
             Y_norm /= y_range
+            # A range of [-1, 1] is more natural for a zero-mean GP
+            Y_norm = 2 * (Y_norm - 0.5)
     else:
         raise ValueError('Unknown normalization type: {}'.format(normalization_type))
 
