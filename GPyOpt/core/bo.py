@@ -7,7 +7,7 @@ import numpy as np
 import time
 import csv
 
-from ..util.general import best_value
+from ..util.general import best_value, normalize
 from ..util.duplicate_manager import DuplicateManager
 from ..core.errors import InvalidConfigError
 from ..core.task.cost import CostModel
@@ -228,29 +228,24 @@ class BO(object):
         ### We zip the value in case there are categorical variables
         return self.space.zip_inputs(self.evaluator.compute_batch(duplicate_manager=duplicate_manager, context_manager= self.acquisition.optimizer.context_manager))
 
-
-    def _update_model(self, normalization_type = 'stats'):
+    def _update_model(self, normalization_type='stats'):
         """
         Updates the model (when more than one observation is available) and saves the parameters (if available).
         """
-        if (self.num_acquisitions%self.model_update_interval)==0:
+        if self.num_acquisitions % self.model_update_interval == 0:
 
-            ### --- input that goes into the model (is unziped in case there are categorical variables)
+            # input that goes into the model (is unziped in case there are categorical variables)
             X_inmodel = self.space.unzip_inputs(self.X)
 
-            ### --- Output that goes into the model
-            ### --- Only normalize with at least two elements and non null sdev
-            if self.normalize_Y and (self.Y.shape[0]>1) and (self.Y.std()>0):
-                if normalization_type == 'stats':
-                    Y_inmodel = (self.Y-self.Y.mean())/(self.Y.std())
-                elif normalization_type == 'maxmin':
-                    Y_inmodel = (self.Y - self.Y.min())/(self.Y.max()-self.Y.min())
+            # Y_inmodel is the output that goes into the model
+            if self.normalize_Y:
+                Y_inmodel = normalize(self.Y, normalization_type)
             else:
-                Y_inmodel =self.Y
+                Y_inmodel = self.Y
 
             self.model.updateModel(X_inmodel, Y_inmodel, None, None)
 
-        ### --- Save parameters of the model
+        # Save parameters of the model
         self._save_model_parameter_values()
 
     def _save_model_parameter_values(self):
@@ -269,7 +264,11 @@ class BO(object):
         if self.model.model is None:
             from copy import deepcopy
             model_to_plot = deepcopy(self.model)
-            model_to_plot.updateModel(self.X, self.Y, self.X, self.Y)
+            if self.normalize_Y:
+                Y = normalize(self.Y, self.normalization_type)
+            else:
+                Y = self.Y
+            model_to_plot.updateModel(self.X, Y, self.X, Y)
         else:
             model_to_plot = self.model
 
@@ -281,7 +280,6 @@ class BO(object):
                                 self.acquisition.acquisition_function,
                                 self.suggest_next_locations(),
                                 filename)
-
 
     def plot_convergence(self,filename=None):
         """

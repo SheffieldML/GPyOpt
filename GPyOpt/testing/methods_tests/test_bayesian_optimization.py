@@ -40,8 +40,30 @@ class TestBayesianOptimization(unittest.TestCase):
     def test_one_initial_data_point(self):
         """Make sure BO still works with only one initial data point."""
         bounds = [{'name': 'var_1', 'type': 'continuous', 'domain': (-1, 1)}]
-        opt = BayesianOptimization(lambda x: x, bounds, initial_design_numdata=1)
+        # Remove hyperparameter optimization, not needed here
+        model = GPyOpt.models.GPModel(max_iters=0)
+        opt = BayesianOptimization(lambda x: x, bounds, model=model, initial_design_numdata=1)
 
         # Make sure run_optimization works
         opt.run_optimization(max_iter=1)
         assert len(opt.Y) > 1
+
+    def test_normalization(self):
+        """Make sure normalization works with wrong model."""
+        np.random.seed(1)
+
+        bounds = [{'name': 'var_1', 'type': 'continuous', 'domain': (1, 2)}]
+        # We get a first measurement at 1, but the model is so harshly
+        # violated that we will just continue to get measurements at 1.
+        # The minimum is at 2.
+        x0 = np.array([[1]])
+        f = lambda x: -1000 * x
+
+        # Remove hyperparameter optimization, not needed here
+        model = GPyOpt.models.GPModel(max_iters=0)
+
+        opt = BayesianOptimization(f, bounds, X=x0, model=model, normalize_Y=True)
+        opt.run_optimization(max_iter=1)
+
+        # Make sure that we did not sample the same point again
+        assert np.linalg.norm(opt.X[0] - opt.X[1]) > 1e-2

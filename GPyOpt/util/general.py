@@ -198,3 +198,35 @@ def merge_values(values1,values2):
             merged_row = np.hstack((row_array1,row_array2))
             merged_array.append(merged_row)
     return np.atleast_2d(merged_array)
+
+
+def normalize(Y, normalization_type='stats'):
+    """Normalize the vector Y using statistics or its range.
+
+    :param Y: Row or column vector that you want to normalize.
+    :param normalization_type: String specifying the kind of normalization
+    to use. Options are 'stats' to use mean and standard deviation,
+    or 'maxmin' to use the range of function values.
+    :return Y_normalized: The normalized vector.
+    """
+    Y = np.asarray(Y, dtype=float)
+
+    if np.max(Y.shape) != Y.size:
+        raise NotImplementedError('Only 1-dimensional arrays are supported.')
+
+    # Only normalize with non null sdev (divide by zero). For only one
+    # data point both std and ptp return 0.
+    if normalization_type == 'stats':
+        Y_norm = Y - Y.mean()
+        std = Y.std()
+        if std > 0:
+            Y_norm /= std
+    elif normalization_type == 'maxmin':
+        Y_norm = Y - Y.min()
+        y_range = np.ptp(Y)
+        if y_range > 0:
+            Y_norm /= y_range
+    else:
+        raise ValueError('Unknown normalization type: {}'.format(normalization_type))
+
+    return Y_norm
