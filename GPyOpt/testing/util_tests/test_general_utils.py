@@ -164,8 +164,8 @@ class TestNormalization(unittest.TestCase):
 
         y = np.array([1, 3])[:, None]
         y_norm = normalize(y, 'maxmin')
-        assert_allclose(y_norm, np.array([[0], [1]]))
+        assert_allclose(y_norm, np.array([[-1], [1]]))
 
         y = np.arange(5)
         y_norm = normalize(y - 1, 'maxmin')
-        assert_allclose(y_norm, y / 4)
+        assert_allclose(y_norm, (y - 2) / 2)
