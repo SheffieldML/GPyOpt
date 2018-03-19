@@ -49,6 +49,8 @@ class BO(object):
         self.normalization_type = 'stats' ## not added in the API
         self.de_duplication = de_duplication
         self.model_parameters_iterations = None
+        self.context = None
+        self.num_acquisitions = 0
 
     def suggest_next_locations(self, context = None, pending_X = None, ignored_X = None):
         """
