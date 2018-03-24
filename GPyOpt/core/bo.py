@@ -208,6 +208,9 @@ class BO(object):
         """
         Computes the distance between the last two evaluations.
         """
+        if self.X.shape[0] < 2:
+            # less than 2 evaluations
+            return np.inf
         return np.sqrt(np.sum((self.X[-1, :] - self.X[-2, :]) ** 2))
 
     def _compute_next_evaluations(self, pending_zipped_X=None, ignored_zipped_X=None):
