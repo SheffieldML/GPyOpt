@@ -1,5 +1,5 @@
-GPyOpt\.testing package
-=======================
+GPyOpt.testing package
+======================
 
 Module contents
 ---------------
