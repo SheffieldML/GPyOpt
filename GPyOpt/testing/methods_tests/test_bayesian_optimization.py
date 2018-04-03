@@ -48,6 +48,28 @@ class TestBayesianOptimization(unittest.TestCase):
         opt.run_optimization(max_iter=1)
         assert len(opt.Y) > 1
 
+    def test_infinite_distance_last_evaluations(self):
+        # Optimization with a single data point will have the distance between last evaluations go to infinity
+        # This will not be interpreted as a converged state and continue as expected
+        domain = [{'name': 'x', 'type': 'continuous', 'domain': (-10,10)}]
+
+        # one initial data point found randomly
+        bo = GPyOpt.methods.BayesianOptimization(lambda x: x*x, domain=domain,
+                                                 X=None, Y=None,
+                                                 initial_design_numdata=1,
+                                                 initial_design_type='random')
+        bo.run_optimization(max_iter=3)
+        assert len(bo.X) == 4
+        assert len(bo.Y) == 4
+
+        # one initial data point given by the user
+        bo2 = GPyOpt.methods.BayesianOptimization(lambda x: x*x, domain=domain,
+                                                  X=np.array([[1]]), Y=np.array([[1]]),
+                                                  initial_design_numdata=0)
+        bo2.run_optimization(max_iter=2)
+        assert len(bo2.X) == 3
+        assert len(bo2.Y) == 3
+
     def test_normalization(self):
         """Make sure normalization works with wrong model."""
         np.random.seed(1)
