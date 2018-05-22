@@ -9,6 +9,7 @@ from .MPI_mcmc import AcquisitionMPI_MCMC
 from .LCB import AcquisitionLCB
 from .LCB_mcmc import AcquisitionLCB_MCMC
 from .LP import AcquisitionLP
+from .ES import AcquisitionEntropySearch
 
 def select_acquisition(name):
     '''
@@ -28,5 +29,7 @@ def select_acquisition(name):
         return AcquisitionMPI_MCMC
     elif name == 'LP':
         return AcquisitionLP
+    elif name == 'ES':
+        return AcquisitionEntropySearch
     else:
         raise Exception('Invalid acquisition selected.')

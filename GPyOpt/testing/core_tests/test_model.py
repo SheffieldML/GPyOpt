@@ -1,11 +1,44 @@
 import numpy as np
-import unittest
 
+import unittest
+from mock import Mock
+from numpy.testing import assert_allclose
+
+from GPyOpt.models.gpmodel import GPModel
 from GPyOpt.models.input_warped_gpmodel import InputWarpedGPModel
 from GPyOpt.core.task.space import Design_space
 
 
 class TestModels(unittest.TestCase):
+
+    def test_gpmodel_predict(self):
+        config = [{'name': 'var_1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality': 1},
+                  {'name': 'var_2', 'type': 'continuous', 'domain':(-1,1), 'dimensionality': 1}]
+        space = Design_space(config)
+        model = GPModel(space)
+        mock_mean = np.array([[2.0], [-2.0]])
+        mock_variance = np.array([[4.0, 0.0], [0.0, 9.0]])
+        model.model = Mock()
+        model.model.predict.return_value = (mock_mean, mock_variance)
+
+        m, d = model.predict(np.ones((2, 2)))
+
+        assert_allclose(m, mock_mean, atol=1e-5)
+        assert_allclose(np.square(d), mock_variance, atol=1e-5)
+
+    def test_gpmodel_predict_covariance(self):
+        config = [{'name': 'var_1', 'type': 'continuous', 'domain':(-1,1), 'dimensionality': 1},
+                  {'name': 'var_2', 'type': 'continuous', 'domain':(-1,1), 'dimensionality': 1}]
+        space = Design_space(config)
+        model = GPModel(space)
+        mock_mean = np.array([[2.0], [-2.0]])
+        mock_variance = np.array([[4.0, 3.0], [4.5, 9.0]])
+        model.model = Mock()
+        model.model.predict.return_value = (mock_mean, mock_variance)
+
+        v = model.predict_covariance(np.ones((2, 2)))
+
+        assert_allclose(v, mock_variance, atol=1e-5)
 
     def test_input_warping_indices(self):
         config1 = [{'name': 'var_1', 'type': 'continuous', 'domain':(-3,1), 'dimensionality': 2},

@@ -50,3 +50,4 @@ iterate.dat
 .ipynb_checkpoints
 
 docs/_build
+.pytest_cache

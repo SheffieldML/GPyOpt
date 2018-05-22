@@ -90,14 +90,35 @@ class GPModel(BOModel):
             else:
                 self.model.optimize_restarts(num_restarts=self.optimize_restarts, optimizer=self.optimizer, max_iters = self.max_iters, verbose=self.verbose)
 
-    def predict(self, X):
+    def _predict(self, X, full_cov, include_likelihood):
+        if X.ndim == 1:
+            X = X[None,:]
+        m, v = self.model.predict(X, full_cov=full_cov, include_likelihood=include_likelihood)
+        v = np.clip(v, 1e-10, np.inf)
+        return m, v
+
+    def predict(self, X, with_noise=True):
         """
         Predictions with the model. Returns posterior means and standard deviations at X. Note that this is different in GPy where the variances are given.
+
+        Parameters:
+            X (np.ndarray) - points to run the prediction for.
+            with_noise (bool) - whether to add noise to the prediction. Default is True.
         """
-        if X.ndim==1: X = X[None,:]
-        m, v = self.model.predict(X)
-        v = np.clip(v, 1e-10, np.inf)
+        m, v = self._predict(X, False, with_noise)
+        # We can take the square root because v is just a diagonal matrix of variances
         return m, np.sqrt(v)
+
+    def predict_covariance(self, X, with_noise=True):
+        """
+        Predicts the covariance matric for points in X.
+
+        Parameters:
+            X (np.ndarray) - points to run the prediction for.
+            with_noise (bool) - whether to add noise to the prediction. Default is True.
+        """
+        _, v = self._predict(X, True, with_noise)
+        return v
 
     def get_fmin(self):
         """
@@ -146,6 +167,12 @@ class GPModel(BOModel):
         Returns a list with the names of the parameters of the model
         """
         return self.model.parameter_names_flat().tolist()
+
+    def get_covariance_between_points(self, x1, x2):
+        """
+        Given the current posterior, computes the covariance between two sets of points.
+        """
+        return self.model.posterior_covariance_between_points(x1, x2)
 
 
 class GPModel_MCMC(BOModel):

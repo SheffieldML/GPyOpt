@@ -1,7 +1,8 @@
 # Copyright (c) 2016, the GPyOpt Authors
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
-from ..acquisitions import AcquisitionEI, AcquisitionMPI, AcquisitionLCB, AcquisitionEI_MCMC, AcquisitionMPI_MCMC, AcquisitionLCB_MCMC, AcquisitionLP
+
+from ..acquisitions import AcquisitionEI, AcquisitionMPI, AcquisitionLCB, AcquisitionEI_MCMC, AcquisitionMPI_MCMC, AcquisitionLCB_MCMC, AcquisitionLP, AcquisitionEntropySearch
 from ..core.bo import BO
 from ..core.errors import InvalidConfigError
 from ..core.task.space import Design_space, bounds_to_space

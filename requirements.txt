@@ -12,6 +12,7 @@ scipy>=0.18.1
 mock>=2.0.0
 PyDOE >= 0.3.0
 sobol_seq >=0.1
+emcee==2.2.1
 
 # For tests
 nose
