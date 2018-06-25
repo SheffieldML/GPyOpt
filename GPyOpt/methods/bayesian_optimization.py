@@ -32,7 +32,7 @@ class BayesianOptimization(BO):
         - 'evaluation_time': a Gaussian process (mean) is used to handle the evaluation cost.
     :model_type: type of model to use as surrogate:
         - 'GP', standard Gaussian process.
-        - 'GP_MCMC',  Gaussian process with prior in the hyper-parameters.
+        - 'GP_MCMC', Gaussian process with prior in the hyper-parameters.
         - 'sparseGP', sparse Gaussian process.
         - 'warperdGP', warped Gaussian process.
         - 'InputWarpedGP', input warped Gaussian process
@@ -51,17 +51,17 @@ class BayesianOptimization(BO):
         - 'LCB', GP-Lower confidence bound.
         - 'LCB_MCMC', integrated GP-Lower confidence bound (requires GP_MCMC model).
     :param normalize_Y: whether to normalize the outputs before performing any optimization (default, True).
-    :exact_feval: whether the outputs are exact (default, False).
+    :exact_feval: whether the outputs are exact (default False).
     :acquisition_optimizer_type: type of acquisition function to use.
-        - 'lbfgs': L-BFGS.
-        - 'DIRECT': Dividing Rectangles.
-        - 'CMA': covariance matrix adaptation.
+        - 'lbfgs', L-BFGS.
+        - 'DIRECT', Dividing Rectangles.
+        - 'CMA', covariance matrix adaptation.
     :param model_update_interval: interval of collected observations after which the model is updated (default, 1).
     :param evaluator_type: determines the way the objective is evaluated (all methods are equivalent if the batch size is one)
         - 'sequential', sequential evaluations.
-        - 'random': synchronous batch that selects the first element as in a sequential policy and the rest randomly.
-        - 'local_penalization': batch method proposed in (Gonzalez et al. 2016).
-        - 'thompson_sampling': batch method using Thompson sampling.
+        - 'random', synchronous batch that selects the first element as in a sequential policy and the rest randomly.
+        - 'local_penalization', batch method proposed in (Gonzalez et al. 2016).
+        - 'thompson_sampling', batch method using Thompson sampling.
     :param batch_size: size of the batch in which the objective is evaluated (default, 1).
     :param num_cores: number of cores used to evaluate the objective (default, 1).
     :param verbosity: prints the models and other options during the optimization (default, False).
@@ -86,7 +86,7 @@ class BayesianOptimization(BO):
         self.de_duplication = de_duplication
         self.kwargs = kwargs
 
-        # --- Handle the arguments passed via kargs
+        # --- Handle the arguments passed via kwargs
         self.problem_config = ArgumentsManager(kwargs)
 
         # --- CHOOSE design space
@@ -96,8 +96,10 @@ class BayesianOptimization(BO):
 
         # --- CHOOSE objective function
         self.maximize = maximize
-        if 'objective_name' in kwargs: self.objective_name = kwargs['objective_name']
-        else: self.objective_name = 'no_name'
+        if 'objective_name' in kwargs:
+            self.objective_name = kwargs['objective_name']
+        else:
+            self.objective_name = 'no_name'
         self.batch_size = batch_size
         self.num_cores = num_cores
         if f is not None:

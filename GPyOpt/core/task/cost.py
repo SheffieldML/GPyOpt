@@ -25,24 +25,24 @@ class  CostModel(object):
         self.cost_type = cost_withGradients
 
         # --- Set-up evaluation cost
-        if self.cost_type is  None:
+        if self.cost_type is None:
             self.cost_withGradients = constant_cost_withGradients
             self.cost_type = 'Constant cost'
 
         elif self.cost_type == 'evaluation_time':
-            self.cost_model = GPModel()                                 
-            self.cost_withGradients  = self._cost_gp_withGradients
+            self.cost_model = GPModel()
+            self.cost_withGradients = self._cost_gp_withGradients
             self.num_updates = 0
         else:
-            self.cost_withGradients  = cost_withGradients
-            self.cost_type  = 'Used defined cost'
+            self.cost_withGradients = cost_withGradients
+            self.cost_type = 'User defined cost'
 
 
     def _cost_gp(self,x):
         """
         Predicts the time cost of evaluating the function at x.
         """
-        m, _, _, _= self.cost_model.predict_withGradients(x)
+        m, _, _, _ = self.cost_model.predict_withGradients(x)
         return np.exp(m)
 
     def _cost_gp_withGradients(self,x):
@@ -75,6 +75,6 @@ class  CostModel(object):
 
 def constant_cost_withGradients(x):
     """
-    Constant cost function used by default: cost=1, d_cost =0.
+    Constant cost function used by default: cost = 1, d_cost = 0.
     """
     return np.ones(x.shape[0])[:,None], np.zeros(x.shape)
