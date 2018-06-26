@@ -77,9 +77,11 @@ class BO(object):
         :param max_iter: exploration horizon, or number of acquisitions. If nothing is provided optimizes the current acquisition.
         :param max_time: maximum exploration horizon in seconds.
         :param eps: minimum distance between two consecutive x's to keep running the model.
-        :param verbosity: flag to print the optimization results after each iteration (default, False).
-        :param report_file: filename of the file where the results of the optimization are saved (default, None).
         :param context: fixes specified variables to a particular context (values) for the optimization run (default, None).
+        :param verbosity: flag to print the optimization results after each iteration (default, False).
+        :param report_file: file to which the results of the optimization are saved (default, None).
+        :param evaluations_file: file to which the evalations are saved (default, None).
+        :param models_file: file to which the model parameters are saved (default, None).
         """
 
         if self.objective is None:
@@ -171,7 +173,7 @@ class BO(object):
         """
         Prints the reason why the optimization stopped.
         """
-        # --- Print stopping reason
+
         if self.verbosity:
             if (self.num_acquisitions == self.max_iter) and (not self.initial_iter):
                 print('   ** Maximum number of iterations reached **')
@@ -300,7 +302,7 @@ class BO(object):
 
     def save_report(self, report_file= None):
         """
-        Saves a report with the main resutls of the optimization.
+        Saves a report with the main results of the optimization.
 
         :param report_file: name of the file in which the results of the optimization are saved.
         """
@@ -364,7 +366,7 @@ class BO(object):
 
     def save_evaluations(self, evaluations_file = None):
         """
-        Saves a report with the results of the iterations of the optimization
+        Saves  evaluations at each iteration of the optimization
 
         :param evaluations_file: name of the file in which the results are saved.
         """
@@ -377,7 +379,7 @@ class BO(object):
 
     def save_models(self, models_file):
         """
-        Saves a report with the results of the iterations of the optimization
+        Saves model parameters at each iteration of the optimization
 
         :param models_file: name of the file or a file buffer, in which the results are saved.
         """
