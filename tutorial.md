@@ -12,7 +12,7 @@ Locally, we recommend to star the reference manual using
 
 ```bash
 $ cd GPyOpt/manual
-$ jypyter notebook index
+$ jupyter notebook index
 ```
 
 On-line, you can also check the [GPyOpt reference manual](http://nbviewer.jupyter.org/github/SheffieldML/GPyOpt/blob/devel/manual/index.ipynb).
