@@ -3,6 +3,7 @@
 
 from .base import AcquisitionBase
 from ..util.general import get_quantiles
+import numpy as np
 
 class AcquisitionLCB(AcquisitionBase):
     """
@@ -33,7 +34,7 @@ class AcquisitionLCB(AcquisitionBase):
         Computes the GP-Lower Confidence Bound 
         """
         m, s = self.model.predict(x)   
-        f_acqu = -m + self.exploration_weight * s
+        f_acqu = -m + self.exploration_weight * np.sqrt(s)
         return f_acqu
 
     def _compute_acq_withGradients(self, x):
@@ -41,7 +42,7 @@ class AcquisitionLCB(AcquisitionBase):
         Computes the GP-Lower Confidence Bound and its derivative
         """
         m, s, dmdx, dsdx = self.model.predict_withGradients(x) 
-        f_acqu = -m + self.exploration_weight * s       
+        f_acqu = -m + self.exploration_weight * np.sqrt(s)       
         df_acqu = -dmdx + self.exploration_weight * dsdx
         return f_acqu, df_acqu
 
