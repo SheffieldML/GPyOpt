@@ -50,7 +50,7 @@ class OptLbfgs(Optimizer):
         else:
             res = scipy.optimize.fmin_l_bfgs_b(_f_df, x0=x0, bounds=self.bounds, maxiter=self.maxiter)
 
-        ### --- We check here if the the optimizer moved. It it didn't we report x0 and f(x0) as scipy can return NaNs
+        ### --- We check here if the the optimizer moved. If it didn't we report x0 and f(x0) as scipy can return NaNs
         if res[2]['task'] == b'ABNORMAL_TERMINATION_IN_LNSRCH':
             result_x  = np.atleast_2d(x0)
             result_fx =  np.atleast_2d(f(x0))
