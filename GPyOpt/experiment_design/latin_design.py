@@ -15,7 +15,7 @@ class LatinDesign(ExperimentDesign):
             raise InvalidConfigError('Sampling with constraints is not allowed by latin design')
         super(LatinDesign, self).__init__(space)
 
-    def get_samples(self, init_points_count):
+    def get_samples(self, init_points_count, criterion='center'):
         samples = np.empty((init_points_count, self.space.dimensionality))
 
         # Use random design to fill non-continuous variables
@@ -29,7 +29,7 @@ class LatinDesign(ExperimentDesign):
             diff = upper_bound - lower_bound
 
             from pyDOE import lhs
-            X_design_aux = lhs(len(self.space.get_continuous_bounds()), init_points_count, criterion='center')
+            X_design_aux = lhs(len(self.space.get_continuous_bounds()), init_points_count, criterion=criterion)
             I = np.ones((X_design_aux.shape[0], 1))
             X_design = np.dot(I, lower_bound) + X_design_aux * np.dot(I, diff)
 
