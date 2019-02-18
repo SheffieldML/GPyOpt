@@ -16,6 +16,14 @@ class LatinDesign(ExperimentDesign):
         super(LatinDesign, self).__init__(space)
 
     def get_samples(self, init_points_count, criterion='center'):
+        """
+        Generates required amount of sample points
+        
+        :param init_points_count: Number of samples to generate
+        :param criterion: For details of the effect of this parameter, please refer to pyDOE.lhs documentation
+                          Default: 'center'
+        :returns: Generated samples
+        """
         samples = np.empty((init_points_count, self.space.dimensionality))
 
         # Use random design to fill non-continuous variables
