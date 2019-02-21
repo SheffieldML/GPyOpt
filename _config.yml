@@ -45,7 +45,7 @@ avatar: "/img/avatar-icon.png"
 author:
   name: Machine Learning Group - University of Sheffield.
   email: "j.h.gonzalez@sheffield.ac.uk"
-  github: https://github.com/SheffieldML    # eg. daattali
+  github: SheffieldML    # eg. daattali
  
 # Select which links to show in the footer
 footer-links-active:
