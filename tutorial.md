@@ -20,4 +20,4 @@ On-line, you can also check the [GPyOpt reference manual](http://nbviewer.jupyte
 
 ## On-line documentation
 
-Check the [GPyOpt documentation](http://pythonhosted.org/GPyOpt/) for details of the different functionalities.
+Check the [GPyOpt documentation](http://gpyopt.readthedocs.io/) for details of the different functionalities.
