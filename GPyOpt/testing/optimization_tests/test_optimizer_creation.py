@@ -23,23 +23,15 @@ class TestOptimizerCreation(unittest.TestCase):
 
     def test_create_lbfgs_optimizer(self):
         optimizer = choose_optimizer('lbfgs', self.design_space.get_bounds())
-        result = optimizer.optimize([0.0, 0.0], self.f)
 
-        self.assertIsNotNone(result)
+        self.assertIsNotNone(optimizer)
 
     def test_create_direct_optimizer(self):
         optimizer = choose_optimizer('DIRECT', self.design_space.get_bounds())
-        result = optimizer.optimize([0.0, 0.0], self.f)
 
-        self.assertIsNotNone(result)
+        self.assertIsNotNone(optimizer)
 
     def test_create_cma_optimizer(self):
         optimizer = choose_optimizer('CMA', self.design_space.get_bounds())
-        result = optimizer.optimize([0.0, 0.0], self.f)
 
-        self.assertIsNotNone(result)
-
-    def test_create_cma_optimizer_invalid_dimentions(self):
-        optimizer = choose_optimizer('CMA', self.design_space.get_bounds()[0:1])
-        with self.assertRaises(IndexError):
-            optimizer.optimize([0.0, 0.0], self.f)
+        self.assertIsNotNone(optimizer)
