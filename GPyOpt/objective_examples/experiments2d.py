@@ -47,7 +47,7 @@ class function2d:
 
 class rosenbrock(function2d):
     '''
-    Cosines function
+    Rosenbrock function
     
     :param bounds: the box constraints to define the domain in which the function is optimized.
     :param sd: standard deviation, to generate noisy evaluations of the function.
@@ -56,7 +56,7 @@ class rosenbrock(function2d):
         self.input_dim = 2
         if bounds is  None: self.bounds = [(-0.5,3),(-1.5,2)]
         else: self.bounds = bounds
-        self.min = [(0, 0)]
+        self.min = [(1, 1)]
         self.fmin = 0
         if sd==None: self.sd = 0
         else: self.sd=sd
@@ -73,12 +73,12 @@ class rosenbrock(function2d):
                 noise = np.zeros(n).reshape(n,1)
             else:
                 noise = np.random.normal(0,self.sd,n).reshape(n,1)
-            return -fval.reshape(n,1) + noise
+            return fval.reshape(n,1) + noise
 
 
 class beale(function2d):
     '''
-    Cosines function
+    Beale function
     
     :param bounds: the box constraints to define the domain in which the function is optimized.
     :param sd: standard deviation, to generate noisy evaluations of the function.
@@ -109,7 +109,7 @@ class beale(function2d):
 
 class dropwave(function2d):
     '''
-    Cosines function
+    Dropwave function
     
     :param bounds: the box constraints to define the domain in which the function is optimized.
     :param sd: standard deviation, to generate noisy evaluations of the function.
