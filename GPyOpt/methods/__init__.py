@@ -3,3 +3,4 @@
 
 from .bayesian_optimization import BayesianOptimization
 from .modular_bayesian_optimization import ModularBayesianOptimization
+from .modular_constrained_bayesian_optimization import ModularConstrainedBayesianOptimization
