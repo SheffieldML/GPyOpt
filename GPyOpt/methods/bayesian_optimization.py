@@ -77,7 +77,7 @@ class BayesianOptimization(BO):
     	initial_design_numdata = 5, initial_design_type='random', acquisition_type ='EI', normalize_Y = True,
         exact_feval = False, acquisition_optimizer_type = 'lbfgs', model_update_interval=1, evaluator_type = 'sequential',
         batch_size = 1, num_cores = 1, verbosity=False, verbosity_model = False, maximize=False, de_duplication=False, **kwargs):
-
+        print('My GPyOpt repo.')
         self.modular_optimization = False
         self.initial_iter = True
         self.verbosity = verbosity
