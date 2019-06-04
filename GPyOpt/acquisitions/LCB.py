@@ -6,7 +6,11 @@ from ..util.general import get_quantiles
 
 class AcquisitionLCB(AcquisitionBase):
     """
-    GP-Lower Confidence Bound acquisition function
+    GP-Lower Confidence Bound acquisition function with constant exploration weight.
+    See:
+    
+    Gaussian Process Optimization in the Bandit Setting: No Regret and Experimental Design
+    Srinivas et al., Proc. International Conference on Machine Learning (ICML), 2010
 
     :param model: GPyOpt class of model
     :param space: GPyOpt class of domain
