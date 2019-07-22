@@ -35,7 +35,7 @@ class BO(object):
     """
 
 
-    def __init__(self, model, space, objective, acquisition, evaluator, X_init, Y_init=None, cost = None, normalize_Y = True, model_update_interval = 1, de_duplication = False):
+    def __init__(self, model, model_c, space, objective, acquisition, evaluator, X_init, Y_init=None, C_init=None, cost = None, normalize_Y = True, model_update_interval = 1, de_duplication = False):
         self.model = model
         self.space = space
         self.objective = objective
@@ -51,6 +51,9 @@ class BO(object):
         self.model_parameters_iterations = None
         self.context = None
         self.num_acquisitions = 0
+
+        self.C = C_init
+        self.model_c = model_c 
 
     def suggest_next_locations(self, context = None, pending_X = None, ignored_X = None):
         """
@@ -101,6 +104,11 @@ class BO(object):
             if not (isinstance(self.model, GPyOpt.models.GPModel) or isinstance(self.model, GPyOpt.models.GPModel_MCMC)):
                 print('Models printout after each iteration is only available for GP and GP_MCMC models')
                 self.save_models_parameters = False
+                
+            # TODO : modify this to a loop on all constraints 
+            #if not (isinstance(self.model_c, GPyOpt.models.GPModel) or isinstance(self.model_c, GPyOpt.models.GPModel_MCMC)):
+            #    print('Constrained Models printout after each iteration is only available for GP and GP_MCMC models')
+            #    self.save_constrained_models_parameters = False
 
         # --- Setting up stop conditions
         self.eps = eps
@@ -117,6 +125,7 @@ class BO(object):
             self.max_iter = max_iter
             self.max_time = max_time
 
+        # --- TODO : update to track constraint cost
         # --- Initial function evaluation and model fitting
         if self.X is not None and self.Y is None:
             self.Y, cost_values = self.objective.evaluate(self.X)
@@ -149,6 +158,10 @@ class BO(object):
 
             # --- Evaluate *f* in X, augment Y and update cost function (if needed)
             self.evaluate_objective()
+            
+            # TODO - implement this in the loop
+            # --- Evaluate *c* in C, augment C 
+            # self.evaluate_constraint()
 
             # --- Update current evaluation time and function evaluations
             self.cum_time = time.time() - self.time_zero
@@ -158,6 +171,7 @@ class BO(object):
                 print("num acquisition: {}, time elapsed: {:.2f}s".format(
                     self.num_acquisitions, self.cum_time))
 
+        # TODO update this function
         # --- Stop messages and execution time
         self._compute_results()
 
@@ -249,8 +263,12 @@ class BO(object):
                 Y_inmodel = normalize(self.Y, normalization_type)
             else:
                 Y_inmodel = self.Y
+                
+            C_inmodel = self.C
 
             self.model.updateModel(X_inmodel, Y_inmodel, None, None)
+            for i,mdl_c in enumerate(self.model_c):
+                mdl_c.updateModel(X_inmodel,C_inmodel[:,i:(i+1)], None, None) # Updating the constraint model
 
         # Save parameters of the model
         self._save_model_parameter_values()
@@ -299,6 +317,9 @@ class BO(object):
 
     def get_evaluations(self):
         return self.X.copy(), self.Y.copy()
+        
+    def get_constraints_evaluations(self):
+        return self.X.copy(), self.C.copy()
 
     def save_report(self, report_file= None):
         """

@@ -73,7 +73,7 @@ class BayesianOptimization(BO):
                 model_optimize_restarts, sparseGP, num_inducing and normalize can still be used but will be deprecated in the next version.
     """
 
-    def __init__(self, f, domain = None, constraints = None, cost_withGradients = None, model_type = 'GP', X = None, Y = None,
+    def __init__(self, f, domain = None, constraints = None, cost_withGradients = None, model_type = 'GP', X = None, Y = None, C = None,
     	initial_design_numdata = 5, initial_design_type='random', acquisition_type ='EI', normalize_Y = True,
         exact_feval = False, acquisition_optimizer_type = 'lbfgs', model_update_interval=1, evaluator_type = 'sequential',
         batch_size = 1, num_cores = 1, verbosity=False, verbosity_model = False, maximize=False, de_duplication=False, **kwargs):
@@ -115,6 +115,7 @@ class BayesianOptimization(BO):
         # --- CHOOSE initial design
         self.X = X
         self.Y = Y
+        self.C = C
         self.initial_design_type  = initial_design_type
         self.initial_design_numdata = initial_design_numdata
         self._init_design_chooser()
@@ -158,14 +159,19 @@ class BayesianOptimization(BO):
         self.evaluator_type = evaluator_type
         self.evaluator = self._evaluator_chooser()
 
+        # --- Create dummy self.model_c member
+        self.model_c = []
+
         # --- Create optimization space
         super(BayesianOptimization,self).__init__(  model                  = self.model,
+                                                    model_c                = self.model_c,
                                                     space                  = self.space,
                                                     objective              = self.objective,
                                                     acquisition            = self.acquisition,
                                                     evaluator              = self.evaluator,
                                                     X_init                 = self.X,
                                                     Y_init                 = self.Y,
+                                                    C_init                 = self.C,
                                                     cost                   = self.cost,
                                                     normalize_Y            = self.normalize_Y,
                                                     model_update_interval  = self.model_update_interval,
