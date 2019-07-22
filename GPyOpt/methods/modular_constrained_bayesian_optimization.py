@@ -58,7 +58,6 @@ class ModularConstrainedBayesianOptimization(BO):
                                                                      de_duplication         = de_duplication)
         
         self.C = C_init
-        self.C_init  = C_init
         self.model_c = model_c 
         self.constraint = constraint
         
@@ -96,7 +95,7 @@ class ModularConstrainedBayesianOptimization(BO):
                 print('Models printout after each iteration is only available for GP and GP_MCMC models')
                 self.save_models_parameters = False
                 
-            # TODO : modify this to a loop on all constrints 
+            # TODO : modify this to a loop on all constraints 
             #if not (isinstance(self.model_c, GPyOpt.models.GPModel) or isinstance(self.model_c, GPyOpt.models.GPModel_MCMC)):
             #    print('Constrained Models printout after each iteration is only available for GP and GP_MCMC models')
             #    self.save_constrained_models_parameters = False
@@ -174,7 +173,7 @@ class ModularConstrainedBayesianOptimization(BO):
         if self.models_file is not None:
             self.save_models(self.models_file)
                 
-    def evaluate_constraint(self):
+    def evaluate_constraint(self): ### HERE
         """
         Evaluates the objective
         """
