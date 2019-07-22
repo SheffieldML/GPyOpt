@@ -30,7 +30,7 @@ def consumer(query_queue,result_queue, lock):
         #with lock:
         #  print('Consumer {} received point {} to process'.format(mp.current_process(),point))
         
-        time.sleep(random.random() * 5)
+        #time.sleep(random.random() * 5)
         
         if point is None:
             with lock: 
@@ -64,7 +64,10 @@ def init_producer(query_queue,lock,num_init,X_init):
 def BO_loop_producer(query_queue, result_queue, lock,
                      num_init, iter_count,num_threads, 
                      model, model_c, space, objective,
-                     constraint, acquisition, dataset):
+                     constraint, acquisition, return_dict):
+  
+  np.set_printoptions(precision=2)
+
   with lock:
     print('Starting BO_loop_producer {}'.format( mp.current_process() ))
 
@@ -126,10 +129,10 @@ def BO_loop_producer(query_queue, result_queue, lock,
   with lock:
     print('BO_loop_producer {} exiting'.format( mp.current_process() ))
   
-  dataset = np.hstack((X_step,Y_step,C_step))
+  return_dict[0] = np.hstack((X_step,Y_step,C_step))
 
 if __name__ == '__main__':
-  #np.set_printoptions(precision=2)
+  np.set_printoptions(precision=2)
 
   objective = None
   constraint = None
@@ -177,13 +180,16 @@ if __name__ == '__main__':
 
   initializer.join()
 
-  BO_args = (query_queue, result_queue, lock, num_init, iter_count,num_threads, model, model_c, space, objective, constraint, acquisition, dataset)
+  manager = mp.Manager()
+  return_dict = manager.dict()
+
+  BO_args = (query_queue, result_queue, lock, num_init, iter_count,num_threads, model, model_c, space, objective, constraint, acquisition, return_dict)
   BO_loop = Process(target=BO_loop_producer,args=BO_args)
   BO_loop.start()
 
   BO_loop.join()
 
-  print(dataset)
+  print(return_dict[0])
 
   for i in range(num_threads):
     query_queue.put(None)
