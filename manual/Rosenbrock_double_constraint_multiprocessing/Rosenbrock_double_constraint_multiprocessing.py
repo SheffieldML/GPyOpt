@@ -152,7 +152,7 @@ if __name__ == '__main__':
   acquisition = AcquisitionEI(model,space,optimizer=aquisition_optimizer,jitter = 1e-3,
                               model_c=model_c,jitter_c = np.array([0.0,0.0]))
                                   
-  num_init = 15
+  num_init = 23
   iter_count = 150-num_init
   typ_init = 'latin'
   X_init = initial_design(typ_init,space,num_init)
