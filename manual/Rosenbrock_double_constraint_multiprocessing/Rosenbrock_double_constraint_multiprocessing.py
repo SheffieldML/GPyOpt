@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import multiprocessing as mp
 from multiprocessing import Process, Queue, Lock
 from GPyOpt.experiment_design import initial_design
-from GPyOpt.acquisitions.EI_PoF import AcquisitionEI_PoF
-from GPyOpt.methods import ModularConstrainedBayesianOptimization
+from GPyOpt.acquisitions.EI import AcquisitionEI
+from GPyOpt.methods import ModularBayesianOptimization
 
 def rosenbrock(x,y):
   return ((1.0-x)**2+100*((y-x**2)**2))
@@ -88,10 +88,9 @@ def BO_loop_producer(query_queue, result_queue, lock,
 
   # Initializer loop, to atribute the first evaluation points 
   ThompsonBatchEvaluator = GPyOpt.core.evaluators.ThompsonBatch(acquisition,batch_size = num_threads)
-  bo_init = ModularConstrainedBayesianOptimization(model, model_c, space, objective,
-                                                   constraint, acquisition, ThompsonBatchEvaluator,
-                                                   X_init = X_step, Y_init = Y_step, C_init = C_step,
-                                                   normalize_Y = False)
+  bo_init = ModularBayesianOptimization(model, space, objective, acquisition, ThompsonBatchEvaluator, 
+                                        X_init = X_step, Y_init = Y_step, C_init = C_step, 
+                                        model_c = model_c, normalize_Y = False)
     
   x_next = bo_init.suggest_next_locations()
   for i in range(num_threads):
@@ -116,10 +115,9 @@ def BO_loop_producer(query_queue, result_queue, lock,
     Y_step = np.vstack((Y_step, y_eval))
     C_step = np.vstack((C_step, c_eval))
         
-    bo_step = ModularConstrainedBayesianOptimization(model, model_c, space, objective,
-                                                     constraint, acquisition, SequentialEvaluator,
-                                                     X_init = X_step, Y_init = Y_step, C_init = C_step, 
-                                                     normalize_Y = False)
+    bo_step = ModularBayesianOptimization(model, space, objective, acquisition, SequentialEvaluator, 
+                                          X_init = X_step, Y_init = Y_step, C_init = C_step, 
+                                          model_c = model_c, normalize_Y = False)
     x_next = bo_step.suggest_next_locations()
     
     query_queue.put(x_next[0])
@@ -151,8 +149,8 @@ if __name__ == '__main__':
   
   aquisition_optimizer = GPyOpt.optimization.AcquisitionOptimizer(space)
   
-  acquisition = AcquisitionEI_PoF(model,model_c,space,optimizer=aquisition_optimizer,
-                                  jitter = 1e-3,jitter_c = np.array([0.0,0.0]))
+  acquisition = AcquisitionEI(model,space,optimizer=aquisition_optimizer,jitter = 1e-3,
+                              model_c=model_c,jitter_c = np.array([0.0,0.0]))
                                   
   num_init = 15
   iter_count = 150-num_init
