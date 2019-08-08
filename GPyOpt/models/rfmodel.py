@@ -7,7 +7,7 @@ import numpy as np
 
 class RFModel(BOModel):
     """
-    General class for handling a Ramdom Forest in GPyOpt.
+    General class for handling a Random Forest in GPyOpt.
 
     .. Note:: The model has beed wrapper 'as it is' from  Scikit-learn. Check
     http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html
