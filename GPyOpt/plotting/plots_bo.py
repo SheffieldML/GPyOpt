@@ -8,7 +8,7 @@ from pylab import savefig
 import pylab
 
 
-def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,suggested_sample, filename = None):
+def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,suggested_sample, filename = None, labels=None):
     '''
     Plots of the model and the acquisition function in 1D and 2D examples.
     '''
@@ -47,6 +47,9 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
         # grid(True)
         # plt.xlim(*bounds)
 
+        if not labels:
+            labels = ('x', 'f(x)')
+
         x_grid = np.arange(bounds[0][0], bounds[0][1], 0.001)
         x_grid = x_grid.reshape(len(x_grid),1)
         acqu = acquisition_function(x_grid)
@@ -65,8 +68,8 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
         factor = max(m+1.96*np.sqrt(v))-min(m-1.96*np.sqrt(v))
 
         plt.plot(x_grid,0.2*factor*acqu_normalized-abs(min(m-1.96*np.sqrt(v)))-0.25*factor, 'r-',lw=2,label ='Acquisition (arbitrary units)')
-        plt.xlabel('x')
-        plt.ylabel('f(x)')
+        plt.xlabel(labels[0])
+        plt.ylabel(labels[1])
         plt.ylim(min(m-1.96*np.sqrt(v))-0.25*factor,  max(m+1.96*np.sqrt(v))+0.05*factor)
         plt.axvline(x=suggested_sample[len(suggested_sample)-1],color='r')
         plt.legend(loc='upper left')
@@ -78,6 +81,10 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
             plt.show()
 
     if input_dim ==2:
+
+        if not labels:
+            labels = ('X1', 'X2')
+
         X1 = np.linspace(bounds[0][0], bounds[0][1], 200)
         X2 = np.linspace(bounds[1][0], bounds[1][1], 200)
         x1, x2 = np.meshgrid(X1, X2)
@@ -91,8 +98,8 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
         plt.contourf(X1, X2, m.reshape(200,200),100)
         plt.plot(Xdata[:,0], Xdata[:,1], 'r.', markersize=10, label=u'Observations')
         plt.colorbar()
-        plt.xlabel('X1')
-        plt.ylabel('X2')
+        plt.xlabel(labels[0])
+        plt.ylabel(labels[1])
         plt.title('Posterior mean')
         plt.axis((bounds[0][0],bounds[0][1],bounds[1][0],bounds[1][1]))
         ##
@@ -100,8 +107,8 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
         plt.plot(Xdata[:,0], Xdata[:,1], 'r.', markersize=10, label=u'Observations')
         plt.contourf(X1, X2, np.sqrt(v.reshape(200,200)),100)
         plt.colorbar()
-        plt.xlabel('X1')
-        plt.ylabel('X2')
+        plt.xlabel(labels[0])
+        plt.ylabel(labels[1])
         plt.title('Posterior sd.')
         plt.axis((bounds[0][0],bounds[0][1],bounds[1][0],bounds[1][1]))
         ##
@@ -109,8 +116,8 @@ def plot_acquisition(bounds,input_dim,model,Xdata,Ydata,acquisition_function,sug
         plt.contourf(X1, X2, acqu_normalized,100)
         plt.colorbar()
         plt.plot(suggested_sample[:,0],suggested_sample[:,1],'k.', markersize=10)
-        plt.xlabel('X1')
-        plt.ylabel('X2')
+        plt.xlabel(labels[0])
+        plt.ylabel(labels[1])
         plt.title('Acquisition function')
         plt.axis((bounds[0][0],bounds[0][1],bounds[1][0],bounds[1][1]))
         if filename!=None:
