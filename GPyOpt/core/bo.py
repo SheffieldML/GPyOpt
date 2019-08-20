@@ -261,12 +261,14 @@ class BO(object):
         else:
             self.model_parameters_iterations = np.vstack((self.model_parameters_iterations,self.model.get_model_parameters()))
 
-    def plot_acquisition(self,filename=None):
+    def plot_acquisition(self, filename=None, label_x=None, label_y=None):
         """
         Plots the model and the acquisition function.
             if self.input_dim = 1: Plots data, mean and variance in one plot and the acquisition function in another plot
             if self.input_dim = 2: as before but it separates the mean and variance of the model in two different plots
         :param filename: name of the file where the plot is saved
+        :param label_x: Graph's x-axis label, if None it is renamed to 'x' (1D) or 'X1' (2D)
+        :param label_y: Graph's y-axis label, if None it is renamed to 'f(x)' (1D) or 'X2' (2D)
         """
         if self.model.model is None:
             from copy import deepcopy
@@ -286,7 +288,9 @@ class BO(object):
                                 model_to_plot.model.Y,
                                 self.acquisition.acquisition_function,
                                 self.suggest_next_locations(),
-                                filename)
+                                filename,
+                                label_x,
+                                label_y)
 
     def plot_convergence(self,filename=None):
         """
