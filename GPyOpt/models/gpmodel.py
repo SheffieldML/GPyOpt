@@ -20,6 +20,7 @@ class GPModel(BOModel):
     :param num_inducing: number of inducing points if a sparse GP is used.
     :param verbose: print out the model messages (default, False).
     :param ARD: whether ARD is used in the kernel (default, False).
+    :param mean_function: GPy Mapping to use as the mean function for the GP model (default, None).
 
     .. Note:: This model does Maximum likelihood estimation of the hyper-parameters.
 
@@ -28,7 +29,7 @@ class GPModel(BOModel):
 
     analytical_gradient_prediction = True  # --- Needed in all models to check is the gradients of acquisitions are computable.
 
-    def __init__(self, kernel=None, noise_var=None, exact_feval=False, optimizer='bfgs', max_iters=1000, optimize_restarts=5, sparse = False, num_inducing = 10,  verbose=True, ARD=False):
+    def __init__(self, kernel=None, noise_var=None, exact_feval=False, optimizer='bfgs', max_iters=1000, optimize_restarts=5, sparse = False, num_inducing = 10,  verbose=True, ARD=False, mean_function=None):
         self.kernel = kernel
         self.noise_var = noise_var
         self.exact_feval = exact_feval
@@ -40,6 +41,7 @@ class GPModel(BOModel):
         self.num_inducing = num_inducing
         self.model = None
         self.ARD = ARD
+        self.mean_function = mean_function
 
     @staticmethod
     def fromConfig(config):
@@ -62,9 +64,9 @@ class GPModel(BOModel):
         noise_var = Y.var()*0.01 if self.noise_var is None else self.noise_var
 
         if not self.sparse:
-            self.model = GPy.models.GPRegression(X, Y, kernel=kern, noise_var=noise_var)
+            self.model = GPy.models.GPRegression(X, Y, kernel=kern, noise_var=noise_var, mean_function=self.mean_function)
         else:
-            self.model = GPy.models.SparseGPRegression(X, Y, kernel=kern, num_inducing=self.num_inducing)
+            self.model = GPy.models.SparseGPRegression(X, Y, kernel=kern, num_inducing=self.num_inducing, mean_function=self.mean_function)
 
         # --- restrict variance if exact evaluations of the objective
         if self.exact_feval:
