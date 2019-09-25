@@ -20,6 +20,7 @@ class GPModel(BOModel):
     :param num_inducing: number of inducing points if a sparse GP is used.
     :param verbose: print out the model messages (default, False).
     :param ARD: whether ARD is used in the kernel (default, False).
+    :param mean_function: GPy Mapping to use as the mean function for the GP model (default, None).
 
     .. Note:: This model does Maximum likelihood estimation of the hyper-parameters.
 
