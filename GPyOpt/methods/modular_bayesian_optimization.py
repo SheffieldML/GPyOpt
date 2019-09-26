@@ -21,19 +21,23 @@ class ModularBayesianOptimization(BO):
     :param de_duplication: instantiated de_duplication GPyOpt class.
     """
 
-    def __init__(self, model, space, objective, acquisition, evaluator, X_init, Y_init=None, cost = None, normalize_Y = True, model_update_interval = 1, de_duplication=False):
+    def __init__(self, model, space, objective, acquisition, evaluator, X_init, 
+                 Y_init=None, C_init = None, model_c = [], cost = None, 
+                 normalize_Y = True, model_update_interval = 1, de_duplication=False):
 
         self.initial_iter = True
         self.modular_optimization = True
 
         # --- Create optimization space
         super(ModularBayesianOptimization ,self).__init__(  model                  = model,
+                                                            model_c                = model_c,
                                                             space                  = space,
                                                             objective              = objective,
                                                             acquisition            = acquisition,
                                                             evaluator              = evaluator,
                                                             X_init                 = X_init,
                                                             Y_init                 = Y_init,
+                                                            C_init                 = C_init,
                                                             cost                   = cost,
                                                             normalize_Y            = normalize_Y,
                                                             model_update_interval  = model_update_interval,
