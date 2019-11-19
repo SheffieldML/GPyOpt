@@ -8,8 +8,14 @@ from ..util.general import get_quantiles
 
 class AcquisitionLCB(AcquisitionBase):
     """
-    GP-Lower Confidence Bound acquisition function
-      with Probability of Feasibility  black-box constraint handling
+    GP-Lower Confidence Bound acquisition function with constant exploration weight.
+    See:
+    
+    Gaussian Process Optimization in the Bandit Setting: No Regret and Experimental Design
+    Srinivas et al., Proc. International Conference on Machine Learning (ICML), 2010
+
+    Probability of Feasibility  black-box constraint handling.
+    See:
 
     Based on Gardner et. al. 2014, "Bayesian Optimization with Inequality Constraints"
       also on Gelbart et. al 2014, Gelbart 2015 and Schonlau 1997
