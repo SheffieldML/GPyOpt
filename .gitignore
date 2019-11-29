@@ -51,3 +51,6 @@ iterate.dat
 
 docs/_build
 .pytest_cache
+
+# Virtual environments
+venv/
