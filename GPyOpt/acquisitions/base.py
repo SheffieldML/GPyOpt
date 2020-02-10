@@ -36,7 +36,8 @@ class AcquisitionBase(object):
         """
         f_acqu = self._compute_acq(x)
         cost_x, _ = self.cost_withGradients(x)
-        return -(f_acqu*self.space.indicator_constraints(x))/cost_x
+        x_z = x if self.space.model_dimensionality == self.space.objective_dimensionality else self.space.zip_inputs(x)
+        return -(f_acqu*self.space.indicator_constraints(x_z))/cost_x
 
 
     def acquisition_function_withGradients(self, x):
@@ -47,7 +48,8 @@ class AcquisitionBase(object):
         cost_x, cost_grad_x = self.cost_withGradients(x)
         f_acq_cost = f_acqu/cost_x
         df_acq_cost = (df_acqu*cost_x - f_acqu*cost_grad_x)/(cost_x**2)
-        return -f_acq_cost*self.space.indicator_constraints(x), -df_acq_cost*self.space.indicator_constraints(x)
+        x_z = x if self.space.model_dimensionality == self.space.objective_dimensionality else self.space.zip_inputs(x)
+        return -f_acq_cost*self.space.indicator_constraints(x_z), -df_acq_cost*self.space.indicator_constraints(x_z)
 
     def optimize(self, duplicate_manager=None):
         """
