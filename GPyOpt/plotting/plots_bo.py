@@ -9,7 +9,7 @@ import pylab
 
 
 def plot_acquisition(bounds, input_dim, model, Xdata, Ydata, acquisition_function, suggested_sample,
-                     filename=None, label_x=None, label_y=None):
+                     filename=None, label_x=None, label_y=None, color_by_step=True):
     '''
     Plots of the model and the acquisition function in 1D and 2D examples.
     '''
@@ -92,6 +92,14 @@ def plot_acquisition(bounds, input_dim, model, Xdata, Ydata, acquisition_functio
         if not label_y:
             label_y = 'X2'
 
+        n = Xdata.shape[0]
+        colors = np.linspace(0, 1, n)
+        cmap = plt.cm.Reds
+        norm = plt.Normalize(vmin=0, vmax=1)
+        points_var_color = lambda X: plt.scatter(
+            X[:,0], X[:,1], c=colors, label=u'Observations', cmap=cmap, norm=norm)
+        points_one_color = lambda X: plt.plot(
+            X[:,0], X[:,1], 'r.', markersize=10, label=u'Observations')
         X1 = np.linspace(bounds[0][0], bounds[0][1], 200)
         X2 = np.linspace(bounds[1][0], bounds[1][1], 200)
         x1, x2 = np.meshgrid(X1, X2)
@@ -103,17 +111,22 @@ def plot_acquisition(bounds, input_dim, model, Xdata, Ydata, acquisition_functio
         plt.figure(figsize=(15,5))
         plt.subplot(1, 3, 1)
         plt.contourf(X1, X2, m.reshape(200,200),100)
-        plt.plot(Xdata[:,0], Xdata[:,1], 'r.', markersize=10, label=u'Observations')
         plt.colorbar()
-        plt.xlabel(label_x)
+        if color_by_step:
+            points_var_color(Xdata)
+        else:
+            points_one_color(Xdata)
         plt.ylabel(label_y)
         plt.title('Posterior mean')
         plt.axis((bounds[0][0],bounds[0][1],bounds[1][0],bounds[1][1]))
         ##
         plt.subplot(1, 3, 2)
-        plt.plot(Xdata[:,0], Xdata[:,1], 'r.', markersize=10, label=u'Observations')
         plt.contourf(X1, X2, np.sqrt(v.reshape(200,200)),100)
         plt.colorbar()
+        if color_by_step:
+            points_var_color(Xdata)
+        else:
+            points_one_color(Xdata)
         plt.xlabel(label_x)
         plt.ylabel(label_y)
         plt.title('Posterior sd.')
@@ -122,7 +135,7 @@ def plot_acquisition(bounds, input_dim, model, Xdata, Ydata, acquisition_functio
         plt.subplot(1, 3, 3)
         plt.contourf(X1, X2, acqu_normalized,100)
         plt.colorbar()
-        plt.plot(suggested_sample[:,0],suggested_sample[:,1],'k.', markersize=10)
+        plt.plot(suggested_sample[:,0],suggested_sample[:,1],'m.', markersize=10)
         plt.xlabel(label_x)
         plt.ylabel(label_y)
         plt.title('Acquisition function')
