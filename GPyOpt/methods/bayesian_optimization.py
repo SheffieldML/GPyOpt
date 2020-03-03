@@ -25,8 +25,8 @@ class BayesianOptimization(BO):
     """
     Main class to initialize a Bayesian Optimization method.
     :param f: function to optimize. It should take 2-dimensional numpy arrays as input and return 2-dimensional outputs (one evaluation per row).
-    :param domain: list of dictionaries containing the description of the inputs variables (See GPyOpt.core.space.Design_space class for details).
-    :param constraints: list of dictionaries containing the description of the problem constraints (See GPyOpt.core.space.Design_space class for details).
+    :param domain: list of dictionaries containing the description of the inputs variables (See GPyOpt.core.task.space.Design_space class for details).
+    :param constraints: list of dictionaries containing the description of the problem constraints (See GPyOpt.core.task.space.Design_space class for details).
     :cost_withGradients: cost function of the objective. The input can be:
         - a function that returns the cost and the derivatives and any set of points in the domain.
         - 'evaluation_time': a Gaussian process (mean) is used to handle the evaluation cost.
