@@ -2,6 +2,7 @@
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
 import numpy as np
+from ..core.errors import InvalidVariableNameError
 
 
 class Optimizer(object):
@@ -49,7 +50,7 @@ class OptLbfgs(Optimizer):
         else:
             res = scipy.optimize.fmin_l_bfgs_b(_f_df, x0=x0, bounds=self.bounds, maxiter=self.maxiter)
 
-        ### --- We check here if the the optimizer moved. It it didn't we report x0 and f(x0) as scipy can return NaNs
+        ### --- We check here if the the optimizer moved. If it didn't we report x0 and f(x0) as scipy can return NaNs
         if res[2]['task'] == b'ABNORMAL_TERMINATION_IN_LNSRCH':
             result_x  = np.atleast_2d(x0)
             result_fx =  np.atleast_2d(f(x0))
@@ -69,7 +70,6 @@ class OptDirect(Optimizer):
     def __init__(self, bounds, maxiter=1000):
         super(OptDirect, self).__init__(bounds)
         self.maxiter = maxiter
-        assert self.space.has_types['continuous']
 
     def optimize(self, x0, f=None, df=None, f_df=None):
         """
@@ -91,6 +91,7 @@ class OptDirect(Optimizer):
             return np.atleast_2d(x), f(np.atleast_2d(x))
         except ImportError:
             print("Cannot find DIRECT library, please install it to use this option.")
+            raise
 
 
 class OptCma(Optimizer):
@@ -110,11 +111,15 @@ class OptCma(Optimizer):
         :param df: gradient of the function to optimize.
         :param f_df: returns both the function to optimize and its gradient.
         """
+
+        if len(self.bounds) == 1:
+            raise IndexError("CMA does not work in problems of dimension 1.")
+
         try:
             import cma
             def CMA_f_wrapper(f):
                 def g(x):
-                    return f(np.array([x]))[0][0]
+                    return f(np.array([x]))
                 return g
             lB = np.asarray(self.bounds)[:,0]
             uB = np.asarray(self.bounds)[:,1]
@@ -122,8 +127,7 @@ class OptCma(Optimizer):
             return np.atleast_2d(x), f(np.atleast_2d(x))
         except ImportError:
             print("Cannot find cma library, please install it to use this option.")
-        except:
-            print("CMA does not work in problems of dimension 1.")
+            raise
 
 
 def apply_optimizer(optimizer, x0, f=None, df=None, f_df=None, duplicate_manager=None, context_manager=None, space=None):

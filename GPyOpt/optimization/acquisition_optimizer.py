@@ -8,7 +8,7 @@ import numpy as np
 
 
 max_objective_anchor_points_logic = "max_objective"
-thompson_sampling_anchor_points_logic = "thompsom_sampling"
+thompson_sampling_anchor_points_logic = "thompson_sampling"
 sobol_design_type = "sobol"
 random_design_type = "random"
 
@@ -34,7 +34,8 @@ class AcquisitionOptimizer(object):
         if 'model' in self.kwargs:
             self.model = self.kwargs['model']
 
-        if 'anchor_points_logic' in self.kwargs:
+        ### -- get a logic for anchor points sampler over acquisition space, with max_objective_anchor_points_logic as default
+        if 'type_anchor_points_logic' in self.kwargs:
             self.type_anchor_points_logic = self.kwargs['type_anchor_points_logic']
         else:
             self.type_anchor_points_logic = max_objective_anchor_points_logic

@@ -48,3 +48,9 @@ iterate.dat
 .DS_Store
 
 .ipynb_checkpoints
+
+docs/_build
+.pytest_cache
+
+# Virtual environments
+venv/

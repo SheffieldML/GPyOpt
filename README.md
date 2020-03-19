@@ -5,8 +5,7 @@ Gaussian process optimization using [GPy](http://sheffieldml.github.io/GPy/). Pe
 
 * [GPyOpt homepage](http://sheffieldml.github.io/GPyOpt/)
 * [Tutorial Notebooks](http://nbviewer.ipython.org/github/SheffieldML/GPyOpt/blob/master/manual/index.ipynb)
-* [Users Mailing list](https://lists.shef.ac.uk/sympa/info/gpyopt-users)
-* [Online documentation](http://pythonhosted.org/GPyOpt)
+* [Online documentation](http://gpyopt.readthedocs.io/)
 
 [![licence](https://img.shields.io/badge/licence-BSD-blue.svg)](http://opensource.org/licenses/BSD-3-Clause)  [![develstat](https://travis-ci.org/SheffieldML/GPyOpt.svg?branch=master)](https://travis-ci.org/SheffieldML/GPyOpt) [![covdevel](http://codecov.io/github/SheffieldML/GPyOpt/coverage.svg?branch=master)](http://codecov.io/github/SheffieldML/GPyOpt?branch=master) [![Research software impact](http://depsy.org/api/package/pypi/GPyOpt/badge.svg)](http://depsy.org/package/python/GPyOpt)
 

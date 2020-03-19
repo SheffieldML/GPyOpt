@@ -21,7 +21,7 @@ class AnchorPointsGenerator(object):
         ## --- We use the context handler to remove duplicates only over the non-context variables
         if context_manager and not self.space._has_bandit():
             space_configuration_without_context = [self.space.config_space_expanded[idx] for idx in context_manager.nocontext_index_obj]
-            space = Design_space(space_configuration_without_context)
+            space = Design_space(space_configuration_without_context, context_manager.space.constraints)
             add_context = lambda x : context_manager._expand_vector(x)
         else:
             space = self.space

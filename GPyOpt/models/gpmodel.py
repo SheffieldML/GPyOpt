@@ -20,6 +20,7 @@ class GPModel(BOModel):
     :param num_inducing: number of inducing points if a sparse GP is used.
     :param verbose: print out the model messages (default, False).
     :param ARD: whether ARD is used in the kernel (default, False).
+    :param mean_function: GPy Mapping to use as the mean function for the GP model (default, None).
 
     .. Note:: This model does Maximum likelihood estimation of the hyper-parameters.
 
@@ -28,7 +29,7 @@ class GPModel(BOModel):
 
     analytical_gradient_prediction = True  # --- Needed in all models to check is the gradients of acquisitions are computable.
 
-    def __init__(self, kernel=None, noise_var=None, exact_feval=False, optimizer='bfgs', max_iters=1000, optimize_restarts=5, sparse = False, num_inducing = 10,  verbose=True, ARD=False):
+    def __init__(self, kernel=None, noise_var=None, exact_feval=False, optimizer='bfgs', max_iters=1000, optimize_restarts=5, sparse = False, num_inducing = 10,  verbose=True, ARD=False, mean_function=None):
         self.kernel = kernel
         self.noise_var = noise_var
         self.exact_feval = exact_feval
@@ -40,6 +41,7 @@ class GPModel(BOModel):
         self.num_inducing = num_inducing
         self.model = None
         self.ARD = ARD
+        self.mean_function = mean_function
 
     @staticmethod
     def fromConfig(config):
@@ -62,9 +64,9 @@ class GPModel(BOModel):
         noise_var = Y.var()*0.01 if self.noise_var is None else self.noise_var
 
         if not self.sparse:
-            self.model = GPy.models.GPRegression(X, Y, kernel=kern, noise_var=noise_var)
+            self.model = GPy.models.GPRegression(X, Y, kernel=kern, noise_var=noise_var, mean_function=self.mean_function)
         else:
-            self.model = GPy.models.SparseGPRegression(X, Y, kernel=kern, num_inducing=self.num_inducing)
+            self.model = GPy.models.SparseGPRegression(X, Y, kernel=kern, num_inducing=self.num_inducing, mean_function=self.mean_function)
 
         # --- restrict variance if exact evaluations of the objective
         if self.exact_feval:
@@ -90,14 +92,35 @@ class GPModel(BOModel):
             else:
                 self.model.optimize_restarts(num_restarts=self.optimize_restarts, optimizer=self.optimizer, max_iters = self.max_iters, verbose=self.verbose)
 
-    def predict(self, X):
+    def _predict(self, X, full_cov, include_likelihood):
+        if X.ndim == 1:
+            X = X[None,:]
+        m, v = self.model.predict(X, full_cov=full_cov, include_likelihood=include_likelihood)
+        v = np.clip(v, 1e-10, np.inf)
+        return m, v
+
+    def predict(self, X, with_noise=True):
         """
         Predictions with the model. Returns posterior means and standard deviations at X. Note that this is different in GPy where the variances are given.
+
+        Parameters:
+            X (np.ndarray) - points to run the prediction for.
+            with_noise (bool) - whether to add noise to the prediction. Default is True.
         """
-        if X.ndim==1: X = X[None,:]
-        m, v = self.model.predict(X)
-        v = np.clip(v, 1e-10, np.inf)
+        m, v = self._predict(X, False, with_noise)
+        # We can take the square root because v is just a diagonal matrix of variances
         return m, np.sqrt(v)
+
+    def predict_covariance(self, X, with_noise=True):
+        """
+        Predicts the covariance matric for points in X.
+
+        Parameters:
+            X (np.ndarray) - points to run the prediction for.
+            with_noise (bool) - whether to add noise to the prediction. Default is True.
+        """
+        _, v = self._predict(X, True, with_noise)
+        return v
 
     def get_fmin(self):
         """
@@ -146,6 +169,12 @@ class GPModel(BOModel):
         Returns a list with the names of the parameters of the model
         """
         return self.model.parameter_names_flat().tolist()
+
+    def get_covariance_between_points(self, x1, x2):
+        """
+        Given the current posterior, computes the covariance between two sets of points.
+        """
+        return self.model.posterior_covariance_between_points(x1, x2)
 
 
 class GPModel_MCMC(BOModel):

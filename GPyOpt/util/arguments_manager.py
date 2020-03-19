@@ -66,10 +66,10 @@ class ArgumentsManager(object):
             return AcquisitionMPI_MCMC(model, space, acquisition_optimizer, cost_withGradients, acquisition_jitter)
 
         elif acquisition_type =='LCB':
-            return AcquisitionLCB(model, space, acquisition_optimizer, cost_withGradients, acquisition_weight)
+            return AcquisitionLCB(model, space, acquisition_optimizer, None, acquisition_weight)
 
         elif acquisition_type =='LCB_MCMC':
-            return AcquisitionLCB_MCMC(model, space, acquisition_optimizer, cost_withGradients, acquisition_weight)
+            return AcquisitionLCB_MCMC(model, space, acquisition_optimizer, None, acquisition_weight)
 
         else:
             raise Exception('Invalid acquisition selected.')

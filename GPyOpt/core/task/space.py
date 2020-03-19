@@ -303,7 +303,7 @@ class Design_space(object):
             for d in self.constraints:
                 try:
                     exec('constraint = lambda x:' + d['constraint'], globals())
-                    ind_x = (constraint(x)<0)*1
+                    ind_x = (constraint(x) <= 0) * 1
                     I_x *= ind_x.reshape(x.shape[0],1)
                 except:
                     print('Fail to compile the constraint: ' + str(d))

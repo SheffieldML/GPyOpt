@@ -1,7 +1,8 @@
 # Copyright (c) 2016, the GPyOpt Authors
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
-from ..acquisitions import AcquisitionEI, AcquisitionMPI, AcquisitionLCB, AcquisitionEI_MCMC, AcquisitionMPI_MCMC, AcquisitionLCB_MCMC, AcquisitionLP
+
+from ..acquisitions import AcquisitionEI, AcquisitionMPI, AcquisitionLCB, AcquisitionEI_MCMC, AcquisitionMPI_MCMC, AcquisitionLCB_MCMC, AcquisitionLP, AcquisitionEntropySearch
 from ..core.bo import BO
 from ..core.errors import InvalidConfigError
 from ..core.task.space import Design_space, bounds_to_space
@@ -24,14 +25,14 @@ class BayesianOptimization(BO):
     """
     Main class to initialize a Bayesian Optimization method.
     :param f: function to optimize. It should take 2-dimensional numpy arrays as input and return 2-dimensional outputs (one evaluation per row).
-    :param domain: list of dictionaries containing the description of the inputs variables (See GPyOpt.core.space.Design_space class for details).
-    :param constraints: list of dictionaries containing the description of the problem constraints (See GPyOpt.core.space.Design_space class for details).
+    :param domain: list of dictionaries containing the description of the inputs variables (See GPyOpt.core.task.space.Design_space class for details).
+    :param constraints: list of dictionaries containing the description of the problem constraints (See GPyOpt.core.task.space.Design_space class for details).
     :cost_withGradients: cost function of the objective. The input can be:
         - a function that returns the cost and the derivatives and any set of points in the domain.
         - 'evaluation_time': a Gaussian process (mean) is used to handle the evaluation cost.
     :model_type: type of model to use as surrogate:
         - 'GP', standard Gaussian process.
-        - 'GP_MCMC',  Gaussian process with prior in the hyper-parameters.
+        - 'GP_MCMC', Gaussian process with prior in the hyper-parameters.
         - 'sparseGP', sparse Gaussian process.
         - 'warperdGP', warped Gaussian process.
         - 'InputWarpedGP', input warped Gaussian process
@@ -50,20 +51,20 @@ class BayesianOptimization(BO):
         - 'LCB', GP-Lower confidence bound.
         - 'LCB_MCMC', integrated GP-Lower confidence bound (requires GP_MCMC model).
     :param normalize_Y: whether to normalize the outputs before performing any optimization (default, True).
-    :exact_feval: whether the outputs are exact (default, False).
+    :exact_feval: whether the outputs are exact (default False).
     :acquisition_optimizer_type: type of acquisition function to use.
-        - 'lbfgs': L-BFGS.
-        - 'DIRECT': Dividing Rectangles.
-        - 'CMA': covariance matrix adaptation.
+        - 'lbfgs', L-BFGS.
+        - 'DIRECT', Dividing Rectangles.
+        - 'CMA', covariance matrix adaptation.
     :param model_update_interval: interval of collected observations after which the model is updated (default, 1).
     :param evaluator_type: determines the way the objective is evaluated (all methods are equivalent if the batch size is one)
         - 'sequential', sequential evaluations.
-        - 'random': synchronous batch that selects the first element as in a sequential policy and the rest randomly.
-        - 'local_penalization': batch method proposed in (Gonzalez et al. 2016).
-        - 'thompson_sampling': batch method using Thompson sampling.
+        - 'random', synchronous batch that selects the first element as in a sequential policy and the rest randomly.
+        - 'local_penalization', batch method proposed in (Gonzalez et al. 2016).
+        - 'thompson_sampling', batch method using Thompson sampling.
     :param batch_size: size of the batch in which the objective is evaluated (default, 1).
     :param num_cores: number of cores used to evaluate the objective (default, 1).
-    :param verbosity: prints the models and other options during the optimization.
+    :param verbosity: prints the models and other options during the optimization (default, False).
     :param maximize: when True -f maximization of f is done by minimizing -f (default, False).
     :param **kwargs: extra parameters. Can be used to tune the current optimization setup or to use deprecated options in this package release.
 
@@ -75,8 +76,7 @@ class BayesianOptimization(BO):
     def __init__(self, f, domain = None, constraints = None, cost_withGradients = None, model_type = 'GP', X = None, Y = None,
     	initial_design_numdata = 5, initial_design_type='random', acquisition_type ='EI', normalize_Y = True,
         exact_feval = False, acquisition_optimizer_type = 'lbfgs', model_update_interval=1, evaluator_type = 'sequential',
-        batch_size = 1, num_cores = 1, verbosity= True, verbosity_model = False, maximize=False, de_duplication=False, **kwargs):
-
+        batch_size = 1, num_cores = 1, verbosity=False, verbosity_model = False, maximize=False, de_duplication=False, **kwargs):
         self.modular_optimization = False
         self.initial_iter = True
         self.verbosity = verbosity
@@ -85,7 +85,7 @@ class BayesianOptimization(BO):
         self.de_duplication = de_duplication
         self.kwargs = kwargs
 
-        # --- Handle the arguments passed via kargs
+        # --- Handle the arguments passed via kwargs
         self.problem_config = ArgumentsManager(kwargs)
 
         # --- CHOOSE design space
@@ -95,8 +95,10 @@ class BayesianOptimization(BO):
 
         # --- CHOOSE objective function
         self.maximize = maximize
-        if 'objective_name' in kwargs: self.objective_name = kwargs['objective_name']
-        else: self.objective_name = 'no_name'
+        if 'objective_name' in kwargs:
+            self.objective_name = kwargs['objective_name']
+        else:
+            self.objective_name = 'no_name'
         self.batch_size = batch_size
         self.num_cores = num_cores
         if f is not None:
@@ -134,8 +136,9 @@ class BayesianOptimization(BO):
         # --- CHOOSE the acquisition optimizer_type
 
         # This states how the discrete variables are handled (exact search or rounding)
+        kwargs.update({ 'model' : self.model })
         self.acquisition_optimizer_type = acquisition_optimizer_type
-        self.acquisition_optimizer = AcquisitionOptimizer(self.space, self.acquisition_optimizer_type, model=self.model)  ## more arguments may come here
+        self.acquisition_optimizer = AcquisitionOptimizer(self.space, self.acquisition_optimizer_type, **kwargs)  ## more arguments may come here
 
         # --- CHOOSE acquisition function. If an instance of an acquisition is passed (possibly user defined), it is used.
         self.acquisition_type = acquisition_type
