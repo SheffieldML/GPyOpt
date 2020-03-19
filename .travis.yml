@@ -26,8 +26,6 @@ script:
 after_success:
 - codecov
 
-skip_cleanup: true
-
 deploy:
   provider: pypi
   user: __token__
