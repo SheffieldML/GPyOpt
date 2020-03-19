@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-__version__ = "1.2.5"
+__version__ = "1.2.6"
 
 packages = find_packages(exclude=("GPyOpt.testing",))
 setup(name = 'GPyOpt',
