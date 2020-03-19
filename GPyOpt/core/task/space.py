@@ -5,9 +5,8 @@ import numpy as np
 import itertools
 from copy import deepcopy
 
-from .variables import BanditVariable, DiscreteVariable, CategoricalVariable, ContinuousVariable, create_variable
-from ..errors import InvalidConfigError
-from ...util.general import values_to_array, merge_values
+from .variables import create_variable
+from ..errors import InvalidConfigError, InvalidVariableNameError
 
 
 class Design_space(object):
