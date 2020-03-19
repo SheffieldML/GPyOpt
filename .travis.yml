@@ -28,9 +28,9 @@ after_success:
 
 deploy:
   provider: pypi
-  user: __token__
+  user: "__token__"
   skip_existing: true
   password:
-    secure: pypi-AgEIcHlwaS5vcmcCJGIxNGMyZTY0LTMxNDQtNDI5Ny04MzAyLTNkOGU2ZWZhMmU2ZQACN3sicGVybWlzc2lvbnMiOiB7InByb2plY3RzIjogWyJncHlvcHQiXX0sICJ2ZXJzaW9uIjogMX0AAAYg8hSEqfofZwxXHTcunWa_OArBqqdNWAfB50VRPPW_hQk
+    secure: "pypi-AgEIcHlwaS5vcmcCJDhhZDdkNWQ4LTU1YjMtNDc5NC04NzVjLWJhYzcyOWI3YWMxZAACN3sicGVybWlzc2lvbnMiOiB7InByb2plY3RzIjogWyJncHlvcHQiXX0sICJ2ZXJzaW9uIjogMX0AAAYgwSwwAPleB1knieum7KdErZv7M_0oINm1peRu0nX0LHE"
   on:
     branch: master
