@@ -27,3 +27,12 @@ after_success:
 - codecov
 
 skip_cleanup: true
+
+deploy:
+  provider: pypi
+  user: __token__
+  skip_existing: true
+  password:
+    secure: pypi-AgEIcHlwaS5vcmcCJGIxNGMyZTY0LTMxNDQtNDI5Ny04MzAyLTNkOGU2ZWZhMmU2ZQACN3sicGVybWlzc2lvbnMiOiB7InByb2plY3RzIjogWyJncHlvcHQiXX0sICJ2ZXJzaW9uIjogMX0AAAYg8hSEqfofZwxXHTcunWa_OArBqqdNWAfB50VRPPW_hQk
+  on:
+    branch: master
