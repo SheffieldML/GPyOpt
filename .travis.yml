@@ -10,9 +10,9 @@ os:
 
 python:
   - "2.7"
-  - "3.4"
   - "3.5"
   - "3.6"
+  - "3.7"
 # command to install dependencies
 
 install:
@@ -26,4 +26,11 @@ script:
 after_success:
 - codecov
 
-skip_cleanup: true
+deploy:
+  provider: pypi
+  user: __token__
+  skip_existing: true
+  password:
+    secure: phHZX7dkqarH2i86eMNwV4CB0Of6AG9a81Kn/svIn5VMadZ0vHCzeoTmGXc6sJetuD2LAjZeiSwD0kIixesoQ1STV94cxTmx3eIv85fZXW7aeQJ7vEr2cMch0Fcx9FSw1u31KI0iY6V2iqy2gKR0M3UFZgjFPIjhVcfPTeWyGmzVjBNnskLwlozojlKHP6upBwXwzTAlNf8eY/IvQORRW8V0+ld5PsOPUxiUY7v8GHDfZwDZ7KVibh2YoXD3351JLvAs9sukWadDRT3euDLBdgg5JSZBpuuvnqxzf5t2TfYXgS3fGre/YCT8flYbAJ2v6fSk88tUVgQUdWMV2Ee8rAIdID6LzGKUoi1TMxg47ZnSvh5y+3Pa7i7uqvthSm7lYMTCAoa01/HfG8LNHcpW3NjySzJ7/c7cFhk422VDUzk4N2n9buGFGcYEAvAvqPje/KGPAPMeCme8aGxHZFC52AdKrxDdL+8WJeHHAvJxRekvPJGxYzbf6LQrWAXQgzhROW8t+5H2y7/K0pJTppJ30tl7hHcl8vJ4Szau1QWwwuZvQMhrWsiM7NDL0vH07I//OsALQETsNEyWmMRoKe+kOnL5j2dkUHdfisjIZvHNSUqinhzxZLps6dTHiepM3o8TOpisdX03voNiORM3GsPRwhgxa1HE9uPoMW0UbMcAYoU=
+  on:
+    branch: master
