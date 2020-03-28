@@ -185,9 +185,10 @@ class Design_space(object):
             self.dimensionality += variable.dimensionality
             self.has_types[variable.type] = True
 
-        # Check if there are any bandit and non-bandit variables together in the space
-        if any(v.is_bandit() for v in self.space) and any(not v.is_bandit() for v in self.space):
-            raise InvalidConfigError('Invalid mixed domain configuration. Bandit variables cannot be mixed with other types.')
+        # import pdb; pdb.set_trace()
+        # # Check if there are any bandit and non-bandit variables together in the space
+        # if any(v.is_bandit() for v in self.space) and any(not v.is_bandit() for v in self.space):
+        #     raise InvalidConfigError('Invalid mixed domain configuration. Bandit variables cannot be mixed with other types.')
 
     def _expand_space(self):
         """
@@ -196,6 +197,7 @@ class Design_space(object):
         """
 
         ## --- Expand the config space
+        # import pdb; pdb.set_trace()
         self._expand_config_space()
 
         ## --- Expand the space
@@ -339,6 +341,13 @@ class Design_space(object):
             x_rounded.append(var_value_rounded)
             value_index += variable.dimensionality_in_model
 
+        # for var_val_rounded, ix in zip(x_rounded, range(len(x_rounded)):
+        #     assert len(var_val_rounded)==1
+        #     vvr=var_val_rounded[0]
+        #     if isinstance(vvr, np.ndarray):
+        #         x_rounded[ix] = [vvr.tolist()]
+
+        # import pdb; pdb.set_trace()
         return np.atleast_2d(np.concatenate(x_rounded))
 
 

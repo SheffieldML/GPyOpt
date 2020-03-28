@@ -140,6 +140,19 @@ class BanditVariable(Variable):
         one_d_variable = BanditVariable(self.name, self.domain, None)
         one_d_variable.dimensionality_in_model = self.domain.shape[1]
 
+        # if hasattr(self.domain, 'shape'):
+        #     one_d_variable.dimensionality_in_model = self.domain.shape[1]
+        # # elif type(self.domain) == list and type(self.domain[0]) == tuple:
+        # elif type(self.domain) == list:
+        #     one_d_variable.dimensionality_in_model = len(self.domain[0])
+        # else:
+        #     raise InvalidConfigError(f"Domain with type {type(self.domain)} unsupported")
+
+        # elif type()
+        #     one_d_variable.dimensionality_in_model = self.domain.shape[1]
+        # else:
+        #     raise InvalidConfigError("Domain configured incorrectly")
+
         return [one_d_variable]
 
     def get_bounds(self):
@@ -156,7 +169,9 @@ class BanditVariable(Variable):
         """
         distances = np.linalg.norm(np.array(self.domain) - value_array, axis=1)
         idx = np.argmin(distances)
-        return [self.domain[idx]]
+        result = self.domain[idx].tolist()
+        # result = [self.domain[idx]]
+        return result
 
 
 class DiscreteVariable(Variable):
