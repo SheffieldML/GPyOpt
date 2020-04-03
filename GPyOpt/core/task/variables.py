@@ -119,6 +119,10 @@ class ContinuousVariable(Variable):
 class BanditVariable(Variable):
     def __init__(self, name, domain, dimensionality=None):
         dims = np.array([len(d) for d in domain])
+        print(f"NAME: {name}")
+        print(f"DOMAIN: {domain}")
+        print(f"DIMENSIONALITY: {dimensionality}")
+        print(f"DIMS: {dims}")
         if not np.all(dims == dims[0]):
             raise InvalidConfigError('The dimensionalities of the bandit variable ' + name + ' have to be the same!')
 
