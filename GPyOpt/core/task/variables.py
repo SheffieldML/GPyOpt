@@ -131,14 +131,22 @@ class BanditVariable(Variable):
 
         super(BanditVariable, self).__init__(name, 'bandit', domain, dimensionality)
 
-    def objective_to_model(self, x_objective):
+    def objective_to_model(self, x_objective: list):
+        if not isinstance(x_objective, list):
+            raise Exception("BanditType must take list of values from objective space")
         return x_objective
 
     def is_bandit(self):
         return True
 
-    def model_to_objective(self, x_model):
-        return x_model
+    def model_to_objective(self, x_model, index_in_model):
+        # NOTE works for Bandit(Discrete/Continuous) not Bandit(XYZ/Categorical)
+        # to support Categorical, vardim must be calculated properly and the entry_list must be
+        # calculated from the sub-variable's model_to_objective.
+        vardim = self.dimensionality_in_model
+        original_entry = x_model[0, index_in_model:(index_in_model+vardim)]
+        entry_list = list(original_entry)
+        return entry_list
 
     def expand(self):
         one_d_variable = BanditVariable(self.name, self.domain, None)

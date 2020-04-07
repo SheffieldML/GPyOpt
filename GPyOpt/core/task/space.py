@@ -74,7 +74,9 @@ class Design_space(object):
         self._create_variables_dic()
 
         ## -- Compute raw and model dimensionalities
+        # NOTE obj dimensionality undercounts bandit type dimensionality
         self.objective_dimensionality = len(self.space_expanded)
+        # self.objective_dimensionality = sum([v.dimensionality for v in self.space_expanded])
         self.model_input_dims = [v.dimensionality_in_model for v in self.space_expanded]
         self.model_dimensionality = sum(self.model_input_dims)
 
@@ -197,7 +199,6 @@ class Design_space(object):
         """
 
         ## --- Expand the config space
-        # import pdb; pdb.set_trace()
         self._expand_config_space()
 
         ## --- Expand the space
@@ -208,32 +209,44 @@ class Design_space(object):
     def objective_to_model(self, x_objective):
         ''' This function serves as interface between objective input vectors and
         model input vectors'''
-
         x_model = []
-
+        k_=0
         for k in range(self.objective_dimensionality):
             variable = self.space_expanded[k]
-            new_entry = variable.objective_to_model(x_objective[0,k])
+            if variable.is_bandit():
+                kend_=k_+variable.dimensionality
+                x_obj_slice=x_objective[0,k_:kend_]
+                x_obj_slice=list(x_obj_slice)
+                k_=kend_
+            else:
+                x_obj_slice=x_objective[0,k_]
+                k_+=1
+            new_entry = variable.objective_to_model(x_obj_slice)
             x_model += new_entry
-
         return x_model
 
     def unzip_inputs(self,X):
-        if self._has_bandit():
-            Z = X
-        else:
-            Z = []
-            for k in range(X.shape[0]):
-                Z.append(self.objective_to_model(X[k,:][None,:]))
+        # if self._has_bandit():
+        #     Z = X
+        # else:
+        #     Z = []
+        #     for k in range(X.shape[0]):
+        #         Z.append(self.objective_to_model(X[k,:][None,:]))
+        Z = []
+        for k in range(X.shape[0]):
+            Z.append(self.objective_to_model(X[k,:][None,:]))
         return np.atleast_2d(Z)
 
     def zip_inputs(self,X):
-        if self._has_bandit():
-            Z = X
-        else:
-            Z = []
-            for k in range(X.shape[0]):
-                Z.append(self.model_to_objective(X[k,:][None,:]))
+        # if self._has_bandit():
+        #     Z = X
+        # else:
+        #     Z = []
+        #     for k in range(X.shape[0]):
+        #         Z.append(self.model_to_objective(X[k,:][None,:]))
+        Z = []
+        for k in range(X.shape[0]):
+            Z.append(self.model_to_objective(X[k,:][None,:]))
         return np.atleast_2d(Z)
 
     def model_to_objective(self, x_model):
@@ -242,9 +255,9 @@ class Design_space(object):
         '''
         idx_model = 0
         x_objective = []
-
         for idx_obj in range(self.objective_dimensionality):
             variable = self.space_expanded[idx_obj]
+            # print(f"VARIABLE: {variable.name} {variable.type}")
             new_entry = variable.model_to_objective(x_model, idx_model)
             x_objective += new_entry
             idx_model += variable.dimensionality_in_model
