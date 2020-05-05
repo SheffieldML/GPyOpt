@@ -19,6 +19,8 @@ class AcquisitionNEI(AcquisitionBase):
     :param space: GPyOpt class of domain
     :param optimizer: optimizer of the acquisition. Should be a GPyOpt optimizer
     :param cost_withGradients: function that provides the evaluation cost and its gradients
+    :param QMC_iterations: number of iteration for the Quasi-Monte Carlo integration
+    :param jitter: positive value to make the acquisition more explorative
 
     """
 
@@ -26,33 +28,16 @@ class AcquisitionNEI(AcquisitionBase):
     analytical_gradient_prediction = True
 
     
-    def __init__(self, model, space, optimizer, cost_withGradients=None, N_QMC = None,jitter = 0, opt_restarts=1):
+    def __init__(self, model, space, optimizer, cost_withGradients=None, QMC_iterations = None,jitter = 0, opt_restarts=1):
 
         self.optimizer = optimizer
-        self.N_QMC = N_QMC
+        self.QMC_iterations = QMC_iterations
         self.jitter=jitter
         self.batch_elements = []
         self.opt_restarts = opt_restarts
         super(AcquisitionNEI, self).__init__(model, space, optimizer)
-        
-        # --- UNCOMMENT ONE OF THE TWO NEXT BITS
-             
-        # 1) THIS ONE IF THE EVALUATION COSTS MAKES SENSE
-        #
-        # if cost_withGradients == None:
-        #     self.cost_withGradients = constant_cost_withGradients
-        # else:
-        #     self.cost_withGradients = cost_withGradients 
 
-        # 2) THIS ONE IF THE EVALUATION COSTS DOES NOT MAKE SENSE
-        #
-        if cost_withGradients == None:
-            self.cost_withGradients = constant_cost_withGradients
-        else:
-            print('NEI acquisition does now make sense with cost. Cost set to constant.')  
-            self.cost_withGradients = constant_cost_withGradients
 
-    # @profile
     def _compute_acq(self,x,try_parallelize = False):
         # t = time()
 
@@ -61,20 +46,20 @@ class AcquisitionNEI(AcquisitionBase):
             if(len(e)>0):
                 observations.append(e.tolist())
         observations = np.array(observations)
-        m,s = self.model.predict(observations)
-        m = functools.reduce(operator.iconcat, m, [])
-        s = functools.reduce(operator.iconcat, s , [])#Flatten m and s (functools.reduce is the most efficient function to do so)
-        se = SobolEngine(dimension=len(observations),scramble=True)
-        tks = np.array(se.draw(self.N_QMC))
+        mean,stdv = self.model.predict(observations)
+        mean = functools.reduce(operator.iconcat, mean, [])
+        stdv = functools.reduce(operator.iconcat, stdv , [])#Flatten m and s (functools.reduce is the most efficient function to do so)
+        sobolEngine = SobolEngine(dimension=len(observations),scramble=True)
+        sobolSequence = np.array(sobolEngine.draw(self.QMC_iterations))
 
         NEI = 0
         gpModel = GPModel(None, exact_feval=True,verbose=False, ARD=self.model.ARD,optimize_restarts=self.opt_restarts)
-        for k in range(self.N_QMC):#quasi monte carlo integration (QMC)
-            tk = tks[k]
-            Fn = (norm.ppf(tk,loc=m,scale=s))
-            Fn = np.array([np.array([xn]) for xn in Fn])
-            gpModel.updateModel(observations,Fn,None,None)
-            NEI += self._compute_EI_acq(gpModel,x)/self.N_QMC
+        for k in range(self.QMC_iterations):#quasi monte carlo integration (QMC)
+            sobolElement = sobolSequence[k]
+            sampled_Y = (norm.ppf(sobolElement,loc=mean,scale=stdv))
+            sampled_Y = np.array([np.array([xn]) for xn in sampled_Y])
+            gpModel.updateModel(observations,sampled_Y,None,None)
+            NEI += self._compute_EI_acq(gpModel,x)/self.QMC_iterations
     
         return NEI
     
@@ -82,24 +67,24 @@ class AcquisitionNEI(AcquisitionBase):
     def _compute_acq_withGradients(self, x):
 
         observations = np.array(self.model.model.X)#Concatenate any pending observation to include them in calculation of Expected Improvement.
-        m,s = self.model.predict(observations)
-        m = functools.reduce(operator.iconcat, m, [])
-        s = functools.reduce(operator.iconcat, s , [])#Flatten m and s (functools.reduce is the most efficient function to do so)
+        mean,stdv = self.model.predict(observations)
+        mean = functools.reduce(operator.iconcat, mean, [])
+        stdv = functools.reduce(operator.iconcat, stdv , [])#Flatten m and s (functools.reduce is the most efficient function to do so)
         NEI = 0
         df_NEI=0
         se = SobolEngine(dimension=len(observations),scramble=True)
-        tks = np.array(se.draw(self.N_QMC))
+        sobolSequence = np.array(se.draw(self.QMC_iterations))
         gpModel = GPModel(None, exact_feval=True,verbose=False, ARD=self.model.ARD,optimize_restarts=self.opt_restarts)
         NEI = 0
         df_NEI=0
-        for k in range(self.N_QMC):#quasi monte carlo integration (QMC)
-            tk = tks[k]
-            Fn = (norm.ppf(tk,loc=m,scale=s))
-            Fn = np.array([np.array([xn]) for xn in Fn])
-            gpModel.updateModel(observations,Fn,None,None)
+        for k in range(self.QMC_iterations):#quasi monte carlo integration (QMC)
+            sobolElement = sobolSequence[k]
+            sampled_Y = (norm.ppf(sobolElement,loc=mean,scale=stdv))
+            sampled_Y = np.array([np.array([xn]) for xn in sampled_Y])
+            gpModel.updateModel(observations,sampled_Y,None,None)
             partNEI, partdf_NEI = self._compute_EI_acq_withGradients(gpModel,x)
-            NEI += partNEI/self.N_QMC
-            df_NEI += partdf_NEI/self.N_QMC
+            NEI += partNEI/self.QMC_iterations
+            df_NEI += partdf_NEI/self.QMC_iterations
 
         return NEI, df_NEI
 

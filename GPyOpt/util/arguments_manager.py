@@ -51,7 +51,7 @@ class ArgumentsManager(object):
         cost_withGradients = cost_withGradients
         acquisition_jitter = self.kwargs.get('acquisition_jitter',0.01)
         acquisition_weight = self.kwargs.get('acquisition_weight',2)
-        QMC_iterations = self.kwargs.get('N_QMC',16)
+        QMC_iterations = self.kwargs.get('QMC_iterations',16)
 
         # --- Choose the acquisition
         if acquisition_type is  None or acquisition_type =='EI':
