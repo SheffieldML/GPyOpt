@@ -3,7 +3,7 @@ from ..models.rfmodel import RFModel
 from ..models.warpedgpmodel import WarpedGPModel
 from ..models.input_warped_gpmodel import InputWarpedGPModel
 from ..core.evaluators import Sequential, RandomBatch, LocalPenalization, ThompsonBatch
-from ..acquisitions import AcquisitionEI, AcquisitionMPI, AcquisitionLCB, AcquisitionEI_MCMC, AcquisitionMPI_MCMC, AcquisitionLCB_MCMC, AcquisitionLP
+from ..acquisitions import AcquisitionEI, AcquisitionMPI, AcquisitionLCB, AcquisitionEI_MCMC, AcquisitionMPI_MCMC, AcquisitionLCB_MCMC, AcquisitionLP, AcquisitionNEI
 from ..core.errors import InvalidConfigError
 
 class ArgumentsManager(object):
@@ -51,6 +51,7 @@ class ArgumentsManager(object):
         cost_withGradients = cost_withGradients
         acquisition_jitter = self.kwargs.get('acquisition_jitter',0.01)
         acquisition_weight = self.kwargs.get('acquisition_weight',2)
+        QMC_iterations = self.kwargs.get('N_QMC',16)
 
         # --- Choose the acquisition
         if acquisition_type is  None or acquisition_type =='EI':
@@ -58,6 +59,9 @@ class ArgumentsManager(object):
 
         elif acquisition_type =='EI_MCMC':
             return AcquisitionEI_MCMC(model, space, acquisition_optimizer, cost_withGradients, acquisition_jitter)
+
+        elif acquisition_type == 'NEI':
+            return AcquisitionNEI(model, space, acquisition_optimizer, None, QMC_iterations, acquisition_jitter)
 
         elif acquisition_type =='MPI':
             return AcquisitionMPI(model, space, acquisition_optimizer, cost_withGradients, acquisition_jitter)
