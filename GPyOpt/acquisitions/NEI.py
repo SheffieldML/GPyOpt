@@ -126,4 +126,6 @@ class AcquisitionNEI(AcquisitionBase):
         return f_acqu, df_acqu
 
     def setBatchElements(self,batch_elements):
+        #use this function to get multiple experiment before evaluating them.
+        #add batch elements that have not been evaluated yet to get a new experiment suggest that takes it into consideration the ones not yet evaluated
         self.batch_elements = batch_elements
