@@ -13,7 +13,7 @@ mock>=2.0.0
 PyDOE >= 0.3.0
 sobol_seq >=0.1
 emcee==2.2.1
-torch==1.1.0#needed for NEI
+torch==1.1.0
 
 # For tests
 nose
