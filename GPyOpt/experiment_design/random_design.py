@@ -59,9 +59,19 @@ class RandomDesign(ExperimentDesign):
         self.fill_noncontinous_variables(samples)
 
         if self.space.has_continuous():
-            X_design = samples_multidimensional_uniform(self.space.get_continuous_bounds(), init_points_count)
+            _continuous_bounds = self.space.get_continuous_bounds()
+            continuous_bounds = []
+            for _bounds in _continuous_bounds:
+                if any([abs(bound) == np.inf for bound in _bounds]):
+                    bounds = (0, 0)  # infinite bounds is an indicator of context
+                else:
+                    bounds = _bounds
+                continuous_bounds.append(bounds)
+            X_design = samples_multidimensional_uniform(
+                continuous_bounds,
+                init_points_count
+                )
             samples[:, self.space.get_continuous_dims()] = X_design
-
         return samples
 
 def samples_multidimensional_uniform(bounds, points_count):

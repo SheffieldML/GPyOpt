@@ -387,9 +387,12 @@ class Design_space(object):
         Returns the dimension of the continuous components of the domain.
         """
         continuous_dims = []
-        for i in range(self.dimensionality):
-            if self.space_expanded[i].type == 'continuous':
+        # NOTE This does not necessarily work when the Bandit variable has any continuous dimensions
+        i = 0
+        for parameter in self.space_expanded:
+            if parameter.type == 'continuous':
                 continuous_dims += [i]
+            i += parameter.dimensionality  # can be >1 for Bandit variable right now
         return continuous_dims
 
 

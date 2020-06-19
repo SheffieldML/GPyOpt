@@ -145,22 +145,11 @@ class BanditVariable(Variable):
         return entry_list
 
     def expand(self):
+        """ Expand self into multiple parameters
+        """
+        # TODO this does not use self.dimensionality to properly expand
         one_d_variable = BanditVariable(self.name, self.domain, None)
         one_d_variable.dimensionality_in_model = self.domain.shape[1]
-
-        # if hasattr(self.domain, 'shape'):
-        #     one_d_variable.dimensionality_in_model = self.domain.shape[1]
-        # # elif type(self.domain) == list and type(self.domain[0]) == tuple:
-        # elif type(self.domain) == list:
-        #     one_d_variable.dimensionality_in_model = len(self.domain[0])
-        # else:
-        #     raise InvalidConfigError(f"Domain with type {type(self.domain)} unsupported")
-
-        # elif type()
-        #     one_d_variable.dimensionality_in_model = self.domain.shape[1]
-        # else:
-        #     raise InvalidConfigError("Domain configured incorrectly")
-
         return [one_d_variable]
 
     def get_bounds(self):
