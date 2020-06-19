@@ -113,7 +113,6 @@ class ContextManager(object):
             self.nocontext_index_obj = [idx for idx in self.all_index_obj if idx not in self.context_index_obj]
 
 
-
     def _expand_vector(self,x):
         '''
         Takes a value x in the subspace of not fixed dimensions and expands it with the values of the fixed ones.

@@ -233,7 +233,12 @@ class BO(object):
             duplicate_manager = None
 
         ### We zip the value in case there are categorical variables
-        return self.space.zip_inputs(self.evaluator.compute_batch(duplicate_manager=duplicate_manager, context_manager= self.acquisition.optimizer.context_manager))
+        result = self.space.zip_inputs(
+            self.evaluator.compute_batch(
+                duplicate_manager = duplicate_manager,
+                context_manager = self.acquisition.optimizer.context_manager
+            ))
+        return result
 
     def _update_model(self, normalization_type='stats'):
         """

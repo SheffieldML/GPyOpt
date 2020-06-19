@@ -145,13 +145,14 @@ class Design_space(object):
             variable.set_index_in_objective([counter_objective])
             counter_objective +=1
 
-            if variable.type is not 'categorical':
-                variable.set_index_in_model([counter_model])
-                counter_model +=1
+            if variable.type in ['categorical', 'bandit']:
+                variable.set_index_in_model(list(range(
+                    counter_model,
+                    counter_model + variable.dimensionality_in_model)))
+                counter_model += variable.dimensionality_in_model
             else:
-                num_categories = len(variable.domain)
-                variable.set_index_in_model(list(range(counter_model,counter_model + num_categories)))
-                counter_model +=num_categories
+                variable.set_index_in_model([counter_model])
+                counter_model += 1
 
 
     def find_variable(self,variable_name):
