@@ -40,17 +40,21 @@ class RandomDesign(ExperimentDesign):
         """
         init_points_count = samples.shape[0]
 
-        for (idx, var) in enumerate(self.space.space_expanded):
+        idx = 0
+        for var in self.space.space_expanded:
             if isinstance(var, DiscreteVariable) or isinstance(var, CategoricalVariable) :
                 sample_var = np.atleast_2d(np.random.choice(var.domain, init_points_count))
                 samples[:,idx] = sample_var.flatten()
+                idx += 1
 
             # sample in the case of bandit variables
             elif isinstance(var, BanditVariable):
                 # Bandit variable is represented by a several adjacent columns in the samples array
-                idx_samples = np.random.randint(var.domain.shape[0], size=init_points_count)
-                bandit_idx = np.arange(idx, idx + var.domain.shape[1])
+                n_points, n_dimensions = var.domain.shape
+                idx_samples = np.random.randint(n_points, size=init_points_count)
+                bandit_idx = np.arange(idx, idx + n_dimensions)
                 samples[:, bandit_idx] = var.domain[idx_samples,:]
+                idx += n_dimensions
 
 
     def get_samples_without_constraints(self, init_points_count):
