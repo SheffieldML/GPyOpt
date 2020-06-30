@@ -4,6 +4,7 @@ import unittest
 from GPyOpt.core.task.space import Design_space
 from GPyOpt.core.task.variables import BanditVariable, DiscreteVariable, CategoricalVariable, ContinuousVariable
 from GPyOpt.core.errors import InvalidConfigError
+from GPyOpt.experiment_design import initial_design
 
 class TestDesignSpace(unittest.TestCase):
     def test_create_bandit_variable(self):
@@ -216,6 +217,44 @@ class TestDesignSpace(unittest.TestCase):
         self.assertTrue(design_space._has_bandit())
         self.assertTrue(design_space.unzip_inputs(X).all()==X.all())
         self.assertTrue(design_space.zip_inputs(X).all()==X.all())
+
+    def test_bandit_multiple_sample(self):
+        n_init_pts = 10
+        X1 =    np.array([
+                [ 0, 0],
+                [ 0, 1],
+                [ 1, 1],
+                [ 1, 2],
+                [ 2, -2]
+                ])
+        X2 =    np.array([
+                [0, -2, -1],
+                [ 0,  0,  1],
+                [ 3, -2, -1],
+                [ 3,  0, 1]])
+
+        space = [
+            {'name': 'var1', 'type': 'bandit', 'domain':X1},
+            {'name': 'var2', 'type': 'bandit', 'domain':X2}
+            ]
+
+        design_space = Design_space(space)
+
+        self.assertTrue(design_space._has_bandit())
+
+        for design_type in ['random']:  # TODO all design types
+            x = initial_design(
+                design_name = design_type,
+                space = design_space,
+                init_points_count = n_init_pts,
+                )
+            idx = 0
+            for param in design_space.space:  # for each (bandit) parameter in the space
+                xp = x[:, idx:(idx+param.dimensionality)]
+                idx += param.dimensionality
+                for xp_row in xp:  # check that the sample is in the allowed values for that param
+                    possible_values = param.get_possible_values()
+                    assert xp_row in possible_values
 
     def test_variable_names(self):
         space = [
