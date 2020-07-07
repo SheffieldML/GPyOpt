@@ -68,7 +68,7 @@ class alpine2:
 
 class gSobol:
     '''
-    gSolbol function
+    gSobol function
    
     :param a: one-dimensional array containing the coefficients of the function.
     :param sd: standard deviation, to generate noisy evaluations of the function.
