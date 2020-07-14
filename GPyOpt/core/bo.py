@@ -13,7 +13,7 @@ from ..core.errors import InvalidConfigError
 from ..core.task.cost import CostModel
 from ..optimization.acquisition_optimizer import ContextManager
 try:
-    from ..plotting.plots_bo import plot_acquisition, plot_convergence
+    from GPyOpt.plotting.plots_bo import plot_acquisition, plot_convergence
 except:
     pass
 

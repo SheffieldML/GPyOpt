@@ -8,7 +8,6 @@ from GPyOpt.core.task.space import Design_space
 from . import core
 from . import methods
 from . import util
-from . import plotting
 from . import interface
 from . import models
 from . import acquisitions
