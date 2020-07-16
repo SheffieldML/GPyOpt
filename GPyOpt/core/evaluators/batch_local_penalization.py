@@ -56,6 +56,8 @@ def estimate_L(model,bounds,storehistory=True):
     def df(x,model,x0):
         x = np.atleast_2d(x)
         dmdx,_ = model.predictive_gradients(x)
+        if dmdx.ndim>2:
+            dmdx = dmdx.reshape(dmdx.shape[:2])
         res = np.sqrt((dmdx*dmdx).sum(1)) # simply take the norm of the expectation of the gradient
         return -res
 
@@ -64,7 +66,7 @@ def estimate_L(model,bounds,storehistory=True):
     pred_samples = df(samples,model,0)
     x0 = samples[np.argmin(pred_samples)]
     res = scipy.optimize.minimize(df,x0, method='L-BFGS-B',bounds=bounds, args = (model,x0), options = {'maxiter': 200})
-    minusL = res.fun[0][0]
+    minusL = float(res.fun)
     L = -minusL
     if L<1e-7: L=10  ## to avoid problems in cases in which the model is flat.
     return L
