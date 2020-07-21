@@ -17,7 +17,7 @@ from ..optimization.acquisition_optimizer import ContextManager
 logger = logging.getLogger(__name__)
 
 try:
-    from GPyOpt.plotting.plots_bo import plot_acquisition, plot_convergence
+    from ..plotting.plots_bo import plot_acquisition, plot_convergence
 except ImportError as e:
     logger.warning("Could not import plotting module: {}".format(e))
 
