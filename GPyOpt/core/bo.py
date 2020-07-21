@@ -6,16 +6,21 @@ import collections
 import numpy as np
 import time
 import csv
+import logging
 
 from ..util.general import best_value, normalize
 from ..util.duplicate_manager import DuplicateManager
 from ..core.errors import InvalidConfigError
 from ..core.task.cost import CostModel
 from ..optimization.acquisition_optimizer import ContextManager
+
+logger = logging.getLogger(__name__)
+
 try:
     from GPyOpt.plotting.plots_bo import plot_acquisition, plot_convergence
-except:
-    pass
+except ImportError as e:
+    logger.warning("Could not import plotting module: {}".format(e))
+
 
 
 class BO(object):
