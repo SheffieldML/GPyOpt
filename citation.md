@@ -27,5 +27,5 @@ GPyOpt contains many general and well known Bayesian optimization options but it
 
 - Javier González, Joseph Longworth, David James, Neil Lawrence. *Bayesian Optimization for synthetic gene design.* The Neural Information Processing Systems (NIPS'14), Workshop in Bayesian Optimization, 2014.
 
-Please cite this works is you use any of the methods mentioned above.
+Please cite these works if you use any of the methods mentioned above.
 
