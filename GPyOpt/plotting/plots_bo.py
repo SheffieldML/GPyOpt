@@ -180,8 +180,9 @@ def plot_convergence(Xdata, best_Y, filename=None, axes: Tuple[Axes, Axes]=None)
     ax_best_val.set_ylabel('Best y')
     ax_best_val.grid(True)
 
-    # todo: fix!
     if filename!=None:
+        if axes is not None:
+            raise Exception("cannot save figure when `axes` has been specified")
         savefig(filename)
     else:
         plt.show()
