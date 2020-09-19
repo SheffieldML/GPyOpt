@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 from pylab import savefig
 import pylab
 
+from typing import Tuple
+from matplotlib.axes import Axes
+
 
 def plot_acquisition(bounds, input_dim, model, Xdata, Ydata, acquisition_function, suggested_sample,
                      filename=None, label_x=None, label_y=None, color_by_step=True):
@@ -146,31 +149,38 @@ def plot_acquisition(bounds, input_dim, model, Xdata, Ydata, acquisition_functio
             plt.show()
 
 
-def plot_convergence(Xdata, best_Y, filename=None):
+def plot_convergence(Xdata, best_Y, filename=None, axes: Tuple[Axes, Axes]=None):
     '''
     Plots to evaluate the convergence of standard Bayesian optimization algorithms
     '''
+
+    if axes is None:
+        fig = plt.figure(figsize=(10, 5))
+        fig.tight_layout()
+        ax_dist, ax_best_val = fig.subplots(1, 2)
+    else:
+        ax_dist = axes[0]
+        ax_best_val = axes[1]
+
     n = Xdata.shape[0]
     aux = (Xdata[1:n,:]-Xdata[0:n-1,:])**2
     distances = np.sqrt(aux.sum(axis=1))
 
     ## Distances between consecutive x's
-    plt.figure(figsize=(10,5))
-    plt.subplot(1, 2, 1)
-    plt.plot(list(range(n-1)), distances, '-ro')
-    plt.xlabel('Iteration')
-    plt.ylabel('d(x[n], x[n-1])')
-    plt.title('Distance between consecutive x\'s')
-    grid(True)
+    ax_dist.plot(list(range(n-1)), distances, '-ro')
+    ax_dist.set_xlabel('Iteration')
+    ax_dist.set_ylabel('d(x[n], x[n-1])')
+    ax_dist.set_title('Distance between consecutive x\'s')
+    ax_dist.grid(True)
 
     # Estimated m(x) at the proposed sampling points
-    plt.subplot(1, 2, 2)
-    plt.plot(list(range(n)),best_Y,'-o')
-    plt.title('Value of the best selected sample')
-    plt.xlabel('Iteration')
-    plt.ylabel('Best y')
-    grid(True)
+    ax_best_val.plot(list(range(n)),best_Y,'-o')
+    ax_best_val.set_title('Value of the best selected sample')
+    ax_best_val.set_xlabel('Iteration')
+    ax_best_val.set_ylabel('Best y')
+    ax_best_val.grid(True)
 
+    # todo: fix!
     if filename!=None:
         savefig(filename)
     else:
