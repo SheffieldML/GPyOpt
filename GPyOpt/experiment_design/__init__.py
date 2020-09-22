@@ -5,7 +5,6 @@ from .random_design import RandomDesign
 from .sobol_design import SobolDesign
 
 def initial_design(design_name, space, init_points_count):
-    design = None
     if design_name == 'random':
         design = RandomDesign(space)
     elif design_name == 'sobol':

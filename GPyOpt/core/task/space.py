@@ -61,7 +61,7 @@ class Design_space(object):
 
     supported_types = ['continuous', 'discrete', 'bandit','categorical']
 
-    def __init__(self, space, constraints=None, store_noncontinuous = False):
+    def __init__(self, space, constraints=None, store_noncontinuous=False, all_x_values=None):
 
         ## --- Complete and expand attributes
         self.store_noncontinuous = store_noncontinuous
@@ -77,6 +77,9 @@ class Design_space(object):
         self.objective_dimensionality = len(self.space_expanded)
         self.model_input_dims = [v.dimensionality_in_model for v in self.space_expanded]
         self.model_dimensionality = sum(self.model_input_dims)
+
+        # in case the search space is pre-computed and can be passed directly to BO
+        self.all_x_values = all_x_values
 
         # Because of the misspelling API used to expect "constrain" as a key
         # This fixes the API but also supports the old form

@@ -14,11 +14,14 @@ class RandomDesign(ExperimentDesign):
 
     def get_samples(self, init_points_count):
         if self.space.has_constraints():
-            return self.get_samples_with_constraints(init_points_count)
+            if self.space.all_x_values is not None:
+                return self.get_samples_with_constraints_and_all_x_values(init_points_count)
+            else:
+                return self.get_samples_with_constraints_without_all_x_values(init_points_count)
         else:
             return self.get_samples_without_constraints(init_points_count)
 
-    def get_samples_with_constraints(self, init_points_count):
+    def get_samples_with_constraints_without_all_x_values(self, init_points_count):
         """
         Draw random samples and only save those that satisfy constraints
         Finish when required number of samples is generated
@@ -33,6 +36,29 @@ class RandomDesign(ExperimentDesign):
                 samples = np.vstack((samples,valid_samples))
 
         return samples[0:init_points_count,:]
+
+    def get_samples_with_constraints_and_all_x_values(self, init_points_count, seed=None):
+        """
+        Draw random samples from pre-computed search space.
+        """
+        N = self.space.all_x_values.shape[0]
+        all_indexes = np.arange(N)
+        if init_points_count < N:
+            sample_indexes = np.random.default_rng(seed=seed).choice(all_indexes,
+                                                                     size=init_points_count,
+                                                                     replace=False)
+        else:
+            sample_indexes = all_indexes
+
+        samples = self.space.all_x_values[sample_indexes, :]
+
+        # validate samples
+        valid_sample_indices = (self.space.indicator_constraints(samples) == 1).flatten()
+
+        if sum(valid_sample_indices) != len(samples):
+            print("Warning: Some points in precomputed search space all_x_values do not comply with constraints.")
+
+        return samples[0:init_points_count, :]
 
     def fill_noncontinous_variables(self, samples):
         """
