@@ -91,7 +91,10 @@ class BayesianOptimization(BO):
         # --- CHOOSE design space
         self.constraints = constraints
         self.domain = domain
-        self.space = Design_space(self.domain, self.constraints)
+        if "all_x_values" in kwargs:
+            self.space = Design_space(self.domain, self.constraints, all_x_values=kwargs["all_x_values"])
+        else:
+            self.space = Design_space(self.domain, self.constraints)
 
         # --- CHOOSE objective function
         self.maximize = maximize
