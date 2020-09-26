@@ -287,7 +287,7 @@ class BO(object):
             model_to_plot = self.model
 
         return plot_acquisition(self.acquisition.space.get_bounds(),
-                                model_to_plot.model.X.shape[1],
+                                 model_to_plot.model.X.shape[1],
                                 model_to_plot.model,
                                 model_to_plot.model.X,
                                 model_to_plot.model.Y,
