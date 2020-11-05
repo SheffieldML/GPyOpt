@@ -1,3 +1,19 @@
+ # End of maintenance for GPyOpt
+
+Dear GPyOpt community!
+
+We would like to acknowledge the obvious. The core team of GPyOpt has moved on, and over the past months we weren't giving the package nearly as much attention as it deserves. Instead of dragging our feet and giving people only occasional replies and no new features, we feel the time has come to officially declare the end of GPyOpt maintenance.
+
+We would like to thank the community that has formed around GPyOpt. Without your interest, discussions, bug fixes and pull requests the package would never be as successful as it is. We hope we were able to provide you with a useful tool to aid your research and work.
+
+From now on we won't be participating in the issues, merging PRs or developing any new functions. All existing PRs will be closed (but not the issues). The repo itself is not closing though, so feel free to start new discussion threads and forks. We are also still around, so may drop an occasional comment here or there. But no promises.
+
+Finally, if you feel really enthusiastic and would like to take over the package, feel free to drop both of us an email, and who knows, maybe you'll be the one(s) carrying the GPyOpt to new heights!
+
+Sincerely yours,
+[Andrei Paleyes](https://paleyes.info/) and [Javier Gonzalez](https://javiergonzalezh.github.io/)
+
+
 # GPyOpt
 
 Gaussian process optimization using [GPy](http://sheffieldml.github.io/GPy/). Performs global optimization with different acquisition functions. Among other functionalities, it is possible to use GPyOpt to optimize physical experiments (sequentially or in batches) and tune the parameters of Machine Learning algorithms. It is able to handle large data sets via sparse Gaussian process models.
